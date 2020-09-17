@@ -7,6 +7,7 @@ keywords = ["technical", "analysis", "trading", "indicators"]
 license = "Apache-2.0"
 license-file = "LICENSE"
 name = "yata"
+readme = "README.md"
 version = "0.1.2"
 
 [dependencies]

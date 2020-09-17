@@ -12,7 +12,7 @@
 
 //! Yet Another Technical Analysis library
 //!
-//! YaTA implements most common technical analysis [methods](crate::methods) and [indicators](crate::indicators)
+//! YaTa implements most common technical analysis [methods](crate::methods) and [indicators](crate::indicators)
 //!
 //! It also provides you an iterface to create your own indicators.
 //!
@@ -33,6 +33,29 @@
 //! * [SWMA](crate::methods::SWMA) Symmetrically weighted moving average.
 //!
 //! And many others: [See Full list](crate::methods#structs)
+//!
+//! Some commonly used **indicators**:
+//!
+//! - Average Directional Index;
+//! - Awesome Oscillator;
+//! - Bollinger Bands;
+//! - Commodity Channel Index;
+//! - Detrended Price Oscillator;
+//! - Ease Of Movement;
+//! - Elders Force Index;
+//! - Envelopes;
+//! - Fisher Transform;
+//! - Ichimoku Cloud;
+//! - Keltner Channels;
+//! - Moving Average Convergence Divergence (MACD);
+//! - Money Flow Index;
+//! - Price Channel Strategy;
+//! - Relative Strength Index (RSI);
+//! - Stochastic Oscillator;
+//! - Trix;
+//! - Woodies CCI;
+//!
+//! And many others [See Full list](crate::indicators#structs)
 //!
 //! # Current usafe status
 //! Currently there is no `unsafe` code in the crate.
