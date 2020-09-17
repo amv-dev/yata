@@ -1,13 +1,16 @@
 [package]
 authors = ["AMvDev <amv-dev@protonmail.com>"]
+categories = ["mathematics", "science", "trading", "technical-alalysis"]
 description = "Yet another Technical Analysis library. For rust now."
 edition = "2018"
 keywords = ["technical", "analysis", "trading", "indicators"]
+license = "Apache-2.0"
+license-file = "LICENSE"
 name = "yata"
 version = "0.1.2"
 
 [dependencies]
-serde = {version = "*", features = ["derive"], optional = true}
+serde = {version = "1.0", features = ["derive"], optional = true}
 
 [profile.release]
 codegen-units = 1
