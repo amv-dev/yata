@@ -1,6 +1,6 @@
 [package]
 authors = ["AMvDev <amv-dev@protonmail.com>"]
-categories = ["mathematics", "science", "trading", "technical-alalysis"]
+categories = ["mathematics", "science"]
 description = "Yet another Technical Analysis library. For rust now."
 edition = "2018"
 keywords = ["technical", "analysis", "trading", "indicators"]
