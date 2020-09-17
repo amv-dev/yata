@@ -2,6 +2,7 @@
 authors = ["AMvDev <amv-dev@protonmail.com>"]
 description = "Yet another Technical Analysis library. For rust now."
 edition = "2018"
+keywords = ["technical analysis", "trading", "moving average", "indicators", "macd", "timeseries", "ohlc", "ohlcv"]
 name = "yata"
 version = "0.1.1"
 

@@ -2,8 +2,6 @@
 
 Yet Another Technical Analysis library
 
-Yet Another Technical Analysis library
-
 YaTA implements most common technical analysis [methods](crate::methods) and [indicators](crate::indicators)
 
 It also provides you an iterface to create your own indicators.
