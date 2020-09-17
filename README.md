@@ -2,11 +2,11 @@
 
 Yet Another Technical Analysis library
 
-YaTA implements most common technical analysis [methods](crate::methods) and [indicators](crate::indicators)
+YaTa implements most common technical analysis **methods** and **indicators**.
 
 It also provides you an iterface to create your own indicators.
 
-Some commonly used methods:
+Some commonly used **methods**:
 
 - Accumulation-distribution index;
 - Cross / CrossAbove / CrossUnder;
@@ -24,6 +24,29 @@ Some commonly used methods:
 - Symmetrically weighted moving average
 
 And many others.
+
+Some commonly used **indicators**:
+
+- Average Directional Index;
+- Awesome Oscillator;
+- Bollinger Bands;
+- Commodity Channel Index;
+- Detrended Price Oscillator;
+- Ease Of Movement;
+- Elders Force Index;
+- Envelopes;
+- Fisher Transform;
+- Ichimoku Cloud;
+- Keltner Channels;
+- Moving Average Convergence Divergence (MACD);
+- Money Flow Index;
+- Price Channel Strategy;
+- Relative Strength Index (RSI);
+- Stochastic Oscillator;
+- Trix;
+- Woodies CCI;
+
+And many others
 
 # Current usafe status
 
