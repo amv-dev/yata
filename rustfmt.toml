@@ -1,0 +1,7 @@
+edition = "2018"
+hard_tabs = true
+tab_spaces = 4
+
+# struct_field_align_threshold = 20
+# enum_discrim_align_threshold = 20
+# fn_single_line = true

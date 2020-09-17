@@ -1,0 +1,162 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+use crate::core::{Action, Method, PeriodType, Source, ValueType, Window, OHLC};
+use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::methods::{Cross, Highest, Lowest};
+
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct IchimokuCloud {
+	pub l1: PeriodType,
+	pub l2: PeriodType,
+	pub l3: PeriodType,
+	pub m: PeriodType,
+	pub source: Source,
+}
+
+impl IndicatorConfig for IchimokuCloud {
+	fn validate(&self) -> bool {
+		self.l1 < self.l2 && self.l2 < self.l3
+	}
+
+	fn set(&mut self, name: &str, value: String) {
+		match name {
+			"l1" => self.l1 = value.parse().unwrap(),
+			"l2" => self.l2 = value.parse().unwrap(),
+			"l3" => self.l3 = value.parse().unwrap(),
+			"m" => self.m = value.parse().unwrap(),
+			"source" => self.source = value.parse().unwrap(),
+
+			_ => {
+				dbg!(format!(
+					"Unknown attribute `{:}` with value `{:}` for `{:}`",
+					name,
+					value,
+					std::any::type_name::<Self>(),
+				));
+			}
+		};
+	}
+
+	fn size(&self) -> (u8, u8) {
+		(4, 2)
+	}
+}
+
+impl<T: OHLC> IndicatorInitializer<T> for IchimokuCloud {
+	type Instance = IchimokuCloudInstance;
+	fn init(self, candle: T) -> Self::Instance
+	where
+		Self: Sized,
+	{
+		let cfg = self;
+		Self::Instance {
+			highest1: Highest::new(cfg.l1, candle.high()),
+			highest2: Highest::new(cfg.l2, candle.high()),
+			highest3: Highest::new(cfg.l3, candle.high()),
+			lowest1: Lowest::new(cfg.l1, candle.low()),
+			lowest2: Lowest::new(cfg.l2, candle.low()),
+			lowest3: Lowest::new(cfg.l3, candle.low()),
+			window1: Window::new(cfg.m, candle.hl2()),
+			window2: Window::new(cfg.m, candle.hl2()),
+			cross1: Cross::default(),
+			cross2: Cross::default(),
+			cfg,
+		}
+	}
+}
+
+impl Default for IchimokuCloud {
+	fn default() -> Self {
+		Self {
+			l1: 9,
+			l2: 26,
+			l3: 52,
+			m: 26,
+			source: Source::Close,
+		}
+	}
+}
+
+#[derive(Debug)]
+pub struct IchimokuCloudInstance {
+	cfg: IchimokuCloud,
+
+	highest1: Highest,
+	highest2: Highest,
+	highest3: Highest,
+	lowest1: Lowest,
+	lowest2: Lowest,
+	lowest3: Lowest,
+	window1: Window<ValueType>,
+	window2: Window<ValueType>,
+	cross1: Cross,
+	cross2: Cross,
+}
+
+impl<T: OHLC> IndicatorInstance<T> for IchimokuCloudInstance {
+	type Config = IchimokuCloud;
+
+	fn name(&self) -> &str {
+		"IchimokuCloud"
+	}
+
+	#[inline]
+	fn config(&self) -> &Self::Config {
+		&self.cfg
+	}
+
+	fn next(&mut self, candle: T) -> IndicatorResult {
+		let src = candle.source(self.cfg.source);
+		let (high, low) = (candle.high(), candle.low());
+		let (highest1, lowest1) = (self.highest1.next(high), self.lowest1.next(low));
+		let (highest2, lowest2) = (self.highest2.next(high), self.lowest2.next(low));
+		let (highest3, lowest3) = (self.highest3.next(high), self.lowest3.next(low));
+
+		let tenkan_sen = (highest1 + lowest1) * 0.5;
+		let kijun_sen = (highest2 + lowest2) * 0.5;
+
+		let senkou_span_a = self.window1.push((tenkan_sen + kijun_sen) * 0.5);
+		let senkou_span_b = self.window2.push((highest3 + lowest3) * 0.5);
+
+		let s1_cross = self.cross1.next((tenkan_sen, kijun_sen));
+		let s2_cross = self.cross2.next((src, kijun_sen));
+
+		// let mut s1 = 0;
+		// let mut s2 = 0;
+
+		let green: bool = senkou_span_a > senkou_span_b;
+		let red: bool = senkou_span_a < senkou_span_b;
+
+		// if src > senkou_span_a && src > senkou_span_b && green && s1_cross == Action::BUY_ALL {
+		// 	s1 += 1;
+		// } else if src < senkou_span_a && src < senkou_span_b && red && s1_cross == Action::SELL_ALL
+		// {
+		// 	s1 -= 1;
+		// }
+
+		// if src > senkou_span_a && src > senkou_span_b && green && s2_cross == Action::BUY_ALL {
+		// 	s2 += 1;
+		// } else if src < senkou_span_a && src < senkou_span_b && red && s2_cross == Action::SELL_ALL
+		// {
+		// 	s2 -= 1;
+		// }
+
+		let s1 = (src > senkou_span_a
+			&& src > senkou_span_b
+			&& green && s1_cross == Action::BUY_ALL) as i8
+			- (src < senkou_span_a && src < senkou_span_b && red && s1_cross == Action::SELL_ALL)
+				as i8;
+		let s2 = (src > senkou_span_a
+			&& src > senkou_span_b
+			&& green && s2_cross == Action::BUY_ALL) as i8
+			- (src < senkou_span_a && src < senkou_span_b && red && s2_cross == Action::SELL_ALL)
+				as i8;
+
+		IndicatorResult::new(
+			&[tenkan_sen, kijun_sen, senkou_span_a, senkou_span_b],
+			&[Action::from(s1), Action::from(s2)],
+		)
+	}
+}

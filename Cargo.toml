@@ -1,0 +1,27 @@
+[package]
+authors = ["AMvDev <amv-dev@protonmail.com>"]
+description = "Yet another Technical Analysis library. For rust now."
+edition = "2018"
+name = "yata"
+version = "0.1.1"
+
+[dependencies]
+serde = {version = "*", features = ["derive"], optional = true}
+
+[profile.release]
+codegen-units = 1
+debug = false
+debug-assertions = false
+incremental = true
+lto = true
+opt-level = 3
+overflow-checks = false
+panic = 'abort'
+rpath = false
+
+[features]
+default = ["serde"]
+period_type_u16 = []
+period_type_u32 = []
+period_type_u64 = []
+value_type_f32 = []
