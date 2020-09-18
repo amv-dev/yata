@@ -1,7 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use super::{CommodityChannelIndex, CommodityChannelIndexInstance};
+use super::commodity_channel_index::CommodityChannelIndexInstance;
+use super::CommodityChannelIndex;
 use crate::core::{Action, Method, PeriodType, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::signi;
