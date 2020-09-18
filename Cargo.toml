@@ -4,7 +4,6 @@ categories = ["mathematics", "science"]
 description = "Yet another Technical Analysis library. For rust now."
 edition = "2018"
 keywords = ["technical", "analysis", "trading", "indicators"]
-license = "Apache-2.0"
 license-file = "LICENSE"
 name = "yata"
 readme = "README.md"
