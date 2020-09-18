@@ -51,6 +51,8 @@ mod conv;
 pub use conv::*;
 mod vwma;
 pub use vwma::*;
+mod trima;
+pub use trima::*;
 //
 mod derivative;
 pub use derivative::*;

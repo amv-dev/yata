@@ -66,6 +66,10 @@ pub enum RegularMethods {
 	#[cfg_attr(feature = "serde", serde(rename = "swma"))]
 	SWMA,
 
+	/// [Triangular Moving Average](crate::methods::TRIMA)
+	#[cfg_attr(feature = "serde", serde(rename = "trima"))]
+	TRIMA,
+
 	/// [Linear regression](crate::methods::LinReg)
 	#[cfg_attr(feature = "serde", serde(rename = "lin_reg"))]
 	LinReg,
@@ -135,6 +139,7 @@ impl FromStr for RegularMethods {
 			"tema" => Ok(Self::TEMA),
 			"smm" => Ok(Self::SMM),
 			"swma" => Ok(Self::SWMA),
+			"trima" => Ok(Self::TRIMA),
 			"lin_reg" | "linreg" => Ok(Self::LinReg),
 
 			"past" | "move" => Ok(Self::Past),
@@ -180,6 +185,7 @@ impl From<String> for RegularMethods {
 /// * `smm` - [simple moving median](SMM)
 /// * `swma` - [symmetrically weighted moving average](SWMA)
 /// * `lin_reg` - [linear regression moving average](LinReg)
+/// * `trima` - [triangular moving average](TRIMA)
 /// * `past`, `move` - [moves timeseries forward](Past)
 /// * `derivative` - [derivative](Derivative)
 /// * `st_dev` - [standart deviation](StDev)
@@ -250,6 +256,7 @@ pub fn method(
 		RegularMethods::SMM => Box::new(SMM::new(length, initial_value)),
 		RegularMethods::SWMA => Box::new(SWMA::new(length, initial_value)),
 		RegularMethods::LinReg => Box::new(LinReg::new(length, initial_value)),
+		RegularMethods::TRIMA => Box::new(TRIMA::new(length, initial_value)),
 
 		RegularMethods::Past | RegularMethods::Move => Box::new(Past::new(length, initial_value)),
 		RegularMethods::Derivative => Box::new(Derivative::new(length, initial_value)),
