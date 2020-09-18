@@ -70,18 +70,49 @@ impl Method for SMM {
 			half,
 			half_m1: half.saturating_sub(1),
 			window: Window::new(length, value),
-			slice: vec![0.0; length as usize],
+			slice: vec![value; length as usize],
 		}
 	}
 
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
-		self.window.push(value);
+		let old_value = self.window.push(value);
 
-		self.slice.copy_from_slice(self.window.as_slice());
+		// self.slice.copy_from_slice(self.window.as_slice());
 
-		self.slice
-			.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
+		// self.slice
+		// 	.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
+
+		let mut old_index = self.slice.len() - 1;
+		let mut index = self.slice.len() - 1;
+
+		for (i, &v) in self.slice.iter().enumerate() {
+			// it is safe to compare f64s here
+			if v > old_value {
+				old_index = i.saturating_sub(1);
+			}
+
+			if v > value {
+				index = i.saturating_sub(1);
+			}
+		}
+
+		println!(
+			"Inserting {} at {}, removing {} from {} into {:?}",
+			value, index, old_value, old_index, self.slice
+		);
+		if index > old_index {
+			self.slice.copy_within((old_index + 1)..=index, old_index);
+		} else if index < old_index {
+			self.slice.copy_within(index..old_index, index + 1);
+		}
+
+		self.slice[index] = value;
+
+		println!(
+			"Result {:?}\n----------------------------------------------------",
+			self.slice
+		);
 
 		if self.is_even {
 			(self.slice[self.half as usize] + self.slice[self.half_m1 as usize]) * 0.5
@@ -128,7 +159,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_smm() {
+	fn test_smm0() {
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
