@@ -16,7 +16,8 @@
 //!
 //! It also provides you an iterface to create your own indicators.
 //!
-//! Some commonly used methods:
+//! ## Some commonly used methods:
+//!
 //! * [ADI](crate::methods::ADI) Accumulation-distribution index;
 //! * [Cross](crate::methods::Cross) / [CrossAbove](crate::methods::CrossAbove) / [CrossUnder](crate::methods::CrossUnder);
 //! * [Derivative](crate::methods::Derivative) (differential);
@@ -34,7 +35,7 @@
 //!
 //! And many others: [See Full list](crate::methods#structs)
 //!
-//! Some commonly used **indicators**:
+//! ##Some commonly used **indicators**:
 //!
 //! - Average Directional Index;
 //! - Awesome Oscillator;
@@ -57,8 +58,50 @@
 //!
 //! And many others [See Full list](crate::indicators#structs)
 //!
-//! # Current usafe status
+//! ## Method usage example
+//!
+//! ```
+//! use yata::prelude::*;
+//! use yata::methods::EMA;
+//!
+//! // EMA of length=3
+//! let mut ema = EMA::new(3, 3.0);
+//!
+//! ema.next(3.0);
+//! ema.next(6.0);
+//!
+//! assert_eq!(ema.next(9.0), 6.75);
+//! assert_eq!(ema.next(12.0), 9.375);
+//! ```
+//!
+//! ## Indicator usage example
+//!
+//! ```
+//! use yata::prelude::*;
+//! use yata::indicators::MACD;
+//! use yata::helpers::RandomCandles;
+//!
+//! let mut candles = RandomCandles::new();
+//! let mut macd = MACD::default().init(candles.first());
+//!
+//! for candle in candles.take(30) {
+//! 	let result = macd.next(candle);
+//!
+//! 	println!("{:?}", result);
+//! }
+//! ```
+//!
+//! ## Current usafe status
+//!
 //! Currently there is no `unsafe` code in the crate.
+//!
+//! ## Suggestions
+//!
+//! You are welcome to give any suggestions about new indicators and methods
+//!
+//! # Say thanks
+//!
+//! If you like this library and you want to say thanks, you can do it also by donating to bitcoin address _1P3gTnaTK9LKSYx2nETrKe2zjP4HMkdhvK_
 
 pub mod core;
 pub mod helpers;
