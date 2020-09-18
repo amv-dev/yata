@@ -14,7 +14,7 @@
 //!
 //! YaTa implements most common technical analysis [methods](crate::methods) and [indicators](crate::indicators)
 //!
-//! It also provides you an iterface to create your own indicators.
+//! It also provides you an interface to create your own indicators.
 //!
 //! ## Some commonly used methods:
 //!
@@ -35,7 +35,7 @@
 //!
 //! And many others: [See Full list](crate::methods#structs)
 //!
-//! ##Some commonly used **indicators**:
+//! ## Some commonly used **indicators**:
 //!
 //! - Average Directional Index;
 //! - Awesome Oscillator;
@@ -56,7 +56,7 @@
 //! - Trix;
 //! - Woodies CCI;
 //!
-//! And many others [See Full list](crate::indicators#structs)
+//! And many others: [See Full list](crate::indicators#structs)
 //!
 //! ## Method usage example
 //!

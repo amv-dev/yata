@@ -4,7 +4,7 @@ Yet Another Technical Analysis library
 
 YaTa implements most common technical analysis **methods** and **indicators**.
 
-It also provides you an iterface to create your own indicators.
+It also provides you an interface to create your own indicators.
 
 ## Some commonly used **methods**:
 
