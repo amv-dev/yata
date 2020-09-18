@@ -67,14 +67,21 @@ assert_eq!(ema.next(12.0), 9.375);
 ## Indicator usage example
 
 ```
-use yata::prelude::*;
+use yata::helpers::{RandomCandles, RegularMethods};
 use yata::indicators::MACD;
-use yata::helpers::RandomCandles;
+use yata::prelude::*;
 
 let mut candles = RandomCandles::new();
-let mut macd = MACD::default().init(candles.first());
+let mut macd = MACD::default();
+macd.period3 = 4; // setting signal period MA to 4
 
-for candle in candles.take(30) {
+macd.method1 = "sma".into(); // one way of defining methods inside indicators
+
+macd.method3 = RegularMethods::TEMA; // another way of defining methods inside indicators
+
+let mut macd = macd.init(candles.first());
+
+for candle in candles.take(10) {
 	let result = macd.next(candle);
 
 	println!("{:?}", result);
