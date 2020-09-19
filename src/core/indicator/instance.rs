@@ -1,5 +1,5 @@
 use super::{IndicatorConfig, IndicatorResult};
-use crate::core::{Sequence, OHLC};
+use crate::core::OHLC;
 
 /// Base trait for implementing indicators **State**
 pub trait IndicatorInstance<T: OHLC> {
@@ -25,13 +25,14 @@ pub trait IndicatorInstance<T: OHLC> {
 		parts.last().unwrap_or_default()
 	}
 
-	/// Evaluates the **State** over the given `Sequence` of candles and returns sequence of `IndicatorResult`.
+	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`.
 	#[inline]
-	fn over(&mut self, candles: &Sequence<T>) -> Vec<IndicatorResult>
+	fn over<S>(&mut self, candles: &S) -> Vec<IndicatorResult>
 	where
+		S: AsRef<Vec<T>>,
 		Self: Sized,
 	{
-		candles.iter().map(|&x| self.next(x)).collect()
+		candles.as_ref().iter().map(|&x| self.next(x)).collect()
 	}
 
 	/// Returns true if indicator is using volume data

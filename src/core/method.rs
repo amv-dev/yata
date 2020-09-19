@@ -78,7 +78,7 @@ pub trait Method: fmt::Debug {
 		(std::mem::size_of::<Self>(), std::mem::align_of::<Self>())
 	}
 
-	/// Creates an `iterator` which produces values by the `Method` over given input data `iterator`
+	/// Creates an `iterator` which produces values by the `Method` over given input data `Iterator`
 	fn iter_data<I>(&mut self, input: I) -> MethodOverIterator<Self, I>
 	where
 		I: Iterator<Item = Self::Input>,
@@ -87,7 +87,7 @@ pub trait Method: fmt::Debug {
 		MethodOverIterator::new(self, input)
 	}
 
-	/// Iterates the `Method` over the given `Sequence` and returns timeserie of output values
+	/// Iterates the `Method` over the given `Iterator` and returns timeserie of output values
 	///
 	/// # Guarantees
 	///
