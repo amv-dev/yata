@@ -65,10 +65,11 @@ impl Method for SMM {
 
 		let half = length / 2;
 
+		let is_even = length % 2 == 0;
 		Self {
-			is_even: length % 2 == 0,
+			is_even,
 			half,
-			half_m1: half.saturating_sub(1),
+			half_m1: half.saturating_sub(is_even as PeriodType),
 			window: Window::new(length, value),
 			slice: vec![value; length as usize],
 		}
@@ -78,47 +79,39 @@ impl Method for SMM {
 	fn next(&mut self, value: Self::Input) -> Self::Output {
 		let old_value = self.window.push(value);
 
-		// self.slice.copy_from_slice(self.window.as_slice());
+		let mut old_index = 0;
+		let mut index = 0;
 
-		// self.slice
-		// 	.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-
-		let mut old_index = self.slice.len() - 1;
-		let mut index = self.slice.len() - 1;
-
+		// first we need to find index of removed `old_value` and index for the new `value`
+		// it is totally OK to compare equality of f64s here
 		for (i, &v) in self.slice.iter().enumerate() {
-			// it is safe to compare f64s here
-			if v > old_value {
-				old_index = i.saturating_sub(1);
+			if v == old_value {
+				old_index = i;
 			}
 
-			if v > value {
-				index = i.saturating_sub(1);
+			if v < value {
+				index += 1;
+			} else if old_index > 0 {
+				break;
 			}
 		}
 
-		println!(
-			"Inserting {} at {}, removing {} from {} into {:?}",
-			value, index, old_value, old_index, self.slice
-		);
+		// if the old index is before current, then we should offset current value by 1 back
+		if old_index < index {
+			index -= 1;
+		}
+
+		// moving values inside the sorted slice
 		if index > old_index {
 			self.slice.copy_within((old_index + 1)..=index, old_index);
 		} else if index < old_index {
 			self.slice.copy_within(index..old_index, index + 1);
 		}
 
+		// inserting new value
 		self.slice[index] = value;
 
-		println!(
-			"Result {:?}\n----------------------------------------------------",
-			self.slice
-		);
-
-		if self.is_even {
-			(self.slice[self.half as usize] + self.slice[self.half_m1 as usize]) * 0.5
-		} else {
-			self.slice[self.half as usize]
-		}
+		(self.slice[self.half as usize] + self.slice[self.half_m1 as usize]) * 0.5
 	}
 }
 
