@@ -29,7 +29,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// O(`length`)
 ///
-/// This method is relatively slow compare to the other methods.
+/// This method is relatively slower compare to the most of the other methods.
 ///
 /// # See also
 ///

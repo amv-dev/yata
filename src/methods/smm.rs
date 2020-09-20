@@ -39,9 +39,9 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Perfomance
 ///
-/// O(`length` x log(`length`))
+/// O(log(`length`))
 ///
-/// This method is relatively very slow compare to the other methods.
+/// This method is relatively slower compare to the most of the other methods.
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
