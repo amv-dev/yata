@@ -247,3 +247,45 @@ impl<T: OHLC> Sequence<T> {
 		self.iter().all(|c| T::validate(c))
 	}
 }
+
+impl OHLC for (ValueType, ValueType, ValueType, ValueType) {
+	fn open(&self) -> ValueType {
+		self.0
+	}
+
+	fn high(&self) -> ValueType {
+		self.1
+	}
+
+	fn low(&self) -> ValueType {
+		self.2
+	}
+
+	fn close(&self) -> ValueType {
+		self.3
+	}
+}
+
+impl OHLC for (ValueType, ValueType, ValueType, ValueType, ValueType) {
+	fn open(&self) -> ValueType {
+		self.0
+	}
+
+	fn high(&self) -> ValueType {
+		self.1
+	}
+
+	fn low(&self) -> ValueType {
+		self.2
+	}
+
+	fn close(&self) -> ValueType {
+		self.3
+	}
+}
+
+impl OHLCV for (ValueType, ValueType, ValueType, ValueType, ValueType) {
+	fn volume(&self) -> ValueType {
+		self.4
+	}
+}
