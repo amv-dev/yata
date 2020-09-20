@@ -5,9 +5,9 @@
 [![Crates.io](https://img.shields.io/crates/v/yata?style=for-the-badge)](https://crates.io/crates/yata)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/amv-dev/yata/Rust?style=for-the-badge)
 [![Read docs](https://img.shields.io/badge/docs.rs-read-brightgreen?style=for-the-badge)](https://docs.rs/yata/latest/yata/)
-[![License Apache 2.0](https://img.shields.io/github/license/amv-dev/yata.svg)](https://github.com/amv-dev/yata/blob/master/LICENSE)
-[![Made with Rust](https://forthebadge.com/images/badges/made-with-rust.svg)](https://www.rust-lang.org/)
+[![License Apache 2.0](https://img.shields.io/github/license/amv-dev/yata.svg?style=for-the-badge)](https://github.com/amv-dev/yata/blob/master/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/amv-dev/yata?style=for-the-badge)](https://github.com/amv-dev/yata/issues)
+[![Made with Rust](https://forthebadge.com/images/badges/made-with-rust.svg)](https://www.rust-lang.org/)
 
 YaTa implements most common technical analysis [methods](https://docs.rs/yata/latest/yata/methods/index.html#structs)
 and [indicators](https://docs.rs/yata/latest/yata/indicators/index.html#structs).
