@@ -40,7 +40,7 @@
 //! * [Integral](crate::methods::Integral) (sum);
 //! * [LinReg](crate::methods::LinReg) Linear regression moving average;
 //! * [Momentum](crate::methods::Momentum);
-//! * [Pivot points](crate::methods::PivotSignal);
+//! * [Reverse points](crate::methods::ReverseSignal);
 //! * [SMA](crate::methods::SMA) Simple moving average;
 //! * [WMA](crate::methods::WMA) Weighted moving average;
 //! * [VWMA](crate::methods::VWMA) Volume weighted moving average;
