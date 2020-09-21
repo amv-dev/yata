@@ -1,7 +1,9 @@
 #![feature(test)]
+use yata::core::ValueType;
 use yata::helpers::RandomCandles;
 use yata::methods::*;
 use yata::prelude::Method;
+
 extern crate test;
 
 // ADI -----------------------------------------------------------------------------------
@@ -18,6 +20,60 @@ fn bench_adi_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = ADI::new(100, candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+// Conv -----------------------------------------------------------------------------------
+#[bench]
+fn bench_conv_w10(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = Conv::new((0..10).map(|x| x as ValueType).collect(), candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+#[bench]
+fn bench_conv_w100(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = Conv::new((0..100).map(|x| x as ValueType).collect(), candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+// Cross -----------------------------------------------------------------------------------
+#[bench]
+fn bench_cross(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new()
+		.take(100)
+		.map(|c| c.close)
+		.zip(RandomCandles::new().skip(15).take(100).map(|c| c.close))
+		.collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = Cross::new((), candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+#[bench]
+fn bench_cross_above(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new()
+		.take(100)
+		.map(|c| c.close)
+		.zip(RandomCandles::new().skip(15).take(100).map(|c| c.close))
+		.collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = CrossAbove::new((), candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+#[bench]
+fn bench_cross_under(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new()
+		.take(100)
+		.map(|c| c.close)
+		.zip(RandomCandles::new().skip(15).take(100).map(|c| c.close))
+		.collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = CrossUnder::new((), candles[0]);
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -273,6 +329,57 @@ fn bench_rate_of_change_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = RateOfChange::new(100, candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+// Reverse -----------------------------------------------------------------------------------
+#[bench]
+fn bench_reverse_signal_w10(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = ReverseSignal::new(5, 5, candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+#[bench]
+fn bench_reverse_signal_w100(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = ReverseSignal::new(50, 50, candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+// ReverseLow -----------------------------------------------------------------------------------
+#[bench]
+fn bench_reverse_low_w10(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = ReverseLowSignal::new(5, 5, candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+#[bench]
+fn bench_reverse_low_w100(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = ReverseLowSignal::new(50, 50, candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+// ReverseHigh -----------------------------------------------------------------------------------
+#[bench]
+fn bench_reverse_high_w10(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = ReverseLowSignal::new(5, 5, candles[0]);
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+#[bench]
+fn bench_reverse_high_w100(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = ReverseHighSignal::new(50, 50, candles[0]);
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
