@@ -86,7 +86,7 @@ pub struct TRIXInstance {
 	tma: TMA,
 	sig: RegularMethod,
 	change: Change,
-	// pivot:       Option<PivotSignal>,
+	// pivot:       Option<ReverseSignal>,
 	cross1: Cross,
 	cross2: Cross,
 	prev_value: ValueType,

@@ -4,7 +4,7 @@ use crate::core::{Action, PeriodType, ValueType, Window};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Searches for [Pivot Points](https://en.wikipedia.org/wiki/Pivot_point_(technical_analysis)) over last `left`+`right`+1 values of type [`ValueType`]
+/// Searches for reverse points over last `left`+`right`+1 values of type [`ValueType`]
 ///
 /// # Parameters
 ///
@@ -27,12 +27,12 @@ use serde::{Deserialize, Serialize};
 ///
 /// ```
 /// use yata::prelude::*;
-/// use yata::methods::PivotSignal;
+/// use yata::methods::ReverseSignal;
 ///
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
 /// let r = [ 0,   0,   1,   0,   -1,  0,   1 ];
 ///
-/// let mut pivot = PivotSignal::new(2, 2, s[0]);
+/// let mut pivot = ReverseSignal::new(2, 2, s[0]);
 /// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
 ///
 /// assert_eq!(r2, r2);
@@ -44,25 +44,25 @@ use serde::{Deserialize, Serialize};
 ///
 /// # See also
 ///
-/// [PivotHighSignal], [PivotLowSignal]
+/// [ReverseHighSignal], [ReverseLowSignal]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
 /// [`Action`]: crate::core::Action
 #[derive(Debug, Default, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct PivotSignal {
-	high: PivotHighSignal,
-	low: PivotLowSignal,
+pub struct ReverseSignal {
+	high: ReverseHighSignal,
+	low: ReverseLowSignal,
 }
 
-impl PivotSignal {
-	/// Constructs new instanceof PivotSignal
+impl ReverseSignal {
+	/// Constructs new instanceof ReverseSignal
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` touple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Self {
 		debug_assert!(
 			left > 0 && right > 0,
-			"PivotSignal: left and right should be >= 1"
+			"ReverseSignal: left and right should be >= 1"
 		);
 
 		Self {
@@ -72,7 +72,7 @@ impl PivotSignal {
 	}
 }
 
-impl Method for PivotSignal {
+impl Method for ReverseSignal {
 	type Params = (PeriodType, PeriodType);
 	type Input = ValueType;
 	type Output = Action;
@@ -85,7 +85,7 @@ impl Method for PivotSignal {
 
 		debug_assert!(
 			left >= 1 && right >= 1,
-			"PivotSignal: left and right should be >= 1"
+			"ReverseSignal: left and right should be >= 1"
 		);
 
 		Self {
@@ -100,7 +100,7 @@ impl Method for PivotSignal {
 	}
 }
 
-/// Searches for high [Pivot Points](https://en.wikipedia.org/wiki/Pivot_point_(technical_analysis)) over last `left`+`right`+1 values of type [`ValueType`]
+/// Searches for high Reverse points over last `left`+`right`+1 values of type [`ValueType`]
 ///
 /// # Parameters
 ///
@@ -123,12 +123,12 @@ impl Method for PivotSignal {
 ///
 /// ```
 /// use yata::core::Method;
-/// use yata::methods::PivotHighSignal;
+/// use yata::methods::ReverseHighSignal;
 ///
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
 /// let r = [ 0,   0,   0,   0,   1,   0,   0 ];
 ///
-/// let mut pivot = PivotHighSignal::new(2, 2, s[0]);
+/// let mut pivot = ReverseHighSignal::new(2, 2, s[0]);
 /// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
 ///
 /// assert_eq!(r2, r2);
@@ -140,7 +140,7 @@ impl Method for PivotSignal {
 ///
 /// # See also
 ///
-/// [PivotSignal], [PivotLowSignal]
+/// [ReverseSignal], [ReverseLowSignal]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
@@ -148,7 +148,7 @@ impl Method for PivotSignal {
 ///
 #[derive(Debug, Default, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct PivotHighSignal {
+pub struct ReverseHighSignal {
 	left: PeriodType,
 	right: PeriodType,
 
@@ -158,15 +158,15 @@ pub struct PivotHighSignal {
 	window: Window<ValueType>,
 }
 
-impl PivotHighSignal {
-	/// Constructs new instanceof PivotHighSignal
+impl ReverseHighSignal {
+	/// Constructs new instanceof ReverseHighSignal
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` touple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Self {
 		Method::new((left, right), value)
 	}
 }
 
-impl Method for PivotHighSignal {
+impl Method for ReverseHighSignal {
 	type Params = (PeriodType, PeriodType);
 	type Input = ValueType;
 	type Output = Action;
@@ -174,7 +174,7 @@ impl Method for PivotHighSignal {
 	fn new(params: Self::Params, value: Self::Input) -> Self {
 		debug_assert!(
 			params.0 >= 1 && params.1 >= 1,
-			"PivotHighSignal: left and right should be >= 1"
+			"ReverseHighSignal: left and right should be >= 1"
 		);
 
 		let (left, right) = params;
@@ -230,7 +230,7 @@ impl Method for PivotHighSignal {
 	}
 }
 
-/// Searches for low [Pivot Points](https://en.wikipedia.org/wiki/Pivot_point_(technical_analysis)) over last `left`+`right`+1 values of type [`ValueType`]
+/// Searches for low reverse points over last `left`+`right`+1 values of type [`ValueType`]
 ///
 /// # Parameters
 ///
@@ -253,12 +253,12 @@ impl Method for PivotHighSignal {
 ///
 /// ```
 /// use yata::core::Method;
-/// use yata::methods::PivotHighSignal;
+/// use yata::methods::ReverseHighSignal;
 ///
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
 /// let r = [ 0,   0,   1,   0,   0,   0,   1 ];
 ///
-/// let mut pivot = PivotHighSignal::new(2, 2, s[0]);
+/// let mut pivot = ReverseHighSignal::new(2, 2, s[0]);
 /// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
 ///
 /// assert_eq!(r2, r2);
@@ -270,7 +270,7 @@ impl Method for PivotHighSignal {
 ///
 /// # See also
 ///
-/// [PivotSignal], [PivotHighSignal]
+/// [ReverseSignal], [ReverseHighSignal]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
@@ -278,7 +278,7 @@ impl Method for PivotHighSignal {
 ///
 #[derive(Debug, Default, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct PivotLowSignal {
+pub struct ReverseLowSignal {
 	left: PeriodType,
 	right: PeriodType,
 
@@ -291,15 +291,15 @@ pub struct PivotLowSignal {
 	window: Window<ValueType>,
 }
 
-impl PivotLowSignal {
-	/// Constructs new instanceof PivotLowSignal
+impl ReverseLowSignal {
+	/// Constructs new instanceof ReverseLowSignal
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` touple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Self {
 		Method::new((left, right), value)
 	}
 }
 
-impl Method for PivotLowSignal {
+impl Method for ReverseLowSignal {
 	type Params = (PeriodType, PeriodType);
 	type Input = ValueType;
 	type Output = Action;
@@ -307,7 +307,7 @@ impl Method for PivotLowSignal {
 	fn new(params: Self::Params, value: Self::Input) -> Self {
 		debug_assert!(
 			params.0 >= 1 && params.1 >= 1,
-			"PivotLowSignal: left and right should be >= 1"
+			"ReverseLowSignal: left and right should be >= 1"
 		);
 
 		let (left, right) = params;
@@ -377,7 +377,7 @@ mod tests {
 		for i in 1..10 {
 			for j in 1..10 {
 				let input = (i as ValueType + 56.0) / 16.3251;
-				let mut method = PivotLowSignal::new(i, j, input);
+				let mut method = ReverseLowSignal::new(i, j, input);
 
 				let output = method.next(input);
 				test_const(&mut method, input, output);
@@ -391,7 +391,7 @@ mod tests {
 		let v: Vec<f64> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
 		let r: Vec<i8> =  vec![ 0,   0,   0,   1,   0,   0,   0,   0,   1,   0,   0,   1,   0,   0,   0,   0,   1 ];
 
-		let mut pivot = PivotLowSignal::new(2, 2, v[0]);
+		let mut pivot = ReverseLowSignal::new(2, 2, v[0]);
 
 		let r2: Vec<i8> = v.iter().map(|&x| pivot.next(x).analog()).collect();
 		assert_eq!(r, r2);
@@ -406,7 +406,7 @@ mod tests {
 		for i in 1..10 {
 			for j in 1..10 {
 				let input = (i as ValueType + 56.0) / 16.3251;
-				let mut method = PivotHighSignal::new(i, j, input);
+				let mut method = ReverseHighSignal::new(i, j, input);
 
 				let output = method.next(input);
 				test_const(&mut method, input, output);
@@ -420,7 +420,7 @@ mod tests {
 		let v: Vec<f64> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
 		let r: Vec<i8> =  vec![ 0,   0,   0,   0,   0,   0,   1,   0,   0,   0,   0,   0,   0,   1,   0,   0,   0 ];
 
-		let mut pivot = PivotHighSignal::new(2, 2, v[0]);
+		let mut pivot = ReverseHighSignal::new(2, 2, v[0]);
 
 		let r2: Vec<i8> = v.iter().map(|&x| pivot.next(x).analog()).collect();
 		assert_eq!(r, r2);

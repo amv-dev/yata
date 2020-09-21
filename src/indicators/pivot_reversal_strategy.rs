@@ -3,16 +3,16 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{Action, Method, PeriodType, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::methods::{PivotHighSignal, PivotLowSignal};
+use crate::methods::{ReverseHighSignal, ReverseLowSignal};
 
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct PivotReversalStrategy {
+pub struct ReverseReversalStrategy {
 	pub left: PeriodType,
 	pub right: PeriodType,
 }
 
-impl IndicatorConfig for PivotReversalStrategy {
+impl IndicatorConfig for ReverseReversalStrategy {
 	fn validate(&self) -> bool {
 		true
 	}
@@ -38,8 +38,8 @@ impl IndicatorConfig for PivotReversalStrategy {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for PivotReversalStrategy {
-	type Instance = PivotReversalStrategyInstance<T>;
+impl<T: OHLC> IndicatorInitializer<T> for ReverseReversalStrategy {
+	type Instance = ReverseReversalStrategyInstance<T>;
 
 	fn init(self, candle: T) -> Self::Instance
 	where
@@ -47,8 +47,8 @@ impl<T: OHLC> IndicatorInitializer<T> for PivotReversalStrategy {
 	{
 		let cfg = self;
 		Self::Instance {
-			ph: PivotHighSignal::new(cfg.left, cfg.right, candle.high()),
-			pl: PivotLowSignal::new(cfg.left, cfg.right, candle.low()),
+			ph: ReverseHighSignal::new(cfg.left, cfg.right, candle.high()),
+			pl: ReverseLowSignal::new(cfg.left, cfg.right, candle.low()),
 			window: Window::new(cfg.right, candle),
 			hprice: 0.,
 			lprice: 0.,
@@ -57,27 +57,27 @@ impl<T: OHLC> IndicatorInitializer<T> for PivotReversalStrategy {
 	}
 }
 
-impl Default for PivotReversalStrategy {
+impl Default for ReverseReversalStrategy {
 	fn default() -> Self {
 		Self { left: 4, right: 2 }
 	}
 }
 
 #[derive(Debug)]
-pub struct PivotReversalStrategyInstance<T: OHLC> {
-	cfg: PivotReversalStrategy,
+pub struct ReverseReversalStrategyInstance<T: OHLC> {
+	cfg: ReverseReversalStrategy,
 
-	ph: PivotHighSignal,
-	pl: PivotLowSignal,
+	ph: ReverseHighSignal,
+	pl: ReverseLowSignal,
 	window: Window<T>,
 	hprice: ValueType,
 	lprice: ValueType,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for PivotReversalStrategyInstance<T> {
-	type Config = PivotReversalStrategy;
+impl<T: OHLC> IndicatorInstance<T> for ReverseReversalStrategyInstance<T> {
+	type Config = ReverseReversalStrategy;
 	fn name(&self) -> &str {
-		"PivotReversalStrategy"
+		"ReverseReversalStrategy"
 	}
 
 	#[inline]

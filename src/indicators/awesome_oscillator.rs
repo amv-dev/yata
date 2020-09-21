@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::core::{Action, Method, PeriodType, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, signi, RegularMethod, RegularMethods};
-use crate::methods::{Cross, PivotHighSignal, PivotLowSignal};
+use crate::methods::{Cross, ReverseHighSignal, ReverseLowSignal};
 
 /*
 Билл Вильямс выделил три возможных варианта сигнала на покупку (+ три возможных
@@ -126,8 +126,8 @@ pub struct AwesomeOscillatorInstance {
 	ma1: RegularMethod,
 	ma2: RegularMethod,
 	cross_over: Cross,
-	ph: PivotHighSignal,
-	pl: PivotLowSignal,
+	ph: ReverseHighSignal,
+	pl: ReverseLowSignal,
 	window: Window<ValueType>,
 }
 

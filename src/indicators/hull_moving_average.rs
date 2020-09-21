@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::core::{Method, PeriodType, Source, OHLC};
-use crate::methods::{PivotSignal, HMA};
+use crate::methods::{ReverseSignal, HMA};
 
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -54,7 +54,7 @@ impl<T: OHLC> IndicatorInitializer<T> for HullMovingAverage {
 
 		Self::Instance {
 			hma: HMA::new(cfg.period, src),
-			pivot: PivotSignal::new(cfg.left, cfg.right, src),
+			pivot: ReverseSignal::new(cfg.left, cfg.right, src),
 			cfg,
 		}
 	}
@@ -76,7 +76,7 @@ pub struct HullMovingAverageInstance {
 	cfg: HullMovingAverage,
 
 	hma: HMA,
-	pivot: PivotSignal,
+	pivot: ReverseSignal,
 }
 
 impl<T: OHLC> IndicatorInstance<T> for HullMovingAverageInstance {

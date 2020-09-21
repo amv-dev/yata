@@ -69,8 +69,8 @@ pub use volatility::*;
 
 mod cross;
 pub use cross::*;
-mod pivot;
-pub use pivot::*;
+mod reverse;
+pub use reverse::*;
 mod highest_lowest;
 pub use highest_lowest::*;
 mod adi;

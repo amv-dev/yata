@@ -79,7 +79,7 @@ mod parabolic_sar;
 pub use parabolic_sar::{ParabolicSAR, ParabolicStopAndReverse};
 
 mod pivot_reversal_strategy;
-pub use pivot_reversal_strategy::PivotReversalStrategy;
+pub use pivot_reversal_strategy::ReverseReversalStrategy;
 
 mod price_channel_strategy;
 pub use price_channel_strategy::PriceChannelStrategy;

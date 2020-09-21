@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::core::{Method, PeriodType, Source, OHLC};
 use crate::helpers::{method, RegularMethod, RegularMethods};
-use crate::methods::{Cross, PivotSignal, RateOfChange};
+use crate::methods::{Cross, RateOfChange, ReverseSignal};
 
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -69,7 +69,7 @@ impl<T: OHLC> IndicatorInitializer<T> for CoppockCurve {
 			ma1: method(cfg.method1, cfg.period1, 0.),
 			ma2: method(cfg.method2, cfg.s3_period, 0.),
 			cross_over1: Cross::default(),
-			pivot: PivotSignal::new(cfg.s2_left, cfg.s2_right, 0.),
+			pivot: ReverseSignal::new(cfg.s2_left, cfg.s2_right, 0.),
 			cross_over2: Cross::default(),
 
 			cfg,
@@ -102,7 +102,7 @@ pub struct CoppockCurveInstance {
 	ma1: RegularMethod,
 	ma2: RegularMethod,
 	cross_over1: Cross,
-	pivot: PivotSignal,
+	pivot: ReverseSignal,
 	cross_over2: Cross,
 }
 
