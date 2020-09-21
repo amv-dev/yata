@@ -96,6 +96,77 @@ for candle in candles.take(10) {
 }
 ```
 
+# Benchmarks
+
+## Methods
+
+- **\_w10** - method with window `length`=10
+- **\_w100** - method with window `length`=100
+
+```
+test bench_adi_w10                   ... bench:          10 ns/iter (+/- 0)
+test bench_adi_w100                  ... bench:          10 ns/iter (+/- 0)
+test bench_conv_w10                  ... bench:          42 ns/iter (+/- 0)
+test bench_conv_w100                 ... bench:         353 ns/iter (+/- 4)
+test bench_cross                     ... bench:           6 ns/iter (+/- 0)
+test bench_cross_above               ... bench:           4 ns/iter (+/- 0)
+test bench_cross_under               ... bench:           4 ns/iter (+/- 0)
+test bench_dema_w10                  ... bench:           9 ns/iter (+/- 0)
+test bench_dema_w100                 ... bench:           9 ns/iter (+/- 0)
+test bench_derivative_w10            ... bench:           4 ns/iter (+/- 0)
+test bench_derivative_w100           ... bench:           4 ns/iter (+/- 0)
+test bench_dma_w10                   ... bench:           7 ns/iter (+/- 0)
+test bench_dma_w100                  ... bench:           7 ns/iter (+/- 0)
+test bench_ema_w10                   ... bench:           7 ns/iter (+/- 0)
+test bench_ema_w100                  ... bench:           3 ns/iter (+/- 0)
+test bench_highest_lowest_delta_w10  ... bench:          26 ns/iter (+/- 0)
+test bench_highest_lowest_delta_w100 ... bench:         482 ns/iter (+/- 28)
+test bench_highest_w10               ... bench:          14 ns/iter (+/- 0)
+test bench_highest_w100              ... bench:         193 ns/iter (+/- 4)
+test bench_hma_w10                   ... bench:          20 ns/iter (+/- 0)
+test bench_hma_w100                  ... bench:          21 ns/iter (+/- 0)
+test bench_integral_w10              ... bench:          10 ns/iter (+/- 0)
+test bench_integral_w100             ... bench:          10 ns/iter (+/- 0)
+test bench_lin_reg_w10               ... bench:          12 ns/iter (+/- 0)
+test bench_lin_reg_w100              ... bench:          12 ns/iter (+/- 0)
+test bench_linear_volatility_w10     ... bench:           5 ns/iter (+/- 0)
+test bench_linear_volatility_w100    ... bench:           5 ns/iter (+/- 0)
+test bench_lowest_w10                ... bench:          31 ns/iter (+/- 0)
+test bench_lowest_w100               ... bench:         433 ns/iter (+/- 1)
+test bench_momentum_w10              ... bench:           4 ns/iter (+/- 0)
+test bench_momentum_w100             ... bench:           4 ns/iter (+/- 0)
+test bench_past_w10                  ... bench:           5 ns/iter (+/- 0)
+test bench_past_w100                 ... bench:           2 ns/iter (+/- 0)
+test bench_rate_of_change_w10        ... bench:           2 ns/iter (+/- 0)
+test bench_rate_of_change_w100       ... bench:           2 ns/iter (+/- 0)
+test bench_reverse_high_w10          ... bench:           5 ns/iter (+/- 0)
+test bench_reverse_high_w100         ... bench:           4 ns/iter (+/- 0)
+test bench_reverse_low_w10           ... bench:          12 ns/iter (+/- 0)
+test bench_reverse_low_w100          ... bench:           9 ns/iter (+/- 0)
+test bench_reverse_signal_w10        ... bench:          23 ns/iter (+/- 0)
+test bench_reverse_signal_w100       ... bench:          17 ns/iter (+/- 0)
+test bench_rma_w10                   ... bench:           7 ns/iter (+/- 0)
+test bench_rma_w100                  ... bench:           7 ns/iter (+/- 0)
+test bench_sma_w10                   ... bench:           5 ns/iter (+/- 0)
+test bench_sma_w100                  ... bench:           5 ns/iter (+/- 0)
+test bench_smm_w10                   ... bench:          30 ns/iter (+/- 0)
+test bench_smm_w100                  ... bench:          54 ns/iter (+/- 0)
+test bench_st_dev_w10                ... bench:           6 ns/iter (+/- 0)
+test bench_st_dev_w100               ... bench:           6 ns/iter (+/- 0)
+test bench_swma_w10                  ... bench:          21 ns/iter (+/- 1)
+test bench_swma_w100                 ... bench:         158 ns/iter (+/- 5)
+test bench_tema_w10                  ... bench:          12 ns/iter (+/- 0)
+test bench_tema_w100                 ... bench:          12 ns/iter (+/- 0)
+test bench_tma_w10                   ... bench:           8 ns/iter (+/- 0)
+test bench_tma_w100                  ... bench:           9 ns/iter (+/- 0)
+test bench_trima_w10                 ... bench:           8 ns/iter (+/- 0)
+test bench_trima_w100                ... bench:           8 ns/iter (+/- 0)
+test bench_vwma_w10                  ... bench:           7 ns/iter (+/- 0)
+test bench_vwma_w100                 ... bench:           7 ns/iter (+/- 0)
+test bench_wma_w10                   ... bench:           8 ns/iter (+/- 0)
+test bench_wma_w100                  ... bench:           8 ns/iter (+/- 0)
+```
+
 ## Current usafe status
 
 Currently there is no `unsafe` code in the crate.
