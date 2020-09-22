@@ -98,10 +98,6 @@ pub struct IchimokuCloudInstance {
 impl<T: OHLC> IndicatorInstance<T> for IchimokuCloudInstance {
 	type Config = IchimokuCloud;
 
-	fn name(&self) -> &str {
-		"IchimokuCloud"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg

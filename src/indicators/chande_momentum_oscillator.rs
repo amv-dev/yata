@@ -122,8 +122,4 @@ impl<T: OHLC> IndicatorInstance<T> for ChandeMomentumOscillatorInstance {
 
 		IndicatorResult::new(&[value], &[signal])
 	}
-
-	fn name(&self) -> &str {
-		"ChandeMomentumOscillator"
-	}
 }

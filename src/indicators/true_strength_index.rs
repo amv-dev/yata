@@ -101,10 +101,6 @@ pub struct TrueStrengthIndexInstance {
 impl<T: OHLC> IndicatorInstance<T> for TrueStrengthIndexInstance {
 	type Config = TrueStrengthIndex;
 
-	fn name(&self) -> &str {
-		"TrueStrengthIndex"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg

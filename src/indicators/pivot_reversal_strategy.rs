@@ -76,9 +76,6 @@ pub struct ReverseReversalStrategyInstance<T: OHLC> {
 
 impl<T: OHLC> IndicatorInstance<T> for ReverseReversalStrategyInstance<T> {
 	type Config = ReverseReversalStrategy;
-	fn name(&self) -> &str {
-		"ReverseReversalStrategy"
-	}
 
 	#[inline]
 	fn config(&self) -> &Self::Config {

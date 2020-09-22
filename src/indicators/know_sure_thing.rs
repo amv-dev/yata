@@ -120,10 +120,6 @@ pub struct KnowSureThingInstance {
 impl<T: OHLC> IndicatorInstance<T> for KnowSureThingInstance {
 	type Config = KnowSureThing;
 
-	fn name(&self) -> &str {
-		"KnowSureThing"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg

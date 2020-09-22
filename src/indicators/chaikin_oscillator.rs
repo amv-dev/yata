@@ -107,8 +107,4 @@ impl<T: OHLCV> IndicatorInstance<T> for ChaikinOscillatorInstance<T> {
 
 		IndicatorResult::new(&[value], &[signal])
 	}
-
-	fn name(&self) -> &str {
-		"ChaikinOscillator"
-	}
 }

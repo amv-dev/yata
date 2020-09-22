@@ -86,10 +86,6 @@ pub struct EnvelopesInstance {
 impl<T: OHLC> IndicatorInstance<T> for EnvelopesInstance {
 	type Config = Envelopes;
 
-	fn name(&self) -> &str {
-		"Envelopes"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg

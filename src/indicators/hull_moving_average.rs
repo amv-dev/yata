@@ -82,10 +82,6 @@ pub struct HullMovingAverageInstance {
 impl<T: OHLC> IndicatorInstance<T> for HullMovingAverageInstance {
 	type Config = HullMovingAverage;
 
-	fn name(&self) -> &str {
-		"HullMovingAverage"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg

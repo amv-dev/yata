@@ -78,10 +78,6 @@ pub struct BollingerBandsInstance {
 impl<T: OHLC> IndicatorInstance<T> for BollingerBandsInstance {
 	type Config = BollingerBands;
 
-	fn name(&self) -> &str {
-		"BollingerBands"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg

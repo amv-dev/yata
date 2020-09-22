@@ -89,10 +89,6 @@ pub struct EldersForceIndexInstance<T: OHLCV> {
 impl<T: OHLCV> IndicatorInstance<T> for EldersForceIndexInstance<T> {
 	type Config = EldersForceIndex;
 
-	fn name(&self) -> &str {
-		"EldersForceIndex"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg

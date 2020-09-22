@@ -8,9 +8,7 @@ pub trait IndicatorInstance<T: OHLC> {
 	type Config: IndicatorConfig;
 
 	/// Returns a reference to the indicator **Configuration**
-	fn config(&self) -> &Self::Config
-	where
-		Self: Sized;
+	fn config(&self) -> &Self::Config;
 
 	// fn config(&self) -> &dyn IndicatorConfig<T>;
 
@@ -18,12 +16,6 @@ pub trait IndicatorInstance<T: OHLC> {
 	fn next(&mut self, candle: T) -> IndicatorResult
 	where
 		Self: Sized;
-
-	/// Returns a name of the indicator
-	fn name(&self) -> &str {
-		let parts = std::any::type_name::<Self>().split("::");
-		parts.last().unwrap_or_default()
-	}
 
 	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`.
 	#[inline]
@@ -51,6 +43,11 @@ pub trait IndicatorInstance<T: OHLC> {
 		Self: Sized,
 	{
 		self.config().size()
+	}
+
+	/// Returns a name of the indicator
+	fn name(&self) -> &'static str {
+		self.config().name()
 	}
 }
 

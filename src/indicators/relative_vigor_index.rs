@@ -96,10 +96,6 @@ pub struct RelativeVigorIndexInstance {
 impl<T: OHLC> IndicatorInstance<T> for RelativeVigorIndexInstance {
 	type Config = RelativeVigorIndex;
 
-	fn name(&self) -> &str {
-		"RelativeVigorIndex"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg

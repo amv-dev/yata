@@ -107,10 +107,6 @@ pub struct ExampleInstance {
 impl<T: OHLC> IndicatorInstance<T> for ExampleInstance {
 	type Config = Example;
 
-	fn name(&self) -> &str {
-		"Example"
-	}
-
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

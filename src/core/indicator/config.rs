@@ -19,6 +19,12 @@ pub trait IndicatorConfig: Clone {
 		false
 	}
 
+	/// Returns a name of the indicator
+	fn name(&self) -> &'static str {
+		let parts = std::any::type_name::<Self>().split("::");
+		parts.last().unwrap_or_default()
+	}
+
 	/// Returns an [IndicatorResult](crate::core::IndicatorResult) size processing by the indicator `(count of raw value, count of signals)`
 	fn size(&self) -> (u8, u8);
 }

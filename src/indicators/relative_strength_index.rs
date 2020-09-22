@@ -91,10 +91,6 @@ pub type RSI = RelativeStrengthIndex;
 impl<T: OHLC> IndicatorInstance<T> for RelativeStrengthIndexInstance {
 	type Config = RelativeStrengthIndex;
 
-	fn name(&self) -> &str {
-		"RelativeStrengthIndex"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg

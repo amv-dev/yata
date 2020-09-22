@@ -94,8 +94,4 @@ impl<T: OHLCV> IndicatorInstance<T> for ChaikinMoneyFlowInstance<T> {
 
 		IndicatorResult::new(&[value], &[signal])
 	}
-
-	fn name(&self) -> &str {
-		"ChaikinMoneyFlow"
-	}
 }

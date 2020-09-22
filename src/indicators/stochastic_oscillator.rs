@@ -106,10 +106,6 @@ pub struct StochasticOscillatorInstance {
 impl<T: OHLC> IndicatorInstance<T> for StochasticOscillatorInstance {
 	type Config = StochasticOscillator;
 
-	fn name(&self) -> &str {
-		"StochasticOscillator"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg

@@ -73,10 +73,6 @@ pub struct PriceChannelStrategyInstance {
 impl<T: OHLC> IndicatorInstance<T> for PriceChannelStrategyInstance {
 	type Config = PriceChannelStrategy;
 
-	fn name(&self) -> &str {
-		"PriceChannelStrategy"
-	}
-
 	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
