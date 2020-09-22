@@ -71,6 +71,23 @@ impl From<String> for Source {
 /// Simple Candlestick structure for implementing [OHLC] and [OHLCV]
 ///
 /// Can be also used by an alias [Candlestick]
+///
+/// You may convert simple tuples of 4 or 5 float values into Candle:
+/// ```
+/// use yata::prelude::Candle;
+/// //               open  high  low  close
+/// let my_candle = (3.0,  5.0,  2.0, 4.0  );
+/// let converted: Candle = my_candle.into();
+/// println!("{:?}", converted);
+/// ```
+///
+/// ```
+/// use yata::prelude::Candle;
+/// //               open  high  low  close  volume
+/// let my_candle = (3.0,  5.0,  2.0, 4.0  ,  50.0 );
+/// let converted: Candle = my_candle.into();
+/// println!("{:?}", converted);
+/// ```
 #[derive(Debug, Clone, Copy, Default, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Candle {
@@ -124,6 +141,30 @@ impl OHLCV for Candle {
 	#[inline]
 	fn volume(&self) -> ValueType {
 		self.volume
+	}
+}
+
+impl From<(ValueType, ValueType, ValueType, ValueType)> for Candle {
+	fn from(value: (ValueType, ValueType, ValueType, ValueType)) -> Self {
+		Self {
+			open: value.0,
+			high: value.1,
+			low: value.2,
+			close: value.3,
+			volume: 0.0,
+		}
+	}
+}
+
+impl From<(ValueType, ValueType, ValueType, ValueType, ValueType)> for Candle {
+	fn from(value: (ValueType, ValueType, ValueType, ValueType, ValueType)) -> Self {
+		Self {
+			open: value.0,
+			high: value.1,
+			low: value.2,
+			close: value.3,
+			volume: value.4,
+		}
 	}
 }
 
