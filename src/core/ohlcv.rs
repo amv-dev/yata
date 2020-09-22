@@ -1,7 +1,20 @@
 use super::{Sequence, Source, ValueType};
 use std::fmt::Debug;
 
-/// Basic trait for implementing [Open-High-Low-Close timeseries data](https://en.wikipedia.org/wiki/Candlestick_chart)
+/// Basic trait for implementing [Open-High-Low-Close timeseries data](https://en.wikipedia.org/wiki/Candlestick_chart).
+///
+/// It has already implemented for tuple of 4 and 5 float values:
+/// ```
+/// use yata::prelude::OHLC;
+/// //         open high low  close
+/// let row = (2.0, 5.0, 1.0,  4.0 );
+/// assert_eq!(row.open(), row.0);
+/// assert_eq!(row.high(), row.1);
+/// assert_eq!(row.low(), row.2);
+/// assert_eq!(row.close(), row.3);
+/// ```
+///
+/// See also [Candle](crate::prelude::Candle).
 pub trait OHLC: Copy + Debug + Default {
 	/// Should return an *open* value of the period
 	fn open(&self) -> ValueType;
@@ -214,7 +227,21 @@ pub trait OHLC: Copy + Debug + Default {
 	}
 }
 
-/// Basic trait for implementing [Open-High-Low-Close-Volume timeseries data](https://en.wikipedia.org/wiki/Candlestick_chart)
+/// Basic trait for implementing [Open-High-Low-Close-Volume timeseries data](https://en.wikipedia.org/wiki/Candlestick_chart).
+///
+/// It has already implemented for tuple of 5 float values:
+/// ```
+/// use yata::prelude::{OHLC, OHLCV};
+/// //         open high low  close volume
+/// let row = (2.0, 5.0, 1.0,  4.0,  10.0 );
+/// assert_eq!(row.open(), row.0);
+/// assert_eq!(row.high(), row.1);
+/// assert_eq!(row.low(), row.2);
+/// assert_eq!(row.close(), row.3);
+/// assert_eq!(row.volume(), row.4);
+/// ```
+///
+/// See also [Candle](crate::prelude::Candle).
 pub trait OHLCV: OHLC {
 	/// Should return *volume* value for the period
 	fn volume(&self) -> ValueType;
@@ -249,42 +276,51 @@ impl<T: OHLC> Sequence<T> {
 }
 
 impl OHLC for (ValueType, ValueType, ValueType, ValueType) {
+	#[inline]
 	fn open(&self) -> ValueType {
 		self.0
 	}
 
+	#[inline]
 	fn high(&self) -> ValueType {
 		self.1
 	}
 
+	#[inline]
 	fn low(&self) -> ValueType {
 		self.2
 	}
 
+	#[inline]
 	fn close(&self) -> ValueType {
 		self.3
 	}
 }
 
 impl OHLC for (ValueType, ValueType, ValueType, ValueType, ValueType) {
+	#[inline]
 	fn open(&self) -> ValueType {
 		self.0
 	}
 
+	#[inline]
 	fn high(&self) -> ValueType {
 		self.1
 	}
 
+	#[inline]
 	fn low(&self) -> ValueType {
 		self.2
 	}
 
+	#[inline]
 	fn close(&self) -> ValueType {
 		self.3
 	}
 }
 
 impl OHLCV for (ValueType, ValueType, ValueType, ValueType, ValueType) {
+	#[inline]
 	fn volume(&self) -> ValueType {
 		self.4
 	}
