@@ -12,6 +12,9 @@ fn bench_adi_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = ADI::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -20,6 +23,9 @@ fn bench_adi_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = ADI::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -29,6 +35,9 @@ fn bench_conv_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Conv::new((0..10).map(|x| x as ValueType).collect(), candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -37,6 +46,9 @@ fn bench_conv_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Conv::new((0..100).map(|x| x as ValueType).collect(), candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -83,6 +95,9 @@ fn bench_sma_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = SMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -91,6 +106,9 @@ fn bench_sma_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = SMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -100,6 +118,9 @@ fn bench_wma_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = WMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -108,6 +129,9 @@ fn bench_wma_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = WMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -117,6 +141,9 @@ fn bench_ema_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = EMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -125,6 +152,9 @@ fn bench_ema_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = EMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -134,6 +164,9 @@ fn bench_dma_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = DMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -142,6 +175,9 @@ fn bench_dma_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = DMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -151,6 +187,9 @@ fn bench_tma_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = TMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -159,6 +198,9 @@ fn bench_tma_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = TMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -168,6 +210,9 @@ fn bench_dema_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = DEMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -176,6 +221,9 @@ fn bench_dema_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = DEMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -185,6 +233,9 @@ fn bench_tema_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = TEMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -193,6 +244,9 @@ fn bench_tema_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = TEMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -202,6 +256,9 @@ fn bench_smm_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = SMM::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -210,6 +267,9 @@ fn bench_smm_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = SMM::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -219,6 +279,9 @@ fn bench_hma_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = HMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -227,6 +290,9 @@ fn bench_hma_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = HMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -236,6 +302,9 @@ fn bench_lin_reg_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = LinReg::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -244,6 +313,9 @@ fn bench_lin_reg_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = LinReg::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -253,6 +325,9 @@ fn bench_derivative_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Derivative::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -261,6 +336,9 @@ fn bench_derivative_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Derivative::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -270,6 +348,9 @@ fn bench_integral_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Integral::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -278,6 +359,9 @@ fn bench_integral_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Integral::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -287,6 +371,9 @@ fn bench_momentum_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Momentum::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -295,6 +382,9 @@ fn bench_momentum_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Momentum::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -304,6 +394,9 @@ fn bench_past_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Past::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -312,6 +405,9 @@ fn bench_past_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Past::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -321,6 +417,9 @@ fn bench_rate_of_change_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = RateOfChange::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -329,6 +428,9 @@ fn bench_rate_of_change_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = RateOfChange::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -338,6 +440,9 @@ fn bench_reverse_signal_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = ReverseSignal::new(5, 5, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -346,6 +451,9 @@ fn bench_reverse_signal_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = ReverseSignal::new(50, 50, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -355,6 +463,9 @@ fn bench_reverse_low_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = ReverseLowSignal::new(5, 5, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -363,6 +474,9 @@ fn bench_reverse_low_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = ReverseLowSignal::new(50, 50, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -372,6 +486,9 @@ fn bench_reverse_high_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = ReverseLowSignal::new(5, 5, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -380,6 +497,9 @@ fn bench_reverse_high_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = ReverseHighSignal::new(50, 50, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -389,6 +509,9 @@ fn bench_rma_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = RMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -397,6 +520,9 @@ fn bench_rma_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = RMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -406,6 +532,9 @@ fn bench_st_dev_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = StDev::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -414,6 +543,9 @@ fn bench_st_dev_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = StDev::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -423,6 +555,9 @@ fn bench_swma_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = SWMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -431,6 +566,9 @@ fn bench_swma_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = SWMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -440,6 +578,9 @@ fn bench_trima_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = TRIMA::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -448,6 +589,9 @@ fn bench_trima_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = TRIMA::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -457,6 +601,9 @@ fn bench_linear_volatility_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = LinearVolatility::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -465,6 +612,9 @@ fn bench_linear_volatility_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = LinearVolatility::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -474,6 +624,10 @@ fn bench_vwma_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = VWMA::new(10, (candles[0].close, candles[0].volume));
+	for _ in 0..10 {
+		let candle = iter.next().unwrap();
+		method.next((candle.close, candle.volume));
+	}
 	b.iter(|| {
 		let candle = iter.next().unwrap();
 		method.next((candle.close, candle.volume))
@@ -485,6 +639,10 @@ fn bench_vwma_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = VWMA::new(100, (candles[0].close, candles[0].volume));
+	for _ in 0..100 {
+		let candle = iter.next().unwrap();
+		method.next((candle.close, candle.volume));
+	}
 	b.iter(|| {
 		let candle = iter.next().unwrap();
 		method.next((candle.close, candle.volume))
@@ -497,6 +655,9 @@ fn bench_highest_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Highest::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -505,6 +666,9 @@ fn bench_highest_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Highest::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -514,6 +678,9 @@ fn bench_lowest_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Lowest::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -522,6 +689,9 @@ fn bench_lowest_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = Lowest::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -531,6 +701,9 @@ fn bench_highest_lowest_delta_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(100).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle().copied();
 	let mut method = HighestLowestDelta::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
 
@@ -538,5 +711,8 @@ fn bench_highest_lowest_delta_w10(b: &mut test::Bencher) {
 fn bench_highest_lowest_delta_w100(b: &mut test::Bencher) {
 	let mut candles = RandomCandles::new();
 	let mut method = HighestLowestDelta::new(100, candles.first().close);
+	for _ in 0..100 {
+		method.next(candles.next().unwrap().close);
+	}
 	b.iter(|| method.next(candles.next().unwrap().close))
 }
