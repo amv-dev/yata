@@ -48,7 +48,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SMM {
-	is_even: bool,
 	half: PeriodType,
 	half_m1: PeriodType,
 	window: Window<ValueType>,
@@ -67,7 +66,6 @@ impl Method for SMM {
 
 		let is_even = length % 2 == 0;
 		Self {
-			is_even,
 			half,
 			half_m1: half.saturating_sub(is_even as PeriodType),
 			window: Window::new(length, value),
