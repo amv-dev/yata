@@ -1,6 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use std::convert::TryFrom;
 use std::str::FromStr;
 
 use crate::core::{Sequence, ValueType, OHLC, OHLCV};
@@ -56,15 +57,19 @@ impl FromStr for Source {
 	}
 }
 
-impl From<&str> for Source {
-	fn from(s: &str) -> Self {
-		Self::from_str(s).unwrap()
+impl TryFrom<&str> for Source {
+	type Error = String;
+
+	fn try_from(s: &str) -> Result<Self, Self::Error> {
+		Self::from_str(s)
 	}
 }
 
-impl From<String> for Source {
-	fn from(s: String) -> Self {
-		Self::from_str(s.as_str()).unwrap()
+impl TryFrom<String> for Source {
+	type Error = String;
+
+	fn try_from(s: String) -> Result<Self, Self::Error> {
+		Self::from_str(s.as_str())
 	}
 }
 

@@ -41,9 +41,10 @@ impl<T: Copy> Sequence<T> {
 	/// ```
 	/// use yata::core::Sequence;
 	/// use yata::helpers::method;
+	/// use std::convert::TryInto;
 	///
 	/// let mut s:Sequence<f64> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
-	/// let mut ma = method("sma".into(), 2, s[0]);
+	/// let mut ma = method("sma".try_into().unwrap(), 2, s[0]);
 	///
 	/// s.apply(ma.as_mut());
 	/// assert_eq!(s.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);

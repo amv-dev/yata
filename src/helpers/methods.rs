@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::core::{Method, PeriodType, ValueType};
 use crate::methods::*;
 
+use std::convert::TryFrom;
 use std::str::FromStr;
 /// A shortcut for dynamically (runtime) generated regular methods
 ///
@@ -157,15 +158,19 @@ impl FromStr for RegularMethods {
 	}
 }
 
-impl From<&str> for RegularMethods {
-	fn from(s: &str) -> Self {
-		Self::from_str(s).unwrap()
+impl TryFrom<&str> for RegularMethods {
+	type Error = String;
+
+	fn try_from(s: &str) -> Result<Self, Self::Error> {
+		Self::from_str(s)
 	}
 }
 
-impl From<String> for RegularMethods {
-	fn from(s: String) -> Self {
-		Self::from_str(s.as_str()).unwrap()
+impl TryFrom<String> for RegularMethods {
+	type Error = String;
+
+	fn try_from(s: String) -> Result<Self, Self::Error> {
+		Self::from_str(s.as_str())
 	}
 }
 
@@ -210,9 +215,10 @@ impl From<String> for RegularMethods {
 /// ```
 /// use yata::core::Sequence;
 /// use yata::helpers::{method, RegularMethods};
+/// use std::convert::TryInto;
 ///
 /// let mut s:Sequence<f64> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
-/// let mut ma = method("sma".into(), 2, s[0]);
+/// let mut ma = method("sma".try_into().unwrap(), 2, s[0]);
 ///
 /// s.apply(ma.as_mut());
 /// assert_eq!(s.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);
@@ -223,10 +229,11 @@ impl From<String> for RegularMethods {
 /// use yata::core::{Sequence, ValueType};
 /// use yata::methods::WMA;
 /// use yata::helpers::method;
+/// use std::convert::TryInto;
 ///
 /// let my_method = String::from("wma");
 /// let mut s:Sequence<f64> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
-/// let mut wma1 = method(my_method.into(), 4, s[0]);
+/// let mut wma1 = method(my_method.try_into().unwrap(), 4, s[0]);
 /// let mut wma2 = WMA::new(4, s[0]);
 ///
 /// let s1:Vec<ValueType> = s.iter().map(|&x| wma1.next(x)).collect();
