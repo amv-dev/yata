@@ -54,8 +54,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Default, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HighestLowestDelta {
-	highest: Highest,
-	lowest: Lowest,
+	// highest: Highest,
+	// lowest: Lowest,
+	highest: ValueType,
+	lowest: ValueType,
+	window: Window<ValueType>,
 }
 
 impl Method for HighestLowestDelta {
@@ -70,14 +73,39 @@ impl Method for HighestLowestDelta {
 		debug_assert!(length > 0, "HighestLowestDelta: length should be > 0");
 
 		Self {
-			highest: Highest::new(length, value),
-			lowest: Lowest::new(length, value),
+			window: Window::new(length, value),
+			highest: value,
+			lowest: value,
 		}
 	}
 
 	#[inline]
 	fn next(&mut self, value: ValueType) -> ValueType {
-		self.highest.next(value) - self.lowest.next(value)
+		let left_value = self.window.push(value);
+
+		let mut search = false;
+		if value >= self.highest {
+			self.highest = value;
+		} else if left_value == self.highest {
+			search = true;
+		}
+
+		if value <= self.lowest {
+			self.lowest = value;
+		} else if left_value == self.lowest {
+			search = true;
+		}
+
+		if search {
+			let (min, max) = self
+				.window
+				.iter()
+				.fold((value, value), |(min, max), v| (min.min(v), max.max(v)));
+			self.highest = max;
+			self.lowest = min;
+		}
+
+		self.highest - self.lowest
 	}
 }
 
@@ -149,11 +177,11 @@ impl Method for Highest {
 
 	#[inline]
 	fn next(&mut self, value: ValueType) -> ValueType {
-		self.window.push(value);
+		let left_value = self.window.push(value);
 
-		if value > self.value {
+		if value >= self.value {
 			self.value = value;
-		} else {
+		} else if left_value == self.value {
 			self.value = self.window.iter().fold(value, |a, b| a.max(b));
 		}
 
@@ -229,11 +257,11 @@ impl Method for Lowest {
 
 	#[inline]
 	fn next(&mut self, value: ValueType) -> ValueType {
-		self.window.push(value);
+		let left_value = self.window.push(value);
 
-		if value < self.value {
+		if value <= self.value {
 			self.value = value;
-		} else {
+		} else if left_value == self.value {
 			self.value = self.window.iter().fold(value, |a, b| a.min(b));
 		}
 
