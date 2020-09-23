@@ -85,8 +85,7 @@ mod tests {
 	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
 
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-8;
+	const SIGMA: ValueType = 5e-4;
 
 	#[test]
 	fn test_vwma_const() {

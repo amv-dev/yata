@@ -388,7 +388,7 @@ mod tests {
 	#[test]
 	#[rustfmt::skip]
 	fn test_pivot_low() {
-		let v: Vec<f64> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
+		let v: Vec<ValueType> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
 		let r: Vec<i8> =  vec![ 0,   0,   0,   1,   0,   0,   0,   0,   1,   0,   0,   1,   0,   0,   0,   0,   1 ];
 
 		let mut pivot = ReverseLowSignal::new(2, 2, v[0]);
@@ -417,7 +417,7 @@ mod tests {
 	#[test]
 	#[rustfmt::skip]
 	fn test_pivot_high() {
-		let v: Vec<f64> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
+		let v: Vec<ValueType> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
 		let r: Vec<i8> =  vec![ 0,   0,   0,   0,   0,   0,   1,   0,   0,   0,   0,   0,   0,   1,   0,   0,   0 ];
 
 		let mut pivot = ReverseHighSignal::new(2, 2, v[0]);

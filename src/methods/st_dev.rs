@@ -99,7 +99,7 @@ mod tests {
 	use crate::helpers::RandomCandles;
 
 	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-7;
+	const SIGMA: ValueType = 5e-4;
 
 	#[test]
 	fn test_st_dev_const() {

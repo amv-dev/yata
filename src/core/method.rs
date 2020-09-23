@@ -11,7 +11,7 @@ use std::fmt;
 /// use yata::methods::SMA;
 /// use yata::prelude::*;
 ///
-/// let s:Vec<f64> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
+/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
 /// let mut ma = SMA::new(2, s[0]);
 ///
 /// s.iter().enumerate().for_each(|(index, &value)| {
@@ -25,7 +25,7 @@ use std::fmt;
 /// use yata::methods::SMA;
 /// use yata::prelude::*;
 ///
-/// let s:Vec<f64> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
+/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
 /// let mut ma = SMA::new(2, s[0]);
 ///
 /// let result = ma.over(s.iter().copied());
@@ -39,7 +39,7 @@ use std::fmt;
 /// use yata::methods::SMA;
 /// use yata::prelude::*;
 ///
-/// let mut s:Sequence<f64> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
+/// let mut s: Sequence<_> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
 /// let mut ma = SMA::new(2, s[0]);
 ///
 /// s.apply(&mut ma);
@@ -96,7 +96,7 @@ pub trait Method: fmt::Debug {
 	/// use yata::methods::SMA;
 	/// use yata::prelude::*;
 	///
-	/// let s:Vec<f64> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
+	/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
 	/// let mut ma = SMA::new(5, s[0]);
 	///
 	/// let result = ma.over(s.iter().copied());
@@ -107,7 +107,7 @@ pub trait Method: fmt::Debug {
 	/// use yata::methods::SMA;
 	/// use yata::prelude::*;
 	///
-	/// let s:Vec<f64> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
+	/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
 	/// let mut ma = SMA::new(100, s[0]);
 	///
 	/// let result = ma.over(s.iter().copied());

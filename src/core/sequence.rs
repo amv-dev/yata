@@ -31,7 +31,7 @@ impl<T: Copy> Sequence<T> {
 	/// use yata::methods::SMA;
 	/// use yata::prelude::*;
 	///
-	/// let mut s:Sequence<f64> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
+	/// let mut s: Sequence<_> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
 	/// let mut ma = SMA::new(2, s[0]);
 	///
 	/// s.apply(&mut ma);
@@ -43,7 +43,7 @@ impl<T: Copy> Sequence<T> {
 	/// use yata::helpers::method;
 	/// use std::convert::TryInto;
 	///
-	/// let mut s:Sequence<f64> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
+	/// let mut s: Sequence<_> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
 	/// let mut ma = method("sma".try_into().unwrap(), 2, s[0]);
 	///
 	/// s.apply(ma.as_mut());

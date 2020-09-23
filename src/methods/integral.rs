@@ -126,7 +126,7 @@ mod tests {
 	use crate::helpers::RandomCandles;
 
 	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-8;
+	const SIGMA: ValueType = 1e-4;
 
 	#[test]
 	fn test_integral_const() {

@@ -87,8 +87,8 @@ pub struct ChandeMomentumOscillatorInstance {
 fn change(change: ValueType) -> (ValueType, ValueType) {
 	// let pos = if change > 0. { change } else { 0. };
 	// let neg = if change < 0. { change * -1. } else { 0. };
-	let pos = (change > 0.) as i8 as f64 * change;
-	let neg = (change < 0.) as i8 as f64 * -change;
+	let pos = (change > 0.) as i8 as ValueType * change;
+	let neg = (change < 0.) as i8 as ValueType * -change;
 
 	(pos, neg)
 }

@@ -88,7 +88,7 @@ mod tests {
 	use crate::helpers::RandomCandles;
 
 	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-8;
+	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_derivative_const() {

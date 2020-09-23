@@ -217,7 +217,7 @@ impl TryFrom<String> for RegularMethods {
 /// use yata::helpers::{method, RegularMethods};
 /// use std::convert::TryInto;
 ///
-/// let mut s:Sequence<f64> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
+/// let mut s:Sequence<_> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
 /// let mut ma = method("sma".try_into().unwrap(), 2, s[0]);
 ///
 /// s.apply(ma.as_mut());
@@ -232,7 +232,7 @@ impl TryFrom<String> for RegularMethods {
 /// use std::convert::TryInto;
 ///
 /// let my_method = String::from("wma");
-/// let mut s:Sequence<f64> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
+/// let mut s:Sequence<_> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
 /// let mut wma1 = method(my_method.try_into().unwrap(), 4, s[0]);
 /// let mut wma2 = WMA::new(4, s[0]);
 ///

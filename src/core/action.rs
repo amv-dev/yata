@@ -156,7 +156,7 @@ impl From<f64> for Action {
 
 		let normalized = v.max(-1.0).min(1.0);
 
-		let value = (normalized.abs() * (BOUND as ValueType)).round() as SignalType;
+		let value = (normalized.abs() * (BOUND as f64)).round() as SignalType;
 
 		if normalized.is_sign_negative() {
 			if value >= BOUND {
@@ -387,7 +387,13 @@ mod tests {
 	#[test]
 	fn test_action_from_float_histogram() {
 		let half_value = Action::Buy(1).ratio().unwrap() / 2.0;
+		let delta = if cfg!(feature = "value_type_f32") {
+			1e-7
+		} else {
+			1e-15
+		};
 
+		println!("{}", delta);
 		(0..=BOUND).for_each(|x| {
 			let xx = x as ValueType;
 			assert_eq!(Action::Buy(x), (half_value * 2. * xx).into());
@@ -397,16 +403,16 @@ mod tests {
 				let y = x - 1;
 				assert_eq!(
 					Action::Buy(y),
-					(half_value * 2. * xx - half_value - 1e-10).into()
+					(half_value * 2. * xx - half_value - delta).into()
 				);
 				assert_eq!(
 					Action::Sell(y),
-					(-(half_value * 2. * xx - half_value - 1e-10)).into()
+					(-(half_value * 2. * xx - half_value - delta)).into()
 				);
 			}
 		});
 
-		assert_eq!(Action::Buy(1), (half_value * 3. - 1e-10).into());
+		assert_eq!(Action::Buy(1), (half_value * 3. - delta).into());
 		assert_eq!(Action::Buy(2), (half_value * 3.).into());
 	}
 

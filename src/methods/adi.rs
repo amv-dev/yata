@@ -56,7 +56,7 @@ use serde::{Deserialize, Serialize};
 /// assert_ne!(windowless.next(candle), windowed.next(candle));
 ///
 /// let candle = candles.next().unwrap();
-/// assert!((windowless.next(candle)-windowed.next(candle)).abs() < 1e-10); // Must be equal here
+/// assert!((windowless.next(candle)-windowed.next(candle)).abs() < 1e-5); // Must be equal here
 /// ```
 ///
 /// # Perfomance

@@ -92,8 +92,10 @@ mod tests {
 	use crate::core::{Candle, ValueType};
 	use crate::helpers::RandomCandles;
 
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-5;
+	#[cfg(feature = "value_type_f32")]
+	const SIGMA: ValueType = 1e-4;
+	#[cfg(not(feature = "value_type_f32"))]
+	const SIGMA: ValueType = 1e-8;
 
 	// #[test]
 	// fn test_lin_reg1() {

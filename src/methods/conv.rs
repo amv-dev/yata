@@ -81,7 +81,7 @@ mod tests {
 	use crate::helpers::RandomCandles;
 
 	// #[allow(dead_code)]
-	const SIGMA: ValueType = 1e-8;
+	const SIGMA: ValueType = 1e-6;
 
 	fn get_weights(length: PeriodType) -> Vec<ValueType> {
 		(0..length)

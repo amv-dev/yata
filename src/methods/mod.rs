@@ -93,7 +93,11 @@ mod tests {
 		}
 	}
 
+	#[cfg(feature = "value_type_f32")]
+	const SIGMA: ValueType = 1e-2;
+	#[cfg(not(feature = "value_type_f32"))]
 	const SIGMA: ValueType = 1e-7;
+
 	pub(super) fn test_const_float<P, I: Copy>(
 		method: &mut dyn Method<Params = P, Input = I, Output = ValueType>,
 		input: I,
