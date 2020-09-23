@@ -77,10 +77,10 @@ pub struct ReverseReversalStrategyInstance<T: OHLC> {
 impl<T: OHLC> IndicatorInstance<T> for ReverseReversalStrategyInstance<T> {
 	type Config = ReverseReversalStrategy;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
+
 	fn next(&mut self, candle: T) -> IndicatorResult {
 		let (high, low) = (candle.high(), candle.low());
 		let past_candle = self.window.push(candle);

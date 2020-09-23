@@ -40,11 +40,13 @@ signalZone = 0.3 #сигналом будет считать показания 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Aroon {
 	pub signal_zone: ValueType,
-	pub n:           PeriodType,
+	pub n: PeriodType,
 }
 
 impl IndicatorConfig for Aroon {
-	fn validate(&self) -> bool { true }
+	fn validate(&self) -> bool {
+		true
+	}
 
 	fn set(&mut self, name: &str, value: String) {
 		match name {
@@ -62,7 +64,9 @@ impl IndicatorConfig for Aroon {
 		};
 	}
 
-	fn size(&self) -> (u8, u8) { (3, 3) }
+	fn size(&self) -> (u8, u8) {
+		(3, 3)
+	}
 }
 
 impl<T: OHLC> IndicatorInitializer<T> for Aroon {
@@ -93,7 +97,7 @@ impl Default for Aroon {
 	fn default() -> Self {
 		Self {
 			signal_zone: 0.3,
-			n:           14,
+			n: 14,
 		}
 	}
 }
@@ -102,25 +106,28 @@ impl Default for Aroon {
 pub struct AroonInstance<T: OHLC> {
 	cfg: Aroon,
 
-	i:         PeriodType,
+	i: PeriodType,
 	max_index: PeriodType,
 	max_value: ValueType,
 	min_index: PeriodType,
 	min_value: ValueType,
-	candle:    T,
-	index:     PeriodType,
-	n_1:       PeriodType,
-	invert_n:  ValueType,
-	window:    Window<T>,
+	candle: T,
+	index: PeriodType,
+	n_1: PeriodType,
+	invert_n: ValueType,
+	window: Window<T>,
 }
 
 impl<T: OHLC> IndicatorInstance<T> for AroonInstance<T> {
 	type Config = Aroon;
 
-	fn name(&self) -> &str { "Aroon" }
+	fn name(&self) -> &str {
+		"Aroon"
+	}
 
-	#[inline]
-	fn config(&self) -> &Self::Config { &self.cfg }
+	fn config(&self) -> &Self::Config {
+		&self.cfg
+	}
 
 	#[allow(unreachable_code, unused_variables)]
 	fn next(&mut self, candle: T) -> IndicatorResult {

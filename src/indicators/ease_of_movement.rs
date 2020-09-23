@@ -82,7 +82,6 @@ pub struct EaseOfMovementInstance<T: OHLCV> {
 impl<T: OHLCV> IndicatorInstance<T> for EaseOfMovementInstance<T> {
 	type Config = EaseOfMovement;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

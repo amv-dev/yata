@@ -57,7 +57,6 @@ impl Method for EMA {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	#[inline]
 	fn new(length: Self::Params, value: Self::Input) -> Self {
 		debug_assert!(length > 0, "EMA: length should be > 0");
 

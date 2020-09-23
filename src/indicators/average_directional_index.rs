@@ -151,7 +151,6 @@ impl<T: OHLC> AverageDirectionalIndexInstance<T> {
 impl<T: OHLC> IndicatorInstance<T> for AverageDirectionalIndexInstance<T> {
 	type Config = AverageDirectionalIndex;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

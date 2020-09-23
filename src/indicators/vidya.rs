@@ -90,7 +90,6 @@ pub struct VidyaInstance {
 impl<T: OHLC> IndicatorInstance<T> for VidyaInstance {
 	type Config = Vidya;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

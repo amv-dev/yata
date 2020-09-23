@@ -107,7 +107,6 @@ fn tfunc<T: OHLCV>(candle: &T, last_candle: &T) -> (ValueType, ValueType) {
 impl<T: OHLCV> IndicatorInstance<T> for MoneyFlowIndexInstance<T> {
 	type Config = MoneyFlowIndex;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

@@ -13,10 +13,10 @@ use crate::methods::{Highest, Lowest, RMA};
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChandeKrollStop {
-	pub p:       PeriodType,
-	pub x:       ValueType,
-	pub q:       PeriodType,
-	pub source:  Source,
+	pub p: PeriodType,
+	pub x: ValueType,
+	pub q: PeriodType,
+	pub source: Source,
 	pub version: u8, // Version, // 1, 2 or 3
 }
 
@@ -27,7 +27,9 @@ impl ChandeKrollStop {
 }
 
 impl IndicatorConfig for ChandeKrollStop {
-	fn validate(&self) -> bool { self.x >= 0.0 }
+	fn validate(&self) -> bool {
+		self.x >= 0.0
+	}
 
 	fn set(&mut self, name: &str, value: String) {
 		match name {
@@ -48,7 +50,9 @@ impl IndicatorConfig for ChandeKrollStop {
 		};
 	}
 
-	fn size(&self) -> (u8, u8) { (2, 1) }
+	fn size(&self) -> (u8, u8) {
+		(2, 1)
+	}
 }
 
 impl<T: OHLC> IndicatorInitializer<T> for ChandeKrollStop {
@@ -74,10 +78,10 @@ impl<T: OHLC> IndicatorInitializer<T> for ChandeKrollStop {
 impl Default for ChandeKrollStop {
 	fn default() -> Self {
 		Self {
-			p:       10,
-			x:       1.0,
-			q:       9,
-			source:  Source::Close,
+			p: 10,
+			x: 1.0,
+			q: 9,
+			source: Source::Close,
 			version: 1,
 		}
 	}
@@ -87,21 +91,24 @@ impl Default for ChandeKrollStop {
 pub struct ChandeKrollStopInstance<T: OHLC> {
 	cfg: ChandeKrollStop,
 
-	rma:         RMA,
-	highest1:    Highest,
-	lowest1:     Lowest,
-	highest2:    Highest,
-	lowest2:     Lowest,
+	rma: RMA,
+	highest1: Highest,
+	lowest1: Lowest,
+	highest2: Highest,
+	lowest2: Lowest,
 	prev_candle: T,
 }
 
 impl<T: OHLC> IndicatorInstance<T> for ChandeKrollStopInstance<T> {
 	type Config = ChandeKrollStop;
 
-	fn name(&self) -> &str { "ChandeKrollStop" }
+	fn name(&self) -> &str {
+		"ChandeKrollStop"
+	}
 
-	#[inline]
-	fn config(&self) -> &Self::Config { &self.cfg }
+	fn config(&self) -> &Self::Config {
+		&self.cfg
+	}
 
 	#[allow(unreachable_code, unused_variables)]
 	fn next(&mut self, candle: T) -> IndicatorResult {

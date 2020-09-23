@@ -89,7 +89,6 @@ pub struct KeltnerChannelsInstance<T: OHLC> {
 impl<T: OHLC> IndicatorInstance<T> for KeltnerChannelsInstance<T> {
 	type Config = KeltnerChannels;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

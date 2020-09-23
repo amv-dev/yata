@@ -134,7 +134,6 @@ pub struct AwesomeOscillatorInstance {
 impl<T: OHLC> IndicatorInstance<T> for AwesomeOscillatorInstance {
 	type Config = AwesomeOscillator;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

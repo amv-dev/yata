@@ -81,7 +81,6 @@ pub struct ChaikinMoneyFlowInstance<T: OHLCV> {
 impl<T: OHLCV> IndicatorInstance<T> for ChaikinMoneyFlowInstance<T> {
 	type Config = ChaikinMoneyFlow;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

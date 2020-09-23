@@ -110,7 +110,6 @@ pub struct WoodiesCCIInstance {
 impl<T: OHLC> IndicatorInstance<T> for WoodiesCCIInstance {
 	type Config = WoodiesCCI;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

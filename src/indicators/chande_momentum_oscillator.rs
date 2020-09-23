@@ -96,7 +96,6 @@ fn change(change: ValueType) -> (ValueType, ValueType) {
 impl<T: OHLC> IndicatorInstance<T> for ChandeMomentumOscillatorInstance {
 	type Config = ChandeMomentumOscillator;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

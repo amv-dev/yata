@@ -96,7 +96,6 @@ pub struct KlingerVolumeOscillatorInstance {
 impl<T: OHLCV> IndicatorInstance<T> for KlingerVolumeOscillatorInstance {
 	type Config = KlingerVolumeOscillator;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

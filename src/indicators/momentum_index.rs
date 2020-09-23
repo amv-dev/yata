@@ -78,7 +78,6 @@ pub struct MomentumIndexInstance {
 impl<T: OHLC> IndicatorInstance<T> for MomentumIndexInstance {
 	type Config = MomentumIndex;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

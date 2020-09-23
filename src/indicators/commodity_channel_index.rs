@@ -110,7 +110,6 @@ impl CommodityChannelIndexInstance {
 impl<T: OHLC> IndicatorInstance<T> for CommodityChannelIndexInstance {
 	type Config = CommodityChannelIndex;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

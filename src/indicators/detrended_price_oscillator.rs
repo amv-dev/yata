@@ -29,11 +29,13 @@ pub struct DetrendedPriceOscillator {
 	pub method1: RegularMethods,
 	pub method2: RegularMethods,
 	pub method3: RegularMethods,
-	pub source:  Source,
+	pub source: Source,
 }
 
 impl IndicatorConfig for DetrendedPriceOscillator {
-	fn validate(&self) -> bool { self.period1 > 1 && self.period2 >= 1 && self.period3 >= 1 }
+	fn validate(&self) -> bool {
+		self.period1 > 1 && self.period2 >= 1 && self.period3 >= 1
+	}
 
 	fn set(&mut self, name: &str, value: String) {
 		match name {
@@ -56,7 +58,9 @@ impl IndicatorConfig for DetrendedPriceOscillator {
 		};
 	}
 
-	fn size(&self) -> (u8, u8) { (2, 2) }
+	fn size(&self) -> (u8, u8) {
+		(2, 2)
+	}
 }
 
 impl<T: OHLC> IndicatorInitializer<T> for DetrendedPriceOscillator {
@@ -90,7 +94,7 @@ impl Default for DetrendedPriceOscillator {
 			method1: RegularMethods::SMA,
 			method2: RegularMethods::SMA,
 			method3: RegularMethods::SMA,
-			source:  Source::Close,
+			source: Source::Close,
 		}
 	}
 }
@@ -99,10 +103,10 @@ impl Default for DetrendedPriceOscillator {
 pub struct DetrendedPriceOscillatorInstance {
 	cfg: DetrendedPriceOscillator,
 
-	sma:         RegularMethod,
-	window:      Window<ValueType>,
-	ma2:         RegularMethod,
-	ma3:         RegularMethod,
+	sma: RegularMethod,
+	window: Window<ValueType>,
+	ma2: RegularMethod,
+	ma3: RegularMethod,
 	cross_over1: Cross,
 	cross_over2: Cross,
 }
@@ -110,10 +114,13 @@ pub struct DetrendedPriceOscillatorInstance {
 impl<T: OHLC> IndicatorInstance<T> for DetrendedPriceOscillatorInstance {
 	type Config = DetrendedPriceOscillator;
 
-	fn name(&self) -> &str { "DetrendedPriceOscillator" }
+	fn name(&self) -> &str {
+		"DetrendedPriceOscillator"
+	}
 
-	#[inline]
-	fn config(&self) -> &Self::Config { &self.cfg }
+	fn config(&self) -> &Self::Config {
+		&self.cfg
+	}
 
 	#[allow(unreachable_code, unused_variables)]
 	fn next(&mut self, candle: T) -> IndicatorResult {

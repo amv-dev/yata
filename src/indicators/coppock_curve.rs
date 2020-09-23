@@ -109,7 +109,6 @@ pub struct CoppockCurveInstance {
 impl<T: OHLC> IndicatorInstance<T> for CoppockCurveInstance {
 	type Config = CoppockCurve;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

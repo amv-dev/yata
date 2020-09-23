@@ -87,7 +87,6 @@ pub type ParabolicStopAndReverse = ParabolicSAR;
 impl<T: OHLC> IndicatorInstance<T> for ParabolicSARInstance<T> {
 	type Config = ParabolicSAR;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

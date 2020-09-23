@@ -108,7 +108,6 @@ fn bound_value(value: ValueType) -> ValueType {
 impl<T: OHLC> IndicatorInstance<T> for FisherTransformInstance {
 	type Config = FisherTransform;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

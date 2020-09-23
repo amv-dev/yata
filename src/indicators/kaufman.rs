@@ -106,7 +106,6 @@ pub struct KaufmanInstance {
 impl<T: OHLC> IndicatorInstance<T> for KaufmanInstance {
 	type Config = Kaufman;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

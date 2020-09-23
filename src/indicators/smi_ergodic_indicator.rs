@@ -95,7 +95,6 @@ pub struct SMIErgodicIndicatorInstance {
 impl<T: OHLC> IndicatorInstance<T> for SMIErgodicIndicatorInstance {
 	type Config = SMIErgodicIndicator;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}

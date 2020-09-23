@@ -90,7 +90,6 @@ pub struct ChaikinOscillatorInstance<T: OHLCV> {
 impl<T: OHLCV> IndicatorInstance<T> for ChaikinOscillatorInstance<T> {
 	type Config = ChaikinOscillator;
 
-	#[inline]
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
