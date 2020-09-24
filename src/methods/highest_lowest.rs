@@ -47,10 +47,12 @@ use serde::{Deserialize, Serialize};
 ///
 /// # See also
 ///
-/// [Highest], [Lowest]
+/// [`Highest`], [`Lowest`], [`HighestIndex`], [`LowestIndex`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
+/// [`HighestIndex`]: crate::methods::HighestIndex
+/// [`LowestIndex`]: crate::methods::LowestIndex
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HighestLowestDelta {
@@ -150,10 +152,12 @@ impl Method for HighestLowestDelta {
 ///
 /// # See also
 ///
-/// [HighestLowestDelta], [Lowest]
+/// [`HighestLowestDelta`], [`Lowest`], [`HighestIndex`], [`LowestIndex`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
+/// [`HighestIndex`]: crate::methods::HighestIndex
+/// [`LowestIndex`]: crate::methods::LowestIndex
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Highest {
@@ -230,10 +234,12 @@ impl Method for Highest {
 ///
 /// # See also
 ///
-/// [HighestLowestDelta], [Highest]
+/// [`HighestLowestDelta`], [`Highest`], [`HighestIndex`], [`LowestIndex`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
+/// [`HighestIndex`]: crate::methods::HighestIndex
+/// [`LowestIndex`]: crate::methods::LowestIndex
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Lowest {
