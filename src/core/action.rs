@@ -1,11 +1,11 @@
-use crate::core::ValueType;
+use crate::core::{PeriodType, ValueType};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::ops::{Neg, Sub};
 
-type SignalType = u8;
-const BOUND: SignalType = 255;
+type SignalType = PeriodType;
+const BOUND: SignalType = SignalType::MAX;
 
 /// Action is basic type of Indicator's signals
 ///
