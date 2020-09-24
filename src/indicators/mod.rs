@@ -3,8 +3,8 @@ pub mod example;
 
 // // ---------------------------------------------
 
-// mod aroon;
-// pub use aroon::*;
+mod aroon;
+pub use aroon::*;
 
 mod average_directional_index;
 pub use average_directional_index::AverageDirectionalIndex;
