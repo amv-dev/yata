@@ -74,7 +74,9 @@ pub use reverse::*;
 mod highest_lowest;
 pub use highest_lowest::*;
 mod adi;
+mod highest_lowest_index;
 pub use adi::*;
+pub use highest_lowest_index::*;
 mod past;
 pub use past::*;
 

@@ -717,8 +717,49 @@ fn bench_highest_lowest_delta_w100(b: &mut test::Bencher) {
 	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
-	for _ in 0..100 {
-		method.next(candles.next().unwrap().close);
+
+// HighestIndex -----------------------------------------------------------------------------------
+#[bench]
+fn bench_highest_index_w10(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = Highest::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
 	}
-	b.iter(|| method.next(candles.next().unwrap().close))
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+#[bench]
+fn bench_highest_index_w100(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = Highest::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+// LowestIndex -----------------------------------------------------------------------------------
+#[bench]
+fn bench_lowest_index_w10(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = Lowest::new(10, candles[0]);
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+#[bench]
+fn bench_lowest_index_w100(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = Lowest::new(100, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
+	b.iter(|| method.next(iter.next().unwrap()))
 }
