@@ -83,13 +83,13 @@ impl Method for HighestIndex {
 
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
-		let left_value = self.window.push(value);
+		self.window.push(value);
 		self.index += 1;
 
 		if value >= self.value {
 			self.value = value;
 			self.index = 0;
-		} else if left_value == self.value || self.index == self.window.len() {
+		} else if self.index == self.window.len() {
 			let (index, value) = self.window.iter().enumerate().fold(
 				(self.window.len() as usize - 1, value),
 				|a, b| {
@@ -188,13 +188,13 @@ impl Method for LowestIndex {
 
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
-		let left_value = self.window.push(value);
+		self.window.push(value);
 		self.index += 1;
 
 		if value <= self.value {
 			self.value = value;
 			self.index = 0;
-		} else if left_value == self.value || self.index == self.window.len() {
+		} else if self.index == self.window.len() {
 			let (index, value) = self.window.iter().enumerate().fold(
 				(self.window.len() as usize - 1, value),
 				|a, b| {
