@@ -709,8 +709,14 @@ fn bench_highest_lowest_delta_w10(b: &mut test::Bencher) {
 
 #[bench]
 fn bench_highest_lowest_delta_w100(b: &mut test::Bencher) {
-	let mut candles = RandomCandles::new();
-	let mut method = HighestLowestDelta::new(100, candles.first().close);
+	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = HighestLowestDelta::new(10, candles[0]);
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
+	b.iter(|| method.next(iter.next().unwrap()))
+}
 	for _ in 0..100 {
 		method.next(candles.next().unwrap().close);
 	}
