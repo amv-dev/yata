@@ -51,7 +51,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HighestIndex {
 	index: PeriodType,
@@ -153,7 +153,7 @@ impl Method for HighestIndex {
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct LowestIndex {
 	index: PeriodType,

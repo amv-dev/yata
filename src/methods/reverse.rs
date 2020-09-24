@@ -49,7 +49,7 @@ use serde::{Deserialize, Serialize};
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
 /// [`Action`]: crate::core::Action
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ReverseSignal {
 	high: ReverseHighSignal,
@@ -146,7 +146,7 @@ impl Method for ReverseSignal {
 /// [`PeriodType`]: crate::core::PeriodType
 /// [`Action`]: crate::core::Action
 ///
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ReverseHighSignal {
 	left: PeriodType,
@@ -276,7 +276,7 @@ impl Method for ReverseHighSignal {
 /// [`PeriodType`]: crate::core::PeriodType
 /// [`Action`]: crate::core::Action
 ///
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ReverseLowSignal {
 	left: PeriodType,
