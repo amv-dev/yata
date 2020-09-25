@@ -1,10 +1,27 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, PeriodType, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{PeriodType, ValueType, Window, OHLC};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 
+/// [Average Directional Index](https://www.investopedia.com/terms/a/adx.asp)
+///
+/// ## Links:
+///
+/// * https://school.stockcharts.com/doku.php?id=technical_indicators:average_directional_index_adx
+/// * https://www.investopedia.com/terms/a/adx.asp
+/// * https://primexbt.com/blog/average-directional-index/
+///
+/// # 3 values
+/// * ADX
+/// * +DI
+/// * -DI
+///
+/// # 2 signals
+/// * `BUY_ALL` when ADX over `zone` and +DI > -DI, `SELL_ALL` when ADX over `zone` and -DI > +DI. Otherwise - no signal.
+/// * Digital signal by difference between +DI and -DI
+///
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AverageDirectionalIndex {
@@ -25,6 +42,8 @@ impl IndicatorConfig for AverageDirectionalIndex {
 			&& self.zone >= 0.
 			&& self.zone <= 1.
 			&& self.period1 >= 1
+			&& self.period1 < self.di_length
+			&& self.period1 < self.adx_smoothing
 	}
 
 	fn set(&mut self, name: &str, value: String) {
@@ -50,7 +69,7 @@ impl IndicatorConfig for AverageDirectionalIndex {
 	}
 
 	fn size(&self) -> (u8, u8) {
-		(3, 1)
+		(3, 2)
 	}
 }
 
@@ -64,11 +83,10 @@ impl<T: OHLC> IndicatorInitializer<T> for AverageDirectionalIndex {
 		let tr = candle.tr(&candle);
 
 		Self::Instance {
-			prev_candle: candle,
 			window: Window::new(cfg.period1, candle),
 			tr_ma: method(cfg.method1, cfg.di_length, tr),
-			plus_dm: method(cfg.method1, cfg.di_length, 0.0),
-			minus_dm: method(cfg.method1, cfg.di_length, 0.0),
+			plus_di: method(cfg.method1, cfg.di_length, 0.0),
+			minus_di: method(cfg.method1, cfg.di_length, 0.0),
 			ma2: method(cfg.method2, cfg.adx_smoothing, 0.0),
 			cfg,
 		}
@@ -92,59 +110,41 @@ impl Default for AverageDirectionalIndex {
 pub struct AverageDirectionalIndexInstance<T: OHLC> {
 	cfg: AverageDirectionalIndex,
 
-	prev_candle: T,
 	window: Window<T>,
 	tr_ma: RegularMethod,
-	plus_dm: RegularMethod,
-	minus_dm: RegularMethod,
+	plus_di: RegularMethod,
+	minus_di: RegularMethod,
 	ma2: RegularMethod,
 }
 
 impl<T: OHLC> AverageDirectionalIndexInstance<T> {
 	fn dir_mov(&mut self, candle: T) -> (ValueType, ValueType) {
-		let tr_ma = &mut self.tr_ma;
-		let plus_dm = &mut self.plus_dm;
-		let minus_dm = &mut self.minus_dm;
-
-		let true_range = tr_ma.next(candle.tr(&self.prev_candle));
-		let left_candle = self.window.push(candle);
-
-		// prevIndex = zeroIndex(index - int(a.Period1))
-		// prevCandle = a.candles[prevIndex]
+		let prev_candle = self.window.push(candle);
+		let true_range = self.tr_ma.next(candle.tr(&prev_candle));
 
 		let (du, dd) = (
-			candle.high() - left_candle.high(),
-			left_candle.low() - candle.low(),
+			candle.high() - prev_candle.high(),
+			prev_candle.low() - candle.low(),
 		);
 
-		let plus_dm_value = if du > dd && du > 0. {
-			plus_dm.next(du)
-		} else {
-			plus_dm.next(0.)
-		};
+		let plus_dm = du * (du > dd && du > 0.) as u8 as ValueType; // +DM
+		let minus_dm = dd * (dd > du && dd > 0.) as u8 as ValueType; // -DM
 
-		let minus_dm_value = if dd > du && dd > 0. {
-			minus_dm.next(dd)
-		} else {
-			minus_dm.next(0.)
-		};
+		let plus_di_value = self.plus_di.next(plus_dm); // +DI
+		let minus_di_value = self.minus_di.next(minus_dm); // -DI
 
-		self.prev_candle = candle;
-
-		(plus_dm_value / true_range, minus_dm_value / true_range)
+		(plus_di_value / true_range, minus_di_value / true_range)
 	}
 
 	fn adx(&mut self, plus: ValueType, minus: ValueType) -> ValueType {
 		let s = plus + minus;
 
-		let ma2 = &mut self.ma2;
-
 		if s == 0. {
-			return ma2.next(0.);
+			return self.ma2.next(0.);
 		}
 
 		let t = (plus - minus).abs() / s;
-		ma2.next(t)
+		self.ma2.next(t)
 	}
 }
 
@@ -159,22 +159,11 @@ impl<T: OHLC> IndicatorInstance<T> for AverageDirectionalIndexInstance<T> {
 		let (plus, minus) = self.dir_mov(candle);
 		let adx = self.adx(plus, minus);
 
-		// let signal: i8 = if adx > self.cfg.zone {
-		// 	if plus > minus {
-		// 		1
-		// 	} else if plus < minus {
-		// 		-1
-		// 	} else {
-		// 		0
-		// 	}
-		// } else {
-		// 	0
-		// };
-
-		let signal = (adx > self.cfg.zone) as i8 * ((plus > minus) as i8 - (plus < minus) as i8);
+		let signal1 = (adx > self.cfg.zone) as i8 * ((plus > minus) as i8 - (plus < minus) as i8);
+		let signal2 = plus - minus;
 
 		let values = [adx, plus, minus];
-		let signals = [Action::from(signal)];
+		let signals = [signal1.into(), signal2.into()];
 
 		IndicatorResult::new(&values, &signals)
 	}
