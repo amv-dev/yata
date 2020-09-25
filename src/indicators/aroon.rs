@@ -99,6 +99,7 @@ impl Default for Aroon {
 	}
 }
 
+/// Aroon state structure
 #[derive(Debug)]
 pub struct AroonInstance<T: OHLC> {
 	cfg: Aroon,

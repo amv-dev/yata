@@ -4,26 +4,24 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{Action, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::methods::{Highest, Lowest, RMA};
+use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::methods::{Highest, Lowest};
 
-//ChandeKrollStop p=10, x=1.0, q=9, version=1 {1,2,3}
-//Индикатор не проверен и может иметь ошибки (Python-версия нерабочая)
-// TODO: исправить
-
-#[derive(Debug, Clone)]
+// ChandeKrollStop p=10, x=1.0, q=9
+/// [Chande Kroll Stop](https://patternswizard.com/chande-kroll-stop-indicator/)
+#[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChandeKrollStop {
+	/// ATR period length
 	pub p: PeriodType,
+	/// ATR method
+	pub method: RegularMethods,
+	/// ATR multiplier
 	pub x: ValueType,
+	/// multiplied highest/lowest period length
 	pub q: PeriodType,
+	/// price source
 	pub source: Source,
-	pub version: u8, // Version, // 1, 2 or 3
-}
-
-impl ChandeKrollStop {
-	pub const VERSION1: u8 = 1;
-	pub const VERSION2: u8 = 2;
-	pub const VERSION3: u8 = 3;
 }
 
 impl IndicatorConfig for ChandeKrollStop {
@@ -37,7 +35,6 @@ impl IndicatorConfig for ChandeKrollStop {
 			"x" => self.x = value.parse().unwrap(),
 			"q" => self.q = value.parse().unwrap(),
 			"source" => self.source = value.parse().unwrap(),
-			"version" => self.version = value.parse().unwrap(),
 
 			_ => {
 				dbg!(format!(
@@ -51,7 +48,7 @@ impl IndicatorConfig for ChandeKrollStop {
 	}
 
 	fn size(&self) -> (u8, u8) {
-		(2, 1)
+		(3, 1)
 	}
 }
 
@@ -64,11 +61,14 @@ impl<T: OHLC> IndicatorInitializer<T> for ChandeKrollStop {
 	{
 		let cfg = self;
 		Self::Instance {
-			rma: RMA::new(cfg.p, candle.high() - candle.low()),
+			ma: method(cfg.method, cfg.p, candle.tr(&candle)),
+
 			highest1: Highest::new(cfg.p, candle.high()),
 			lowest1: Lowest::new(cfg.p, candle.low()),
+
 			highest2: Highest::new(cfg.q, candle.high()),
 			lowest2: Lowest::new(cfg.q, candle.low()),
+
 			prev_candle: candle,
 			cfg,
 		}
@@ -79,19 +79,20 @@ impl Default for ChandeKrollStop {
 	fn default() -> Self {
 		Self {
 			p: 10,
+			method: RegularMethods::SMA,
 			x: 1.0,
 			q: 9,
 			source: Source::Close,
-			version: 1,
 		}
 	}
 }
 
+/// Chande Kroll Stop state structure
 #[derive(Debug)]
 pub struct ChandeKrollStopInstance<T: OHLC> {
 	cfg: ChandeKrollStop,
 
-	rma: RMA,
+	ma: RegularMethod,
 	highest1: Highest,
 	lowest1: Lowest,
 	highest2: Highest,
@@ -102,7 +103,7 @@ pub struct ChandeKrollStopInstance<T: OHLC> {
 impl<T: OHLC> IndicatorInstance<T> for ChandeKrollStopInstance<T> {
 	type Config = ChandeKrollStop;
 
-	fn name(&self) -> &str {
+	fn name(&self) -> &'static str {
 		"ChandeKrollStop"
 	}
 
@@ -112,52 +113,26 @@ impl<T: OHLC> IndicatorInstance<T> for ChandeKrollStopInstance<T> {
 
 	#[allow(unreachable_code, unused_variables)]
 	fn next(&mut self, candle: T) -> IndicatorResult {
-		todo!("Проверить корректность реализации.");
-
 		let tr = candle.tr(&self.prev_candle);
 		self.prev_candle = candle;
 
-		let atr = self.rma.next(tr);
+		let atr = self.ma.next(tr);
 
-		let highest = self.highest1;
-		let lowest = self.lowest1;
+		let highest = &mut self.highest1;
+		let lowest = &mut self.lowest1;
 
-		let first_high_stop;
-		let first_low_stop;
+		let phs = highest.next(candle.high()) - atr * self.cfg.x;
+		let pls = lowest.next(candle.low()) + atr * self.cfg.x;
 
-		match self.cfg.version {
-			Self::Config::VERSION1 => {
-				first_high_stop = highest.next(candle.high()) - atr * self.cfg.x;
-				first_low_stop = lowest.next(candle.low()) + atr * self.cfg.x;
-			}
-			Self::Config::VERSION2 => {
-				first_high_stop = highest.next(candle.low()) - atr * self.cfg.x;
-				first_low_stop = lowest.next(candle.high()) + atr * self.cfg.x;
-			}
-			Self::Config::VERSION3 => {
-				first_low_stop = highest.next(candle.low()) - atr * self.cfg.x;
-				first_high_stop = lowest.next(candle.high()) + atr * self.cfg.x;
-			}
-			_ => {
-				first_high_stop = highest.next(candle.high()) - atr * self.cfg.x;
-				first_low_stop = lowest.next(candle.low()) + atr * self.cfg.x;
-			}
-		};
-
-		let stop_short = self.highest2.next(first_high_stop);
-		let stop_long = self.lowest2.next(first_low_stop);
+		let stop_short = self.highest2.next(phs);
+		let stop_long = self.lowest2.next(pls);
 
 		let src = candle.source(self.cfg.source);
-		let mut s = 0;
 
-		if src > stop_long {
-			s += 1;
-		}
+		let mid = (stop_short + stop_long) * 0.5;
+		let size = mid - stop_long;
+		let value = (src - mid) / size;
 
-		if src < stop_short {
-			s -= 1;
-		}
-
-		IndicatorResult::new(&[stop_long, stop_short], &[Action::from(s)])
+		IndicatorResult::new(&[stop_long, src, stop_short], &[Action::from(value)])
 	}
 }
