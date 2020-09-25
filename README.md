@@ -24,7 +24,7 @@ It also provides you an interface to create your own indicators.
 - [Integral](https://docs.rs/yata/latest/yata/methods/struct.Integral.html) (sum)
 - [Linear regression moving average](https://docs.rs/yata/latest/yata/methods/struct.LinReg.html)
 - [Momentum](https://docs.rs/yata/latest/yata/methods/struct.Momentum.html)
-- [Pivot points](https://docs.rs/yata/latest/yata/methods/struct.PivotSignal.html)
+- [Reverse points](https://docs.rs/yata/latest/yata/methods/struct.ReverseSignal.html)
 - [Simple moving average](https://docs.rs/yata/latest/yata/methods/struct.SMA.html)
 - [Weighted moving average](https://docs.rs/yata/latest/yata/methods/struct.WMA.html)
 - [Volume weighted moving average](https://docs.rs/yata/latest/yata/methods/struct.VWMA.html)
