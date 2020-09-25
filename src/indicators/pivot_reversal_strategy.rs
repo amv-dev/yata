@@ -7,12 +7,12 @@ use crate::methods::{ReverseHighSignal, ReverseLowSignal};
 
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct ReverseReversalStrategy {
+pub struct PivotReversalStrategy {
 	pub left: PeriodType,
 	pub right: PeriodType,
 }
 
-impl IndicatorConfig for ReverseReversalStrategy {
+impl IndicatorConfig for PivotReversalStrategy {
 	fn validate(&self) -> bool {
 		true
 	}
@@ -38,8 +38,8 @@ impl IndicatorConfig for ReverseReversalStrategy {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for ReverseReversalStrategy {
-	type Instance = ReverseReversalStrategyInstance<T>;
+impl<T: OHLC> IndicatorInitializer<T> for PivotReversalStrategy {
+	type Instance = PivotReversalStrategyInstance<T>;
 
 	fn init(self, candle: T) -> Self::Instance
 	where
@@ -57,15 +57,15 @@ impl<T: OHLC> IndicatorInitializer<T> for ReverseReversalStrategy {
 	}
 }
 
-impl Default for ReverseReversalStrategy {
+impl Default for PivotReversalStrategy {
 	fn default() -> Self {
 		Self { left: 4, right: 2 }
 	}
 }
 
 #[derive(Debug)]
-pub struct ReverseReversalStrategyInstance<T: OHLC> {
-	cfg: ReverseReversalStrategy,
+pub struct PivotReversalStrategyInstance<T: OHLC> {
+	cfg: PivotReversalStrategy,
 
 	ph: ReverseHighSignal,
 	pl: ReverseLowSignal,
@@ -74,8 +74,8 @@ pub struct ReverseReversalStrategyInstance<T: OHLC> {
 	lprice: ValueType,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for ReverseReversalStrategyInstance<T> {
-	type Config = ReverseReversalStrategy;
+impl<T: OHLC> IndicatorInstance<T> for PivotReversalStrategyInstance<T> {
+	type Config = PivotReversalStrategy;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
