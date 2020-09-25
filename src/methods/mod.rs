@@ -37,6 +37,8 @@ mod wma;
 pub use wma::*;
 mod ema;
 pub use ema::*;
+mod wsma;
+pub use wsma::*;
 mod rma;
 pub use rma::*;
 mod smm;

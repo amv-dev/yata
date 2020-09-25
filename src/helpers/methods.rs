@@ -59,6 +59,10 @@ pub enum RegularMethods {
 	#[cfg_attr(feature = "serde", serde(rename = "tema"))]
 	TEMA,
 
+	/// [Wilder's smoothing average](crate::methods::WSMA)
+	#[cfg_attr(feature = "serde", serde(rename = "wsma"))]
+	WSMA,
+
 	/// [Simle Moving Median](crate::methods::SMM)
 	#[cfg_attr(feature = "serde", serde(rename = "smm"))]
 	SMM,
@@ -138,6 +142,7 @@ impl FromStr for RegularMethods {
 			"dema" => Ok(Self::DEMA),
 			"tma" => Ok(Self::TMA),
 			"tema" => Ok(Self::TEMA),
+			"wsma" => Ok(Self::WSMA),
 			"smm" => Ok(Self::SMM),
 			"swma" => Ok(Self::SWMA),
 			"trima" => Ok(Self::TRIMA),
@@ -187,6 +192,7 @@ impl TryFrom<String> for RegularMethods {
 /// * `dema` - [another double exponential moving average](DEMA)
 /// * `tma` - [triple exponential moving average](TMA)
 /// * `tema` - [another triple exponential moving average](TEMA)
+/// * `wsma` - [Wilder's smoothing average](WSMA)
 /// * `smm` - [simple moving median](SMM)
 /// * `swma` - [symmetrically weighted moving average](SWMA)
 /// * `lin_reg` - [linear regression moving average](LinReg)
@@ -260,6 +266,7 @@ pub fn method(
 		RegularMethods::DEMA => Box::new(DEMA::new(length, initial_value)),
 		RegularMethods::TMA => Box::new(TMA::new(length, initial_value)),
 		RegularMethods::TEMA => Box::new(TEMA::new(length, initial_value)),
+		RegularMethods::WSMA => Box::new(WSMA::new(length, initial_value)),
 		RegularMethods::SMM => Box::new(SMM::new(length, initial_value)),
 		RegularMethods::SWMA => Box::new(SWMA::new(length, initial_value)),
 		RegularMethods::LinReg => Box::new(LinReg::new(length, initial_value)),
