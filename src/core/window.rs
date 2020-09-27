@@ -1,3 +1,4 @@
+#![allow(unsafe_code)]
 use super::PeriodType;
 use std::mem;
 use std::vec;
@@ -95,7 +96,13 @@ where
 	pub fn push(&mut self, value: T) -> T {
 		debug_assert!(!self.is_empty(), "Trying to use an empty window");
 
-		let old_value = mem::replace(&mut self.buf[self.index as usize], value);
+		let refer = if cfg!(feature = "unsafe_perfomance") {
+			unsafe { self.buf.get_unchecked_mut(self.index as usize) }
+		} else {
+			&mut self.buf[self.index as usize]
+		};
+
+		let old_value = mem::replace(refer, value);
 
 		// Next string is branchless version of the code:
 		// if self.index == self.size - 1 {
@@ -133,7 +140,11 @@ where
 	/// Returns an oldest value
 	#[inline]
 	pub fn first(&self) -> T {
-		self.buf[self.index as usize]
+		if cfg!(feature = "usafe_perfomance") {
+			*unsafe { self.buf.get_unchecked(self.index as usize) }
+		} else {
+			self.buf[self.index as usize]
+		}
 	}
 
 	/// Returns a last pushed value
@@ -166,7 +177,8 @@ where
 		// } else {
 		// 	self.s_1
 		// };
-		self.buf[index as usize]
+		// self.buf[index as usize]
+		*unsafe { self.buf.get_unchecked(index as usize) }
 	}
 
 	/// Checks if `Window` is empty (`length` == 0). Returns `true` if `Window` is empty or false otherwise.
@@ -213,7 +225,11 @@ where
 		let s = self.size - self.index;
 		let buf_index = (overflow * index.saturating_sub(s) + (1 - overflow) * saturated) as usize;
 
-		&self.buf[buf_index]
+		if cfg!(feature = "usafe_perfomance") {
+			unsafe { self.buf.get_unchecked(buf_index) }
+		} else {
+			&self.buf[buf_index]
+		}
 	}
 }
 
@@ -273,7 +289,12 @@ where
 			return None;
 		}
 
-		let value = self.window.buf[self.index as usize];
+		// let value = self.window.buf[self.index as usize];
+		let value = if cfg!(feature = "unsafe_perfomance") {
+			*unsafe { self.window.buf.get_unchecked(self.index as usize) }
+		} else {
+			self.window.buf[self.index as usize]
+		};
 
 		self.size -= 1;
 		let not_at_end = self.index != self.window.s_1;
