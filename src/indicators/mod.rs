@@ -4,7 +4,7 @@ pub mod example;
 // // ---------------------------------------------
 
 mod aroon;
-pub use aroon::*;
+pub use aroon::Aroon;
 
 mod average_directional_index;
 pub use average_directional_index::AverageDirectionalIndex;
@@ -22,7 +22,7 @@ mod chaikin_oscillator;
 pub use chaikin_oscillator::ChaikinOscillator;
 
 mod chande_kroll_stop;
-pub use chande_kroll_stop::*;
+pub use chande_kroll_stop::ChandeKrollStop;
 
 mod chande_momentum_oscillator;
 pub use chande_momentum_oscillator::ChandeMomentumOscillator;
@@ -33,8 +33,8 @@ pub use commodity_channel_index::CommodityChannelIndex;
 mod coppock_curve;
 pub use coppock_curve::CoppockCurve;
 
-// mod detrended_price_oscillator;
-// pub use detrended_price_oscillator::*;
+mod detrended_price_oscillator;
+pub use detrended_price_oscillator::DetrendedPriceOscillator;
 
 mod ease_of_movement;
 pub use ease_of_movement::EaseOfMovement;

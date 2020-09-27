@@ -29,3 +29,8 @@ fn bench_indicator_aroon(b: &mut test::Bencher) {
 fn bench_indicator_average_directional_index(b: &mut test::Bencher) {
 	bench_indicator::<AverageDirectionalIndex>(b);
 }
+
+#[bench]
+fn bench_detrended_price_oscillator(b: &mut test::Bencher) {
+	bench_indicator::<DetrendedPriceOscillator>(b);
+}
