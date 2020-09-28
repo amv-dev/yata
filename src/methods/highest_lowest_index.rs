@@ -68,6 +68,11 @@ impl Method for HighestIndex {
 	type Output = PeriodType;
 
 	fn new(length: Self::Params, value: Self::Input) -> Self {
+		assert!(
+			value.is_finite(),
+			"HighestIndex method cannot operate with NAN values"
+		);
+
 		debug_assert!(
 			length > 0 && length < Self::Params::MAX,
 			"Highest: length should be > 0 and < {}",
@@ -83,6 +88,11 @@ impl Method for HighestIndex {
 
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
+		assert!(
+			value.is_finite(),
+			"HighestIndex method cannot operate with NAN values"
+		);
+
 		self.window.push(value);
 		self.index += 1;
 
@@ -173,6 +183,11 @@ impl Method for LowestIndex {
 	type Output = PeriodType;
 
 	fn new(length: Self::Params, value: Self::Input) -> Self {
+		assert!(
+			value.is_finite(),
+			"LowestIndex method cannot operate with NAN values"
+		);
+
 		debug_assert!(
 			length > 0 && length < Self::Params::MAX,
 			"Highest: length should be > 0 and < {}",
@@ -188,6 +203,11 @@ impl Method for LowestIndex {
 
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
+		assert!(
+			value.is_finite(),
+			"LowestIndex method cannot operate with NAN values"
+		);
+
 		self.window.push(value);
 		self.index += 1;
 
