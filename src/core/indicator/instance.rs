@@ -17,7 +17,7 @@ pub trait IndicatorInstance<T: OHLC> {
 	where
 		Self: Sized;
 
-	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`.
+	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`s.
 	/// ```
 	/// use yata::prelude::*;
 	/// use yata::helpers::{RandomCandles};
