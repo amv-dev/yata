@@ -49,7 +49,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WMA {
-	sum: ValueType,
 	invert_sum: ValueType,
 	float_length: ValueType,
 	total: ValueType,
@@ -69,10 +68,9 @@ impl Method for WMA {
 		let sum = ((length2 * (length2 + 1)) / 2) as ValueType;
 		let float_length = length as ValueType;
 		Self {
-			sum: sum,
 			invert_sum: sum.recip(),
 			float_length,
-			total: value * float_length,
+			total: -value * float_length,
 			numerator: value * sum,
 			window: Window::new(length, value),
 		}
@@ -82,8 +80,8 @@ impl Method for WMA {
 	fn next(&mut self, value: Self::Input) -> Self::Output {
 		let prev_value = self.window.push(value);
 
-		self.numerator += self.float_length.mul_add(value, -self.total);
-		self.total += value - prev_value;
+		self.numerator += self.float_length.mul_add(value, self.total);
+		self.total += prev_value - value;
 
 		self.numerator * self.invert_sum
 	}
