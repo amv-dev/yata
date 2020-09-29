@@ -171,6 +171,11 @@ impl Method for Highest {
 	type Output = Self::Input;
 
 	fn new(length: Self::Params, value: Self::Input) -> Self {
+		assert!(
+			value.is_finite(),
+			"Highest method cannot operate with NAN values"
+		);
+
 		debug_assert!(length > 0, "Highest: length should be > 0");
 
 		Self {
@@ -181,6 +186,11 @@ impl Method for Highest {
 
 	#[inline]
 	fn next(&mut self, value: ValueType) -> ValueType {
+		assert!(
+			value.is_finite(),
+			"Highest method cannot operate with NAN values"
+		);
+
 		let left_value = self.window.push(value);
 
 		if value >= self.value {
@@ -253,6 +263,11 @@ impl Method for Lowest {
 	type Output = Self::Input;
 
 	fn new(length: Self::Params, value: Self::Input) -> Self {
+		assert!(
+			value.is_finite(),
+			"Lowest method cannot operate with NAN values"
+		);
+
 		debug_assert!(length > 0, "Lowest: length should be > 0");
 
 		Self {
@@ -263,6 +278,11 @@ impl Method for Lowest {
 
 	#[inline]
 	fn next(&mut self, value: ValueType) -> ValueType {
+		assert!(
+			value.is_finite(),
+			"Lowest method cannot operate with NAN values"
+		);
+
 		let left_value = self.window.push(value);
 
 		if value <= self.value {

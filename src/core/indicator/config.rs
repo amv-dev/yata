@@ -1,4 +1,4 @@
-use super::IndicatorInstance;
+use super::{IndicatorInstance, IndicatorResult};
 use crate::core::OHLC;
 
 /// Each indicator has it's own **Configuration** with parameters
@@ -36,6 +36,29 @@ pub trait IndicatorInitializer<T: OHLC> {
 
 	/// Initializes the **State** based on current **Configuration**
 	fn init(self, initial_value: T) -> Self::Instance;
+
+	/// Evaluates indicator config over sequence of OHLC and returns sequence of `IndicatorResult`s
+	/// ```
+	/// use yata::prelude::*;
+	/// use yata::helpers::{RandomCandles};
+	/// use yata::indicators::Trix;
+	///
+	/// let candles: Vec<_> = RandomCandles::new().take(10).collect();
+	/// let trix = Trix::default();
+	/// let results = trix.over(&candles);
+	/// println!("{:?}", results);
+	/// ```
+	fn over(self, over_slice: &[T]) -> Vec<IndicatorResult>
+	where
+		Self: Sized,
+	{
+		if over_slice.is_empty() {
+			return Vec::new();
+		}
+
+		let mut state = self.init(over_slice[0]);
+		state.over(over_slice)
+	}
 }
 
 // pub trait IndicatorConfigDyn<T: OHLC + 'static>: IndicatorConfig<T> {

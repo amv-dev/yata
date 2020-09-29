@@ -60,6 +60,11 @@ impl Method for SMM {
 	type Output = Self::Input;
 
 	fn new(length: Self::Params, value: Self::Input) -> Self {
+		assert!(
+			value.is_finite(),
+			"SMM method cannot operate with NAN values"
+		);
+
 		debug_assert!(length > 0, "SMM: length should be > 0");
 
 		let half = length / 2;
@@ -75,6 +80,11 @@ impl Method for SMM {
 
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
+		assert!(
+			value.is_finite(),
+			"SMM method cannot operate with NAN values"
+		);
+
 		let old_value = self.window.push(value);
 
 		let mut old_index = 0;

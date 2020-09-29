@@ -17,8 +17,8 @@ use std::marker::PhantomData;
 ///
 /// # 2 values
 ///
-/// * `AroonUp` [0.0; 1.0]
-/// * `AroonDown` [0.0; 1.0]
+/// * `AroonUp` \[0.0; 1.0\]
+/// * `AroonDown` \[0.0; 1.0\]
 ///
 /// # 3 signals
 ///

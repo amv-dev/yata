@@ -17,14 +17,25 @@ pub trait IndicatorInstance<T: OHLC> {
 	where
 		Self: Sized;
 
-	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`.
+	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`s.
+	/// ```
+	/// use yata::prelude::*;
+	/// use yata::helpers::{RandomCandles};
+	/// use yata::indicators::Trix;
+	///
+	/// let candles: Vec<_> = RandomCandles::new().take(10).collect();
+	/// let trix = Trix::default();
+	/// let mut state = trix.init(candles[0]);
+	///
+	/// let results = state.over(&candles);
+	/// println!("{:?}", results);
+	/// ```
 	#[inline]
-	fn over<S>(&mut self, candles: &S) -> Vec<IndicatorResult>
+	fn over(&mut self, candles: &[T]) -> Vec<IndicatorResult>
 	where
-		S: AsRef<Vec<T>>,
 		Self: Sized,
 	{
-		candles.as_ref().iter().map(|&x| self.next(x)).collect()
+		candles.iter().map(|&x| self.next(x)).collect()
 	}
 
 	/// Returns true if indicator is using volume data
