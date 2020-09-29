@@ -194,6 +194,10 @@ pub trait OHLC: Copy + Debug + Default {
 			&& self.open() > 0.
 			&& self.high() > 0.
 			&& self.low() > 0.
+			&& self.close().is_finite()
+			&& self.open().is_finite()
+			&& self.high().is_finite()
+			&& self.low().is_finite()
 	}
 
 	/// Returns [Source] field value of the candle.
@@ -251,7 +255,7 @@ pub trait OHLCV: OHLC {
 	/// See more at [OHLC#method.validate].
 	#[inline]
 	fn validate(&self) -> bool {
-		OHLC::validate(self) && self.volume() >= 0.
+		OHLC::validate(self) && self.volume() >= 0. && self.volume().is_finite()
 	}
 
 	/// Returns [Source] field value of the candle.
@@ -271,7 +275,7 @@ impl<T: OHLC> Sequence<T> {
 	///
 	/// Returns `true` if every candle validates OK
 	pub fn validate(&self) -> bool {
-		self.iter().all(|c| T::validate(c))
+		self.iter().all(T::validate)
 	}
 }
 
