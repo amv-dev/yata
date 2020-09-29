@@ -1,6 +1,4 @@
-use super::Conv;
-use crate::core::Method;
-use crate::core::{PeriodType, ValueType};
+use crate::core::{Method, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -27,9 +25,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Perfomance
 ///
-/// O(`length`)
-///
-/// This method is relatively slower compare to the most of the other methods.
+/// O(1)
 ///
 /// # See also
 ///
@@ -40,7 +36,18 @@ use serde::{Deserialize, Serialize};
 ///
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct SWMA(Conv);
+pub struct SWMA {
+	right_total: ValueType,
+	right_float_length: ValueType,
+	right_window: Window<ValueType>,
+
+	left_total: ValueType,
+	left_float_length: ValueType,
+	left_window: Window<ValueType>,
+
+	invert_sum: ValueType,
+	numerator: ValueType,
+}
 
 impl Method for SWMA {
 	type Params = PeriodType;
@@ -50,44 +57,66 @@ impl Method for SWMA {
 	fn new(length: Self::Params, value: Self::Input) -> Self {
 		debug_assert!(length > 0, "SWMA: length must be > 0");
 
-		let ln2 = length / 2;
+		let left_length = (length + 1) / 2;
+		let right_length = length / 2;
 
-		let k_sum =
-			(ln2 * (ln2 + 1) + if length % 2 == 1 { (length + 1) / 2 } else { 0 }) as ValueType;
+		let right_length2 = right_length as usize;
+		let left_length2 = left_length as usize;
 
-		let mut weights = vec![0.; length as usize];
-		(0..(length + 1) / 2).for_each(|i| {
-			let q = (i + 1) as ValueType / k_sum;
-			weights[i as usize] = q;
-			weights[(length - i - 1) as usize] = q;
-		});
+		let sum = ((left_length2 * (left_length2 + 1)) / 2
+			+ (right_length2 * (right_length2 + 1) / 2)) as ValueType;
 
-		Self(Conv::new(weights, value))
+		let right_float_length = -(right_length as ValueType);
+		let left_float_length = left_length as ValueType;
+
+		Self {
+			left_total: -value * left_length2 as ValueType,
+			left_float_length,
+			left_window: Window::new(left_length, value),
+
+			right_total: value * right_length2 as ValueType,
+			right_float_length,
+			right_window: Window::new(right_length, value),
+
+			invert_sum: sum.recip(),
+
+			numerator: value * sum,
+		}
 	}
 
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
-		self.0.next(value)
+		if self.right_window.is_empty() {
+			return value;
+		}
+
+		let prev_value = self.right_window.push(value);
+		self.right_total += value - prev_value;
+		self.numerator += prev_value.mul_add(self.right_float_length, self.right_total);
+
+		let value = prev_value;
+		let prev_value = self.left_window.push(value);
+		self.numerator += value.mul_add(self.left_float_length, self.left_total);
+		self.left_total += prev_value - value;
+
+		self.numerator * self.invert_sum
 	}
 }
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
-	use super::{Conv, Method, SWMA as TestingMethod};
+	use super::{Method, SWMA as TestingMethod};
 	use crate::core::{PeriodType, ValueType};
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
+	use crate::methods::Conv;
 
 	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-6;
 
 	#[test]
 	fn test_swma_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
-		for i in 1..30 {
+		for i in 2..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = TestingMethod::new(i, input);
 
@@ -124,6 +153,11 @@ mod tests {
 			vec![1.0, 2.0, 3.0, 4.0, 4.0, 3.0, 2.0, 1.0],
 			vec![1.0, 2.0, 3.0, 4.0, 5.0, 4.0, 3.0, 2.0, 1.0],
 			vec![1.0, 2.0, 3.0, 4.0, 5.0, 5.0, 4.0, 3.0, 2.0, 1.0],
+			vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0],
+			vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0],
+			vec![
+				1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0,
+			],
 		];
 
 		weights.iter().for_each(|weights| {
@@ -143,7 +177,14 @@ mod tests {
 				let value2 = wcv / wsum;
 				let value3 = conv.next(x);
 
-				assert!((value2 - value).abs() < SIGMA);
+				assert!(
+					(value2 - value).abs() < SIGMA,
+					"Got {}, should {} at {} with length {}",
+					value2,
+					value,
+					i,
+					length
+				);
 				assert!((value3 - value).abs() < SIGMA);
 			});
 		});
