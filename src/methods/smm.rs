@@ -4,8 +4,41 @@ use crate::core::{PeriodType, ValueType, Window};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+// find current value index
+fn find_index(value: ValueType, slice: &[ValueType], padding: usize) -> usize {
+	if slice.len() == 1 {
+		return padding;
+	}
+
+	let half = slice.len() / 2;
+
+	if value == slice[half] {
+		padding + half
+	} else if value > slice[half] {
+		find_index(value, &slice[(half + 1)..], padding + half + 1)
+	} else {
+		find_index(value, &slice[..half], padding)
+	}
+}
+
+// find new value insert index at
+fn find_insert_index(value: ValueType, slice: &[ValueType], padding: usize) -> usize {
+	if slice.is_empty() {
+		return padding;
+	}
+
+	let half = slice.len() / 2;
+
+	if value == slice[half] {
+		padding + half
+	} else if value > slice[half] {
+		find_insert_index(value, &slice[(half + 1)..], padding + half + 1)
+	} else {
+		find_insert_index(value, &slice[..half], padding)
+	}
+}
 ///
-/// [Simle Moving Median](https://en.wikipedia.org/wiki/Moving_average#Moving_median) of specified `length` for timeseries of type [`ValueType`]
+/// [Simple Moving Median](https://en.wikipedia.org/wiki/Moving_average#Moving_median) of specified `length` for timeseries of type [`ValueType`]
 ///
 /// # Parameters
 ///
@@ -87,27 +120,11 @@ impl Method for SMM {
 
 		let old_value = self.window.push(value);
 
-		let mut old_index = 0;
-		let mut index = 0;
-
-		// first we need to find index of removed `old_value` and index for the new `value`
-		// it is totally OK to compare equality of f64s here
-		for (i, &v) in self.slice.iter().enumerate() {
-			if v == old_value {
-				old_index = i;
-			}
-
-			if v < value {
-				index += 1;
-			} else if old_index > 0 {
-				break;
-			}
-		}
+		let old_index = find_index(old_value, &self.slice, 0);
+		let index = find_insert_index(value, &self.slice, 0);
 
 		// if the old index is before current, then we should offset current value by 1 back
-		if old_index < index {
-			index -= 1;
-		}
+		let index = index - (old_index < index) as usize;
 
 		// moving values inside the sorted slice
 		if index > old_index {
