@@ -68,7 +68,8 @@ impl Method for Conv {
 		self.window
 			.iter()
 			.zip(self.weights.iter())
-			.fold(0., |s, (value, &weight)| value.mul_add(weight, s))
+			.map(|(value, &weight)| value * weight)
+			.sum::<ValueType>()
 			* self.wsum_invert
 	}
 }
