@@ -1,64 +1,44 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Method, PeriodType, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, signi, RegularMethod, RegularMethods};
-use crate::methods::{Cross, ReverseHighSignal, ReverseLowSignal};
+use crate::core::{Method, PeriodType, Source, OHLC};
+use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::methods::{Cross, ReverseSignal};
 
-/*
-Билл Вильямс выделил три возможных варианта сигнала на покупку (+ три возможных
-сигнала на продажу полностью противоположные сигналам на покупку) которые создает awesome oscillator.
-
-1. «Блюдце» — это единственный сигнал на покупку, который возникает, когда
-гистограмма awesome oscillator находится выше нулевой линии. Для образования
-сигнала «Блюдце» необходимо, по крайней мере, три столбца гистограммы. «Блюдце»
-образуется, когда гистограмма меняет направление с нисходящего на восходящее,
-т.е. у 1-го будет большее значение чем у 2-го, у 2-го меньшее чем у 1-го (красный столбец),
-у 3-го больше чем у 2-го (зеленый столбец). При этом все столбцы гистограммы
-awesome oscillator должны быть выше нулевой линии.
-
-сигнал awesome oscillator - Блюдце
-
-2. «Пересечение нулевой линии» — сигнал на покупку образуется, когда гистограмма
-awesome oscillator переходит от отрицательных значений к положительным значениям.
-Это происходит тогда, когда гистограмма пересекает нулевую линию. При наличии сигнала
-к покупке «Пересечение нулевой линии», сигнальный столбец гистограммы всегда будет
-зеленого цвета.
-
-сигнал awesome oscillator - Пересечение нулевой линии
-
-3. «Два Пика» — сигнал на покупку образуется, когда у вас есть направленный вниз
-пик (самый низкий минимум), находящийся ниже нулевой линии awesome oscillator,
-за которым следует другой направленный вниз пик, который выше (отрицательное число,
-меньшее по абсолютному значению, поэтому оно находится ближе к нулевой линии), чем
-предыдущий пик, смотрящий вниз. Гистограмма должна находиться ниже нулевой линии
-между двумя пиками. Если гистограмма пересекает нулевую линию между пиками, сигнал
-на покупку не действует. Однако создается сигнал на покупку «Пересечение нулевой линии».
-Если формируется дополнительный, более высокий пик (который ближе к нулевой линии) и
-гистограмма не пересекла нулевую линию, то образуется дополнительный сигнал на покупку.
-Сигнальный столбец гистограммы должен быть зеленого цвета.
-
-Если столбец гистограммы awesome oscillator зеленого цвета, сигнала на продажу не может
-быть. Если он красного цвета, то у вас не может быть сигнала на покупку по awesome
-oscillator. Другой важный момент заключается в том, что если сигнал на покупку или
-продажу образован, но не преодолевается текущим ценовым баром, затем столбец гистограммы
-меняет цвет, этот сигнал аннулируется.
-*/
-
+/// [Awesome Oscillator](https://www.tradingview.com/scripts/awesomeoscillator/)
+/// # 1 value
+///
+/// * Absolute difference between fast and slow periods MA
+///
+/// # 2 signals
+///
+/// * "Twin Peaks". When `value` is below zero line and we got `conseq_peaks` lower peaks, then returns full positive signal
+/// When `value` is above zero line and we got `conseq_peaks` higher peaks, then returns full negative signal.
+/// Ohterwise gives no signal.
+/// * Gives signal when `values` crosses zero line
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AwesomeOscillator {
+	/// Default is 34
 	pub period1: PeriodType,
+	/// Default is 5
 	pub period2: PeriodType,
+	/// Default is [SMA](crate::methods::SMA)
 	pub method: RegularMethods,
+	/// Default is [HL2](crate::core::Source#variant.HL2)
+	pub source: Source,
+	/// Default is 1
 	pub left: PeriodType,
+	/// Default is 1
 	pub right: PeriodType,
+	/// Defualt is 2
+	pub conseq_peaks: u8,
 }
 
 impl IndicatorConfig for AwesomeOscillator {
 	fn validate(&self) -> bool {
-		self.period1 > self.period2
+		self.period1 > self.period2 && self.left > 0 && self.right > 0 && self.conseq_peaks > 0
 	}
 
 	fn set(&mut self, name: &str, value: String) {
@@ -66,6 +46,7 @@ impl IndicatorConfig for AwesomeOscillator {
 			"period1" => self.period1 = value.parse().unwrap(),
 			"period2" => self.period2 = value.parse().unwrap(),
 			"method" => self.method = value.parse().unwrap(),
+			"source" => self.source = value.parse().unwrap(),
 			"left" => self.left = value.parse().unwrap(),
 			"right" => self.right = value.parse().unwrap(),
 
@@ -93,15 +74,15 @@ impl<T: OHLC> IndicatorInitializer<T> for AwesomeOscillator {
 		Self: Sized,
 	{
 		let cfg = self;
-		let hl2 = candle.hl2();
+		let src = candle.source(cfg.source);
 
 		Self::Instance {
-			ma1: method(cfg.method, cfg.period1, hl2),
-			ma2: method(cfg.method, cfg.period2, hl2),
+			ma1: method(cfg.method, cfg.period1, src),
+			ma2: method(cfg.method, cfg.period2, src),
 			cross_over: Cross::default(),
-			ph: Method::new((cfg.left, cfg.right), 0.0),
-			pl: Method::new((cfg.left, cfg.right), 0.0),
-			window: Window::new(cfg.right, 0.),
+			reverse: Method::new((cfg.left, cfg.right), 0.0),
+			low_peaks: 0,
+			high_peaks: 0,
 			cfg,
 		}
 	}
@@ -113,8 +94,10 @@ impl Default for AwesomeOscillator {
 			period1: 34,
 			period2: 5,
 			method: RegularMethods::SMA,
+			source: Source::HL2,
 			left: 1,
 			right: 1,
+			conseq_peaks: 2,
 		}
 	}
 }
@@ -126,9 +109,9 @@ pub struct AwesomeOscillatorInstance {
 	ma1: RegularMethod,
 	ma2: RegularMethod,
 	cross_over: Cross,
-	ph: ReverseHighSignal,
-	pl: ReverseLowSignal,
-	window: Window<ValueType>,
+	reverse: ReverseSignal,
+	low_peaks: u8,
+	high_peaks: u8,
 }
 
 impl<T: OHLC> IndicatorInstance<T> for AwesomeOscillatorInstance {
@@ -139,40 +122,28 @@ impl<T: OHLC> IndicatorInstance<T> for AwesomeOscillatorInstance {
 	}
 
 	fn next(&mut self, candle: T) -> IndicatorResult {
-		let hl2 = candle.hl2();
+		let src = candle.source(self.cfg.source);
 
 		let ma1 = &mut self.ma1;
 		let ma2 = &mut self.ma2;
-		let value = ma2.next(hl2) - ma1.next(hl2);
+		let value = ma2.next(src) - ma1.next(src);
 
+		let reverse: i8 = self.reverse.next(value).into();
+
+		self.high_peaks = self.high_peaks.saturating_add((reverse > 0) as u8);
+		self.low_peaks = self.low_peaks.saturating_add((reverse < 0) as u8);
+
+		let s1 = (reverse < 0 && self.low_peaks >= self.cfg.conseq_peaks) as i8
+			- (reverse > 0 && self.high_peaks >= self.cfg.conseq_peaks) as i8;
 		let s2 = self.cross_over.next((value, 0.));
 
-		let ph: i8 = self.ph.next(value).into();
-		let pl: i8 = self.pl.next(value).into();
-
-		let last_value = self.window.push(value); //self.window.first();
-		let sign = signi(last_value);
-
-		// let mut m_up = pl * sign;
-		// let mut m_down = ph * sign;
-
-		// if m_up < 0 {
-		// 	m_up = 0;
-		// }
-
-		// if m_down > 0 {
-		// 	m_down = 0;
-		// }
-
-		// let s1 = m_up + m_down;
-
-		let m_up = ((pl * sign) > 0) as i8;
-		let m_down = ((ph * sign) < 0) as i8;
-
-		let s1 = m_up - m_down;
+		// need to reset high/low peaks counter if value got lower/higher 0.0
+		// sould do it after actual signals calculating
+		self.high_peaks = self.high_peaks * (value >= 0.0) as u8;
+		self.low_peaks = self.low_peaks * (value <= 0.0) as u8;
 
 		let values = [value];
-		let signals = [Action::from(s1), s2];
+		let signals = [s1.into(), s2];
 
 		IndicatorResult::new(&values, &signals)
 	}

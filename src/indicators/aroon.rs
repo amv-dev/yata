@@ -31,11 +31,11 @@ use std::marker::PhantomData;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Aroon {
-	/// main period length
+	/// main period length. Default is 14
 	pub period: PeriodType,
-	/// zone value in range [0.0; 1.0] determines when signal #2 appears
+	/// zone value in range [0.0; 1.0] determines when signal #2 appears. Default is 0.3
 	pub signal_zone: ValueType,
-	/// period until signal #2 appears in full strength
+	/// period until signal #2 appears in full strength. Default is 7
 	pub over_zone_period: PeriodType,
 }
 

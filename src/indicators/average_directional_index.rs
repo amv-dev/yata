@@ -14,24 +14,32 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 /// * https://primexbt.com/blog/average-directional-index/
 ///
 /// # 3 values
+///
 /// * ADX
 /// * +DI
 /// * -DI
 ///
 /// # 2 signals
+///
 /// * `BUY_ALL` when ADX over `zone` and +DI > -DI, `SELL_ALL` when ADX over `zone` and -DI > +DI. Otherwise - no signal.
 /// * Digital signal by difference between +DI and -DI
 ///
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AverageDirectionalIndex {
+	/// Default is [RMA](crate::methods::RMA)
 	pub method1: RegularMethods,
+	/// Default is 14
 	pub di_length: PeriodType,
 
+	/// Default is [RMA](crate::methods::RMA)
 	pub method2: RegularMethods,
+	/// Default is 14
 	pub adx_smoothing: PeriodType,
 
+	/// Default is 1
 	pub period1: PeriodType,
+	/// Default is 0.2
 	pub zone: ValueType,
 }
 
