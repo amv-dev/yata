@@ -140,7 +140,7 @@ pub trait OHLC: Copy + Debug + Default {
 	/// assert_eq!(tr, 70.);
 	/// ```
 	#[inline]
-	fn tr<T: OHLC>(&self, prev_candle: &T) -> ValueType {
+	fn tr(&self, prev_candle: &Self) -> ValueType {
 		// Original formula
 
 		// let (a, b, c) = (
