@@ -172,9 +172,20 @@ test bench_wma_w10                   ... bench:           8 ns/iter (+/- 0)
 test bench_wma_w100                  ... bench:           8 ns/iter (+/- 0)
 ```
 
-## Current usafe status
+# Current usafe status
 
-Currently there is no `unsafe` code in the crate.
+By default there is no `unsafe` code in the crate. But you can optionally enable `unsafe_perfomance` feature throw you `Cargo.toml` or by `--feature` flag in your CLI.
+
+`usafe_perfomance` enables some usafe code blocks, most of them are unsafe access to a vetor's elemens. For some methods it may increase perfomance by ~5-10%.
+
+# Features
+
+- `serde` - enables [`serde`](https://crates.io/crates/serde) crate support;
+- `period_type_u16` - sets `PeriodType` to `u16`;
+- `period_type_u32` - sets `PeriodType` to `u32`;
+- `period_type_u64` - sets `PeriodType` to `u64`;
+- `value_type_f32` - sets `ValueType` to `f32`;
+- `unsafe_perfomance` - enables optional unsafe code blocks, which may increase perfomance;
 
 ## Rust version
 
