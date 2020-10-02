@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::VWMA;
 ///
 /// // VWMA of length=3
-/// let mut vwma = VWMA::new(3, (3.0, 1.0));
+/// let mut vwma = VWMA::new(3, (3.0, 1.0)).unwrap();
 ///
 /// // input value is a pair of f64 (value, weight)
 /// vwma.next((3.0, 1.0));
@@ -57,13 +57,14 @@ impl Method for VWMA {
 	type Input = (ValueType, ValueType);
 	type Output = ValueType;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "VWMA: length should be > 0");
-
-		Self {
-			sum: value.0 * value.1 * length as ValueType,
-			vol_sum: value.1 * length as ValueType,
-			window: Window::new(length, value),
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				sum: value.0 * value.1 * length as ValueType,
+				vol_sum: value.1 * length as ValueType,
+				window: Window::new(length, value),
+			}),
 		}
 	}
 
@@ -80,22 +81,18 @@ impl Method for VWMA {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{Method, VWMA as TestingMethod};
 	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
 
 	const SIGMA: ValueType = 5e-4;
 
 	#[test]
 	fn test_vwma_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = ((i as ValueType + 56.0) / 16.3251, 3.55);
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -106,7 +103,8 @@ mod tests {
 	fn test_vwma1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, (candles.first().close, candles.first().volume));
+		let mut ma =
+			TestingMethod::new(1, (candles.first().close, candles.first().volume)).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next((x.close, x.volume))).abs() < SIGMA);
@@ -121,7 +119,7 @@ mod tests {
 			candles.take(100).map(|x| (x.close, x.volume)).collect();
 
 		(1..20).for_each(|ma_length| {
-			let mut ma = TestingMethod::new(ma_length, src[0]);
+			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
 			let ma_length = ma_length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {

@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, ValueType, OHLCV};
 use crate::helpers::{method, sign, RegularMethod, RegularMethods};
 use crate::methods::Cross;
 
@@ -17,27 +17,41 @@ pub struct KlingerVolumeOscillator {
 }
 
 impl IndicatorConfig for KlingerVolumeOscillator {
+	const NAME: &'static str = "Aroon";
+
 	fn validate(&self) -> bool {
 		self.period1 < self.period2
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"period3" => self.period3 = value.parse().unwrap(),
-			"method1" => self.method1 = value.parse().unwrap(),
-			"method2" => self.method2 = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"period3" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period3 = value,
+			},
+			"method1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method1 = value,
+			},
+			"method2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method2 = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn is_volume_based(&self) -> bool {
@@ -52,20 +66,24 @@ impl IndicatorConfig for KlingerVolumeOscillator {
 impl<T: OHLCV> IndicatorInitializer<T> for KlingerVolumeOscillator {
 	type Instance = KlingerVolumeOscillatorInstance;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
-		Self::Instance {
-			ma1: method(cfg.method1, cfg.period1, 0.),
-			ma2: method(cfg.method1, cfg.period2, 0.),
-			ma3: method(cfg.method2, cfg.period3, 0.),
+		Ok(Self::Instance {
+			ma1: method(cfg.method1, cfg.period1, 0.)?,
+			ma2: method(cfg.method1, cfg.period2, 0.)?,
+			ma3: method(cfg.method2, cfg.period3, 0.)?,
 			cross1: Cross::default(),
 			cross2: Cross::default(),
 			last_tp: candle.tp(),
 			cfg,
-		}
+		})
 	}
 }
 

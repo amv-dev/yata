@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, Source, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, Source, OHLC};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, RateOfChange, ReverseSignal};
 
@@ -21,32 +21,58 @@ pub struct CoppockCurve {
 }
 
 impl IndicatorConfig for CoppockCurve {
+	const NAME: &'static str = "CoppockCurve";
+
 	fn validate(&self) -> bool {
 		true
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"period3" => self.period3 = value.parse().unwrap(),
-			"s2_left" => self.s2_left = value.parse().unwrap(),
-			"s2_right" => self.s2_right = value.parse().unwrap(),
-			"s3_period" => self.s3_period = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
-			"method1" => self.method1 = value.parse().unwrap(),
-			"method2" => self.method2 = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"period3" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period3 = value,
+			},
+			"s2_left" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.s2_left = value,
+			},
+			"s2_right" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.s2_right = value,
+			},
+			"s3_period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.s3_period = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
+			"method1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method1 = value,
+			},
+			"method2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method2 = value,
+			},
 			// "zone"		=> self.zone = value.parse().unwrap(),
 			// "source"	=> self.source = value.parse().unwrap(),
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -57,23 +83,27 @@ impl IndicatorConfig for CoppockCurve {
 impl<T: OHLC> IndicatorInitializer<T> for CoppockCurve {
 	type Instance = CoppockCurveInstance;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let src = candle.source(cfg.source);
-		Self::Instance {
-			roc1: RateOfChange::new(cfg.period2, src),
-			roc2: RateOfChange::new(cfg.period3, src),
-			ma1: method(cfg.method1, cfg.period1, 0.),
-			ma2: method(cfg.method2, cfg.s3_period, 0.),
+		Ok(Self::Instance {
+			roc1: RateOfChange::new(cfg.period2, src)?,
+			roc2: RateOfChange::new(cfg.period3, src)?,
+			ma1: method(cfg.method1, cfg.period1, 0.)?,
+			ma2: method(cfg.method2, cfg.s3_period, 0.)?,
 			cross_over1: Cross::default(),
-			pivot: ReverseSignal::new(cfg.s2_left, cfg.s2_right, 0.),
+			pivot: ReverseSignal::new(cfg.s2_left, cfg.s2_right, 0.)?,
 			cross_over2: Cross::default(),
 
 			cfg,
-		}
+		})
 	}
 }
 

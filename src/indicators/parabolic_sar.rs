@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, ValueType, OHLC};
+use crate::core::{Action, Error, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 
 // https://en.wikipedia.org/wiki/Parabolic_SAR
@@ -13,24 +13,29 @@ pub struct ParabolicSAR {
 }
 
 impl IndicatorConfig for ParabolicSAR {
+	const NAME: &'static str = "ParabolicSAR";
+
 	fn validate(&self) -> bool {
 		self.af_step < self.af_max
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"af_step" => self.af_step = value.parse().unwrap(),
-			"af_max" => self.af_max = value.parse().unwrap(),
+			"af_step" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.af_step = value,
+			},
+			"af_max" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.af_max = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -41,12 +46,16 @@ impl IndicatorConfig for ParabolicSAR {
 impl<T: OHLC> IndicatorInitializer<T> for ParabolicSAR {
 	type Instance = ParabolicSARInstance<T>;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
-		Self::Instance {
+		Ok(Self::Instance {
 			trend: 1,
 			trend_inc: 1,
 			low: candle.low(),
@@ -55,7 +64,7 @@ impl<T: OHLC> IndicatorInitializer<T> for ParabolicSAR {
 			prev_candle: candle,
 			prev_trend: 0,
 			cfg,
-		}
+		})
 	}
 }
 

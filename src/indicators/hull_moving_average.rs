@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, Source, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, Source, OHLC};
 use crate::methods::{ReverseSignal, HMA};
 
 #[derive(Debug, Clone, Copy)]
@@ -15,26 +15,37 @@ pub struct HullMovingAverage {
 }
 
 impl IndicatorConfig for HullMovingAverage {
+	const NAME: &'static str = "HullMovingAverage";
+
 	fn validate(&self) -> bool {
-		self.period > 1 && self.left >= 1 && self.right >= 1
+		self.period > 2 && self.left >= 1 && self.right >= 1
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period" => self.period = value.parse().unwrap(),
-			"left" => self.left = value.parse().unwrap(),
-			"right" => self.right = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
+			"period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period = value,
+			},
+			"left" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.left = value,
+			},
+			"right" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.right = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -45,18 +56,22 @@ impl IndicatorConfig for HullMovingAverage {
 impl<T: OHLC> IndicatorInitializer<T> for HullMovingAverage {
 	type Instance = HullMovingAverageInstance;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let src = candle.source(cfg.source);
 
-		Self::Instance {
-			hma: HMA::new(cfg.period, src),
-			pivot: ReverseSignal::new(cfg.left, cfg.right, src),
+		Ok(Self::Instance {
+			hma: HMA::new(cfg.period, src)?,
+			pivot: ReverseSignal::new(cfg.left, cfg.right, src)?,
 			cfg,
-		}
+		})
 	}
 }
 

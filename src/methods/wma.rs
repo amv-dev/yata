@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -27,7 +27,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::WMA;
 ///
 /// // WMA of length=3
-/// let mut wma = WMA::new(3, 3.0);
+/// let mut wma = WMA::new(3, 3.0).unwrap();
 ///
 /// wma.next(3.0);
 /// wma.next(6.0);
@@ -61,18 +61,21 @@ impl Method for WMA {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "WMA: length should be > 0");
-
-		let length2 = length as usize;
-		let sum = ((length2 * (length2 + 1)) / 2) as ValueType;
-		let float_length = length as ValueType;
-		Self {
-			invert_sum: sum.recip(),
-			float_length,
-			total: -value * float_length,
-			numerator: value * sum,
-			window: Window::new(length, value),
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => {
+				let length2 = length as usize;
+				let sum = ((length2 * (length2 + 1)) / 2) as ValueType;
+				let float_length = length as ValueType;
+				Ok(Self {
+					invert_sum: sum.recip(),
+					float_length,
+					total: -value * float_length,
+					numerator: value * sum,
+					window: Window::new(length, value),
+				})
+			}
 		}
 	}
 
@@ -89,24 +92,19 @@ impl Method for WMA {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{Method, WMA as TestingMethod};
 	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
 	use crate::methods::Conv;
 
-	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_wma_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -117,7 +115,7 @@ mod tests {
 	fn test_wma1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -131,8 +129,9 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|ma_length| {
-			let mut ma = TestingMethod::new(ma_length, src[0]);
-			let mut conv = Conv::new((1..=ma_length).map(|x| x as ValueType).collect(), src[0]);
+			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
+			let mut conv =
+				Conv::new((1..=ma_length).map(|x| x as ValueType).collect(), src[0]).unwrap();
 			let ma_length = ma_length as usize;
 
 			let div = (1..=ma_length).sum::<usize>() as ValueType;

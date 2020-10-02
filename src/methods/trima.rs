@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType};
+use crate::core::{Error, PeriodType, ValueType};
 use crate::methods::SMA;
 
 #[cfg(feature = "serde")]
@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::TRIMA;
 ///
 /// // TRIMA of length=3
-/// let mut trima = TRIMA::new(4, 1.0);
+/// let mut trima = TRIMA::new(4, 1.0).unwrap();
 ///
 /// trima.next(1.0);
 /// trima.next(2.0);
@@ -56,13 +56,11 @@ impl Method for TRIMA {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "TRIMA: length should be > 0");
-
-		Self {
-			sma1: SMA::new(length, value),
-			sma2: SMA::new(length, value),
-		}
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		Ok(Self {
+			sma1: SMA::new(length, value)?,
+			sma2: SMA::new(length, value)?,
+		})
 	}
 
 	#[inline]
@@ -73,23 +71,18 @@ impl Method for TRIMA {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{Method, TRIMA as TestingMethod};
 	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
 
-	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_trima_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -100,7 +93,7 @@ mod tests {
 	fn test_trima1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -114,7 +107,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|sma_length| {
-			let mut ma = TestingMethod::new(sma_length, src[0]);
+			let mut ma = TestingMethod::new(sma_length, src[0]).unwrap();
 			let mut level2 = Vec::new();
 
 			src.iter().enumerate().for_each(|(i, &x)| {

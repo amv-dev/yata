@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -44,29 +44,32 @@ impl Method for LinReg {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 1, "LinReg: length should be > 1");
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 | 1 => Err(Error::WrongMethodParameters),
+			length => {
+				let l64 = length as usize;
+				let float_length = length as ValueType;
+				let length_invert = -float_length.recip();
 
-		let l64 = length as usize;
-		let float_length = length as ValueType;
-		let length_invert = -float_length.recip();
+				let n_1 = l64 - 1;
+				let s_x = l64 * n_1 / 2;
+				let s_x2 = s_x * (2 * n_1 + 1) / 3;
 
-		let n_1 = l64 - 1;
-		let s_x = l64 * n_1 / 2;
-		let s_x2 = s_x * (2 * n_1 + 1) / 3;
+				let divider = ((l64 * s_x2 - s_x * s_x) as ValueType).recip();
 
-		let divider = ((l64 * s_x2 - s_x * s_x) as ValueType).recip();
-
-		let s_x = -(s_x as ValueType);
-		Self {
-			length,
-			float_length,
-			length_invert,
-			divider,
-			s_x: s_x,
-			s_y: -value * float_length,
-			s_xy: value * s_x,
-			window: Window::new(length, value),
+				let s_x = -(s_x as ValueType);
+				Ok(Self {
+					length,
+					float_length,
+					length_invert,
+					divider,
+					s_x: s_x,
+					s_y: -value * float_length,
+					s_xy: value * s_x,
+					window: Window::new(length, value),
+				})
+			}
 		}
 	}
 
@@ -87,10 +90,10 @@ impl Method for LinReg {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{LinReg as TestingMethod, Method};
-	use crate::core::{Candle, ValueType};
+	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const_float;
 
 	#[cfg(feature = "value_type_f32")]
 	const SIGMA: ValueType = 1e-4;
@@ -111,13 +114,9 @@ mod tests {
 
 	#[test]
 	fn test_lin_reg_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const_float;
-
 		for i in 2..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const_float(&mut method, input, output);
@@ -131,7 +130,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(2..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
 			let n = length as ValueType;

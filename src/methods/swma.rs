@@ -1,4 +1,4 @@
-use crate::core::{Method, PeriodType, ValueType, Window};
+use crate::core::{Error, Method, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -54,33 +54,36 @@ impl Method for SWMA {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "SWMA: length must be > 0");
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => {
+				let left_length = (length + 1) / 2;
+				let right_length = length / 2;
 
-		let left_length = (length + 1) / 2;
-		let right_length = length / 2;
+				let right_length2 = right_length as usize;
+				let left_length2 = left_length as usize;
 
-		let right_length2 = right_length as usize;
-		let left_length2 = left_length as usize;
+				let sum = ((left_length2 * (left_length2 + 1)) / 2
+					+ (right_length2 * (right_length2 + 1) / 2)) as ValueType;
 
-		let sum = ((left_length2 * (left_length2 + 1)) / 2
-			+ (right_length2 * (right_length2 + 1) / 2)) as ValueType;
+				let right_float_length = -(right_length as ValueType);
+				let left_float_length = left_length as ValueType;
 
-		let right_float_length = -(right_length as ValueType);
-		let left_float_length = left_length as ValueType;
+				Ok(Self {
+					left_total: -value * left_length2 as ValueType,
+					left_float_length,
+					left_window: Window::new(left_length, value),
 
-		Self {
-			left_total: -value * left_length2 as ValueType,
-			left_float_length,
-			left_window: Window::new(left_length, value),
+					right_total: value * right_length2 as ValueType,
+					right_float_length,
+					right_window: Window::new(right_length, value),
 
-			right_total: value * right_length2 as ValueType,
-			right_float_length,
-			right_window: Window::new(right_length, value),
+					invert_sum: sum.recip(),
 
-			invert_sum: sum.recip(),
-
-			numerator: value * sum,
+					numerator: value * sum,
+				})
+			}
 		}
 	}
 
@@ -111,14 +114,13 @@ mod tests {
 	use crate::methods::tests::test_const;
 	use crate::methods::Conv;
 
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-6;
+	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_swma_const() {
 		for i in 2..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -129,7 +131,7 @@ mod tests {
 	fn test_swma1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -164,8 +166,8 @@ mod tests {
 			let wsum: ValueType = weights.iter().sum();
 			let length = weights.len();
 
-			let mut ma = TestingMethod::new(length as PeriodType, src[0]);
-			let mut conv = Conv::new(weights.clone(), src[0]);
+			let mut ma = TestingMethod::new(length as PeriodType, src[0]).unwrap();
+			let mut conv = Conv::new(weights.clone(), src[0]).unwrap();
 
 			src.iter().enumerate().for_each(|(i, &x)| {
 				let wcv = weights

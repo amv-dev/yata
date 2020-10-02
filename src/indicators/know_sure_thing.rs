@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, ValueType, OHLC};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, RateOfChange};
 
@@ -25,33 +25,65 @@ pub struct KnowSureThing {
 }
 
 impl IndicatorConfig for KnowSureThing {
+	const NAME: &'static str = "KnowSureThing";
+
 	fn validate(&self) -> bool {
 		self.period1 < self.period2 && self.period2 < self.period3 && self.period3 < self.period4
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"period3" => self.period3 = value.parse().unwrap(),
-			"period4" => self.period4 = value.parse().unwrap(),
-			"sma1" => self.sma1 = value.parse().unwrap(),
-			"sma2" => self.sma2 = value.parse().unwrap(),
-			"sma3" => self.sma3 = value.parse().unwrap(),
-			"sma4" => self.sma4 = value.parse().unwrap(),
-			"sma5" => self.sma5 = value.parse().unwrap(),
-			"method1" => self.method1 = value.parse().unwrap(),
-			"method2" => self.method2 = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"period3" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period3 = value,
+			},
+			"period4" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period4 = value,
+			},
+			"sma1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.sma1 = value,
+			},
+			"sma2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.sma2 = value,
+			},
+			"sma3" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.sma3 = value,
+			},
+			"sma4" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.sma4 = value,
+			},
+			"sma5" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.sma5 = value,
+			},
+			"method1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method1 = value,
+			},
+			"method2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method2 = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -61,25 +93,30 @@ impl IndicatorConfig for KnowSureThing {
 
 impl<T: OHLC> IndicatorInitializer<T> for KnowSureThing {
 	type Instance = KnowSureThingInstance;
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let close = candle.close();
-		Self::Instance {
-			roc1v: RateOfChange::new(cfg.period1, close),
-			roc2v: RateOfChange::new(cfg.period2, close),
-			roc3v: RateOfChange::new(cfg.period3, close),
-			roc4v: RateOfChange::new(cfg.period4, close),
-			ma1: method(cfg.method1, cfg.sma1, 0.),
-			ma2: method(cfg.method1, cfg.sma2, 0.),
-			ma3: method(cfg.method1, cfg.sma3, 0.),
-			ma4: method(cfg.method1, cfg.sma4, 0.),
-			ma5: method(cfg.method2, cfg.sma5, 0.),
+
+		Ok(Self::Instance {
+			roc1v: RateOfChange::new(cfg.period1, close)?,
+			roc2v: RateOfChange::new(cfg.period2, close)?,
+			roc3v: RateOfChange::new(cfg.period3, close)?,
+			roc4v: RateOfChange::new(cfg.period4, close)?,
+			ma1: method(cfg.method1, cfg.sma1, 0.)?,
+			ma2: method(cfg.method1, cfg.sma2, 0.)?,
+			ma3: method(cfg.method1, cfg.sma3, 0.)?,
+			ma4: method(cfg.method1, cfg.sma4, 0.)?,
+			ma5: method(cfg.method2, cfg.sma5, 0.)?,
 			cross: Cross::default(),
 			cfg,
-		}
+		})
 	}
 }
 

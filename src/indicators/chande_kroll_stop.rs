@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 // use std::str::FromStr;
 
-use crate::core::{Action, Method, PeriodType, Source, ValueType, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Highest, Lowest};
@@ -25,26 +25,37 @@ pub struct ChandeKrollStop {
 }
 
 impl IndicatorConfig for ChandeKrollStop {
+	const NAME: &'static str = "ChandeKrollStop";
+
 	fn validate(&self) -> bool {
 		self.x >= 0.0
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"p" => self.p = value.parse().unwrap(),
-			"x" => self.x = value.parse().unwrap(),
-			"q" => self.q = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
+			"p" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.p = value,
+			},
+			"x" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.x = value,
+			},
+			"q" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.q = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -55,23 +66,27 @@ impl IndicatorConfig for ChandeKrollStop {
 impl<T: OHLC> IndicatorInitializer<T> for ChandeKrollStop {
 	type Instance = ChandeKrollStopInstance<T>;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
-		Self::Instance {
-			ma: method(cfg.method, cfg.p, candle.tr(&candle)),
+		Ok(Self::Instance {
+			ma: method(cfg.method, cfg.p, candle.tr(&candle))?,
 
-			highest1: Highest::new(cfg.p, candle.high()),
-			lowest1: Lowest::new(cfg.p, candle.low()),
+			highest1: Highest::new(cfg.p, candle.high())?,
+			lowest1: Lowest::new(cfg.p, candle.low())?,
 
-			highest2: Highest::new(cfg.q, candle.high()),
-			lowest2: Lowest::new(cfg.q, candle.low()),
+			highest2: Highest::new(cfg.q, candle.high())?,
+			lowest2: Lowest::new(cfg.q, candle.low())?,
 
 			prev_candle: candle,
 			cfg,
-		}
+		})
 	}
 }
 
@@ -102,10 +117,6 @@ pub struct ChandeKrollStopInstance<T: OHLC> {
 
 impl<T: OHLC> IndicatorInstance<T> for ChandeKrollStopInstance<T> {
 	type Config = ChandeKrollStop;
-
-	fn name(&self) -> &'static str {
-		"ChandeKrollStop"
-	}
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

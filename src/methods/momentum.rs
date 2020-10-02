@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -27,7 +27,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::prelude::*;
 /// use yata::methods::Momentum;
 ///
-/// let mut change = Momentum::new(3, 1.0); // a.k.a. Change => let mut change = Change::new(3);
+/// let mut change = Momentum::new(3, 1.0).unwrap(); // a.k.a. Change => let mut change = Change::new(3);
 /// change.next(1.0);
 /// change.next(2.0);
 /// assert_eq!(change.next(3.0), 2.0);
@@ -42,8 +42,8 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::Momentum;
 /// use yata::methods::Derivative;
 ///
-/// let mut change = Momentum::new(1, 1.0);
-/// let mut derivative = Derivative::new(1, 1.0);
+/// let mut change = Momentum::new(1, 1.0).unwrap();
+/// let mut derivative = Derivative::new(1, 1.0).unwrap();
 /// change.next(1.0); derivative.next(1.0);
 /// change.next(2.0); derivative.next(2.0);
 /// assert_eq!(change.next(3.0), derivative.next(3.0));
@@ -81,12 +81,13 @@ impl Method for Momentum {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "Momentum: length should be > 0");
-
-		Self {
-			window: Window::new(length, value),
-			last_value: value,
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				window: Window::new(length, value),
+				last_value: value,
+			}),
 		}
 	}
 
@@ -102,19 +103,16 @@ mod tests {
 	use super::{Method, Momentum as TestingMethod};
 	use crate::core::{Candle, ValueType};
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
 
 	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-8;
 
 	#[test]
 	fn test_momentum_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -125,7 +123,7 @@ mod tests {
 	fn test_momentum1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		let mut prev = None;
 		candles.take(100).map(|x| x.close).for_each(|x| {
@@ -143,7 +141,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			src.iter().enumerate().for_each(|(i, &x)| {
 				assert_eq!(x - src[i.saturating_sub(length as usize)], ma.next(x))
 			});

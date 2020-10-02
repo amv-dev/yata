@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::str::FromStr;
 
-use crate::core::{Sequence, ValueType, OHLC, OHLCV};
+use crate::core::{Error, Sequence, ValueType, OHLC, OHLCV};
 
 /// Source enum represents common parts of a *Candle*
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -40,7 +40,7 @@ pub enum Source {
 }
 
 impl FromStr for Source {
-	type Err = String;
+	type Err = Error;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s.to_ascii_lowercase().trim() {
@@ -52,13 +52,13 @@ impl FromStr for Source {
 			"hl2" => Ok(Self::HL2),
 			"open" => Ok(Self::Open),
 
-			_ => Err(format!("Unknown source {}", s)),
+			value => Err(Error::SourceParse(value.to_string())),
 		}
 	}
 }
 
 impl TryFrom<&str> for Source {
-	type Error = String;
+	type Error = Error;
 
 	fn try_from(s: &str) -> Result<Self, Self::Error> {
 		Self::from_str(s)
@@ -66,7 +66,7 @@ impl TryFrom<&str> for Source {
 }
 
 impl TryFrom<String> for Source {
-	type Error = String;
+	type Error = Error;
 
 	fn try_from(s: String) -> Result<Self, Self::Error> {
 		Self::from_str(s.as_str())

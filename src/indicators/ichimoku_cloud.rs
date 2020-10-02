@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Method, PeriodType, Source, ValueType, Window, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{Cross, Highest, Lowest};
 
@@ -16,27 +16,41 @@ pub struct IchimokuCloud {
 }
 
 impl IndicatorConfig for IchimokuCloud {
+	const NAME: &'static str = "IchimokuCloud";
+
 	fn validate(&self) -> bool {
 		self.l1 < self.l2 && self.l2 < self.l3
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"l1" => self.l1 = value.parse().unwrap(),
-			"l2" => self.l2 = value.parse().unwrap(),
-			"l3" => self.l3 = value.parse().unwrap(),
-			"m" => self.m = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
+			"l1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.l1 = value,
+			},
+			"l2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.l2 = value,
+			},
+			"l3" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.l3 = value,
+			},
+			"m" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.m = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -46,24 +60,28 @@ impl IndicatorConfig for IchimokuCloud {
 
 impl<T: OHLC> IndicatorInitializer<T> for IchimokuCloud {
 	type Instance = IchimokuCloudInstance;
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
-		Self::Instance {
-			highest1: Highest::new(cfg.l1, candle.high()),
-			highest2: Highest::new(cfg.l2, candle.high()),
-			highest3: Highest::new(cfg.l3, candle.high()),
-			lowest1: Lowest::new(cfg.l1, candle.low()),
-			lowest2: Lowest::new(cfg.l2, candle.low()),
-			lowest3: Lowest::new(cfg.l3, candle.low()),
+		Ok(Self::Instance {
+			highest1: Highest::new(cfg.l1, candle.high())?,
+			highest2: Highest::new(cfg.l2, candle.high())?,
+			highest3: Highest::new(cfg.l3, candle.high())?,
+			lowest1: Lowest::new(cfg.l1, candle.low())?,
+			lowest2: Lowest::new(cfg.l2, candle.low())?,
+			lowest3: Lowest::new(cfg.l3, candle.low())?,
 			window1: Window::new(cfg.m, candle.hl2()),
 			window2: Window::new(cfg.m, candle.hl2()),
 			cross1: Cross::default(),
 			cross2: Cross::default(),
 			cfg,
-		}
+		})
 	}
 }
 

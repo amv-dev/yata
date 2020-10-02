@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Method, PeriodType, ValueType, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, SMA, SWMA};
@@ -17,27 +17,41 @@ pub struct RelativeVigorIndex {
 }
 
 impl IndicatorConfig for RelativeVigorIndex {
+	const NAME: &'static str = "RelativeVigorIndex";
+
 	fn validate(&self) -> bool {
 		self.period1 >= 2 && self.zone >= 0. && self.zone <= 1. && self.period3 > 1
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"period3" => self.period3 = value.parse().unwrap(),
-			"method" => self.method = value.parse().unwrap(),
-			"zone" => self.zone = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"period3" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period3 = value,
+			},
+			"method" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method = value,
+			},
+			"zone" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.zone = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -47,24 +61,30 @@ impl IndicatorConfig for RelativeVigorIndex {
 
 impl<T: OHLC> IndicatorInitializer<T> for RelativeVigorIndex {
 	type Instance = RelativeVigorIndexInstance;
-	fn init(self, candle: T) -> Self::Instance
+
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let d_close = candle.close() - candle.open();
 		let d_hl = candle.high() - candle.low();
 		let rvi = if d_hl != 0. { d_close / d_hl } else { 0. };
-		Self::Instance {
+
+		Ok(Self::Instance {
 			prev_close: candle.open(),
-			swma1: SWMA::new(cfg.period2, d_close),
-			sma1: SMA::new(cfg.period1, d_close),
-			swma2: SWMA::new(cfg.period2, d_hl),
-			sma2: SMA::new(cfg.period1, d_hl),
-			ma: method(cfg.method, cfg.period3, rvi),
+			swma1: SWMA::new(cfg.period2, d_close)?,
+			sma1: SMA::new(cfg.period1, d_close)?,
+			swma2: SWMA::new(cfg.period2, d_hl)?,
+			sma2: SMA::new(cfg.period1, d_hl)?,
+			ma: method(cfg.method, cfg.period3, rvi)?,
 			cross: Cross::default(),
 			cfg,
-		}
+		})
 	}
 }
 

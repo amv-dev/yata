@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window, OHLCV};
+use crate::core::{Error, PeriodType, ValueType, Window, OHLCV};
 use std::marker::PhantomData;
 
 #[cfg(feature = "serde")]
@@ -46,8 +46,8 @@ use serde::{Deserialize, Serialize};
 /// use yata::helpers::RandomCandles;
 ///
 /// let mut candles = RandomCandles::default();
-/// let mut windowless = ADI::new(0, candles.first());
-/// let mut windowed = ADI::new(3, candles.first()); // <----- Window size 3
+/// let mut windowless = ADI::new(0, candles.first()).unwrap();
+/// let mut windowed = ADI::new(3, candles.first()).unwrap(); // <----- Window size 3
 ///
 /// let candle = candles.next().unwrap();
 /// assert_ne!(windowless.next(candle), windowed.next(candle));
@@ -94,7 +94,7 @@ impl<T: OHLCV> Method for ADI<T> {
 	type Input = T;
 	type Output = ValueType;
 
-	fn new(length: Self::Params, candle: Self::Input) -> Self {
+	fn new(length: Self::Params, candle: Self::Input) -> Result<Self, Error> {
 		let mut cmf_sum = 0.0;
 		let window;
 
@@ -106,13 +106,13 @@ impl<T: OHLCV> Method for ADI<T> {
 			window = Window::empty();
 		}
 
-		Self {
+		Ok(Self {
 			length,
 
 			cmf_sum,
 			window,
 			phantom: PhantomData::default(),
-		}
+		})
 	}
 
 	#[inline]
@@ -149,7 +149,7 @@ mod tests {
 		};
 
 		for i in 1..30 {
-			let mut adi = ADI::new(i, candle);
+			let mut adi = ADI::new(i, candle).unwrap();
 			let output = adi.next(candle);
 
 			test_const(&mut adi, candle, output);
@@ -171,7 +171,7 @@ mod tests {
 			volume: 531.0,
 		};
 
-		let mut adi = ADI::new(0, candle);
+		let mut adi = ADI::new(0, candle).unwrap();
 		let output = adi.next(candle);
 
 		test_const(&mut adi, candle, output);
@@ -185,7 +185,7 @@ mod tests {
 		use crate::methods::ADI;
 
 		let mut candles = RandomCandles::default();
-		let mut adi = ADI::new(0, candles.first());
+		let mut adi = ADI::new(0, candles.first()).unwrap();
 
 		candles.take(100).fold(0., |s, candle| {
 			assert_eq!(adi.next(candle), s + candle.clv() * candle.volume());
@@ -200,13 +200,13 @@ mod tests {
 		use crate::methods::ADI;
 
 		let mut candles = RandomCandles::default();
-		let mut adi = ADI::new(0, candles.first());
+		let mut adi = ADI::new(0, candles.first()).unwrap();
 		let mut adiw = [
-			ADI::new(1, candles.first()),
-			ADI::new(2, candles.first()),
-			ADI::new(3, candles.first()),
-			ADI::new(4, candles.first()),
-			ADI::new(5, candles.first()),
+			ADI::new(1, candles.first()).unwrap(),
+			ADI::new(2, candles.first()).unwrap(),
+			ADI::new(3, candles.first()).unwrap(),
+			ADI::new(4, candles.first()).unwrap(),
+			ADI::new(5, candles.first()).unwrap(),
 		];
 
 		candles

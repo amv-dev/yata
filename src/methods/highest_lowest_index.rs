@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -31,7 +31,7 @@ use serde::{Deserialize, Serialize};
 /// let values = [1.0, 2.0, 3.0, 2.0, 1.0, 0.5, 2.0, 3.0];
 /// let r      = [ 0,   0,   0,   1,   2,   2,   0,   0 ];
 ///
-/// let mut highest_index = HighestIndex::new(3, values[0]);
+/// let mut highest_index = HighestIndex::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
 /// 	let v = highest_index.next(values[i]);
@@ -67,22 +67,18 @@ impl Method for HighestIndex {
 	type Input = ValueType;
 	type Output = PeriodType;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		assert!(
-			value.is_finite(),
-			"HighestIndex method cannot operate with NAN values"
-		);
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		if !value.is_finite() {
+			return Err(Error::InvalidCandles);
+		}
 
-		debug_assert!(
-			length > 0 && length < Self::Params::MAX,
-			"Highest: length should be > 0 and < {}",
-			Self::Params::MAX,
-		);
-
-		Self {
-			window: Window::new(length, value),
-			index: 0,
-			value,
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				window: Window::new(length, value),
+				index: 0,
+				value,
+			}),
 		}
 	}
 
@@ -146,7 +142,7 @@ impl Method for HighestIndex {
 /// let values = [1.0, 2.0, 3.0, 2.0, 1.0, 0.5, 2.0, 3.0];
 /// let r      = [ 0,   1,   2,   0,   0,   0,   1,   2 ];
 ///
-/// let mut lowest_index = LowestIndex::new(3, values[0]);
+/// let mut lowest_index = LowestIndex::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
 /// 	let v = lowest_index.next(values[i]);
@@ -182,22 +178,18 @@ impl Method for LowestIndex {
 	type Input = ValueType;
 	type Output = PeriodType;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		assert!(
-			value.is_finite(),
-			"LowestIndex method cannot operate with NAN values"
-		);
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		if !value.is_finite() {
+			return Err(Error::InvalidCandles);
+		}
 
-		debug_assert!(
-			length > 0 && length < Self::Params::MAX,
-			"Highest: length should be > 0 and < {}",
-			Self::Params::MAX,
-		);
-
-		Self {
-			window: Window::new(length, value),
-			index: 0,
-			value,
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				window: Window::new(length, value),
+				index: 0,
+				value,
+			}),
 		}
 	}
 
@@ -246,7 +238,7 @@ mod tests {
 	fn test_highest_index_const() {
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = HighestIndex::new(i, input);
+			let mut method = HighestIndex::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -255,11 +247,11 @@ mod tests {
 
 	#[test]
 	fn test_highest_index1() {
-		use super::{HighestIndex as TestingMethod, Method};
+		use super::HighestIndex as TestingMethod;
 
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert_eq!(0, ma.next(x.close));
@@ -268,14 +260,14 @@ mod tests {
 
 	#[test]
 	fn test_highest_index() {
-		use super::{HighestIndex as TestingMethod, Method};
+		use super::HighestIndex as TestingMethod;
 
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {
@@ -307,7 +299,7 @@ mod tests {
 	fn test_lowest_index_const() {
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = LowestIndex::new(i, input);
+			let mut method = LowestIndex::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -316,11 +308,11 @@ mod tests {
 
 	#[test]
 	fn test_lowest_index1() {
-		use super::{LowestIndex as TestingMethod, Method};
+		use super::LowestIndex as TestingMethod;
 
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert_eq!(0, ma.next(x.close));
@@ -329,14 +321,14 @@ mod tests {
 
 	#[test]
 	fn test_lowest_index() {
-		use super::{LowestIndex as TestingMethod, Method};
+		use super::LowestIndex as TestingMethod;
 
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {

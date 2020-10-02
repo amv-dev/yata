@@ -11,7 +11,7 @@ fn bench_indicator<T: IndicatorConfig + IndicatorInitializer<Candle> + Default>(
 ) {
 	let candles: Vec<_> = RandomCandles::new().take(1000).collect();
 	let mut iter = candles.iter().copied().cycle();
-	let mut indicator = T::default().init(iter.next().unwrap());
+	let mut indicator = T::default().init(iter.next().unwrap()).unwrap();
 
 	for _ in 0..50 {
 		indicator.next(iter.next().unwrap());

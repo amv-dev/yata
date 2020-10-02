@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Method, PeriodType, ValueType, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{Highest, Lowest};
 
@@ -13,24 +13,29 @@ pub struct PriceChannelStrategy {
 }
 
 impl IndicatorConfig for PriceChannelStrategy {
+	const NAME: &'static str = "MomentumIndex";
+
 	fn validate(&self) -> bool {
 		self.period > 1 && self.sigma > 0.
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period" => self.period = value.parse().unwrap(),
-			"sigma" => self.sigma = value.parse().unwrap(),
+			"period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period = value,
+			},
+			"sigma" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.sigma = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -40,16 +45,20 @@ impl IndicatorConfig for PriceChannelStrategy {
 
 impl<T: OHLC> IndicatorInitializer<T> for PriceChannelStrategy {
 	type Instance = PriceChannelStrategyInstance;
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
-		let cfg = self;
-		Self::Instance {
-			highest: Highest::new(cfg.period, candle.high()),
-			lowest: Lowest::new(cfg.period, candle.low()),
-			cfg,
+		if !self.validate() {
+			return Err(Error::WrongConfig);
 		}
+
+		let cfg = self;
+		Ok(Self::Instance {
+			highest: Highest::new(cfg.period, candle.high())?,
+			lowest: Lowest::new(cfg.period, candle.low())?,
+			cfg,
+		})
 	}
 }
 
@@ -76,6 +85,7 @@ impl<T: OHLC> IndicatorInstance<T> for PriceChannelStrategyInstance {
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
+
 	fn next(&mut self, candle: T) -> IndicatorResult {
 		let (high, low) = (candle.high(), candle.low());
 		let highest = self.highest.next(high);

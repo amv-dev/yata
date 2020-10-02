@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -50,10 +50,11 @@ impl Method for RateOfChange {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "RateOfChange: length should be > 0");
-
-		Self(Window::new(length, value))
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self(Window::new(length, value))),
+		}
 	}
 
 	#[inline]
@@ -64,25 +65,21 @@ impl Method for RateOfChange {
 	}
 }
 
+#[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{Method, ROC as TestingMethod};
 	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
 	use crate::methods::{Derivative, Past};
 
-	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-8;
 
 	#[test]
 	fn test_rate_of_change_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -93,9 +90,9 @@ mod tests {
 	fn test_rate_of_change1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
-		let mut der = Derivative::new(1, candles.first().close);
-		let mut mv = Past::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
+		let mut der = Derivative::new(1, candles.first().close).unwrap();
+		let mut mv = Past::new(1, candles.first().close).unwrap();
 
 		candles.take(100).map(|x| x.close).for_each(|x| {
 			let value = ma.next(x);
@@ -111,7 +108,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			src.iter().enumerate().for_each(|(i, &x)| {
 				let value = ma.next(x);

@@ -3,7 +3,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Candle, Method, PeriodType, Source, OHLC};
+use crate::core::{Candle, Error, Method, PeriodType, Source, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::Cross;
@@ -22,29 +22,48 @@ pub struct MACD {
 }
 
 impl IndicatorConfig for MACD {
+	const NAME: &'static str = "MACD";
+
 	fn validate(&self) -> bool {
 		self.period1 < self.period2
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"period3" => self.period3 = value.parse().unwrap(),
-			"method1" => self.method1 = value.parse().unwrap(),
-			"method2" => self.method2 = value.parse().unwrap(),
-			"method3" => self.method3 = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
-
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"period3" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period3 = value,
+			},
+			"method1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method1 = value,
+			},
+			"method2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method2 = value,
+			},
+			"method3" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method3 = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -55,18 +74,23 @@ impl IndicatorConfig for MACD {
 impl<T: OHLC> IndicatorInitializer<T> for MACD {
 	type Instance = MACDInstance;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
-		let cfg = self;
-		let src = candle.source(cfg.source);
-		Self::Instance {
-			ma1: method(cfg.method1, cfg.period1, src),
-			ma2: method(cfg.method2, cfg.period2, src),
-			ma3: method(cfg.method3, cfg.period3, src),
-			cross: Cross::new((), (0.0, 0.0)),
-			cfg,
+		match self.validate() {
+			true => {
+				let cfg = self;
+				let src = candle.source(cfg.source);
+				Ok(Self::Instance {
+					ma1: method(cfg.method1, cfg.period1, src)?,
+					ma2: method(cfg.method2, cfg.period2, src)?,
+					ma3: method(cfg.method3, cfg.period3, src)?,
+					cross: Cross::new((), (0.0, 0.0))?,
+					cfg,
+				})
+			}
+			false => Err(Error::WrongConfig),
 		}
 	}
 }

@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, Source, ValueType, OHLC};
 use crate::methods::{Change, Cross, CrossAbove, CrossUnder, EMA};
 
 // https://en.wikipedia.org/wiki/Trix_(technical_analysis)
@@ -17,27 +17,41 @@ pub struct TrueStrengthIndex {
 }
 
 impl IndicatorConfig for TrueStrengthIndex {
+	const NAME: &'static str = "TrueStrengthIndex";
+
 	fn validate(&self) -> bool {
 		self.period1 > 2 && self.zone >= 0. && self.zone <= 1.
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"period3" => self.period3 = value.parse().unwrap(),
-			"zone" => self.zone = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"period3" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period3 = value,
+			},
+			"zone" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.zone = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -48,25 +62,30 @@ impl IndicatorConfig for TrueStrengthIndex {
 impl<T: OHLC> IndicatorInitializer<T> for TrueStrengthIndex {
 	type Instance = TrueStrengthIndexInstance;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let src = candle.source(cfg.source);
-		Self::Instance {
-			change: Change::new(1, src),
-			ema11: EMA::new(cfg.period1, 0.),
-			ema12: EMA::new(cfg.period2, 0.),
-			ema21: EMA::new(cfg.period1, 0.),
-			ema22: EMA::new(cfg.period2, 0.),
-			ema: EMA::new(cfg.period3, 0.),
+
+		Ok(Self::Instance {
+			change: Change::new(1, src)?,
+			ema11: EMA::new(cfg.period1, 0.)?,
+			ema12: EMA::new(cfg.period2, 0.)?,
+			ema21: EMA::new(cfg.period1, 0.)?,
+			ema22: EMA::new(cfg.period2, 0.)?,
+			ema: EMA::new(cfg.period3, 0.)?,
 			cross_under: CrossUnder::default(),
 			cross_above: CrossAbove::default(),
 			cross_over1: Cross::default(),
 			cross_over2: Cross::default(),
 			cfg,
-		}
+		})
 	}
 }
 

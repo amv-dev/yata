@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, ValueType, OHLC};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, CrossAbove, CrossUnder, Highest, Lowest};
 
@@ -17,27 +17,41 @@ pub struct StochasticOscillator {
 }
 
 impl IndicatorConfig for StochasticOscillator {
+	const NAME: &'static str = "StochasticOscillator";
+
 	fn validate(&self) -> bool {
 		self.period > 1
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period" => self.period = value.parse().unwrap(),
-			"smooth_k" => self.smooth_k = value.parse().unwrap(),
-			"smooth_d" => self.smooth_d = value.parse().unwrap(),
-			"zone" => self.zone = value.parse().unwrap(),
-			"method" => self.method = value.parse().unwrap(),
+			"period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period = value,
+			},
+			"smooth_k" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.smooth_k = value,
+			},
+			"smooth_d" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.smooth_d = value,
+			},
+			"zone" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.zone = value,
+			},
+			"method" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -48,10 +62,14 @@ impl IndicatorConfig for StochasticOscillator {
 impl<T: OHLC> IndicatorInitializer<T> for StochasticOscillator {
 	type Instance = StochasticOscillatorInstance;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let k_rows = if candle.high() != candle.low() {
 			(candle.close() - candle.low()) / (candle.high() - candle.low())
@@ -59,19 +77,19 @@ impl<T: OHLC> IndicatorInitializer<T> for StochasticOscillator {
 			0.
 		};
 
-		Self::Instance {
+		Ok(Self::Instance {
 			upper_zone: 1. - cfg.zone,
-			highest: Highest::new(cfg.period, candle.high()),
-			lowest: Lowest::new(cfg.period, candle.low()),
-			ma1: method(cfg.method, cfg.smooth_k, k_rows),
-			ma2: method(cfg.method, cfg.smooth_d, k_rows),
+			highest: Highest::new(cfg.period, candle.high())?,
+			lowest: Lowest::new(cfg.period, candle.low())?,
+			ma1: method(cfg.method, cfg.smooth_k, k_rows)?,
+			ma2: method(cfg.method, cfg.smooth_d, k_rows)?,
 			cross_over: Cross::default(),
 			cross_above1: CrossAbove::default(),
 			cross_under1: CrossUnder::default(),
 			cross_above2: CrossAbove::default(),
 			cross_under2: CrossUnder::default(),
 			cfg,
-		}
+		})
 	}
 }
 

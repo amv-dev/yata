@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-pub mod example;
+// pub mod example;
 
 // // ---------------------------------------------
 

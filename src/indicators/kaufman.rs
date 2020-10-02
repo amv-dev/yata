@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Method, PeriodType, Source, ValueType, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{Change, Cross, LinearVolatility, StDev};
 
@@ -19,6 +19,8 @@ pub struct Kaufman {
 }
 
 impl IndicatorConfig for Kaufman {
+	const NAME: &'static str = "Kaufman";
+
 	fn validate(&self) -> bool {
 		self.period3 > self.period2
 			&& self.period2 > 0
@@ -26,25 +28,43 @@ impl IndicatorConfig for Kaufman {
 			&& (self.k > 0.0 || self.filter_period < 2)
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"period3" => self.period3 = value.parse().unwrap(),
-			"filter_period" => self.filter_period = value.parse().unwrap(),
-			"square_smooth" => self.square_smooth = value.parse().unwrap(),
-			"k" => self.k = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"period3" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period3 = value,
+			},
+			"filter_period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.filter_period = value,
+			},
+			"square_smooth" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.square_smooth = value,
+			},
+			"k" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.k = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -54,24 +74,29 @@ impl IndicatorConfig for Kaufman {
 
 impl<T: OHLC> IndicatorInitializer<T> for Kaufman {
 	type Instance = KaufmanInstance;
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let src = candle.source(cfg.source);
-		Self::Instance {
-			volatility: LinearVolatility::new(cfg.period1, src),
-			change: Change::new(cfg.period1, src),
+
+		Ok(Self::Instance {
+			volatility: LinearVolatility::new(cfg.period1, src)?,
+			change: Change::new(cfg.period1, src)?,
 			fastest: 2. / (cfg.period2 + 1) as ValueType,
 			slowest: 2. / (cfg.period3 + 1) as ValueType,
-			st_dev: StDev::new(cfg.filter_period, src),
+			st_dev: StDev::new(cfg.filter_period, src)?,
 			cross: Cross::default(),
 			last_signal: Action::None,
 			last_signal_value: src,
 			prev_value: src,
-			cfg: cfg,
-		}
+			cfg,
+		})
 	}
 }
 

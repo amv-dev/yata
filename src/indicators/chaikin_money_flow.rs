@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, ValueType, Window, OHLCV};
 use crate::methods::{Cross, ADI};
 
 #[derive(Debug, Clone, Copy)]
@@ -13,23 +13,24 @@ pub struct ChaikinMoneyFlow {
 }
 
 impl IndicatorConfig for ChaikinMoneyFlow {
+	const NAME: &'static str = "ChaikinMoneyFlow";
+
 	fn validate(&self) -> bool {
 		self.size > 1
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"size" => self.size = value.parse().unwrap(),
-
+			"size" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.size = value,
+			},
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn is_volume_based(&self) -> bool {
@@ -44,18 +45,22 @@ impl IndicatorConfig for ChaikinMoneyFlow {
 impl<T: OHLCV> IndicatorInitializer<T> for ChaikinMoneyFlow {
 	type Instance = ChaikinMoneyFlowInstance<T>;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
-		Self::Instance {
-			adi: ADI::new(cfg.size, candle),
+		Ok(Self::Instance {
+			adi: ADI::new(cfg.size, candle)?,
 			vol_sum: candle.volume() * cfg.size as ValueType,
 			window: Window::new(cfg.size, candle.volume()),
 			cross_over: Cross::default(),
 			cfg,
-		}
+		})
 	}
 }
 

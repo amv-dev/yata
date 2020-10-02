@@ -83,7 +83,7 @@ limitations under the License.
 //! use yata::methods::EMA;
 //!
 //! // EMA of length=3
-//! let mut ema = EMA::new(3, 3.0);
+//! let mut ema = EMA::new(3, 3.0).unwrap();
 //!
 //! ema.next(3.0);
 //! ema.next(6.0);
@@ -109,7 +109,7 @@ limitations under the License.
 //!
 //! macd.method3 = RegularMethods::TEMA; // another way of defining methods inside indicators
 //!
-//! let mut macd = macd.init(candles.first());
+//! let mut macd = macd.init(candles.first()).unwrap();
 //!
 //! for candle in candles.take(10) {
 //! 	let result = macd.next(candle);
