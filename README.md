@@ -14,6 +14,11 @@ and [indicators](https://docs.rs/yata/latest/yata/indicators/index.html#structs)
 
 It also provides you an interface to create your own indicators.
 
+```
+[dependencies]
+yata = "0.2"
+```
+
 ## Some commonly used **methods**:
 
 - [Accumulation-distribution index](https://docs.rs/yata/latest/yata/methods/struct.ADI.html);
