@@ -125,18 +125,50 @@ impl Method for SMM {
 
 		// if the old index is before current, then we should offset current value by 1 back
 		let index = index - (old_index < index) as usize;
+		
+		#[allow(unsafe_code)]
+		if cfg!(feature = "unsafe_perfomance") {
+			
+			if index != old_index {
+				let is_after = (index > old_index) as usize;
+				let start = (old_index + 1) * is_after + index * (1 - is_after);
+				let dest = old_index * is_after + (index + 1) * (1 - is_after);
 
-		// moving values inside the sorted slice
-		if index > old_index {
-			self.slice.copy_within((old_index + 1)..=index, old_index);
-		} else if index < old_index {
-			self.slice.copy_within(index..old_index, index + 1);
+				let count = index.saturating_sub(old_index) * is_after
+					+ old_index.saturating_sub(index) * (1 - is_after);
+
+				
+				unsafe {
+					std::ptr::copy(
+						self.slice.as_ptr().add(start),
+						self.slice.as_mut_ptr().add(dest),
+						count,
+					);
+				}
+			}
+
+			unsafe {
+				let q = self.slice.get_unchecked_mut(index);
+				*q = value;
+
+				(self.slice.get_unchecked(self.half as usize) + self.slice.get_unchecked(self.half_m1 as usize)) * 0.5
+			}
+		} else {
+			// moving values inside the sorted slice
+			if index > old_index {
+				self.slice.copy_within((old_index + 1)..=index, old_index);
+			} else if index < old_index {
+				self.slice.copy_within(index..old_index, index + 1);
+			}
+
+			// inserting new value
+			self.slice[index] = value;
+
+			(self.slice[self.half as usize] + self.slice[self.half_m1 as usize]) * 0.5
 		}
 
-		// inserting new value
-		self.slice[index] = value;
-
-		(self.slice[self.half as usize] + self.slice[self.half_m1 as usize]) * 0.5
+		
+		
 	}
 }
 
