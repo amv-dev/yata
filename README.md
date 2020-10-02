@@ -181,11 +181,11 @@ test bench_indicator_aroon                     ... bench:          65 ns/iter (+
 test bench_indicator_average_directional_index ... bench:          71 ns/iter (+/- 1)
 ```
 
-# Current usafe status
+# Current unsafe status
 
 By default there is no `unsafe` code in the crate. But you can optionally enable `unsafe_perfomance` feature throw you `Cargo.toml` or by `--feature` flag in your CLI.
 
-`usafe_perfomance` enables some usafe code blocks, most of them are unsafe access to a vetor's elemens. For some methods it may increase perfomance by ~5-10%.
+`usafe_perfomance` enables some usafe code blocks, most of them are unsafe access to a vector's elemens. For some methods it may increase perfomance by ~5-10%.
 
 # Features
 
