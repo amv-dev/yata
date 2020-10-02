@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, ValueType, OHLC};
 use crate::methods::{Cross, HighestIndex, LowestIndex};
 use std::marker::PhantomData;
 
@@ -40,6 +40,8 @@ pub struct Aroon {
 }
 
 impl IndicatorConfig for Aroon {
+	const NAME: &'static str = "Aroon";
+
 	fn validate(&self) -> bool {
 		self.signal_zone >= 0.0
 			&& self.signal_zone <= 1.0
@@ -47,21 +49,27 @@ impl IndicatorConfig for Aroon {
 			&& self.over_zone_period > 0
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"signal_zone" => self.signal_zone = value.parse().unwrap(),
-			"over_zone_period" => self.over_zone_period = value.parse().unwrap(),
-			"period" => self.period = value.parse().unwrap(),
+			"signal_zone" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.signal_zone = value,
+			},
+			"over_zone_period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.over_zone_period = value,
+			},
+			"period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -72,20 +80,25 @@ impl IndicatorConfig for Aroon {
 impl<T: OHLC> IndicatorInitializer<T> for Aroon {
 	type Instance = AroonInstance<T>;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
-		Self::Instance {
-			lowest_index: LowestIndex::new(cfg.period, candle.low()),
-			highest_index: HighestIndex::new(cfg.period, candle.high()),
+
+		Ok(Self::Instance {
+			lowest_index: LowestIndex::new(cfg.period, candle.low())?,
+			highest_index: HighestIndex::new(cfg.period, candle.high())?,
 			cross: Cross::default(),
 			uptrend: 0,
 			downtrend: 0,
 			cfg,
 			phantom: PhantomData::default(),
-		}
+		})
 	}
 }
 
@@ -113,10 +126,6 @@ pub struct AroonInstance<T: OHLC> {
 
 impl<T: OHLC> IndicatorInstance<T> for AroonInstance<T> {
 	type Config = Aroon;
-
-	fn name(&self) -> &'static str {
-		"Aroon"
-	}
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

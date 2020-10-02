@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, PeriodType, Source, ValueType, OHLC};
+use crate::core::{Action, Error, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 
@@ -16,27 +16,41 @@ pub struct Envelopes {
 }
 
 impl IndicatorConfig for Envelopes {
+	const NAME: &'static str = "ChaikinOscillator";
+
 	fn validate(&self) -> bool {
 		true
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period" => self.period = value.parse().unwrap(),
-			"k" => self.k = value.parse().unwrap(),
-			"method" => self.method = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
-			"source2" => self.source2 = value.parse().unwrap(),
+			"period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period = value,
+			},
+			"k" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.k = value,
+			},
+			"method" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
+			"source2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source2 = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -46,19 +60,23 @@ impl IndicatorConfig for Envelopes {
 
 impl<T: OHLC> IndicatorInitializer<T> for Envelopes {
 	type Instance = EnvelopesInstance;
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let src = candle.source(cfg.source);
 
-		Self::Instance {
-			ma: method(cfg.method, cfg.period, src),
+		Ok(Self::Instance {
+			ma: method(cfg.method, cfg.period, src)?,
 			k_high: 1.0 + cfg.k,
 			k_low: 1.0 - cfg.k,
 			cfg,
-		}
+		})
 	}
 }
 

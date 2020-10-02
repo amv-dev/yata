@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, ValueType, Window, OHLCV};
 use crate::methods::{CrossAbove, CrossUnder};
 
 #[derive(Debug, Clone, Copy)]
@@ -13,24 +13,29 @@ pub struct MoneyFlowIndex {
 }
 
 impl IndicatorConfig for MoneyFlowIndex {
+	const NAME: &'static str = "MoneyFlowIndex";
+
 	fn validate(&self) -> bool {
 		self.zone >= 0. && self.zone <= 0.5
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period" => self.period = value.parse().unwrap(),
-			"zone" => self.zone = value.parse().unwrap(),
+			"period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period = value,
+			},
+			"zone" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.zone = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn is_volume_based(&self) -> bool {
@@ -45,12 +50,16 @@ impl IndicatorConfig for MoneyFlowIndex {
 impl<T: OHLCV> IndicatorInitializer<T> for MoneyFlowIndex {
 	type Instance = MoneyFlowIndexInstance<T>;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
-		Self::Instance {
+		Ok(Self::Instance {
 			window: Window::new(cfg.period, candle),
 			prev_candle: candle,
 			last_prev_candle: candle,
@@ -59,7 +68,7 @@ impl<T: OHLCV> IndicatorInitializer<T> for MoneyFlowIndex {
 			cross_under: CrossUnder::default(),
 			cross_above: CrossAbove::default(),
 			cfg,
-		}
+		})
 	}
 }
 

@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Method, PeriodType, Source, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, Source, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::Momentum;
 
@@ -14,25 +14,33 @@ pub struct MomentumIndex {
 }
 
 impl IndicatorConfig for MomentumIndex {
+	const NAME: &'static str = "MomentumIndex";
+
 	fn validate(&self) -> bool {
-		self.period1 > self.period2
+		self.period2 > 0 && self.period1 > self.period2
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -43,17 +51,22 @@ impl IndicatorConfig for MomentumIndex {
 impl<T: OHLC> IndicatorInitializer<T> for MomentumIndex {
 	type Instance = MomentumIndexInstance;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let src = candle.source(cfg.source);
-		Self::Instance {
-			momentum1: Momentum::new(cfg.period1, src),
-			momentum2: Momentum::new(cfg.period2, src),
+
+		Ok(Self::Instance {
+			momentum1: Momentum::new(cfg.period1, src)?,
+			momentum2: Momentum::new(cfg.period2, src)?,
 			cfg,
-		}
+		})
 	}
 }
 

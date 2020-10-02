@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, OHLCV};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, ADI};
 
@@ -16,25 +16,33 @@ pub struct ChaikinOscillator {
 }
 
 impl IndicatorConfig for ChaikinOscillator {
+	const NAME: &'static str = "ChaikinOscillator";
+
 	fn validate(&self) -> bool {
 		self.period1 < self.period2
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"method" => self.method = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"method" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn is_volume_based(&self) -> bool {
@@ -49,20 +57,24 @@ impl IndicatorConfig for ChaikinOscillator {
 impl<T: OHLCV> IndicatorInitializer<T> for ChaikinOscillator {
 	type Instance = ChaikinOscillatorInstance<T>;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
-		let cfg = self;
-		let adi = ADI::new(cfg.window, candle);
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
 
-		Self::Instance {
-			ma1: method(cfg.method, cfg.period1, adi.get_value()),
-			ma2: method(cfg.method, cfg.period2, adi.get_value()),
+		let cfg = self;
+		let adi = ADI::new(cfg.window, candle)?;
+
+		Ok(Self::Instance {
+			ma1: method(cfg.method, cfg.period1, adi.get_value())?,
+			ma2: method(cfg.method, cfg.period2, adi.get_value())?,
 			adi,
 			cross_over: Cross::default(),
 			cfg,
-		}
+		})
 	}
 }
 

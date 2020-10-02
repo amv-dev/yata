@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Method, PeriodType, ValueType, Window, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{ReverseHighSignal, ReverseLowSignal};
 
@@ -13,24 +13,29 @@ pub struct PivotReversalStrategy {
 }
 
 impl IndicatorConfig for PivotReversalStrategy {
+	const NAME: &'static str = "PivotReversalStrategy";
+
 	fn validate(&self) -> bool {
-		true
+		self.left >= 1 && self.right >= 1
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"left" => self.left = value.parse().unwrap(),
-			"right" => self.right = value.parse().unwrap(),
+			"left" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.left = value,
+			},
+			"right" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.right = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -41,19 +46,23 @@ impl IndicatorConfig for PivotReversalStrategy {
 impl<T: OHLC> IndicatorInitializer<T> for PivotReversalStrategy {
 	type Instance = PivotReversalStrategyInstance<T>;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
-		Self::Instance {
-			ph: ReverseHighSignal::new(cfg.left, cfg.right, candle.high()),
-			pl: ReverseLowSignal::new(cfg.left, cfg.right, candle.low()),
+		Ok(Self::Instance {
+			ph: ReverseHighSignal::new(cfg.left, cfg.right, candle.high())?,
+			pl: ReverseLowSignal::new(cfg.left, cfg.right, candle.low())?,
 			window: Window::new(cfg.right, candle),
 			hprice: 0.,
 			lprice: 0.,
 			cfg,
-		}
+		})
 	}
 }
 

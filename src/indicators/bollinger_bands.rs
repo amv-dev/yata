@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Method, PeriodType, Source, ValueType, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{StDev, SMA};
 
@@ -14,25 +14,33 @@ pub struct BollingerBands {
 }
 
 impl IndicatorConfig for BollingerBands {
+	const NAME: &'static str = "BollingerBands";
+
 	fn validate(&self) -> bool {
 		self.sigma >= 0.0 && self.avg_size > 2
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"avg_size" => self.avg_size = value.parse().unwrap(),
-			"sigma" => self.sigma = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
+			"avg_size" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.avg_size = value,
+			},
+			"sigma" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.sigma = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -43,17 +51,21 @@ impl IndicatorConfig for BollingerBands {
 impl<T: OHLC> IndicatorInitializer<T> for BollingerBands {
 	type Instance = BollingerBandsInstance;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let src = T::source(&candle, cfg.source);
-		Self::Instance {
-			ma: SMA::new(cfg.avg_size, src),
-			st_dev: StDev::new(cfg.avg_size, src),
+		Ok(Self::Instance {
+			ma: SMA::new(cfg.avg_size, src)?,
+			st_dev: StDev::new(cfg.avg_size, src)?,
 			cfg,
-		}
+		})
 	}
 }
 

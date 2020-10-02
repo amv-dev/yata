@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLC, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{Method, PeriodType, Source, ValueType, Window, OHLC, OHLCV};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::Cross;
 
@@ -16,26 +16,37 @@ pub struct EldersForceIndex {
 }
 
 impl IndicatorConfig for EldersForceIndex {
+	const NAME: &'static str = "EldersForceIndex";
+
 	fn validate(&self) -> bool {
 		self.period1 > 1 && self.period2 >= 1
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"method" => self.method = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"method" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn is_volume_based(&self) -> bool {
@@ -50,18 +61,22 @@ impl IndicatorConfig for EldersForceIndex {
 impl<T: OHLCV> IndicatorInitializer<T> for EldersForceIndex {
 	type Instance = EldersForceIndexInstance<T>;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
-		Self::Instance {
-			ma: method(cfg.method, cfg.period1, 0.),
+		Ok(Self::Instance {
+			ma: method(cfg.method, cfg.period1, 0.)?,
 			window: Window::new(cfg.period2, candle),
 			vol_sum: candle.volume() * cfg.period2 as ValueType,
 			cross_over: Cross::default(),
 			cfg,
-		}
+		})
 	}
 }
 

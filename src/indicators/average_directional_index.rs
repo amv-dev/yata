@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::{Error, PeriodType, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::core::{PeriodType, ValueType, Window, OHLC};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 
 /// [Average Directional Index](https://www.investopedia.com/terms/a/adx.asp)
@@ -44,6 +44,8 @@ pub struct AverageDirectionalIndex {
 }
 
 impl IndicatorConfig for AverageDirectionalIndex {
+	const NAME: &'static str = "AverageDirectionalIndex";
+
 	fn validate(&self) -> bool {
 		self.di_length >= 1
 			&& self.adx_smoothing >= 1
@@ -54,26 +56,41 @@ impl IndicatorConfig for AverageDirectionalIndex {
 			&& self.period1 < self.adx_smoothing
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"method1" => self.method1 = value.parse().unwrap(),
-			"di_length" => self.di_length = value.parse().unwrap(),
+			"method1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method1 = value,
+			},
+			"di_length" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.di_length = value,
+			},
 
-			"method2" => self.method2 = value.parse().unwrap(),
-			"adx_smoothing" => self.adx_smoothing = value.parse().unwrap(),
+			"method2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method2 = value,
+			},
+			"adx_smoothing" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.adx_smoothing = value,
+			},
 
-			"period1" => self.period1 = value.parse().unwrap(),
-			"zone" => self.zone = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"zone" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.zone = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -83,21 +100,25 @@ impl IndicatorConfig for AverageDirectionalIndex {
 
 impl<T: OHLC> IndicatorInitializer<T> for AverageDirectionalIndex {
 	type Instance = AverageDirectionalIndexInstance<T>;
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let tr = candle.tr(&candle);
 
-		Self::Instance {
+		Ok(Self::Instance {
 			window: Window::new(cfg.period1, candle),
-			tr_ma: method(cfg.method1, cfg.di_length, tr),
-			plus_di: method(cfg.method1, cfg.di_length, 0.0),
-			minus_di: method(cfg.method1, cfg.di_length, 0.0),
-			ma2: method(cfg.method2, cfg.adx_smoothing, 0.0),
+			tr_ma: method(cfg.method1, cfg.di_length, tr)?,
+			plus_di: method(cfg.method1, cfg.di_length, 0.0)?,
+			minus_di: method(cfg.method1, cfg.di_length, 0.0)?,
+			ma2: method(cfg.method2, cfg.adx_smoothing, 0.0)?,
 			cfg,
-		}
+		})
 	}
 }
 

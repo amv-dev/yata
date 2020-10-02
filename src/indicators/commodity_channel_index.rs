@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Method, PeriodType, Source, ValueType, Window, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::SMA;
 
@@ -15,25 +15,33 @@ pub struct CommodityChannelIndex {
 }
 
 impl IndicatorConfig for CommodityChannelIndex {
+	const NAME: &'static str = "CommodityChannelIndex";
+
 	fn validate(&self) -> bool {
 		self.zone >= 0.0 && self.zone <= 8.0
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period" => self.period = value.parse().unwrap(),
-			"zone" => self.zone = value.parse().unwrap(),
-			"source" => self.source = value.parse().unwrap(),
+			"period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period = value,
+			},
+			"zone" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.zone = value,
+			},
+			"source" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.source = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -44,24 +52,28 @@ impl IndicatorConfig for CommodityChannelIndex {
 impl<T: OHLC> IndicatorInitializer<T> for CommodityChannelIndex {
 	type Instance = CommodityChannelIndexInstance;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 		let invert_length = (cfg.period as ValueType).recip();
 		let value = candle.source(cfg.source);
 
-		Self::Instance {
+		Ok(Self::Instance {
 			last_cci: 0.,
 			last_signal: 0,
 			dev_sum: 0.,
-			sma: SMA::new(cfg.period, value),
+			sma: SMA::new(cfg.period, value)?,
 			window: Window::new(cfg.period, 0.),
 
 			invert_length,
 			cfg,
-		}
+		})
 	}
 }
 

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use super::commodity_channel_index::CommodityChannelIndexInstance;
 use super::CommodityChannelIndex;
-use crate::core::{Action, Method, PeriodType, ValueType, Window, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::signi;
 use crate::methods::{Cross, CrossAbove, CrossUnder, SMA};
@@ -19,27 +19,41 @@ pub struct WoodiesCCI {
 }
 
 impl IndicatorConfig for WoodiesCCI {
+	const NAME: &'static str = "WoodiesCCI";
+
 	fn validate(&self) -> bool {
 		self.period1 > self.period2
 	}
 
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"period1" => self.period1 = value.parse().unwrap(),
-			"period2" => self.period2 = value.parse().unwrap(),
-			"signal1_period" => self.signal1_period = value.parse().unwrap(),
-			"signal1_bars_count" => self.signal2_bars_count = value.parse().unwrap(),
-			"signal3_zone" => self.signal3_zone = value.parse().unwrap(),
+			"period1" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period1 = value,
+			},
+			"period2" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.period2 = value,
+			},
+			"signal1_period" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.signal1_period = value,
+			},
+			"signal1_bars_count" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.signal2_bars_count = value,
+			},
+			"signal3_zone" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.signal3_zone = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	fn size(&self) -> (u8, u8) {
@@ -50,10 +64,14 @@ impl IndicatorConfig for WoodiesCCI {
 impl<T: OHLC> IndicatorInitializer<T> for WoodiesCCI {
 	type Instance = WoodiesCCIInstance;
 
-	fn init(self, candle: T) -> Self::Instance
+	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
 
 		let mut cci1 = CommodityChannelIndex::default();
@@ -61,10 +79,10 @@ impl<T: OHLC> IndicatorInitializer<T> for WoodiesCCI {
 		let mut cci2 = CommodityChannelIndex::default();
 		cci2.period = cfg.period2;
 
-		Self::Instance {
-			cci1: cci1.init(candle),
-			cci2: cci2.init(candle),
-			sma: SMA::new(cfg.signal1_period, 0.),
+		Ok(Self::Instance {
+			cci1: cci1.init(candle)?,
+			cci2: cci2.init(candle)?,
+			sma: SMA::new(cfg.signal1_period, 0.)?,
 			cross1: Cross::default(),
 			cross2: Cross::default(),
 			s2_sum: 0,
@@ -74,7 +92,7 @@ impl<T: OHLC> IndicatorInitializer<T> for WoodiesCCI {
 			cross_above: CrossAbove::default(),
 			cross_under: CrossUnder::default(),
 			cfg,
-		}
+		})
 	}
 }
 
