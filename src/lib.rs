@@ -138,6 +138,7 @@ pub mod methods;
 /// Contains main traits you need to start using this library
 pub mod prelude {
 	pub use super::core::{
-		Candle, IndicatorConfig, IndicatorInitializer, IndicatorInstance, Method, OHLC, OHLCV,
+		Candle, Error, IndicatorConfig, IndicatorInitializer, IndicatorInstance, Method, OHLC,
+		OHLCV,
 	};
 }
