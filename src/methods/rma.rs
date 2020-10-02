@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType};
+use crate::core::{Error, PeriodType, ValueType};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -27,7 +27,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::RMA;
 ///
 /// // RMA of length=3
-/// let mut rma = RMA::new(3, 1.0);
+/// let mut rma = RMA::new(3, 1.0).unwrap();
 ///
 /// rma.next(1.0);
 /// rma.next(2.0);
@@ -66,14 +66,17 @@ impl Method for RMA {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "RMA: length should be > 0");
-
-		let alpha = (length as ValueType).recip();
-		Self {
-			alpha,
-			alpha_rev: 1. - alpha,
-			prev_value: value,
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => {
+				let alpha = (length as ValueType).recip();
+				Ok(Self {
+					alpha,
+					alpha_rev: 1. - alpha,
+					prev_value: value,
+				})
+			}
 		}
 	}
 
@@ -104,7 +107,7 @@ mod tests {
 
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const_float(&mut method, input, output);
@@ -115,7 +118,7 @@ mod tests {
 	fn test_rma1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -129,7 +132,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let mut value2 = src[0];
 			src.iter().enumerate().for_each(|(i, &x)| {

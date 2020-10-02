@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -31,7 +31,7 @@ use serde::{Deserialize, Serialize};
 /// let s = vec![0.0, 1.0, 3.0, 0.5, 2.0, -10.0];
 ///	let r = vec![0.0, 1.0, 2.0,-2.5, 1.5, -12.0];
 ///
-/// let mut derivative = Derivative::new(1, s[0]);
+/// let mut derivative = Derivative::new(1, s[0]).unwrap();
 ///
 /// (0..s.len()).for_each(|i| {
 /// 	let der = derivative.next(s[i]);
@@ -65,11 +65,14 @@ impl Method for Derivative {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		Self {
-			divider: (length as ValueType).recip(),
-			window: Window::new(length, value),
-			initialized: false,
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				divider: (length as ValueType).recip(),
+				window: Window::new(length, value),
+				initialized: false,
+			}),
 		}
 	}
 
@@ -84,20 +87,18 @@ impl Method for Derivative {
 mod tests {
 	#![allow(unused_imports)]
 	use super::{Derivative as TestingMethod, Method};
-	use crate::core::ValueType;
+	use crate::core::{Candle, ValueType};
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
 
 	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_derivative_const() {
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			test_const(&mut method, input, 0.0);
 		}
@@ -107,7 +108,7 @@ mod tests {
 	fn test_derivative1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 		let mut prev = None;
 
 		candles.take(100).map(|x| x.close).for_each(|x| {
@@ -123,7 +124,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let mut value2 = src[0];
 			src.iter().enumerate().for_each(|(i, &x)| {

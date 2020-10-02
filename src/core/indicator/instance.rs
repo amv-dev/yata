@@ -25,7 +25,7 @@ pub trait IndicatorInstance<T: OHLC> {
 	///
 	/// let candles: Vec<_> = RandomCandles::new().take(10).collect();
 	/// let trix = Trix::default();
-	/// let mut state = trix.init(candles[0]);
+	/// let mut state = trix.init(candles[0]).unwrap();
 	///
 	/// let results = state.over(&candles);
 	/// println!("{:?}", results);

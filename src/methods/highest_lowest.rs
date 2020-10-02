@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -31,7 +31,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// let values = [1.0, 2.0, 3.0, 2.0, 1.0, 0.5, 2.0, 3.0];
 /// let r      = [0.0, 1.0, 2.0, 1.0, 2.0, 1.5, 1.5, 2.5];
-/// let mut hld = HighestLowestDelta::new(3, values[0]);
+/// let mut hld = HighestLowestDelta::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
 /// 	let v = hld.next(values[i]);
@@ -68,16 +68,21 @@ impl Method for HighestLowestDelta {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
-		debug_assert!(length > 0, "HighestLowestDelta: length should be > 0");
+		if !value.is_finite() {
+			return Err(Error::InvalidCandles);
+		}
 
-		Self {
-			window: Window::new(length, value),
-			highest: value,
-			lowest: value,
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				window: Window::new(length, value),
+				highest: value,
+				lowest: value,
+			}),
 		}
 	}
 
@@ -136,7 +141,7 @@ impl Method for HighestLowestDelta {
 /// let values = [1.0, 2.0, 3.0, 2.0, 1.0, 0.5, 2.0, 3.0];
 /// let r      = [1.0, 2.0, 3.0, 3.0, 3.0, 2.0, 2.0, 3.0];
 ///
-/// let mut highest = Highest::new(3, values[0]);
+/// let mut highest = Highest::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
 /// 	let v = highest.next(values[i]);
@@ -170,17 +175,17 @@ impl Method for Highest {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		assert!(
-			value.is_finite(),
-			"Highest method cannot operate with NAN values"
-		);
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		if !value.is_finite() {
+			return Err(Error::InvalidCandles);
+		}
 
-		debug_assert!(length > 0, "Highest: length should be > 0");
-
-		Self {
-			window: Window::new(length, value),
-			value,
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				window: Window::new(length, value),
+				value,
+			}),
 		}
 	}
 
@@ -228,7 +233,7 @@ impl Method for Highest {
 /// let values = [1.0, 2.0, 3.0, 2.0, 1.0, 0.5, 2.0, 3.0];
 /// let r      = [1.0, 1.0, 1.0, 2.0, 1.0, 0.5, 0.5, 0.5];
 ///
-/// let mut lowest = Lowest::new(3, values[0]);
+/// let mut lowest = Lowest::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
 /// 	let v = lowest.next(values[i]);
@@ -262,17 +267,17 @@ impl Method for Lowest {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		assert!(
-			value.is_finite(),
-			"Lowest method cannot operate with NAN values"
-		);
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		if !value.is_finite() {
+			return Err(Error::InvalidCandles);
+		}
 
-		debug_assert!(length > 0, "Lowest: length should be > 0");
-
-		Self {
-			window: Window::new(length, value),
-			value,
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				window: Window::new(length, value),
+				value,
+			}),
 		}
 	}
 
@@ -298,21 +303,19 @@ impl Method for Lowest {
 #[cfg(test)]
 mod tests {
 	#![allow(unused_imports)]
-	use crate::core::{PeriodType, ValueType};
+	use super::{Highest, HighestLowestDelta, Lowest};
+	use crate::core::{Method, PeriodType, ValueType};
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
 
 	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-8;
 
 	#[test]
 	fn test_highest_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = Highest::new(i, input);
+			let mut method = Highest::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -321,11 +324,11 @@ mod tests {
 
 	#[test]
 	fn test_highest1() {
-		use super::{Highest as TestingMethod, Method};
+		use super::Highest as TestingMethod;
 
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert_eq!(x.close, ma.next(x.close));
@@ -334,14 +337,14 @@ mod tests {
 
 	#[test]
 	fn test_highest() {
-		use super::{Highest as TestingMethod, Method};
+		use super::Highest as TestingMethod;
 
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(2..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {
@@ -354,13 +357,9 @@ mod tests {
 
 	#[test]
 	fn test_lowest_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = Lowest::new(i, input);
+			let mut method = Lowest::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -369,10 +368,10 @@ mod tests {
 
 	#[test]
 	fn test_lowest1() {
-		use super::{Lowest as TestingMethod, Method};
+		use super::Lowest as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert_eq!(x.close, ma.next(x.close));
@@ -381,13 +380,13 @@ mod tests {
 
 	#[test]
 	fn test_lowest() {
-		use super::{Lowest as TestingMethod, Method};
+		use super::Lowest as TestingMethod;
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(2..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {
@@ -400,13 +399,9 @@ mod tests {
 
 	#[test]
 	fn test_highest_lowest_delta_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = HighestLowestDelta::new(i, input);
+			let mut method = HighestLowestDelta::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -415,10 +410,10 @@ mod tests {
 
 	#[test]
 	fn test_highes_lowest_delta1() {
-		use super::{HighestLowestDelta as TestingMethod, Method};
+		use super::HighestLowestDelta as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert_eq!(0.0, ma.next(x.close));
@@ -427,13 +422,13 @@ mod tests {
 
 	#[test]
 	fn test_highes_lowest_delta() {
-		use super::{HighestLowestDelta as TestingMethod, Method};
+		use super::HighestLowestDelta as TestingMethod;
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(2..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {

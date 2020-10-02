@@ -4,6 +4,7 @@
 
 mod action;
 mod candles;
+mod errors;
 mod indicator;
 mod method;
 mod ohlcv;
@@ -12,6 +13,7 @@ mod window;
 
 pub use action::Action;
 pub use candles::*;
+pub use errors::Error;
 pub use indicator::*;
 pub use method::Method;
 pub use ohlcv::{OHLC, OHLCV};
@@ -39,6 +41,7 @@ pub use window::Window;
 #[cfg(not(feature = "value_type_f32"))]
 pub type ValueType = f64;
 #[cfg(feature = "value_type_f32")]
+#[allow(missing_docs)]
 pub type ValueType = f32;
 
 /// PeriodType is a type for using on methods and indicators params.

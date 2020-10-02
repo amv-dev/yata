@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{Action, ValueType};
+use crate::core::{Action, Error, ValueType};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -67,14 +67,14 @@ impl Method for Cross {
 	type Input = (ValueType, ValueType);
 	type Output = Action;
 
-	fn new(_: Self::Params, value: Self::Input) -> Self
+	fn new(_: Self::Params, value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
-		Self {
-			up: CrossAbove::new((), value),
-			down: CrossUnder::new((), value),
-		}
+		Ok(Self {
+			up: CrossAbove::new((), value).unwrap(),
+			down: CrossUnder::new((), value).unwrap(),
+		})
 	}
 
 	#[inline]
@@ -110,7 +110,7 @@ impl Method for Cross {
 /// use yata::core::Method;
 /// use yata::methods::CrossAbove;
 ///
-/// let mut cross_above = CrossAbove::new((), (0.0, 5.0));
+/// let mut cross_above = CrossAbove::new((), (0.0, 5.0)).unwrap();
 ///
 /// let t1 = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
 /// let t2 = vec![5.0, 3.0, 1.8, 2.9, 4.1, 5.6];
@@ -160,14 +160,14 @@ impl Method for CrossAbove {
 	type Input = (ValueType, ValueType);
 	type Output = Action;
 
-	fn new(_: Self::Params, value: Self::Input) -> Self
+	fn new(_: Self::Params, value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
-		Self {
+		Ok(Self {
 			last_delta: value.0 - value.1,
 			..Self::default()
-		}
+		})
 	}
 
 	#[inline]
@@ -200,7 +200,7 @@ impl Method for CrossAbove {
 /// use yata::core::Method;
 /// use yata::methods::CrossUnder;
 ///
-/// let mut cross_under = CrossUnder::new((), (0.0, 5.0));
+/// let mut cross_under = CrossUnder::new((), (0.0, 5.0)).unwrap();
 ///
 /// let t1 = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
 /// let t2 = vec![5.0, 3.0, 1.8, 2.9, 4.1, 5.6];
@@ -250,14 +250,14 @@ impl Method for CrossUnder {
 	type Input = (ValueType, ValueType);
 	type Output = Action;
 
-	fn new(_: Self::Params, value: Self::Input) -> Self
+	fn new(_: Self::Params, value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
-		Self {
+		Ok(Self {
 			last_delta: value.0 - value.1,
 			..Self::default()
-		}
+		})
 	}
 
 	#[inline]
@@ -269,17 +269,16 @@ impl Method for CrossUnder {
 #[cfg(test)]
 mod tests {
 	#![allow(unused_imports)]
-	use crate::core::ValueType;
+	use crate::core::{Candle, Method, ValueType};
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
 
 	#[test]
 	fn test_cross_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
+		use super::Cross as TestingMethod;
 
 		let input = (7.0, 1.0);
-		let mut cross = Cross::new((), input);
+		let mut cross = TestingMethod::new((), input).unwrap();
 		let output = cross.next(input);
 
 		test_const(&mut cross, input, output);
@@ -288,14 +287,13 @@ mod tests {
 	#[test]
 	fn test_cross() {
 		use super::Cross as TestingMethod;
-		use crate::core::Method;
 
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 		let avg = src.iter().sum::<ValueType>() / src.len() as ValueType;
 
-		let mut ma = TestingMethod::new((), (src[0], avg));
+		let mut ma = TestingMethod::new((), (src[0], avg)).unwrap();
 
 		src.iter().enumerate().for_each(|(i, &x)| {
 			let value1 = ma.next((x, avg)).analog();
@@ -314,12 +312,10 @@ mod tests {
 	}
 	#[test]
 	fn test_cross_above_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
+		use super::CrossAbove as TestingMethod;
 
 		let input = (7.0, 1.0);
-		let mut cross = CrossAbove::new((), input);
+		let mut cross = TestingMethod::new((), input).unwrap();
 		let output = cross.next(input);
 
 		test_const(&mut cross, input, output);
@@ -328,14 +324,13 @@ mod tests {
 	#[test]
 	fn test_cross_above() {
 		use super::CrossAbove as TestingMethod;
-		use crate::core::Method;
 
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 		let avg = src.iter().sum::<ValueType>() / src.len() as ValueType;
 
-		let mut ma = TestingMethod::new((), (src[0], avg));
+		let mut ma = TestingMethod::new((), (src[0], avg)).unwrap();
 
 		src.iter().enumerate().for_each(|(i, &x)| {
 			let value1 = ma.next((x, avg)).analog();
@@ -353,12 +348,10 @@ mod tests {
 
 	#[test]
 	fn test_cross_under_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
+		use super::CrossUnder as TestingMethod;
 
 		let input = (7.0, 1.0);
-		let mut cross = CrossUnder::new((), input);
+		let mut cross = TestingMethod::new((), input).unwrap();
 		let output = cross.next(input);
 
 		test_const(&mut cross, input, output);
@@ -367,14 +360,13 @@ mod tests {
 	#[test]
 	fn test_cross_under() {
 		use super::CrossUnder as TestingMethod;
-		use crate::core::Method;
 
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 		let avg = src.iter().sum::<ValueType>() / src.len() as ValueType;
 
-		let mut ma = TestingMethod::new((), (src[0], avg));
+		let mut ma = TestingMethod::new((), (src[0], avg)).unwrap();
 
 		src.iter().enumerate().for_each(|(i, &x)| {
 			let value1 = ma.next((x, avg)).analog();

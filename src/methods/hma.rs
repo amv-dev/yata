@@ -1,5 +1,5 @@
 use super::WMA;
-use crate::core::{Method, PeriodType, ValueType};
+use crate::core::{Error, Method, PeriodType, ValueType};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -31,7 +31,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// let mut candles = RandomCandles::default();
 ///
-/// let mut hma = HMA::new(5, candles.first().close);
+/// let mut hma = HMA::new(5, candles.first().close).unwrap();
 ///
 /// candles.take(5).enumerate().for_each(|(index, candle)| {
 /// 	println!("HMA at #{} is {}", index, hma.next(candle.close));
@@ -58,20 +58,19 @@ pub struct HMA {
 	wma3: WMA,
 }
 
-// TODO:
-// Rewrite algorithm using signle Window instead of 3 Windows inside WMAs
 impl Method for HMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 1, "HMA: length should be > 1");
-
-		Self {
-			wma1: WMA::new(length / 2, value),
-			wma2: WMA::new(length, value),
-			wma3: WMA::new((length as ValueType).sqrt() as PeriodType, value),
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 | 1 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				wma1: WMA::new(length / 2, value)?,
+				wma2: WMA::new(length, value)?,
+				wma3: WMA::new((length as ValueType).sqrt() as PeriodType, value)?,
+			}),
 		}
 	}
 
@@ -91,19 +90,16 @@ mod tests {
 	use crate::core::Method;
 	use crate::core::{PeriodType, ValueType};
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const_float;
 
 	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-8;
 
 	#[test]
 	fn test_hma_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const_float;
-
 		for i in 2..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const_float(&mut method, input, output);
@@ -117,11 +113,11 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(2..20).for_each(|length| {
-			let mut wma1 = WMA::new(length, src[0]);
-			let mut wma2 = WMA::new(length / 2, src[0]);
-			let mut wma3 = WMA::new((length as ValueType).sqrt() as PeriodType, src[0]);
+			let mut wma1 = WMA::new(length, src[0]).unwrap();
+			let mut wma2 = WMA::new(length / 2, src[0]).unwrap();
+			let mut wma3 = WMA::new((length as ValueType).sqrt() as PeriodType, src[0]).unwrap();
 
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			src.iter().for_each(|&x| {
 				let value1 = ma.next(x);

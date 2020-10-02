@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -31,7 +31,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::LinearVolatility;
 ///
 /// // volatility over 3 periods
-/// let mut vol = LinearVolatility::new(3, 1.0);
+/// let mut vol = LinearVolatility::new(3, 1.0).unwrap();
 /// vol.next(1.0);
 /// vol.next(2.0);
 /// assert_eq!(vol.next(3.0), 2.0);
@@ -58,13 +58,14 @@ impl Method for LinearVolatility {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "LinearVolatility: length should be > 0");
-
-		Self {
-			window: Window::new(length, 0.),
-			prev_value: value,
-			volatility: 0.,
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				window: Window::new(length, 0.),
+				prev_value: value,
+				volatility: 0.,
+			}),
 		}
 	}
 
@@ -83,24 +84,19 @@ impl Method for LinearVolatility {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{LinearVolatility as TestingMethod, Method};
 	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
 	use crate::methods::Derivative;
 
-	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_volatility_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			test_const(&mut method, input, 0.0);
 		}
@@ -110,8 +106,8 @@ mod tests {
 	fn test_volatility1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
-		let mut der = Derivative::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
+		let mut der = Derivative::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			let v1 = der.next(x.close).abs();
@@ -127,7 +123,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|ma_length| {
-			let mut ma = TestingMethod::new(ma_length, src[0]);
+			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
 			let ma_length = ma_length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {

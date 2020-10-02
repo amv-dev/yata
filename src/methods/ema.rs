@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType};
+use crate::core::{Error, PeriodType, ValueType};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -27,7 +27,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::EMA;
 ///
 /// // EMA of length=3
-/// let mut ema = EMA::new(3, 3.0);
+/// let mut ema = EMA::new(3, 3.0).unwrap();
 ///
 /// ema.next(3.0);
 /// ema.next(6.0);
@@ -57,11 +57,14 @@ impl Method for EMA {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "EMA: length should be > 0");
-
-		let alpha = 2. / ((length + 1) as ValueType);
-		Self { alpha, value }
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => {
+				let alpha = 2. / ((length + 1) as ValueType);
+				Ok(Self { alpha, value })
+			}
+		}
 	}
 
 	#[inline]
@@ -89,12 +92,13 @@ impl Method for DMA {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "DMA: length should be > 0");
-
-		Self {
-			ema: EMA::new(length, value),
-			dma: EMA::new(length, value),
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				ema: EMA::new(length, value)?,
+				dma: EMA::new(length, value)?,
+			}),
 		}
 	}
 
@@ -121,12 +125,13 @@ impl Method for TMA {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "TMA: length should be > 0");
-
-		Self {
-			dma: DMA::new(length, value),
-			tma: EMA::new(length, value),
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				dma: DMA::new(length, value)?,
+				tma: EMA::new(length, value)?,
+			}),
 		}
 	}
 
@@ -159,7 +164,7 @@ impl Method for TMA {
 /// use yata::methods::DEMA;
 ///
 /// // DEMA of length=3
-/// let mut dema = DEMA::new(3, 1.0);
+/// let mut dema = DEMA::new(3, 1.0).unwrap();
 ///
 /// dema.next(1.0);
 /// dema.next(2.0);
@@ -190,12 +195,13 @@ impl Method for DEMA {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "DEMA: length should be > 0");
-
-		Self {
-			ema: EMA::new(length, value),
-			dma: EMA::new(length, value),
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				ema: EMA::new(length, value)?,
+				dma: EMA::new(length, value)?,
+			}),
 		}
 	}
 
@@ -232,7 +238,7 @@ impl Method for DEMA {
 /// use yata::methods::TEMA;
 ///
 /// // TEMA of length=3
-/// let mut tema = TEMA::new(3, 1.0);
+/// let mut tema = TEMA::new(3, 1.0).unwrap();
 ///
 /// tema.next(1.0);
 /// tema.next(2.0);
@@ -264,13 +270,14 @@ impl Method for TEMA {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 0, "TEMA: length should be > 0");
-
-		Self {
-			ema: EMA::new(length, value),
-			dma: EMA::new(length, value),
-			tma: EMA::new(length, value),
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 => Err(Error::WrongMethodParameters),
+			length => Ok(Self {
+				ema: EMA::new(length, value)?,
+				dma: EMA::new(length, value)?,
+				tma: EMA::new(length, value)?,
+			}),
 		}
 	}
 
@@ -288,21 +295,19 @@ impl Method for TEMA {
 #[cfg(test)]
 mod tests {
 	#![allow(unused_imports)]
-	use crate::core::ValueType;
+	use super::{DEMA, DMA, EMA, TEMA, TMA};
+	use crate::core::{Method, ValueType};
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const_float;
 
 	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_ema_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const_float;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = EMA::new(i, input);
+			let mut method = EMA::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const_float(&mut method, input, output);
@@ -311,10 +316,10 @@ mod tests {
 
 	#[test]
 	fn test_ema1() {
-		use super::{Method, EMA as TestingMethod};
+		use super::EMA as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -323,13 +328,13 @@ mod tests {
 
 	#[test]
 	fn test_ema() {
-		use super::{Method, EMA as TestingMethod};
+		use super::EMA as TestingMethod;
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
 
@@ -355,13 +360,9 @@ mod tests {
 
 	#[test]
 	fn test_dma_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const_float;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = DMA::new(i, input);
+			let mut method = DMA::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const_float(&mut method, input, output);
@@ -370,10 +371,10 @@ mod tests {
 
 	#[test]
 	fn test_dma1() {
-		use super::{Method, DMA as TestingMethod};
+		use super::DMA as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -382,13 +383,13 @@ mod tests {
 
 	#[test]
 	fn test_dma() {
-		use super::{Method, DMA as TestingMethod};
+		use super::DMA as TestingMethod;
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
 
@@ -419,13 +420,9 @@ mod tests {
 
 	#[test]
 	fn test_dema_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const_float;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = DEMA::new(i, input);
+			let mut method = DEMA::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const_float(&mut method, input, output);
@@ -434,10 +431,10 @@ mod tests {
 
 	#[test]
 	fn test_dema1() {
-		use super::{Method, DEMA as TestingMethod};
+		use super::DEMA as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -446,13 +443,13 @@ mod tests {
 
 	#[test]
 	fn test_dema() {
-		use super::{Method, DEMA as TestingMethod};
+		use super::DEMA as TestingMethod;
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
 
@@ -483,13 +480,9 @@ mod tests {
 
 	#[test]
 	fn test_tma_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const_float;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TMA::new(i, input);
+			let mut method = TMA::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const_float(&mut method, input, output);
@@ -498,10 +491,10 @@ mod tests {
 
 	#[test]
 	fn test_tma1() {
-		use super::{Method, TMA as TestingMethod};
+		use super::TMA as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -510,13 +503,13 @@ mod tests {
 
 	#[test]
 	fn test_tma() {
-		use super::{Method, TMA as TestingMethod};
+		use super::TMA as TestingMethod;
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
 
@@ -550,13 +543,9 @@ mod tests {
 
 	#[test]
 	fn test_tema_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const_float;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TEMA::new(i, input);
+			let mut method = TEMA::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const_float(&mut method, input, output);
@@ -568,7 +557,7 @@ mod tests {
 		use super::{Method, TEMA as TestingMethod};
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -583,7 +572,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
 

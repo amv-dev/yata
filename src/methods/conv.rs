@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -48,17 +48,20 @@ impl Method for Conv {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(weights: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(weights.len() > 0, "Conv: weights length must be > 0");
+	fn new(weights: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match weights.len() {
+			0 => Err(Error::WrongMethodParameters),
+			_ => {
+				let wsum_invert = weights.iter().sum::<ValueType>().recip();
 
-		let wsum_invert = weights.iter().sum::<ValueType>().recip();
+				Ok(Self {
+					window: Window::new(weights.len() as PeriodType, value),
+					weights,
+					wsum_invert,
 
-		Self {
-			window: Window::new(weights.len() as PeriodType, value),
-			weights,
-			wsum_invert,
-
-			initialized: false,
+					initialized: false,
+				})
+			}
 		}
 	}
 
@@ -102,7 +105,7 @@ mod tests {
 		for i in 1..30 {
 			let weights = get_weights(i);
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(weights, input);
+			let mut method = TestingMethod::new(weights, input).unwrap();
 
 			let output = method.next(input);
 			test_const_float(&mut method, input, output);
@@ -114,7 +117,7 @@ mod tests {
 		let mut candles = RandomCandles::default();
 
 		let weights = get_weights(1);
-		let mut ma = TestingMethod::new(weights, candles.first().close);
+		let mut ma = TestingMethod::new(weights, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -131,7 +134,7 @@ mod tests {
 			let mut weights = get_weights(weights_count);
 			let wsum: ValueType = weights.iter().sum();
 
-			let mut ma = TestingMethod::new(weights.clone(), src[0]);
+			let mut ma = TestingMethod::new(weights.clone(), src[0]).unwrap();
 			weights.reverse();
 
 			src.iter().enumerate().for_each(|(i, &x)| {

@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType};
+use crate::core::{Error, PeriodType, ValueType};
 use crate::methods::EMA;
 
 #[cfg(feature = "serde")]
@@ -30,7 +30,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::WSMA;
 ///
 /// // WSMA of length=3
-/// let mut wsma = WSMA::new(4, 2.0);
+/// let mut wsma = WSMA::new(4, 2.0).unwrap();
 ///
 /// wsma.next(3.0);
 /// wsma.next(6.0);
@@ -48,19 +48,19 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WSMA(EMA);
 
+const MAX_PERIOD: PeriodType = PeriodType::MAX / 2;
+
 impl Method for WSMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(
-			length > 0 && length < PeriodType::MAX / 2,
-			"WSMA: length should be > 0 and < {}",
-			PeriodType::MAX / 2
-		);
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		if length > MAX_PERIOD {
+			return Err(Error::WrongMethodParameters);
+		}
 
-		Self(EMA::new(length * 2 - 1, value))
+		Ok(Self(EMA::new(length * 2 - 1, value)?))
 	}
 
 	#[inline]
@@ -76,7 +76,6 @@ mod tests {
 	use crate::helpers::RandomCandles;
 	use crate::methods::tests::test_const_float;
 
-	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-5;
 
 	use super::WSMA as TestingMethod;
@@ -85,7 +84,7 @@ mod tests {
 	fn test_wsma_const() {
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const_float(&mut method, input, output);
@@ -95,7 +94,7 @@ mod tests {
 	#[test]
 	fn test_wsma1() {
 		let mut candles = RandomCandles::default();
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -108,7 +107,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let mut prev_value = src[0];
 			src.iter().enumerate().for_each(|(i, &x)| {

@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Method, PeriodType, ValueType};
+use crate::core::{Error, Method, PeriodType, ValueType};
 use crate::methods::*;
 
 use std::convert::TryFrom;
@@ -209,7 +209,7 @@ impl TryFrom<String> for RegularMethods {
 /// ```
 /// use yata::helpers::{method, RegularMethods};
 ///
-/// let mut m = method(RegularMethods::SMA, 3, 1.0);
+/// let mut m = method(RegularMethods::SMA, 3, 1.0).unwrap();
 ///
 /// m.next(1.0);
 /// m.next(2.0);
@@ -224,7 +224,7 @@ impl TryFrom<String> for RegularMethods {
 /// use std::convert::TryInto;
 ///
 /// let mut s:Sequence<_> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
-/// let mut ma = method("sma".try_into().unwrap(), 2, s[0]);
+/// let mut ma = method("sma".try_into().unwrap(), 2, s[0]).unwrap();
 ///
 /// s.apply(ma.as_mut());
 /// assert_eq!(s.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);
@@ -239,8 +239,8 @@ impl TryFrom<String> for RegularMethods {
 ///
 /// let my_method = String::from("wma");
 /// let mut s:Sequence<_> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
-/// let mut wma1 = method(my_method.try_into().unwrap(), 4, s[0]);
-/// let mut wma2 = WMA::new(4, s[0]);
+/// let mut wma1 = method(my_method.try_into().unwrap(), 4, s[0]).unwrap();
+/// let mut wma2 = WMA::new(4, s[0]).unwrap();
 ///
 /// let s1:Vec<ValueType> = s.iter().map(|&x| wma1.next(x)).collect();
 /// let s2:Vec<ValueType> = wma2.iter_data(s.iter().copied()).collect();
@@ -255,37 +255,39 @@ pub fn method(
 	method: RegularMethods,
 	length: PeriodType,
 	initial_value: ValueType,
-) -> RegularMethod {
+) -> Result<RegularMethod, Error> {
 	match method {
-		RegularMethods::SMA => Box::new(SMA::new(length, initial_value)),
-		RegularMethods::WMA => Box::new(WMA::new(length, initial_value)),
-		RegularMethods::HMA => Box::new(HMA::new(length, initial_value)),
-		RegularMethods::RMA => Box::new(RMA::new(length, initial_value)),
-		RegularMethods::EMA => Box::new(EMA::new(length, initial_value)),
-		RegularMethods::DMA => Box::new(DMA::new(length, initial_value)),
-		RegularMethods::DEMA => Box::new(DEMA::new(length, initial_value)),
-		RegularMethods::TMA => Box::new(TMA::new(length, initial_value)),
-		RegularMethods::TEMA => Box::new(TEMA::new(length, initial_value)),
-		RegularMethods::WSMA => Box::new(WSMA::new(length, initial_value)),
-		RegularMethods::SMM => Box::new(SMM::new(length, initial_value)),
-		RegularMethods::SWMA => Box::new(SWMA::new(length, initial_value)),
-		RegularMethods::LinReg => Box::new(LinReg::new(length, initial_value)),
-		RegularMethods::TRIMA => Box::new(TRIMA::new(length, initial_value)),
+		RegularMethods::SMA => Ok(Box::new(SMA::new(length, initial_value)?)),
+		RegularMethods::WMA => Ok(Box::new(WMA::new(length, initial_value)?)),
+		RegularMethods::HMA => Ok(Box::new(HMA::new(length, initial_value)?)),
+		RegularMethods::RMA => Ok(Box::new(RMA::new(length, initial_value)?)),
+		RegularMethods::EMA => Ok(Box::new(EMA::new(length, initial_value)?)),
+		RegularMethods::DMA => Ok(Box::new(DMA::new(length, initial_value)?)),
+		RegularMethods::DEMA => Ok(Box::new(DEMA::new(length, initial_value)?)),
+		RegularMethods::TMA => Ok(Box::new(TMA::new(length, initial_value)?)),
+		RegularMethods::TEMA => Ok(Box::new(TEMA::new(length, initial_value)?)),
+		RegularMethods::WSMA => Ok(Box::new(WSMA::new(length, initial_value)?)),
+		RegularMethods::SMM => Ok(Box::new(SMM::new(length, initial_value)?)),
+		RegularMethods::SWMA => Ok(Box::new(SWMA::new(length, initial_value)?)),
+		RegularMethods::LinReg => Ok(Box::new(LinReg::new(length, initial_value)?)),
+		RegularMethods::TRIMA => Ok(Box::new(TRIMA::new(length, initial_value)?)),
 
-		RegularMethods::Past | RegularMethods::Move => Box::new(Past::new(length, initial_value)),
-		RegularMethods::Derivative => Box::new(Derivative::new(length, initial_value)),
-		RegularMethods::Integral => Box::new(Integral::new(length, initial_value)),
-		RegularMethods::StDev => Box::new(StDev::new(length, initial_value)),
+		RegularMethods::Past | RegularMethods::Move => {
+			Ok(Box::new(Past::new(length, initial_value)?))
+		}
+		RegularMethods::Derivative => Ok(Box::new(Derivative::new(length, initial_value)?)),
+		RegularMethods::Integral => Ok(Box::new(Integral::new(length, initial_value)?)),
+		RegularMethods::StDev => Ok(Box::new(StDev::new(length, initial_value)?)),
 		RegularMethods::Momentum | RegularMethods::Change => {
-			Box::new(Momentum::new(length, initial_value))
+			Ok(Box::new(Momentum::new(length, initial_value)?))
 		}
 		RegularMethods::RateOfChange | RegularMethods::ROC => {
-			Box::new(RateOfChange::new(length, initial_value))
+			Ok(Box::new(RateOfChange::new(length, initial_value)?))
 		}
-		RegularMethods::Highest => Box::new(Highest::new(length, initial_value)),
-		RegularMethods::Lowest => Box::new(Lowest::new(length, initial_value)),
+		RegularMethods::Highest => Ok(Box::new(Highest::new(length, initial_value)?)),
+		RegularMethods::Lowest => Ok(Box::new(Lowest::new(length, initial_value)?)),
 		RegularMethods::HighestLowestDelta => {
-			Box::new(HighestLowestDelta::new(length, initial_value))
+			Ok(Box::new(HighestLowestDelta::new(length, initial_value)?))
 		}
 	}
 }

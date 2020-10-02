@@ -1,4 +1,4 @@
-use super::Sequence;
+use super::{Error, Sequence};
 use std::fmt;
 
 /// Trait for creating methods for timeseries
@@ -12,7 +12,7 @@ use std::fmt;
 /// use yata::prelude::*;
 ///
 /// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
-/// let mut ma = SMA::new(2, s[0]);
+/// let mut ma = SMA::new(2, s[0]).unwrap();
 ///
 /// s.iter().enumerate().for_each(|(index, &value)| {
 /// 	assert_eq!(ma.next(value), (value + s[index.saturating_sub(1)])/2.);
@@ -26,7 +26,7 @@ use std::fmt;
 /// use yata::prelude::*;
 ///
 /// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
-/// let mut ma = SMA::new(2, s[0]);
+/// let mut ma = SMA::new(2, s[0]).unwrap();
 ///
 /// let result = ma.over(s.iter().copied());
 /// assert_eq!(result.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);
@@ -40,7 +40,7 @@ use std::fmt;
 /// use yata::prelude::*;
 ///
 /// let mut s: Sequence<_> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
-/// let mut ma = SMA::new(2, s[0]);
+/// let mut ma = SMA::new(2, s[0]).unwrap();
 ///
 /// s.apply(&mut ma);
 /// assert_eq!(s.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);
@@ -57,7 +57,7 @@ pub trait Method: fmt::Debug {
 	type Output: Copy; // = Self::Input;
 
 	/// Static method for creating an instance of the method with given `parameters` and initial `value` (simply first input value)
-	fn new(parameters: Self::Params, initial_value: Self::Input) -> Self
+	fn new(parameters: Self::Params, initial_value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized;
 
@@ -97,7 +97,7 @@ pub trait Method: fmt::Debug {
 	/// use yata::prelude::*;
 	///
 	/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
-	/// let mut ma = SMA::new(5, s[0]);
+	/// let mut ma = SMA::new(5, s[0]).unwrap();
 	///
 	/// let result = ma.over(s.iter().copied());
 	/// assert_eq!(result.len(), s.len());
@@ -108,7 +108,7 @@ pub trait Method: fmt::Debug {
 	/// use yata::prelude::*;
 	///
 	/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
-	/// let mut ma = SMA::new(100, s[0]);
+	/// let mut ma = SMA::new(100, s[0]).unwrap();
 	///
 	/// let result = ma.over(s.iter().copied());
 	/// assert_eq!(result.len(), s.len());

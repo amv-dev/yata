@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 use crate::methods::SMA;
 
 #[cfg(feature = "serde")]
@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///
-/// `length` should be > 0
+/// `length` should be > 1
 ///
 /// # Input type
 ///
@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::StDev;
 ///
 /// // StDev over the window with length=3
-/// let mut stdev = StDev::new(3, 1.0);
+/// let mut stdev = StDev::new(3, 1.0).unwrap();
 ///
 /// stdev.next(1.0);
 /// stdev.next(2.0);
@@ -59,20 +59,23 @@ impl Method for StDev {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		debug_assert!(length > 1, "StDev: length should be > 1");
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		match length {
+			0 | 1 => Err(Error::WrongMethodParameters),
+			length => {
+				let k = ((length - 1) as ValueType).recip();
 
-		let k = ((length - 1) as ValueType).recip();
-
-		let float_length = length as ValueType;
-		let val_sum = value * float_length;
-		Self {
-			float_length,
-			val_sum,
-			sq_val_sum: value * val_sum,
-			k,
-			window: Window::new(length, value),
-			ma: SMA::new(length, value),
+				let float_length = length as ValueType;
+				let val_sum = value * float_length;
+				Ok(Self {
+					float_length,
+					val_sum,
+					sq_val_sum: value * val_sum,
+					k,
+					window: Window::new(length, value),
+					ma: SMA::new(length, value)?,
+				})
+			}
 		}
 	}
 
@@ -93,23 +96,18 @@ impl Method for StDev {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{Method, StDev as TestingMethod};
 	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const_float;
 
-	#[allow(dead_code)]
 	const SIGMA: ValueType = 5e-4;
 
 	#[test]
 	fn test_st_dev_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const_float;
-
 		for i in 2..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			test_const_float(&mut method, input, 0.0);
 		}
@@ -133,7 +131,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(2..20).for_each(|ma_length| {
-			let mut ma = TestingMethod::new(ma_length, src[0]);
+			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
 			let ma_length = ma_length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {

@@ -1,5 +1,5 @@
 use crate::core::Method;
-use crate::core::{PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -27,7 +27,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::Integral;
 ///
 /// // Integrates over last 3 values
-/// let mut integral = Integral::new(3, 1.0);
+/// let mut integral = Integral::new(3, 1.0).unwrap();
 ///
 /// integral.next(1.0);
 /// integral.next(2.0);
@@ -41,7 +41,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::Integral;
 ///
 /// // Integrates since the beginning
-/// let mut integral = Integral::new(0, 1.0); // same as Integral::default()
+/// let mut integral = Integral::new(0, 1.0).unwrap(); // same as Integral::default()
 ///
 /// integral.next(1.0);
 /// integral.next(2.0);
@@ -57,7 +57,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// let s = [1.0, 2.0, 3.0, 3.0, 2.5, 3.5, 5.0];
 /// let mut integral = Integral::default();
-/// let mut derivative = Derivative::new(1, s[0]);
+/// let mut derivative = Derivative::new(1, s[0]).unwrap();
 ///
 /// (&s).iter().for_each(|&v| {
 /// 	let integration_constant = s[0];
@@ -93,11 +93,11 @@ impl Method for Integral {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Self {
-		Self {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		Ok(Self {
 			window: Window::new(length, value),
 			value: value * length as ValueType,
-		}
+		})
 	}
 
 	#[inline]
@@ -114,7 +114,7 @@ impl Method for Integral {
 
 impl Default for Integral {
 	fn default() -> Self {
-		Self::new(0, 0.0)
+		Self::new(0, 0.0).unwrap()
 	}
 }
 
@@ -124,19 +124,15 @@ mod tests {
 	use super::{Integral as TestingMethod, Method};
 	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
+	use crate::methods::tests::test_const;
 
-	#[allow(dead_code)]
 	const SIGMA: ValueType = 1e-4;
 
 	#[test]
 	fn test_integral_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		for i in 1..30 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input);
+			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
 			test_const(&mut method, input, output);
@@ -151,7 +147,7 @@ mod tests {
 		use crate::methods::tests::test_const;
 
 		let input = (5.0 + 56.0) / 16.3251;
-		let mut method = TestingMethod::new(0, input);
+		let mut method = TestingMethod::new(0, input).unwrap();
 
 		let output = method.next(input);
 		test_const(&mut method, input, output);
@@ -164,7 +160,7 @@ mod tests {
 			.map(|x| x.close)
 			.collect();
 
-		let mut ma = TestingMethod::new(0, src[0]);
+		let mut ma = TestingMethod::new(0, src[0]).unwrap();
 		let mut q = Vec::new();
 
 		src.iter().enumerate().for_each(|(i, &x)| {
@@ -180,7 +176,7 @@ mod tests {
 	fn test_integral1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close);
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
 			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
@@ -194,7 +190,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
 		(1..20).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]);
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {
