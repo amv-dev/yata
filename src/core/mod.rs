@@ -75,8 +75,11 @@ pub type PeriodType = u8;
 	feature = "period_type_u16",
 	not(any(feature = "period_type_u32", feature = "period_type_u64"))
 ))]
+#[allow(missing_docs)]
 pub type PeriodType = u16;
 #[cfg(all(feature = "period_type_u32", not(feature = "period_type_u64")))]
+#[allow(missing_docs)]
 pub type PeriodType = u32;
 #[cfg(feature = "period_type_u64")]
+#[allow(missing_docs)]
 pub type PeriodType = u64;
