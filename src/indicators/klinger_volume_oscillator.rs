@@ -17,7 +17,7 @@ pub struct KlingerVolumeOscillator {
 }
 
 impl IndicatorConfig for KlingerVolumeOscillator {
-	const NAME: &'static str = "Aroon";
+	const NAME: &'static str = "KlingerVolumeOscillator";
 
 	fn validate(&self) -> bool {
 		self.period1 < self.period2

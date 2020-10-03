@@ -20,7 +20,7 @@ pub struct Trix {
 }
 
 impl IndicatorConfig for Trix {
-	const NAME: &'static str = "MACD";
+	const NAME: &'static str = "Trix";
 
 	fn validate(&self) -> bool {
 		self.period1 > 2 && self.period2 > 1

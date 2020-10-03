@@ -5,7 +5,7 @@
 //! The idea is to find signals where price of timeseries crosses this config's `price` for the last `period` frames.
 
 // Some core structures and traits
-use crate::core::{Action, IndicatorResult, PeriodType, Source, ValueType};
+use crate::core::{Action, Error, IndicatorResult, PeriodType, Source, ValueType};
 use crate::prelude::*;
 
 // Cross method for searching crossover between price and our value
@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Must implement `Debug`, `Clone`, `Default`, [`IndicatorConfig`](crate::core::IndicatorConfig) and [`IndicatorInitializer`](crate::core::IndicatorInitializer) traits.
 ///
-/// Also it can implement `serde::{Serialize, Deserialize}` - it's up to you.
+/// Also it may implements `serde::{Serialize, Deserialize}` - it's up to you.
 ///
 /// See source code for the full example
 #[derive(Debug, Clone, Copy)]
@@ -33,25 +33,27 @@ pub struct Example {
 
 /// Implementing [`IndicatorConfig`](crate::core::IndicatorConfig) trait
 impl IndicatorConfig for Example {
+	const NAME: &'static str = "Example";
+
 	/// Validates config values to be consistent
 	fn validate(&self) -> bool {
 		self.price > 0.0
 	}
 
 	/// Sets attributes of config by given name and value by `String`
-	fn set(&mut self, name: &str, value: String) {
+	fn set(&mut self, name: &str, value: String) -> Option<Error> {
 		match name {
-			"price" => self.price = value.parse().unwrap(),
+			"price" => match value.parse() {
+				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.price = value,
+			},
 
 			_ => {
-				dbg!(format!(
-					"Unknown attribute `{:}` with value `{:}` for `{:}`",
-					name,
-					value,
-					std::any::type_name::<Self>(),
-				));
+				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
 			}
 		};
+
+		None
 	}
 
 	/// Our indicator will return single raw value and two signals
@@ -64,17 +66,21 @@ impl IndicatorConfig for Example {
 impl<T: OHLC> IndicatorInitializer<T> for Example {
 	type Instance = ExampleInstance;
 
-	fn init(self, _candle: T) -> Self::Instance
+	fn init(self, _candle: T) -> Result<Self::Instance, Error>
 	where
 		Self: Sized,
 	{
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
 		let cfg = self;
-		Self::Instance {
+		Ok(Self::Instance {
 			cross: Cross::default(),
 			last_signal: Action::None,
 			last_signal_position: 0,
 			cfg,
-		}
+		})
 	}
 }
 

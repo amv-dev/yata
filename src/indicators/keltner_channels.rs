@@ -17,7 +17,7 @@ pub struct KeltnerChannels {
 }
 
 impl IndicatorConfig for KeltnerChannels {
-	const NAME: &'static str = "Aroon";
+	const NAME: &'static str = "KeltnerChannels";
 
 	fn validate(&self) -> bool {
 		self.period > 1 && self.sigma > 1e-4

@@ -13,7 +13,7 @@ pub struct PriceChannelStrategy {
 }
 
 impl IndicatorConfig for PriceChannelStrategy {
-	const NAME: &'static str = "MomentumIndex";
+	const NAME: &'static str = "PriceChannelStrategy";
 
 	fn validate(&self) -> bool {
 		self.period > 1 && self.sigma > 0.

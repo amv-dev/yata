@@ -16,7 +16,7 @@ pub struct Envelopes {
 }
 
 impl IndicatorConfig for Envelopes {
-	const NAME: &'static str = "ChaikinOscillator";
+	const NAME: &'static str = "Envelopes";
 
 	fn validate(&self) -> bool {
 		true

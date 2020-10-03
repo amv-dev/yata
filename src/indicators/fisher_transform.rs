@@ -22,7 +22,7 @@ pub struct FisherTransform {
 }
 
 impl IndicatorConfig for FisherTransform {
-	const NAME: &'static str = "Aroon";
+	const NAME: &'static str = "FisherTransform";
 
 	fn validate(&self) -> bool {
 		self.period1 >= 3 && self.delta >= 1 && self.period2 >= 1
