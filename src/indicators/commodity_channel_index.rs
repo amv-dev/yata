@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, Window, OHLC};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::methods::SMA;
+use crate::methods::CCI;
 
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -61,17 +61,13 @@ impl<T: OHLC> IndicatorInitializer<T> for CommodityChannelIndex {
 		}
 
 		let cfg = self;
-		let invert_length = (cfg.period as ValueType).recip();
 		let value = candle.source(cfg.source);
 
 		Ok(Self::Instance {
 			last_cci: 0.,
 			last_signal: 0,
-			dev_sum: 0.,
-			sma: SMA::new(cfg.period, value)?,
-			window: Window::new(cfg.period, 0.),
+			cci: CCI::new(cfg.period, value)?,
 
-			invert_length,
 			cfg,
 		})
 	}
@@ -94,29 +90,9 @@ impl Default for CommodityChannelIndex {
 pub struct CommodityChannelIndexInstance {
 	cfg: CommodityChannelIndex,
 
-	invert_length: ValueType,
+	cci: CCI,
 	last_cci: ValueType,
 	last_signal: i8,
-	dev_sum: ValueType,
-	sma: SMA,
-	window: Window<ValueType>,
-}
-
-impl CommodityChannelIndexInstance {
-	fn dev(&mut self, value: ValueType, ma: ValueType) -> ValueType {
-		let d = (value - ma).abs();
-
-		let past_d = self.window.push(d);
-		self.dev_sum += (d - past_d) * self.invert_length;
-		self.dev_sum
-	}
-
-	fn cci(&mut self, value: ValueType) -> ValueType {
-		let ma = self.sma.next(value);
-		let dev = self.dev(value, ma);
-
-		(value - ma) / (dev * self.cfg.scale)
-	}
 }
 
 impl<T: OHLC> IndicatorInstance<T> for CommodityChannelIndexInstance {
@@ -129,7 +105,7 @@ impl<T: OHLC> IndicatorInstance<T> for CommodityChannelIndexInstance {
 	fn next(&mut self, candle: T) -> IndicatorResult {
 		let value = candle.source(self.cfg.source);
 
-		let cci = self.cci(value);
+		let cci = self.cci.next(value);
 
 		// let mut t_signal = 0;
 		// let mut signal = 0;
