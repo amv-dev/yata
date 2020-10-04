@@ -92,6 +92,7 @@ mod tests {
 	}
 
 	#[test]
+	#[should_panic]
 	fn test_median_abs_dev1() {
 		let mut candles = RandomCandles::default();
 
