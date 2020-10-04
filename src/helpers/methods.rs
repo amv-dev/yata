@@ -99,6 +99,10 @@ pub enum RegularMethods {
 	#[cfg_attr(feature = "serde", serde(rename = "mean_abs_dev"))]
 	MeanAbsDev,
 
+	/// [Median Absolute Deviation](crate::methods::MedianAbsDev)
+	#[cfg_attr(feature = "serde", serde(rename = "mean_abs_dev"))]
+	MedianAbsDev,
+
 	/// [Standart Deviation](crate::methods::StDev)
 	#[cfg_attr(feature = "serde", serde(rename = "st_dev"))]
 	StDev,
@@ -160,6 +164,7 @@ impl FromStr for RegularMethods {
 			"derivative" => Ok(Self::Derivative),
 			"integral" => Ok(Self::Integral),
 			"mean_abs_dev" => Ok(Self::MeanAbsDev),
+			"median_abs_dev" => Ok(Self::MedianAbsDev),
 			"st_dev" | "stdev" => Ok(Self::StDev),
 			"cci" => Ok(Self::CCI),
 			"momentum" | "change" => Ok(Self::Momentum),
@@ -210,6 +215,7 @@ impl TryFrom<String> for RegularMethods {
 /// * `past`, `move` - [moves timeseries forward](Past)
 /// * `derivative` - [derivative](Derivative)
 /// * `mean_abs_dev` - [mead absolute deviation](MeanAbsDev)
+/// * `median_abs_dev` - [median absolute deviation](MedianAbsDev)
 /// * `st_dev` - [standart deviation](StDev)
 /// * `cci` - [Commodity channel index](CCI)
 /// * `momentum`, `change` - [absolute change of values](Momentum)
@@ -290,6 +296,7 @@ pub fn method(
 		RegularMethods::Derivative => Ok(Box::new(Derivative::new(length, initial_value)?)),
 		RegularMethods::Integral => Ok(Box::new(Integral::new(length, initial_value)?)),
 		RegularMethods::MeanAbsDev => Ok(Box::new(MeanAbsDev::new(length, initial_value)?)),
+		RegularMethods::MedianAbsDev => Ok(Box::new(MedianAbsDev::new(length, initial_value)?)),
 		RegularMethods::StDev => Ok(Box::new(StDev::new(length, initial_value)?)),
 		RegularMethods::CCI => Ok(Box::new(CCI::new(length, initial_value)?)),
 		RegularMethods::Momentum | RegularMethods::Change => {

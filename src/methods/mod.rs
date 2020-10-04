@@ -72,6 +72,8 @@ mod cci;
 pub use cci::*;
 mod mean_abs_dev;
 pub use mean_abs_dev::*;
+mod median_abs_dev;
+pub use median_abs_dev::*;
 
 mod cross;
 pub use cross::*;

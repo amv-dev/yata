@@ -87,6 +87,29 @@ pub struct SMM {
 	slice: Vec<ValueType>,
 }
 
+impl SMM {
+	/// Returns inner [`Window`](crate::core::Window). Useful for implementing in other methods and indicators.
+	#[inline]
+	pub fn get_window(&self) -> &Window<ValueType> {
+		&self.window
+	}
+
+	/// Returns last result value. Useful for implementing in other methods and indicators.
+	#[allow(unsafe_code)]
+	#[inline]
+	pub fn get_last_value(&self) -> ValueType {
+		if cfg!(feature = "unsafe_perfomance") {
+			unsafe {
+				(self.slice.get_unchecked(self.half as usize)
+					+ self.slice.get_unchecked(self.half_m1 as usize))
+					* 0.5
+			}
+		} else {
+			(self.slice[self.half as usize] + self.slice[self.half_m1 as usize]) * 0.5
+		}
+	}
+}
+
 impl Method for SMM {
 	type Params = PeriodType;
 	type Input = ValueType;
@@ -127,10 +150,8 @@ impl Method for SMM {
 
 		// if the old index is before current, then we should offset current value by 1 back
 		let index = index - (old_index < index) as usize;
-		
 		#[allow(unsafe_code)]
 		if cfg!(feature = "unsafe_perfomance") {
-			
 			if index != old_index {
 				let is_after = (index > old_index) as usize;
 				let start = (old_index + 1) * is_after + index * (1 - is_after);
@@ -139,7 +160,6 @@ impl Method for SMM {
 				let count = index.saturating_sub(old_index) * is_after
 					+ old_index.saturating_sub(index) * (1 - is_after);
 
-				
 				unsafe {
 					std::ptr::copy(
 						self.slice.as_ptr().add(start),
@@ -152,8 +172,6 @@ impl Method for SMM {
 			unsafe {
 				let q = self.slice.get_unchecked_mut(index);
 				*q = value;
-
-				(self.slice.get_unchecked(self.half as usize) + self.slice.get_unchecked(self.half_m1 as usize)) * 0.5
 			}
 		} else {
 			// moving values inside the sorted slice
@@ -165,12 +183,9 @@ impl Method for SMM {
 
 			// inserting new value
 			self.slice[index] = value;
-
-			(self.slice[self.half as usize] + self.slice[self.half_m1 as usize]) * 0.5
 		}
 
-		
-		
+		self.get_last_value()
 	}
 }
 
