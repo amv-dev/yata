@@ -95,9 +95,17 @@ pub enum RegularMethods {
 	#[cfg_attr(feature = "serde", serde(rename = "integral"))]
 	Integral,
 
-	/// [Standart deviation](crate::methods::StDev)
+	/// [Mean Absolute Deviation](crate::methods::MeanAbsDev)
+	#[cfg_attr(feature = "serde", serde(rename = "mean_abs_dev"))]
+	MeanAbsDev,
+
+	/// [Standart Deviation](crate::methods::StDev)
 	#[cfg_attr(feature = "serde", serde(rename = "st_dev"))]
 	StDev,
+
+	/// [Commodity channel index](crate::methods::CCI)
+	#[cfg_attr(feature = "serde", serde(rename = "st_dev"))]
+	CCI,
 
 	/// [Momentum](crate::methods::Momentum)
 	#[cfg_attr(feature = "serde", serde(rename = "momentum"))]
@@ -151,7 +159,9 @@ impl FromStr for RegularMethods {
 			"past" | "move" => Ok(Self::Past),
 			"derivative" => Ok(Self::Derivative),
 			"integral" => Ok(Self::Integral),
+			"mean_abs_dev" => Ok(Self::MeanAbsDev),
 			"st_dev" | "stdev" => Ok(Self::StDev),
+			"cci" => Ok(Self::CCI),
 			"momentum" | "change" => Ok(Self::Momentum),
 			"rate_of_change" | "rateofchange" | "roc" => Ok(Self::RateOfChange),
 			"highest" => Ok(Self::Highest),
@@ -199,7 +209,9 @@ impl TryFrom<String> for RegularMethods {
 /// * `trima` - [triangular moving average](TRIMA)
 /// * `past`, `move` - [moves timeseries forward](Past)
 /// * `derivative` - [derivative](Derivative)
+/// * `mean_abs_dev` - [mead absolute deviation](MeanAbsDev)
 /// * `st_dev` - [standart deviation](StDev)
+/// * `cci` - [Commodity channel index](CCI)
 /// * `momentum`, `change` - [absolute change of values](Momentum)
 /// * `rate_of_change` - [relative change of values](RateOfChange)
 /// * [`highest`](Highest), [`lowest`](Lowest), [`highest_lowest_delta`](HighestLowestDelta)
@@ -277,7 +289,9 @@ pub fn method(
 		}
 		RegularMethods::Derivative => Ok(Box::new(Derivative::new(length, initial_value)?)),
 		RegularMethods::Integral => Ok(Box::new(Integral::new(length, initial_value)?)),
+		RegularMethods::MeanAbsDev => Ok(Box::new(MeanAbsDev::new(length, initial_value)?)),
 		RegularMethods::StDev => Ok(Box::new(StDev::new(length, initial_value)?)),
+		RegularMethods::CCI => Ok(Box::new(CCI::new(length, initial_value)?)),
 		RegularMethods::Momentum | RegularMethods::Change => {
 			Ok(Box::new(Momentum::new(length, initial_value)?))
 		}

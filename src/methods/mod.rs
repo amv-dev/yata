@@ -68,6 +68,10 @@ mod st_dev;
 pub use st_dev::*;
 mod volatility;
 pub use volatility::*;
+mod cci;
+pub use cci::*;
+mod mean_abs_dev;
+pub use mean_abs_dev::*;
 
 mod cross;
 pub use cross::*;
