@@ -1,7 +1,6 @@
-#![allow(unused_imports)]
 use crate::core::Method;
-use crate::core::{Error, PeriodType, ValueType, Window};
-use crate::methods::{Integral, SMA};
+use crate::core::{Error, PeriodType, ValueType};
+use crate::methods::SMA;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
