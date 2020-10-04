@@ -46,7 +46,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct StDev {
-	float_length: ValueType,
 	val_sum: ValueType,
 	sq_val_sum: ValueType,
 	k: ValueType,
@@ -68,7 +67,6 @@ impl Method for StDev {
 				let float_length = length as ValueType;
 				let val_sum = value * float_length;
 				Ok(Self {
-					float_length,
 					val_sum,
 					sq_val_sum: value * val_sum,
 					k,
@@ -86,10 +84,9 @@ impl Method for StDev {
 		self.val_sum += value - prev_value;
 		let ma_value = self.ma.next(value);
 
-		// let sum = self.sq_val_sum + ma_value * (ma_value * self.float_length - 2. * self.val_sum);
-		let sum = ma_value
-			.mul_add(self.float_length, -2. * self.val_sum)
-			.mul_add(ma_value, self.sq_val_sum);
+		// let sum = self.sq_val_sum - ma_value * self.val_sum;
+		let sum = self.val_sum.mul_add(-ma_value, self.sq_val_sum);
+
 		(sum.abs() * self.k).sqrt()
 	}
 }
@@ -128,7 +125,11 @@ mod tests {
 	fn test_st_dev() {
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles
+			.take(100)
+			.enumerate()
+			.map(|(i, x)| x.close * if i % 2 == 0 { 1.0 } else { -1.0 })
+			.collect();
 
 		(2..20).for_each(|ma_length| {
 			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
