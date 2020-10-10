@@ -14,7 +14,7 @@ and [indicators](https://docs.rs/yata/latest/yata/indicators/index.html#structs)
 
 It also provides you an interface to create your own indicators.
 
-```
+```yaml
 [dependencies]
 yata = "0.2"
 ```
@@ -196,7 +196,7 @@ test bench_indicator_average_directional_index ... bench:          69 ns/iter (+
 
 By default there is no `unsafe` code in the crate. But you can optionally enable `unsafe_perfomance` feature throw you `Cargo.toml` or by `--feature` flag in your CLI.
 
-`usafe_perfomance` enables some usafe code blocks, most of them are unsafe access to a vector's elemens. For some methods it may increase perfomance by ~5-10%.
+`usafe_perfomance` enables some unsafe code blocks, most of them are unsafe access to a vector's elemens. For some methods it may increase perfomance by ~5-10%.
 
 # Features
 
