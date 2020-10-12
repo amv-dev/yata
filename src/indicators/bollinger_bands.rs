@@ -5,11 +5,27 @@ use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{StDev, SMA};
 
+/// [Bollinget Bands](https://en.wikipedia.org/wiki/Bollinger_Bands)
+///
+/// # 3 values
+///
+/// * upper bound
+/// * source value
+/// * lower bound
+///
+/// # 1 digital signal
+///
+/// When `source` value goes above the upper bound, then returns full buy signal.
+/// When `source` value goes under the lower bound, then returns full sell signal.
+/// Otherwise returns relative position of the `source` value based on upper and lower values.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BollingerBands {
+	/// Main period length. Default is 20
 	pub avg_size: PeriodType,
+	/// Standart deviation multiplier for bounds. Default is 2.0
 	pub sigma: ValueType,
+	/// Source type of values. Default is [Close](crate::core::Source#variant.Close)
 	pub source: Source,
 }
 
@@ -17,7 +33,7 @@ impl IndicatorConfig for BollingerBands {
 	const NAME: &'static str = "BollingerBands";
 
 	fn validate(&self) -> bool {
-		self.sigma >= 0.0 && self.avg_size > 2
+		self.sigma > 0.0 && self.avg_size > 2
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {
@@ -103,17 +119,16 @@ impl<T: OHLC> IndicatorInstance<T> for BollingerBandsInstance {
 		let upper = middle + sq_error * self.cfg.sigma;
 		let lower = middle - sq_error * self.cfg.sigma;
 
-		// let signal = if source >= upper {
-		// 	1
-		// } else if source <= lower {
-		// 	-1
-		// } else {
-		// 	0
-		// };
-		let signal = (source >= upper) as i8 - (source <= lower) as i8;
-
 		let values = [upper, middle, lower];
-		let signals = [Action::from(signal)];
+
+		let range = upper - lower;
+		let relative = if range == 0.0 {
+			(source - lower) / range
+		} else {
+			0.0
+		};
+
+		let signals = [Action::from(relative * 2.0 - 1.0)];
 		IndicatorResult::new(&values, &signals)
 	}
 }
