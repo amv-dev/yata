@@ -132,12 +132,11 @@ impl<T: OHLCV> IndicatorInstance<T> for MoneyFlowIndexInstance<T> {
 		self.pmf += pos - left_pos;
 		self.nmf += neg - left_neg;
 
-		let mfr;
-		if self.nmf == 0.0 {
-			mfr = 1.;
+		let mfr = if self.nmf == 0.0 {
+			1.
 		} else {
-			mfr = self.pmf / self.nmf;
-		}
+			self.pmf / self.nmf
+		};
 
 		let value = 1. - (1. + mfr).recip();
 
