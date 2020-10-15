@@ -1,3 +1,4 @@
+#![allow(clippy::use_self)]
 #[allow(unused_imports)]
 use super::Method;
 #[cfg(feature = "serde")]
@@ -6,7 +7,7 @@ use std::iter::FromIterator;
 use std::ops::Deref;
 use std::ops::DerefMut;
 
-/// Wrapper for timeseries data vectors
+/// Wrapper for time series data vectors
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Sequence<T: Copy>(Vec<T>);

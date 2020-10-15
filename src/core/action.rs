@@ -125,9 +125,9 @@ impl From<i8> for Action {
 impl From<Action> for i8 {
 	fn from(value: Action) -> Self {
 		match value {
-			Action::Buy(value) => (value > 0) as i8,
+			Action::Buy(value) => (value > 0) as Self,
 			Action::None => 0,
-			Action::Sell(value) => -((value > 0) as i8),
+			Action::Sell(value) => -((value > 0) as Self),
 		}
 	}
 }
