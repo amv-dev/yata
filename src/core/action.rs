@@ -159,17 +159,15 @@ impl From<f64> for Action {
 		let value = (normalized.abs() * (BOUND as f64)).round() as SignalType;
 
 		if normalized.is_sign_negative() {
-			if value >= BOUND {
+			if value == BOUND {
 				Self::SELL_ALL
 			} else {
 				Self::Sell(value)
 			}
+		} else if value == BOUND {
+			Self::BUY_ALL
 		} else {
-			if value >= BOUND {
-				Self::BUY_ALL
-			} else {
-				Self::Buy(value)
-			}
+			Self::Buy(value)
 		}
 	}
 }
@@ -194,17 +192,15 @@ impl From<f32> for Action {
 		let value = (normalized.abs() * (BOUND as f32)).round() as SignalType;
 
 		if normalized.is_sign_negative() {
-			if value >= BOUND {
+			if value == BOUND {
 				Self::SELL_ALL
 			} else {
 				Self::Sell(value)
 			}
+		} else if value == BOUND {
+			Self::BUY_ALL
 		} else {
-			if value >= BOUND {
-				Self::BUY_ALL
-			} else {
-				Self::Buy(value)
-			}
+			Self::Buy(value)
 		}
 	}
 }

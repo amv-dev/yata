@@ -71,7 +71,7 @@ impl IndicatorConfig for AwesomeOscillator {
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
@@ -160,8 +160,8 @@ impl<T: OHLC> IndicatorInstance<T> for AwesomeOscillatorInstance {
 
 		// need to reset high/low peaks counter if value got lower/higher 0.0
 		// sould do it after actual signals calculating
-		self.high_peaks = self.high_peaks * (value >= 0.0) as u8;
-		self.low_peaks = self.low_peaks * (value <= 0.0) as u8;
+		self.high_peaks *= (value >= 0.0) as u8;
+		self.low_peaks *= (value <= 0.0) as u8;
 
 		let values = [value];
 		let signals = [s1.into(), s2];

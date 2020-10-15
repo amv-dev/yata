@@ -12,7 +12,7 @@ fn find_index(value: ValueType, slice: &[ValueType], padding: usize) -> usize {
 
 	let half = slice.len() / 2;
 
-	if value == slice[half] {
+	if (value - slice[half]).abs() < ValueType::EPSILON {
 		padding + half
 	} else if value > slice[half] {
 		find_index(value, &slice[(half + 1)..], padding + half + 1)
@@ -29,7 +29,7 @@ fn find_insert_index(value: ValueType, slice: &[ValueType], padding: usize) -> u
 
 	let half = slice.len() / 2;
 
-	if value == slice[half] {
+	if (value - slice[half]).abs() < ValueType::EPSILON {
 		padding + half
 	} else if value > slice[half] {
 		find_insert_index(value, &slice[(half + 1)..], padding + half + 1)

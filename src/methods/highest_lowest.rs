@@ -34,8 +34,8 @@ use serde::{Deserialize, Serialize};
 /// let mut hld = HighestLowestDelta::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-/// 	let v = hld.next(values[i]);
-/// 	assert_eq!(v, r[i]);
+///     let v = hld.next(values[i]);
+///     assert_eq!(v, r[i]);
 /// });
 /// ```
 ///
@@ -93,13 +93,13 @@ impl Method for HighestLowestDelta {
 		let mut search = false;
 		if value >= self.highest {
 			self.highest = value;
-		} else if left_value == self.highest {
+		} else if (left_value - self.highest).abs() < ValueType::EPSILON {
 			search = true;
 		}
 
 		if value <= self.lowest {
 			self.lowest = value;
-		} else if left_value == self.lowest {
+		} else if (left_value - self.lowest).abs() < ValueType::EPSILON {
 			search = true;
 		}
 
@@ -144,8 +144,8 @@ impl Method for HighestLowestDelta {
 /// let mut highest = Highest::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-/// 	let v = highest.next(values[i]);
-/// 	assert_eq!(v, r[i]);
+///     let v = highest.next(values[i]);
+///     assert_eq!(v, r[i]);
 /// });
 /// ```
 ///
@@ -200,7 +200,7 @@ impl Method for Highest {
 
 		if value >= self.value {
 			self.value = value;
-		} else if left_value == self.value {
+		} else if (left_value - self.value).abs() < ValueType::EPSILON {
 			self.value = self.window.iter().fold(value, |a, b| a.max(b));
 		}
 
@@ -236,8 +236,8 @@ impl Method for Highest {
 /// let mut lowest = Lowest::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-/// 	let v = lowest.next(values[i]);
-/// 	assert_eq!(v, r[i]);
+///     let v = lowest.next(values[i]);
+///     assert_eq!(v, r[i]);
 /// });
 /// ```
 ///
@@ -292,7 +292,7 @@ impl Method for Lowest {
 
 		if value <= self.value {
 			self.value = value;
-		} else if left_value == self.value {
+		} else if (left_value - self.value).abs() < ValueType::EPSILON {
 			self.value = self.window.iter().fold(value, |a, b| a.min(b));
 		}
 

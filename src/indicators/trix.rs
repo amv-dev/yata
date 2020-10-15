@@ -41,7 +41,7 @@ impl IndicatorConfig for Trix {
 				Ok(value) => self.source = value,
 			},
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 

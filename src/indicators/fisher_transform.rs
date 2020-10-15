@@ -56,7 +56,7 @@ impl IndicatorConfig for FisherTransform {
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
@@ -139,7 +139,7 @@ impl<T: OHLC> IndicatorInstance<T> for FisherTransformInstance {
 		// converting original value to between -1.0 and 1.0 over period1
 		let h = self.highest.next(src);
 		let l = self.lowest.next(src);
-		let is_different = (h != l) as i8 as ValueType;
+		let is_different = ((h - l).abs() > ValueType::EPSILON) as i8 as ValueType;
 		let v1 = is_different * (src * 2. - (h + l)) / (h - l + 1. - is_different);
 
 		// bound value

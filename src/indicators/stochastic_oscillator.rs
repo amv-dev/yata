@@ -47,7 +47,7 @@ impl IndicatorConfig for StochasticOscillator {
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
@@ -71,7 +71,7 @@ impl<T: OHLC> IndicatorInitializer<T> for StochasticOscillator {
 		}
 
 		let cfg = self;
-		let k_rows = if candle.high() != candle.low() {
+		let k_rows = if (candle.high() - candle.low()).abs() > ValueType::EPSILON {
 			(candle.close() - candle.low()) / (candle.high() - candle.low())
 		} else {
 			0.
@@ -134,7 +134,7 @@ impl<T: OHLC> IndicatorInstance<T> for StochasticOscillatorInstance {
 		let highest = self.highest.next(high);
 		let lowest = self.lowest.next(low);
 
-		let k_rows = if highest != lowest {
+		let k_rows = if (highest - lowest).abs() > ValueType::EPSILON {
 			(close - lowest) / (highest - lowest)
 		} else {
 			0.

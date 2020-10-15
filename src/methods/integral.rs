@@ -60,11 +60,11 @@ use serde::{Deserialize, Serialize};
 /// let mut derivative = Derivative::new(1, s[0]).unwrap();
 ///
 /// (&s).iter().for_each(|&v| {
-/// 	let integration_constant = s[0];
-/// 	let der = derivative.next(v);
-/// 	let integr = integral.next(der) + integration_constant;
+///     let integration_constant = s[0];
+///     let der = derivative.next(v);
+///     let integr = integral.next(der) + integration_constant;
 ///
-/// 	assert_eq!(integr, v);
+///     assert_eq!(integr, v);
 /// });
 /// ```
 ///

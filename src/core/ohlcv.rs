@@ -38,10 +38,10 @@ pub trait OHLC: Copy + Debug + Default {
 	/// use yata::core::Candle;
 	///
 	/// let candle = Candle {
-	/// 	high: 10.0,
-	/// 	low: 5.0,
-	/// 	close: 9.0,
-	/// 	..Candle::default()
+	///     high: 10.0,
+	///     low: 5.0,
+	///     close: 9.0,
+	///     ..Candle::default()
 	/// };
 	///
 	/// assert_eq!(candle.tp(), 8.0);
@@ -60,9 +60,9 @@ pub trait OHLC: Copy + Debug + Default {
 	/// use yata::core::Candle;
 	///
 	/// let candle = Candle {
-	/// 	high: 10.0,
-	/// 	low: 5.0,
-	/// 	..Candle::default()
+	///     high: 10.0,
+	///     low: 5.0,
+	///     ..Candle::default()
 	/// };
 	///
 	/// assert_eq!(candle.hl2(), 7.5);
@@ -80,10 +80,10 @@ pub trait OHLC: Copy + Debug + Default {
 	/// use yata::prelude::*;
 	/// use yata::core::Candle;
 	/// let candle = Candle {
-	/// 	high: 5.0,
-	/// 	low: 2.0,
-	///		close: 4.0,
-	/// 	..Candle::default()
+	///     high: 5.0,
+	///     low: 2.0,
+	///     close: 4.0,
+	///     ..Candle::default()
 	/// };
 	///
 	/// assert_eq!(candle.clv(), ((candle.close()-candle.low()) - (candle.high() - candle.close()))/(candle.high() - candle.low()));
@@ -91,7 +91,7 @@ pub trait OHLC: Copy + Debug + Default {
 	/// ```
 	#[inline]
 	fn clv(&self) -> ValueType {
-		if self.high() != self.low() {
+		if (self.high() - self.low()).abs() > ValueType::EPSILON {
 			(2. * self.close() - self.low() - self.high()) / (self.high() - self.low())
 		} else {
 			0.
@@ -107,14 +107,14 @@ pub trait OHLC: Copy + Debug + Default {
 	/// use yata::core::Candle;
 	///
 	/// let candle1 = Candle {
-	/// 	close: 70.0,
-	/// 	..Candle::default()
+	///     close: 70.0,
+	///     ..Candle::default()
 	/// };
 	///
 	/// let candle2 = Candle {
-	/// 	high: 100.0,
-	/// 	low: 50.0,
-	/// 	..Candle::default()
+	///     high: 100.0,
+	///     low: 50.0,
+	///     ..Candle::default()
 	/// };
 	///
 	/// let tr = candle2.tr(&candle1);
@@ -126,14 +126,14 @@ pub trait OHLC: Copy + Debug + Default {
 	/// use yata::core::Candle;
 	///
 	/// let candle1 = Candle {
-	/// 	close: 30.0,
-	/// 	..Candle::default()
+	///     close: 30.0,
+	///     ..Candle::default()
 	/// };
 	///
 	/// let candle2 = Candle {
-	/// 	high: 100.0,
-	/// 	low: 50.0,
-	/// 	..Candle::default()
+	///     high: 100.0,
+	///     low: 50.0,
+	///     ..Candle::default()
 	/// };
 	///
 	/// let tr = candle2.tr(&candle1);
@@ -144,9 +144,9 @@ pub trait OHLC: Copy + Debug + Default {
 		// Original formula
 
 		// let (a, b, c) = (
-		// 	self.high() - self.low(),
-		// 	(self.high() - prev_candle.close()).abs(),
-		// 	(prev_candle.close() - self.low()).abs(),
+		//     self.high() - self.low(),
+		//     (self.high() - prev_candle.close()).abs(),
+		//     (prev_candle.close() - self.low()).abs(),
 		// );
 
 		// a.max(b).max(c)
@@ -168,20 +168,20 @@ pub trait OHLC: Copy + Debug + Default {
 	/// use yata::core::Candle;
 	///
 	/// let candle1 = Candle {
-	/// 	open: 7.0,
-	/// 	high: 10.0,
-	/// 	low: 7.0,
-	/// 	close: 11.0, // cannot be more than high
+	///     open: 7.0,
+	///     high: 10.0,
+	///     low: 7.0,
+	///     close: 11.0, // cannot be more than high
 	///
-	/// 	..Candle::default()
+	///     ..Candle::default()
 	/// };
 	/// let candle2 = Candle {
-	/// 	open: 10.0,
-	/// 	high: 10.0,
-	/// 	low: 11.0, // low cannot be more than any other value of the candle
-	/// 	close: 10.0,
+	///     open: 10.0,
+	///     high: 10.0,
+	///     low: 11.0, // low cannot be more than any other value of the candle
+	///     close: 10.0,
 	///
-	/// 	..Candle::default()
+	///     ..Candle::default()
 	/// };
 	///
 	/// assert!(!OHLC::validate(&candle1));
@@ -208,11 +208,11 @@ pub trait OHLC: Copy + Debug + Default {
 	/// use yata::prelude::*;
 	/// use yata::core::{Candle, Source};
 	/// let candle = Candle {
-	/// 	open: 12.0,
-	/// 	high: 15.0,
-	/// 	low: 7.0,
-	/// 	close: 10.0,
-	/// 	..Candle::default()
+	///     open: 12.0,
+	///     high: 15.0,
+	///     low: 7.0,
+	///     close: 10.0,
+	///     ..Candle::default()
 	/// };
 	/// assert_eq!(OHLCV::source(&candle, Source::Low), 7.0);
 	/// assert_eq!(OHLCV::source(&candle, "close".to_string().parse().unwrap()), 10.0);

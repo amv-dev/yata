@@ -31,7 +31,7 @@ impl IndicatorConfig for ParabolicSAR {
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
