@@ -78,19 +78,18 @@ impl<T: OHLC> IndicatorInitializer<T> for MACD {
 	where
 		Self: Sized,
 	{
-		match self.validate() {
-			true => {
-				let cfg = self;
-				let src = candle.source(cfg.source);
-				Ok(Self::Instance {
-					ma1: method(cfg.method1, cfg.period1, src)?,
-					ma2: method(cfg.method2, cfg.period2, src)?,
-					ma3: method(cfg.method3, cfg.period3, src)?,
-					cross: Cross::new((), (0.0, 0.0))?,
-					cfg,
-				})
-			}
-			false => Err(Error::WrongConfig),
+		if self.validate() {
+			let cfg = self;
+			let src = candle.source(cfg.source);
+			Ok(Self::Instance {
+				ma1: method(cfg.method1, cfg.period1, src)?,
+				ma2: method(cfg.method2, cfg.period2, src)?,
+				ma3: method(cfg.method3, cfg.period3, src)?,
+				cross: Cross::new((), (0.0, 0.0))?,
+				cfg,
+			})
+		} else {
+			Err(Error::WrongConfig)
 		}
 	}
 }

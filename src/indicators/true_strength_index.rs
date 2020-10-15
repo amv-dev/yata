@@ -133,7 +133,7 @@ impl<T: OHLC> IndicatorInstance<T> for TrueStrengthIndexInstance {
 		let ema21 = self.ema21.next(m2);
 		let ema22 = self.ema22.next(ema21);
 
-		let value = if ema22 != 0. { ema12 / ema22 } else { 0. };
+		let value = if ema22 == 0. { 0. } else { ema12 / ema22 };
 
 		let sig = self.ema.next(value);
 

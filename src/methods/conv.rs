@@ -49,19 +49,18 @@ impl Method for Conv {
 	type Output = Self::Input;
 
 	fn new(weights: Self::Params, value: Self::Input) -> Result<Self, Error> {
-		match weights.len() {
-			0 => Err(Error::WrongMethodParameters),
-			_ => {
-				let wsum_invert = weights.iter().sum::<ValueType>().recip();
+		if let 0 = weights.len() {
+			Err(Error::WrongMethodParameters)
+		} else {
+			let wsum_invert = weights.iter().sum::<ValueType>().recip();
 
-				Ok(Self {
-					window: Window::new(weights.len() as PeriodType, value),
-					weights,
-					wsum_invert,
+			Ok(Self {
+				window: Window::new(weights.len() as PeriodType, value),
+				weights,
+				wsum_invert,
 
-					initialized: false,
-				})
-			}
+				initialized: false,
+			})
 		}
 	}
 

@@ -92,7 +92,7 @@ impl fmt::Debug for IndicatorResult {
 			.signals
 			.iter()
 			.take(self.length.1 as usize)
-			.map(|s| s.to_string())
+			.map(std::string::ToString::to_string)
 			.collect();
 		write!(
 			f,
