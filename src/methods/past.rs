@@ -112,9 +112,9 @@ mod tests {
 		candles.take(100).for_each(|x| {
 			let q = ma.next(x);
 			let p = prev.unwrap_or(x);
-			assert_eq!(p.close, q.close);
-			assert_eq!(p.volume, q.volume);
-			assert_eq!(p.high, q.high);
+			assert_abs_diff_eq!(p.close, q.close);
+			assert_abs_diff_eq!(p.volume, q.volume);
+			assert_abs_diff_eq!(p.high, q.high);
 			prev = Some(x);
 		});
 	}
@@ -127,9 +127,9 @@ mod tests {
 
 		(1..20).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
-			src.iter()
-				.enumerate()
-				.for_each(|(i, &x)| assert_eq!(src[i.saturating_sub(length as usize)], ma.next(x)));
+			src.iter().enumerate().for_each(|(i, &x)| {
+				assert_abs_diff_eq!(src[i.saturating_sub(length as usize)], ma.next(x))
+			});
 		});
 	}
 }

@@ -76,7 +76,7 @@ mod tests {
 			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
-			assert_eq!(output, 0.0);
+			assert_abs_diff_eq!(output, 0.0);
 		}
 	}
 

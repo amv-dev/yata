@@ -17,7 +17,7 @@ limitations under the License.
 */
 #![deny(clippy::all)]
 #![allow(clippy::comparison_chain)]
-#![allow(clippy::float_cmp)]
+// #![allow(clippy::float_cmp)]
 #![deny(clippy::pedantic)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::similar_names)]
@@ -147,6 +147,9 @@ limitations under the License.
 //! # Say thanks
 //!
 //! If you like this library and you want to say thanks, you can do it also by donating to bitcoin address _1P3gTnaTK9LKSYx2nETrKe2zjP4HMkdhvK_
+
+#[macro_use]
+extern crate approx;
 
 pub mod core;
 pub mod helpers;

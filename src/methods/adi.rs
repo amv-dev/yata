@@ -186,7 +186,7 @@ mod tests {
 		let mut adi = ADI::new(0, candles.first()).unwrap();
 
 		candles.take(100).fold(0., |s, candle| {
-			assert_eq!(adi.next(candle), s + candle.clv() * candle.volume());
+			assert_abs_diff_eq!(adi.next(candle), s + candle.clv() * candle.volume());
 			s + candle.clv() * candle.volume()
 		});
 	}

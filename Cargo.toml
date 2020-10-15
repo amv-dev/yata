@@ -11,6 +11,7 @@ repository = "https://github.com/amv-dev/yata"
 version = "0.2.0"
 
 [dependencies]
+approx = "0.3.2"
 serde = {version = "1.0", features = ["derive"], optional = true}
 
 [profile.release]
