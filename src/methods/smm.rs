@@ -246,13 +246,11 @@ mod tests {
 
 				slice.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
-				let value2;
-
-				if ma_length % 2 == 0 {
-					value2 = (slice[ma_length / 2] + slice[ma_length / 2 - 1]) / 2.0;
+				let value2 = if ma_length % 2 == 0 {
+					(slice[ma_length / 2] + slice[ma_length / 2 - 1]) / 2.0
 				} else {
-					value2 = slice[ma_length / 2];
-				}
+					slice[ma_length / 2]
+				};
 				assert!((value2 - value).abs() < SIGMA);
 			});
 		});
