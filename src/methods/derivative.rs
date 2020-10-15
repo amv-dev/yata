@@ -29,13 +29,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::Derivative;
 ///
 /// let s = vec![0.0, 1.0, 3.0, 0.5, 2.0, -10.0];
-///	let r = vec![0.0, 1.0, 2.0,-2.5, 1.5, -12.0];
+/// let r = vec![0.0, 1.0, 2.0,-2.5, 1.5, -12.0];
 ///
 /// let mut derivative = Derivative::new(1, s[0]).unwrap();
 ///
 /// (0..s.len()).for_each(|i| {
-/// 	let der = derivative.next(s[i]);
-/// 	assert_eq!(der, r[i]);
+///     let der = derivative.next(s[i]);
+///     assert_eq!(der, r[i]);
 /// });
 /// ```
 ///

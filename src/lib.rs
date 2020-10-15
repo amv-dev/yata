@@ -1,3 +1,6 @@
+#![deny(clippy::all)]
+#![allow(clippy::comparison_chain)]
+#![allow(clippy::float_cmp)]
 /*
 
 Copyright 2020 AMvDev (amv-dev@protonmail.com)
@@ -15,7 +18,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 */
-
 #![warn(
 	missing_docs,
 	missing_debug_implementations,
@@ -112,9 +114,9 @@ limitations under the License.
 //! let mut macd = macd.init(candles.first()).unwrap();
 //!
 //! for candle in candles.take(10) {
-//! 	let result = macd.next(candle);
+//!     let result = macd.next(candle);
 //!
-//! 	println!("{:?}", result);
+//!     println!("{:?}", result);
 //! }
 //! ```
 //!

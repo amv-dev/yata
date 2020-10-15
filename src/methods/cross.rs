@@ -37,10 +37,10 @@ use serde::{Deserialize, Serialize};
 /// let r  = vec![ 0,   0,   1,   0,   -1,  0 ];
 ///
 /// (0..t1.len()).for_each(|i| {
-/// 	let value = t1[i];
-/// 	let base = t2[i];
-/// 	let cross_value = cross.next((value, base)).analog();
-/// 	assert_eq!(cross_value, r[i]);
+///     let value = t1[i];
+///     let base = t2[i];
+///     let cross_value = cross.next((value, base)).analog();
+///     assert_eq!(cross_value, r[i]);
 /// });
 /// ```
 ///
@@ -117,10 +117,10 @@ impl Method for Cross {
 /// let r  = vec![ 0,   0,   1,   0,   0,   0 ];
 ///
 /// (0..t1.len()).for_each(|i| {
-/// 	let value = t1[i];
-/// 	let base = t2[i];
-/// 	let cross_value = cross_above.next((value, base)).analog();
-/// 	assert_eq!(cross_value, r[i]);
+///     let value = t1[i];
+///     let base = t2[i];
+///     let cross_value = cross_above.next((value, base)).analog();
+///     assert_eq!(cross_value, r[i]);
 /// });
 /// ```
 ///
@@ -166,7 +166,6 @@ impl Method for CrossAbove {
 	{
 		Ok(Self {
 			last_delta: value.0 - value.1,
-			..Self::default()
 		})
 	}
 
@@ -207,10 +206,10 @@ impl Method for CrossAbove {
 /// let r  = vec![ 0,   0,   0,   0,   1,   0 ];
 ///
 /// (0..t1.len()).for_each(|i| {
-/// 	let value = t1[i];
-/// 	let base = t2[i];
-/// 	let cross_value = cross_under.next((value, base)).analog();
-/// 	assert_eq!(cross_value, r[i]);
+///     let value = t1[i];
+///     let base = t2[i];
+///     let cross_value = cross_under.next((value, base)).analog();
+///     assert_eq!(cross_value, r[i]);
 /// });
 /// ```
 ///
@@ -256,7 +255,6 @@ impl Method for CrossUnder {
 	{
 		Ok(Self {
 			last_delta: value.0 - value.1,
-			..Self::default()
 		})
 	}
 

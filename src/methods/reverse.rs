@@ -201,11 +201,9 @@ impl Method for ReverseHighSignal {
 				});
 			self.max_value = max_value;
 			self.max_index = max_index;
-		} else {
-			if value >= self.max_value {
-				self.max_value = value;
-				self.max_index = self.index;
-			}
+		} else if value >= self.max_value {
+			self.max_value = value;
+			self.max_index = self.index;
 		}
 
 		let s;
@@ -333,11 +331,9 @@ impl Method for ReverseLowSignal {
 				});
 			self.min_value = min_value;
 			self.min_index = min_index;
-		} else {
-			if value <= self.min_value {
-				self.min_value = value;
-				self.min_index = self.index;
-			}
+		} else if value <= self.min_value {
+			self.min_value = value;
+			self.min_index = self.index;
 		}
 
 		let s;

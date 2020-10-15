@@ -34,8 +34,8 @@ use serde::{Deserialize, Serialize};
 /// let mut hld = HighestLowestDelta::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-/// 	let v = hld.next(values[i]);
-/// 	assert_eq!(v, r[i]);
+///     let v = hld.next(values[i]);
+///     assert_eq!(v, r[i]);
 /// });
 /// ```
 ///
@@ -144,8 +144,8 @@ impl Method for HighestLowestDelta {
 /// let mut highest = Highest::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-/// 	let v = highest.next(values[i]);
-/// 	assert_eq!(v, r[i]);
+///     let v = highest.next(values[i]);
+///     assert_eq!(v, r[i]);
 /// });
 /// ```
 ///
@@ -236,8 +236,8 @@ impl Method for Highest {
 /// let mut lowest = Lowest::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-/// 	let v = lowest.next(values[i]);
-/// 	assert_eq!(v, r[i]);
+///     let v = lowest.next(values[i]);
+///     assert_eq!(v, r[i]);
 /// });
 /// ```
 ///

@@ -24,7 +24,7 @@
 //! use yata::methods::SMA;
 //!
 //! let mut sma = SMA::new(3, 5.0).unwrap();
-//!	sma.next(5.0);
+//! sma.next(5.0);
 //! sma.next(4.0);
 //! assert_eq!(sma.next(6.0), 5.0);
 //! assert_eq!(sma.next(2.0), 4.0);
