@@ -93,13 +93,13 @@ impl Method for HighestLowestDelta {
 		let mut search = false;
 		if value >= self.highest {
 			self.highest = value;
-		} else if (left_value - self.highest).abs() < ValueType::EPSILON {
+		} else if abs_diff_eq!(left_value, self.highest) {
 			search = true;
 		}
 
 		if value <= self.lowest {
 			self.lowest = value;
-		} else if (left_value - self.lowest).abs() < ValueType::EPSILON {
+		} else if abs_diff_eq!(left_value, self.lowest) {
 			search = true;
 		}
 
@@ -200,7 +200,7 @@ impl Method for Highest {
 
 		if value >= self.value {
 			self.value = value;
-		} else if (left_value - self.value).abs() < ValueType::EPSILON {
+		} else if abs_diff_eq!(left_value, self.value) {
 			self.value = self.window.iter().fold(value, |a, b| a.max(b));
 		}
 
@@ -292,7 +292,7 @@ impl Method for Lowest {
 
 		if value <= self.value {
 			self.value = value;
-		} else if (left_value - self.value).abs() < ValueType::EPSILON {
+		} else if abs_diff_eq!(left_value, self.value) {
 			self.value = self.window.iter().fold(value, |a, b| a.min(b));
 		}
 

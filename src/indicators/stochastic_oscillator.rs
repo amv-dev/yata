@@ -71,7 +71,7 @@ impl<T: OHLC> IndicatorInitializer<T> for StochasticOscillator {
 		}
 
 		let cfg = self;
-		let k_rows = if (candle.high() - candle.low()).abs() > ValueType::EPSILON {
+		let k_rows = if abs_diff_ne!(candle.high(), candle.low()) {
 			(candle.close() - candle.low()) / (candle.high() - candle.low())
 		} else {
 			0.
@@ -134,7 +134,7 @@ impl<T: OHLC> IndicatorInstance<T> for StochasticOscillatorInstance {
 		let highest = self.highest.next(high);
 		let lowest = self.lowest.next(low);
 
-		let k_rows = if (highest - lowest).abs() > ValueType::EPSILON {
+		let k_rows = if abs_diff_ne!(highest, lowest) {
 			(close - lowest) / (highest - lowest)
 		} else {
 			0.

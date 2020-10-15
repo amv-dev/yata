@@ -91,7 +91,7 @@ pub trait OHLC: Copy + Debug + Default {
 	/// ```
 	#[inline]
 	fn clv(&self) -> ValueType {
-		if (self.high() - self.low()).abs() > ValueType::EPSILON {
+		if abs_diff_ne!(self.high(), self.low()) {
 			(2. * self.close() - self.low() - self.high()) / (self.high() - self.low())
 		} else {
 			0.
