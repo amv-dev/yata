@@ -73,7 +73,7 @@ impl<T: OHLC> IndicatorInitializer<T> for RelativeVigorIndex {
 		let cfg = self;
 		let d_close = candle.close() - candle.open();
 		let d_hl = candle.high() - candle.low();
-		let rvi = if d_hl != 0. { d_close / d_hl } else { 0. };
+		let rvi = if d_hl == 0. { 0. } else { d_close / d_hl };
 
 		Ok(Self::Instance {
 			prev_close: candle.open(),
@@ -132,7 +132,7 @@ impl<T: OHLC> IndicatorInstance<T> for RelativeVigorIndexInstance {
 		let swma2 = self.swma2.next(high_low);
 		let sma2 = self.sma2.next(swma2);
 
-		let rvi = if sma2 != 0. { sma1 / sma2 } else { 0. };
+		let rvi = if sma2 == 0. { 0. } else { sma1 / sma2 };
 		let sig: ValueType = self.ma.next(rvi);
 
 		// let s2;

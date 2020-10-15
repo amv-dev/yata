@@ -1,5 +1,18 @@
 #![deny(clippy::all)]
 #![allow(clippy::comparison_chain)]
+#![deny(clippy::pedantic)]
+#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::similar_names)]
+#![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::cast_sign_loss)]
+#![allow(clippy::cast_lossless)]
+#![allow(clippy::doc_markdown)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::unsafe_derive_deserialize)]
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::cast_precision_loss)]
+#![allow(clippy::shadow_unrelated)]
+#![allow(clippy::copy_iterator)]
 /*
 
 Copyright 2020 AMvDev (amv-dev@protonmail.com)
@@ -31,7 +44,7 @@ limitations under the License.
 
 //! Yet Another Technical Analysis library
 //!
-//! YaTa implements most common technical analysis [methods](crate::methods) and [indicators](crate::indicators)
+//! `YaTa` implements most common technical analysis [methods](crate::methods) and [indicators](crate::indicators)
 //!
 //! It also provides you an interface to create your own indicators.
 //!
