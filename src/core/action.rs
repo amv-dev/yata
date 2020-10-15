@@ -318,20 +318,20 @@ mod tests {
 			BOUND / 2
 		};
 		// f64
-		assert_eq!(Action::from(0.0f64), Action::Buy(0));
-		assert_eq!(Action::from(-0.5f64), Action::Sell(half_bound));
-		assert_eq!(Action::from(1.0f64), Action::BUY_ALL);
-		assert_eq!(Action::from(-1.0f64), Action::SELL_ALL);
-		assert_eq!(Action::from(2.0f64), Action::BUY_ALL);
-		assert_eq!(Action::from(-2.0f64), Action::SELL_ALL);
+		assert_eq!(Action::from(0.0_f64), Action::Buy(0));
+		assert_eq!(Action::from(-0.5_f64), Action::Sell(half_bound));
+		assert_eq!(Action::from(1.0_f64), Action::BUY_ALL);
+		assert_eq!(Action::from(-1.0_f64), Action::SELL_ALL);
+		assert_eq!(Action::from(2.0_f64), Action::BUY_ALL);
+		assert_eq!(Action::from(-2.0_f64), Action::SELL_ALL);
 
 		// f32
-		assert_eq!(Action::from(0.0f32), Action::Buy(0));
-		assert_eq!(Action::from(-0.5f32), Action::Sell(half_bound));
-		assert_eq!(Action::from(1.0f32), Action::BUY_ALL);
-		assert_eq!(Action::from(-1.0f32), Action::SELL_ALL);
-		assert_eq!(Action::from(2.0f32), Action::BUY_ALL);
-		assert_eq!(Action::from(-2.0f32), Action::SELL_ALL);
+		assert_eq!(Action::from(0.0_f32), Action::Buy(0));
+		assert_eq!(Action::from(-0.5_f32), Action::Sell(half_bound));
+		assert_eq!(Action::from(1.0_f32), Action::BUY_ALL);
+		assert_eq!(Action::from(-1.0_f32), Action::SELL_ALL);
+		assert_eq!(Action::from(2.0_f32), Action::BUY_ALL);
+		assert_eq!(Action::from(-2.0_f32), Action::SELL_ALL);
 
 		// other
 		assert_eq!(Action::from(1. / BOUND as ValueType), Action::Buy(1));
