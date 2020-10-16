@@ -303,13 +303,13 @@ where
 		Some(value)
 	}
 
-	fn count(self) -> usize {
-		self.size as usize
-	}
-
 	fn size_hint(&self) -> (usize, Option<usize>) {
 		let size = self.size as usize;
 		(size, Some(size))
+	}
+
+	fn count(self) -> usize {
+		self.size as usize
 	}
 
 	fn last(self) -> Option<Self::Item> {
