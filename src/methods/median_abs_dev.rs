@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Output type is [`ValueType`]
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(`length`)
 ///

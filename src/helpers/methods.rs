@@ -63,7 +63,7 @@ pub enum RegularMethods {
 	#[cfg_attr(feature = "serde", serde(rename = "wsma"))]
 	WSMA,
 
-	/// [Simle Moving Median](crate::methods::SMM)
+	/// [Simple Moving Median](crate::methods::SMM)
 	#[cfg_attr(feature = "serde", serde(rename = "smm"))]
 	SMM,
 
