@@ -15,7 +15,7 @@ use crate::methods::{Cross, ReverseSignal};
 ///
 /// * "Twin Peaks". When `value` is below zero line and we got `conseq_peaks` lower peaks, then returns full positive signal
 /// When `value` is above zero line and we got `conseq_peaks` higher peaks, then returns full negative signal.
-/// Ohterwise gives no signal.
+/// Otherwise gives no signal.
 /// * Gives signal when `values` crosses zero line
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -32,7 +32,7 @@ pub struct AwesomeOscillator {
 	pub left: PeriodType,
 	/// Default is 1
 	pub right: PeriodType,
-	/// Defualt is 2
+	/// Default is 2
 	pub conseq_peaks: u8,
 }
 
@@ -159,7 +159,7 @@ impl<T: OHLC> IndicatorInstance<T> for AwesomeOscillatorInstance {
 		let s2 = self.cross_over.next((value, 0.));
 
 		// need to reset high/low peaks counter if value got lower/higher 0.0
-		// sould do it after actual signals calculating
+		// should do it after actual signals calculating
 		self.high_peaks *= (value >= 0.0) as u8;
 		self.low_peaks *= (value <= 0.0) as u8;
 

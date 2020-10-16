@@ -62,7 +62,7 @@ impl IndicatorConfig for Example {
 	}
 }
 
-/// Implementing IndicatorInitializer to create **State** from the **Configration**
+/// Implementing IndicatorInitializer to create **State** from the **Configuration**
 impl<T: OHLC> IndicatorInitializer<T> for Example {
 	type Instance = ExampleInstance;
 

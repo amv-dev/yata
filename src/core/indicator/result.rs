@@ -16,7 +16,7 @@ pub struct IndicatorResult {
 }
 
 impl IndicatorResult {
-	/// Size of preallocated result array
+	/// Size of pre-allocated result array
 	/// For the most of cases it should not be used anywhere outside this crate
 	pub const SIZE: usize = 4;
 

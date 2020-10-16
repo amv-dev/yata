@@ -96,7 +96,7 @@ where
 	pub fn push(&mut self, value: T) -> T {
 		debug_assert!(!self.is_empty(), "Trying to use an empty window");
 
-		let refer = if cfg!(feature = "unsafe_perfomance") {
+		let refer = if cfg!(feature = "unsafe_performance") {
 			unsafe { self.buf.get_unchecked_mut(self.index as usize) }
 		} else {
 			&mut self.buf[self.index as usize]
@@ -140,7 +140,7 @@ where
 	/// Returns an oldest value
 	#[inline]
 	pub fn first(&self) -> T {
-		if cfg!(feature = "usafe_perfomance") {
+		if cfg!(feature = "unsafe_performance") {
 			*unsafe { self.buf.get_unchecked(self.index as usize) }
 		} else {
 			self.buf[self.index as usize]
@@ -225,7 +225,7 @@ where
 		let s = self.size - self.index;
 		let buf_index = (overflow * index.saturating_sub(s) + (1 - overflow) * saturated) as usize;
 
-		if cfg!(feature = "usafe_perfomance") {
+		if cfg!(feature = "unsafe_performance") {
 			unsafe { self.buf.get_unchecked(buf_index) }
 		} else {
 			&self.buf[buf_index]
@@ -290,7 +290,7 @@ where
 		}
 
 		// let value = self.window.buf[self.index as usize];
-		let value = if cfg!(feature = "unsafe_perfomance") {
+		let value = if cfg!(feature = "unsafe_performance") {
 			*unsafe { self.window.buf.get_unchecked(self.index as usize) }
 		} else {
 			self.window.buf[self.index as usize]

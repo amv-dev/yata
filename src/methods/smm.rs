@@ -98,7 +98,7 @@ impl SMM {
 	#[allow(unsafe_code)]
 	#[inline]
 	pub fn get_last_value(&self) -> ValueType {
-		if cfg!(feature = "unsafe_perfomance") {
+		if cfg!(feature = "unsafe_performance") {
 			unsafe {
 				(self.slice.get_unchecked(self.half as usize)
 					+ self.slice.get_unchecked(self.half_m1 as usize))
@@ -151,7 +151,7 @@ impl Method for SMM {
 		// if the old index is before current, then we should offset current value by 1 back
 		let index = index - (old_index < index) as usize;
 		#[allow(unsafe_code)]
-		if cfg!(feature = "unsafe_perfomance") {
+		if cfg!(feature = "unsafe_performance") {
 			if index != old_index {
 				let is_after = (index > old_index) as usize;
 				let start = (old_index + 1) * is_after + index * (1 - is_after);

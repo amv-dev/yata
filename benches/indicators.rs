@@ -36,6 +36,6 @@ fn bench_detrended_price_oscillator(b: &mut test::Bencher) {
 }
 
 #[bench]
-fn bench_awsome_oscillator(b: &mut test::Bencher) {
+fn bench_awesome_oscillator(b: &mut test::Bencher) {
 	bench_indicator::<AwesomeOscillator>(b);
 }

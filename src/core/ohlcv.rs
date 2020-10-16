@@ -152,7 +152,7 @@ pub trait OHLC: Copy + Debug + Default {
 		// a.max(b).max(c)
 
 		// -----------------------
-		// more perfomance
+		// more performance
 		// only 1 subtract operation instead of 3
 		self.high().max(prev_candle.close()) - self.low().min(prev_candle.close())
 	}
