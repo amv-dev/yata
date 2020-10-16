@@ -107,7 +107,7 @@ pub enum RegularMethods {
 	#[cfg_attr(feature = "serde", serde(rename = "mean_abs_dev"))]
 	MedianAbsDev,
 
-	/// [Standart Deviation](crate::methods::StDev)
+	/// [Standard Deviation](crate::methods::StDev)
 	#[cfg_attr(feature = "serde", serde(rename = "st_dev"))]
 	StDev,
 
