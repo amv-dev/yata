@@ -91,15 +91,17 @@ impl Method for HighestLowestDelta {
 		let left_value = self.window.push(value);
 
 		let mut search = false;
+		#[allow(clippy::float_cmp)] //this is totally fine to compare cloned value
 		if value >= self.highest {
 			self.highest = value;
-		} else if abs_diff_eq!(left_value, self.highest) {
+		} else if left_value == self.highest {
 			search = true;
 		}
 
+		#[allow(clippy::float_cmp)] //this is totally fine to compare cloned value
 		if value <= self.lowest {
 			self.lowest = value;
-		} else if abs_diff_eq!(left_value, self.lowest) {
+		} else if left_value == self.lowest {
 			search = true;
 		}
 
@@ -198,9 +200,10 @@ impl Method for Highest {
 
 		let left_value = self.window.push(value);
 
+		#[allow(clippy::float_cmp)] //this is totally fine to compare cloned value
 		if value >= self.value {
 			self.value = value;
-		} else if abs_diff_eq!(left_value, self.value) {
+		} else if left_value == self.value {
 			self.value = self.window.iter().fold(value, |a, b| a.max(b));
 		}
 
@@ -290,9 +293,10 @@ impl Method for Lowest {
 
 		let left_value = self.window.push(value);
 
+		#[allow(clippy::float_cmp)] //this is totally fine to compare cloned value
 		if value <= self.value {
 			self.value = value;
-		} else if abs_diff_eq!(left_value, self.value) {
+		} else if left_value == self.value {
 			self.value = self.window.iter().fold(value, |a, b| a.min(b));
 		}
 
