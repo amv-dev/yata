@@ -91,10 +91,10 @@ pub trait OHLC: Copy + Debug + Default {
 	/// ```
 	#[inline]
 	fn clv(&self) -> ValueType {
-		if self.high() != self.low() {
-			(2. * self.close() - self.low() - self.high()) / (self.high() - self.low())
-		} else {
+		if self.high() == self.low() {
 			0.
+		} else {
+			(2. * self.close() - self.low() - self.high()) / (self.high() - self.low())
 		}
 	}
 
