@@ -194,9 +194,9 @@ test bench_indicator_average_directional_index ... bench:          69 ns/iter (+
 
 # Current unsafe status
 
-By default there is no `unsafe` code in the crate. But you can optionally enable `unsafe_perfomance` feature throw you `Cargo.toml` or by `--feature` flag in your CLI.
+By default, there is no `unsafe` code in the crate. But you can optionally enable `unsafe_performance` feature throw you `Cargo.toml` or by `--feature` flag in your CLI.
 
-`usafe_perfomance` enables some unsafe code blocks, most of them are unsafe access to a vector's elemens. For some methods it may increase perfomance by ~5-10%.
+`usafe_perfomance` enables some unsafe code blocks, most of them are unsafe access to a vector's elements. For some methods it may increase performance by ~5-10%.
 
 # Features
 
@@ -205,7 +205,7 @@ By default there is no `unsafe` code in the crate. But you can optionally enable
 - `period_type_u32` - sets `PeriodType` to `u32`;
 - `period_type_u64` - sets `PeriodType` to `u64`;
 - `value_type_f32` - sets `ValueType` to `f32`;
-- `unsafe_perfomance` - enables optional unsafe code blocks, which may increase perfomance;
+- `unsafe_performance` - enables optional unsafe code blocks, which may increase performance;
 
 # Rust version
 
@@ -220,4 +220,4 @@ You are welcome to [give any suggestions](https://github.com/amv-dev/yata/issues
 
 # Say thanks
 
-If you like this library and you want to say thanks, you can do it also by donating to bitcoin address _1P3gTnaTK9LKSYx2nETrKe2zjP4HMkdhvK_
+If you like this library, and you want to say thanks, you can do it also by donating to bitcoin address `1P3gTnaTK9LKSYx2nETrKe2zjP4HMkdhvK`

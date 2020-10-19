@@ -17,7 +17,7 @@ impl<T: Copy> Sequence<T> {
 		Self(Vec::new())
 	}
 
-	/// Creates an empty `Sequence` instance with preallocated memory for `len` elements
+	/// Creates an empty `Sequence` instance with pre-allocated memory for `len` elements
 	pub fn new(len: usize) -> Self {
 		Self(Vec::with_capacity(len))
 	}

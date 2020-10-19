@@ -34,7 +34,7 @@ impl Action {
 	///
 	/// Any positive number converts to BUY_ALL
 	///
-	/// Any negatie number converts to SELL_ALL
+	/// Any negative number converts to SELL_ALL
 	///
 	/// Zero converts to None
 	pub fn from_analog(value: i8) -> Self {

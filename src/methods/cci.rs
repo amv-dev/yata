@@ -6,7 +6,7 @@ use crate::methods::MeanAbsDev;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// [Commdity channel index](https://en.wikipedia.org/wiki/Commodity_channel_index) of specified `length` for timeseries of type [`ValueType`]
+/// [Commodity channel index](https://en.wikipedia.org/wiki/Commodity_channel_index) of specified `length` for time series of type [`ValueType`]
 ///
 /// In the original formula there is constant coefficient K = 1/0.015. This implementation does not include this coefficient (lt;dr it is 1.0).
 ///
@@ -24,7 +24,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Output type is [`ValueType`]
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(`length`)
 ///
