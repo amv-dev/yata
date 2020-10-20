@@ -6,7 +6,6 @@
 #![allow(clippy::unsafe_derive_deserialize)]
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::shadow_unrelated)]
-#![allow(clippy::copy_iterator)]
 #![deny(clippy::nursery)]
 /*
 

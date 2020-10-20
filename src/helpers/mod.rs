@@ -108,7 +108,8 @@ pub fn assert_neq_float(value1: ValueType, value2: ValueType) {
 }
 
 /// Random Candles iterator for testing purposes
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
+#[allow(missing_copy_implementations)]
 pub struct RandomCandles(u16);
 
 impl RandomCandles {
