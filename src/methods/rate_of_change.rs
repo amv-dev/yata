@@ -30,7 +30,7 @@ pub type ROC = RateOfChange;
 ///
 /// Output type is [`ValueType`]
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///

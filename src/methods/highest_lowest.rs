@@ -409,7 +409,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_highes_lowest_delta1() {
+	fn test_highest_lowest_delta1() {
 		use super::HighestLowestDelta as TestingMethod;
 		let mut candles = RandomCandles::default();
 
@@ -421,7 +421,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_highes_lowest_delta() {
+	fn test_highest_lowest_delta() {
 		use super::HighestLowestDelta as TestingMethod;
 		let candles = RandomCandles::default();
 
