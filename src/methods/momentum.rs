@@ -129,7 +129,7 @@ mod tests {
 		candles.take(100).map(|x| x.close).for_each(|x| {
 			let q = ma.next(x);
 			let p = prev.unwrap_or(x);
-			assert_eq!(q, x - p);
+			approx::assert_abs_diff_eq!(q, x - p);
 			prev = Some(x);
 		});
 	}
@@ -143,7 +143,7 @@ mod tests {
 		(1..20).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			src.iter().enumerate().for_each(|(i, &x)| {
-				assert_eq!(x - src[i.saturating_sub(length as usize)], ma.next(x))
+				approx::assert_abs_diff_eq!(x - src[i.saturating_sub(length as usize)], ma.next(x))
 			});
 		});
 	}

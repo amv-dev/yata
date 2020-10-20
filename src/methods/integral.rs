@@ -120,7 +120,7 @@ impl Default for Integral {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
+	extern crate approx;
 	use super::{Integral as TestingMethod, Method};
 	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
@@ -142,8 +142,7 @@ mod tests {
 	#[test]
 	#[should_panic]
 	fn test_integral0_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
+		use crate::core::Method;
 		use crate::methods::tests::test_const;
 
 		let input = (5.0 + 56.0) / 16.3251;
@@ -168,7 +167,13 @@ mod tests {
 			let value2 = src.iter().take(i + 1).fold(0.0, |s, &c| s + c);
 			q.push(x);
 
-			assert_eq!(value1, value2, "at index {} with value {}: {:?}", i, x, q);
+			assert!(
+				approx::abs_diff_eq!(value1, value2),
+				"at index {} with value {}: {:?}",
+				i,
+				x,
+				q
+			);
 		});
 	}
 

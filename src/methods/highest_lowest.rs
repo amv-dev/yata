@@ -335,7 +335,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq!(x.close, ma.next(x.close));
+			approx::assert_abs_diff_eq!(x.close, ma.next(x.close));
 		});
 	}
 
@@ -354,7 +354,7 @@ mod tests {
 			src.iter().enumerate().for_each(|(i, &x)| {
 				let value1 = ma.next(x);
 				let value2 = (0..length).fold(src[i], |m, j| m.max(src[i.saturating_sub(j)]));
-				assert_eq!(value2, value1);
+				approx::assert_abs_diff_eq!(value2, value1);
 			});
 		});
 	}
@@ -378,7 +378,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq!(x.close, ma.next(x.close));
+			approx::assert_abs_diff_eq!(x.close, ma.next(x.close));
 		});
 	}
 
@@ -396,7 +396,7 @@ mod tests {
 			src.iter().enumerate().for_each(|(i, &x)| {
 				let value1 = ma.next(x);
 				let value2 = (0..length).fold(src[i], |m, j| m.min(src[i.saturating_sub(j)]));
-				assert_eq!(value2, value1);
+				approx::assert_abs_diff_eq!(value2, value1);
 			});
 		});
 	}
@@ -420,7 +420,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq!(0.0, ma.next(x.close));
+			approx::assert_abs_diff_eq!(0.0, ma.next(x.close));
 		});
 	}
 
@@ -439,7 +439,7 @@ mod tests {
 				let value1 = ma.next(x);
 				let min = (0..length).fold(src[i], |m, j| m.min(src[i.saturating_sub(j)]));
 				let max = (0..length).fold(src[i], |m, j| m.max(src[i.saturating_sub(j)]));
-				assert_eq!(max - min, value1);
+				approx::assert_abs_diff_eq!(max - min, value1);
 			});
 		});
 	}

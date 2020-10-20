@@ -30,3 +30,6 @@ period_type_u32 = []
 period_type_u64 = []
 unsafe_performance = []
 value_type_f32 = []
+
+[dev-dependencies]
+approx = "0.3.2"
