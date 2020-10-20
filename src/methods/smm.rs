@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
+use std::cmp::Ordering;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -177,11 +178,11 @@ impl Method for SMM {
 			}
 		} else {
 			// moving values inside the sorted slice
-			if index > old_index {
-				self.slice.copy_within((old_index + 1)..=index, old_index);
-			} else if index < old_index {
-				self.slice.copy_within(index..old_index, index + 1);
-			}
+			match index.cmp(&old_index) {
+				Ordering::Greater => self.slice.copy_within((old_index + 1)..=index, old_index),
+				Ordering::Less => self.slice.copy_within(index..old_index, index + 1),
+				Ordering::Equal => {}
+			};
 
 			// inserting new value
 			self.slice[index] = value;

@@ -301,6 +301,7 @@ impl fmt::Display for Action {
 mod tests {
 	use super::{Action, BOUND};
 	use crate::core::ValueType;
+	use std::cmp::Ordering;
 
 	#[test]
 	fn test_action_ratio() {
@@ -418,12 +419,11 @@ mod tests {
 	fn test_action_from_i8() {
 		(i8::MIN..=i8::MAX).for_each(|s| {
 			let action = Action::from(s);
-			if s == 0 {
-				assert_eq!(action, Action::None);
-			} else if s > 0 {
-				assert_eq!(action, Action::BUY_ALL);
-			} else {
-				assert_eq!(action, Action::SELL_ALL);
+
+			match s.cmp(&0) {
+				Ordering::Greater => assert_eq!(action, Action::BUY_ALL),
+				Ordering::Less => assert_eq!(action, Action::SELL_ALL),
+				Ordering::Equal => assert_eq!(action, Action::None),
 			}
 		});
 	}
@@ -432,12 +432,11 @@ mod tests {
 	fn test_action_from_i8_optional() {
 		(i8::MIN..=i8::MAX).for_each(|s| {
 			let action = Action::from(Some(s));
-			if s == 0 {
-				assert_eq!(action, Action::None);
-			} else if s > 0 {
-				assert_eq!(action, Action::BUY_ALL);
-			} else {
-				assert_eq!(action, Action::SELL_ALL);
+
+			match s.cmp(&0) {
+				Ordering::Greater => assert_eq!(action, Action::BUY_ALL),
+				Ordering::Less => assert_eq!(action, Action::SELL_ALL),
+				Ordering::Equal => assert_eq!(action, Action::None),
 			}
 		});
 	}

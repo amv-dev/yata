@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{Action, Error, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use std::cmp::Ordering;
 
 // https://en.wikipedia.org/wiki/Parabolic_SAR
 #[derive(Debug, Clone, Copy)]
@@ -101,30 +102,32 @@ impl<T: OHLC> IndicatorInstance<T> for ParabolicSARInstance<T> {
 	}
 
 	fn next(&mut self, candle: T) -> IndicatorResult {
-		if self.trend > 0 {
-			if self.high < candle.high() {
-				self.high = candle.high();
-				self.trend_inc += 1;
+		match self.trend.cmp(&0) {
+			Ordering::Greater => {
+				if self.high < candle.high() {
+					self.high = candle.high();
+					self.trend_inc += 1;
+				}
+				if candle.low() < self.sar {
+					self.trend *= -1;
+					self.low = candle.low();
+					self.trend_inc = 1;
+					self.sar = self.high;
+				}
 			}
-
-			if candle.low() < self.sar {
-				self.trend *= -1;
-				self.low = candle.low();
-				self.trend_inc = 1;
-				self.sar = self.high;
+			Ordering::Less => {
+				if self.low > candle.low() {
+					self.low = candle.low();
+					self.trend_inc += 1;
+				}
+				if candle.high() > self.sar {
+					self.trend *= -1;
+					self.high = candle.high();
+					self.trend_inc = 1;
+					self.sar = self.low;
+				}
 			}
-		} else if self.trend < 0 {
-			if self.low > candle.low() {
-				self.low = candle.low();
-				self.trend_inc += 1;
-			}
-
-			if candle.high() > self.sar {
-				self.trend *= -1;
-				self.high = candle.high();
-				self.trend_inc = 1;
-				self.sar = self.low;
-			}
+			Ordering::Equal => {}
 		}
 
 		let trend = self.trend;
@@ -136,12 +139,16 @@ impl<T: OHLC> IndicatorInstance<T> for ParabolicSARInstance<T> {
 			.af_max
 			.min(self.cfg.af_step * (self.trend_inc as ValueType));
 
-		if self.trend > 0 {
-			self.sar = self.sar + af * (self.high - self.sar);
-			self.sar = self.sar.min(candle.low()).min(self.prev_candle.low());
-		} else if self.trend < 0 {
-			self.sar = self.sar + af * (self.low - self.sar);
-			self.sar = self.sar.max(candle.high()).max(self.prev_candle.high());
+		match self.trend.cmp(&0) {
+			Ordering::Greater => {
+				self.sar = self.sar + af * (self.high - self.sar);
+				self.sar = self.sar.min(candle.low()).min(self.prev_candle.low());
+			}
+			Ordering::Less => {
+				self.sar = self.sar + af * (self.low - self.sar);
+				self.sar = self.sar.max(candle.high()).max(self.prev_candle.high());
+			}
+			Ordering::Equal => {}
 		}
 
 		self.prev_candle = candle;
