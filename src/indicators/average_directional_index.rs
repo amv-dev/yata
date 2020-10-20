@@ -192,8 +192,7 @@ impl<T: OHLC> IndicatorInstance<T> for AverageDirectionalIndexInstance<T> {
 		let signal2 = plus - minus;
 
 		let values = [adx, plus, minus];
-		let signals = [signal1.into(), signal2.into()];
 
-		IndicatorResult::new(&values, &signals)
+		IndicatorResult::new(&values, &[signal1.into(), signal2.into()])
 	}
 }

@@ -121,6 +121,7 @@ impl<T: OHLC> IndicatorInstance<T> for RelativeVigorIndexInstance {
 		&self.cfg
 	}
 
+	#[allow(clippy::similar_names)]
 	fn next(&mut self, candle: T) -> IndicatorResult {
 		let close_open = candle.close() - self.prev_close;
 		let high_low = candle.high() - candle.low();

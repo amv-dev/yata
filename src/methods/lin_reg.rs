@@ -106,6 +106,8 @@ mod tests {
 
 	#[test]
 	fn test_lin_reg() {
+		#![allow(clippy::similar_names)]
+
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();

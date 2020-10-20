@@ -90,6 +90,7 @@ impl<T: OHLC> IndicatorInstance<T> for PivotReversalStrategyInstance<T> {
 		&self.cfg
 	}
 
+	#[allow(clippy::similar_names)]
 	fn next(&mut self, candle: T) -> IndicatorResult {
 		let (high, low) = (candle.high(), candle.low());
 		let past_candle = self.window.push(candle);

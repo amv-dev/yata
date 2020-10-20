@@ -207,11 +207,11 @@ impl Method for DEMA {
 
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
-		let ema = self.ema.next(value);
-		let dma = self.dma.next(ema);
+		let e_ma = self.ema.next(value);
+		let d_ma = self.dma.next(e_ma);
 
 		// 2. * ema - dma
-		ema.mul_add(2., -dma)
+		e_ma.mul_add(2., -d_ma)
 	}
 }
 
@@ -283,12 +283,12 @@ impl Method for TEMA {
 
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
-		let ema = self.ema.next(value);
-		let dma = self.dma.next(ema);
-		let tma = self.tma.next(dma);
+		let e_ma = self.ema.next(value);
+		let d_ma = self.dma.next(e_ma);
+		let t_ma = self.tma.next(d_ma);
 
 		// 3. * (ema - dma) + tma
-		(ema - dma).mul_add(3., tma)
+		(e_ma - d_ma).mul_add(3., t_ma)
 	}
 }
 
@@ -551,15 +551,15 @@ mod tests {
 			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
-				let ema = alpha * x + (1. - alpha) * prev_value1;
-				let dma = alpha * ema + (1. - alpha) * prev_value2;
-				let tma = alpha * dma + (1. - alpha) * prev_value3;
+				let e_ma = alpha * x + (1. - alpha) * prev_value1;
+				let d_ma = alpha * e_ma + (1. - alpha) * prev_value2;
+				let t_ma = alpha * d_ma + (1. - alpha) * prev_value3;
 
-				prev_value1 = ema;
-				prev_value2 = dma;
-				prev_value3 = tma;
+				prev_value1 = e_ma;
+				prev_value2 = d_ma;
+				prev_value3 = t_ma;
 
-				let value2 = 3. * ema - 3. * dma + tma;
+				let value2 = 3. * e_ma - 3. * d_ma + t_ma;
 
 				assert_eq_float(value2, value);
 			});

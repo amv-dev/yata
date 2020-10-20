@@ -102,6 +102,7 @@ mod tests {
 
 	#[test]
 	fn test_median_abs_dev0() {
+		#![allow(clippy::similar_names)]
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();

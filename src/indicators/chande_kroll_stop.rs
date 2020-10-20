@@ -122,7 +122,7 @@ impl<T: OHLC> IndicatorInstance<T> for ChandeKrollStopInstance<T> {
 		&self.cfg
 	}
 
-	#[allow(unreachable_code, unused_variables)]
+	#[allow(clippy::similar_names)]
 	fn next(&mut self, candle: T) -> IndicatorResult {
 		let tr = candle.tr(&self.prev_candle);
 		self.prev_candle = candle;
