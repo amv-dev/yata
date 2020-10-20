@@ -153,6 +153,7 @@ impl From<Action> for Option<i8> {
 
 #[inline]
 #[allow(clippy::cast_possible_truncation)]
+#[allow(clippy::cast_sign_loss)]
 fn from_normalized_f64_to_bounded(value: f64) -> SignalType {
 	debug_assert!(value >= 0.0 && value <= 1.0);
 
