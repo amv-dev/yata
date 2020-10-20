@@ -201,19 +201,18 @@ impl Method for ReverseHighSignal {
 				});
 			self.max_value = max_value;
 			self.max_index = max_index;
-		} else {
-			if value >= self.max_value {
-				self.max_value = value;
-				self.max_index = self.index;
-			}
+		} else if value >= self.max_value {
+			self.max_value = value;
+			self.max_index = self.index;
 		}
 
-		let s;
-		if self.index >= self.right && self.max_index == self.index.saturating_sub(self.right) {
-			s = Action::BUY_ALL;
+		let s = if self.index >= self.right
+			&& self.max_index == self.index.saturating_sub(self.right)
+		{
+			Action::BUY_ALL
 		} else {
-			s = Action::None;
-		}
+			Action::None
+		};
 
 		self.index += 1;
 		s
@@ -333,19 +332,18 @@ impl Method for ReverseLowSignal {
 				});
 			self.min_value = min_value;
 			self.min_index = min_index;
-		} else {
-			if value <= self.min_value {
-				self.min_value = value;
-				self.min_index = self.index;
-			}
+		} else if value <= self.min_value {
+			self.min_value = value;
+			self.min_index = self.index;
 		}
 
-		let s;
-		if self.index >= self.right && self.min_index == self.index.saturating_sub(self.right) {
-			s = Action::BUY_ALL;
+		let s = if self.index >= self.right
+			&& self.min_index == self.index.saturating_sub(self.right)
+		{
+			Action::BUY_ALL
 		} else {
-			s = Action::None;
-		}
+			Action::None
+		};
 
 		self.index += 1;
 		s

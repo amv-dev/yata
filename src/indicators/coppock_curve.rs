@@ -68,7 +68,7 @@ impl IndicatorConfig for CoppockCurve {
 			// "zone"		=> self.zone = value.parse().unwrap(),
 			// "source"	=> self.source = value.parse().unwrap(),
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 

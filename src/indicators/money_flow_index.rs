@@ -31,7 +31,7 @@ impl IndicatorConfig for MoneyFlowIndex {
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
@@ -132,12 +132,11 @@ impl<T: OHLCV> IndicatorInstance<T> for MoneyFlowIndexInstance<T> {
 		self.pmf += pos - left_pos;
 		self.nmf += neg - left_neg;
 
-		let mfr;
-		if self.nmf != 0.0 {
-			mfr = self.pmf / self.nmf;
+		let mfr = if self.nmf == 0.0 {
+			1.
 		} else {
-			mfr = 1.;
-		}
+			self.pmf / self.nmf
+		};
 
 		let value = 1. - (1. + mfr).recip();
 

@@ -64,7 +64,7 @@ impl Method for LinReg {
 					float_length,
 					length_invert,
 					divider,
-					s_x: s_x,
+					s_x,
 					s_y: -value * float_length,
 					s_xy: value * s_x,
 					window: Window::new(length, value),
@@ -82,9 +82,7 @@ impl Method for LinReg {
 
 		// y = kx + b, x=0
 		let k = self.s_xy.mul_add(self.float_length, self.s_x * self.s_y) * self.divider;
-		let b = self.s_x.mul_add(k, self.s_y) * self.length_invert;
-
-		b
+		self.s_x.mul_add(k, self.s_y) * self.length_invert
 	}
 }
 

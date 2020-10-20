@@ -111,11 +111,11 @@ impl Iterator for RandomCandles {
 
 		let candle = Self::Item {
 			// candle: Candle {
-			open: open,
-			high: high,
-			low: low,
-			close: close,
-			volume: volume,
+			open,
+			high,
+			low,
+			close,
+			volume,
 			// },
 			// timestamp: position as i64,
 			// ..Self::Item::default()

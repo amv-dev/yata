@@ -96,15 +96,13 @@ impl<T: OHLCV> Method for ADI<T> {
 
 	fn new(length: Self::Params, candle: Self::Input) -> Result<Self, Error> {
 		let mut cmf_sum = 0.0;
-		let window;
-
-		if length > 0 {
+		let window = if length > 0 {
 			let clvv = candle.clv() * candle.volume();
 			cmf_sum = clvv * length as ValueType;
-			window = Window::new(length, clvv);
+			Window::new(length, clvv)
 		} else {
-			window = Window::empty();
-		}
+			Window::empty()
+		};
 
 		Ok(Self {
 			length,
