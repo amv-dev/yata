@@ -7,7 +7,7 @@ use std::str::FromStr;
 use crate::core::{Error, Sequence, ValueType, OHLC, OHLCV};
 
 /// Source enum represents common parts of a *Candle*
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Source {
 	/// *Close* part of a candle
@@ -93,7 +93,7 @@ impl TryFrom<String> for Source {
 /// let converted: Candle = my_candle.into();
 /// println!("{:?}", converted);
 /// ```
-#[derive(Debug, Clone, Copy, Default, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, Default, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Candle {
 	/// *Open* value of the candle
@@ -172,6 +172,18 @@ impl From<(ValueType, ValueType, ValueType, ValueType, ValueType)> for Candle {
 		}
 	}
 }
+
+impl PartialEq for Candle {
+	fn eq(&self, other: &Self) -> bool {
+		self.open.to_bits() == other.open.to_bits()
+			&& self.high.to_bits() == other.high.to_bits()
+			&& self.low.to_bits() == other.low.to_bits()
+			&& self.close.to_bits() == other.close.to_bits()
+			&& self.volume.to_bits() == other.volume.to_bits()
+	}
+}
+
+impl Eq for Candle {}
 
 /// Just an alias for the Sequence of any `T`
 pub type Candles<T> = Sequence<T>;
