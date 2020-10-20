@@ -21,33 +21,39 @@ impl IndicatorResult {
 	pub const SIZE: usize = 4;
 
 	/// Returns a slice of signals of current indicator result
+	#[must_use]
 	pub fn signals(&self) -> &[Action] {
 		let len = self.length.1 as usize;
 		&self.signals[..len]
 	}
 
 	/// Returns a slice of raw indicator values of current indicator result
+	#[must_use]
 	pub fn values(&self) -> &[ValueType] {
 		&self.values
 	}
 
 	/// Returns count of signals
+	#[must_use]
 	pub fn signals_length(&self) -> u8 {
 		self.length.1
 	}
 
 	/// Returns count of raw values
+	#[must_use]
 	pub fn values_length(&self) -> u8 {
 		self.length.0
 	}
 
 	/// Returns a tuple of count of raw values and count of signals
+	#[must_use]
 	pub fn size(&self) -> (u8, u8) {
 		self.length
 	}
 
 	/// Returns a raw value at given index
 	#[inline]
+	#[must_use]
 	pub fn value(&self, index: usize) -> ValueType {
 		debug_assert!(index < self.length.0 as usize);
 		self.values[index]
@@ -55,6 +61,7 @@ impl IndicatorResult {
 
 	/// Returns a signal at given index
 	#[inline]
+	#[must_use]
 	pub fn signal(&self, index: usize) -> Action {
 		debug_assert!(index < self.length.1 as usize);
 		self.signals[index]
@@ -62,6 +69,7 @@ impl IndicatorResult {
 
 	/// Creates a new instance of `IndicatorResult` with provided *values* and *signals*
 	#[inline]
+	#[must_use]
 	pub fn new(values_slice: &[ValueType], signals_slice: &[Action]) -> Self {
 		let mut values = [0 as ValueType; Self::SIZE];
 		let mut signals = [Action::default(); Self::SIZE];

@@ -4,7 +4,6 @@
 #![allow(clippy::cast_lossless)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::unsafe_derive_deserialize)]
-#![allow(clippy::must_use_candidate)]
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::shadow_unrelated)]
 #![allow(clippy::copy_iterator)]

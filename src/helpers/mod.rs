@@ -23,6 +23,7 @@ pub use methods::*;
 /// assert_eq!(sign(0.000001), 1.0);
 /// ```
 #[inline]
+#[must_use]
 pub fn sign(value: ValueType) -> ValueType {
 	// if value > 0. {
 	// 	1.
@@ -53,6 +54,7 @@ pub fn sign(value: ValueType) -> ValueType {
 /// assert_eq!(signi(-0.000001), -1);
 /// ```
 #[inline]
+#[must_use]
 pub fn signi(value: ValueType) -> i8 {
 	// if value > 0. {
 	// 	1
@@ -114,6 +116,7 @@ impl RandomCandles {
 	const DEFAULT_VOLUME: ValueType = 10.0;
 
 	/// Returns new instance of `RandomCandles` for testing purposes
+	#[must_use]
 	pub fn new() -> Self {
 		Self::default()
 	}

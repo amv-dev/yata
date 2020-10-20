@@ -14,11 +14,13 @@ pub struct Sequence<T: Copy>(Vec<T>);
 
 impl<T: Copy> Sequence<T> {
 	/// Creates an empty `Sequence` instance
+	#[must_use]
 	pub fn empty() -> Self {
 		Self(Vec::new())
 	}
 
 	/// Creates an empty `Sequence` instance with pre-allocated memory for `len` elements
+	#[must_use]
 	pub fn new(len: usize) -> Self {
 		Self(Vec::with_capacity(len))
 	}

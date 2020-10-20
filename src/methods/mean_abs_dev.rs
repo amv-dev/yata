@@ -33,6 +33,7 @@ pub struct MeanAbsDev(SMA);
 
 impl MeanAbsDev {
 	/// Returns reference to inner SMA. Useful for implementing in other methods and indicators.
+	#[must_use]
 	pub fn get_sma(&self) -> &SMA {
 		&self.0
 	}

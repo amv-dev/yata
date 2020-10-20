@@ -80,6 +80,7 @@ where
 	}
 
 	/// Creates an empty `Window` instance (no buffer allocated)
+	#[must_use]
 	pub fn empty() -> Self {
 		Self {
 			buf: Vec::new(),
@@ -133,12 +134,14 @@ where
 	/// assert_eq!(p, [3, 4, 5]);
 	/// ```
 	#[inline]
+	#[must_use]
 	pub fn iter(&self) -> WindowIterator<T> {
 		WindowIterator::new(self)
 	}
 
 	/// Returns an oldest value
 	#[inline]
+	#[must_use]
 	pub fn first(&self) -> T {
 		if cfg!(feature = "unsafe_performance") {
 			*unsafe { self.buf.get_unchecked(self.index as usize) }
@@ -168,6 +171,7 @@ where
 	/// assert_eq!(w.last(), 6);
 	/// ```
 	#[inline]
+	#[must_use]
 	pub fn last(&self) -> T {
 		let is_zero = self.index == 0;
 		let index = !is_zero as PeriodType * self.index.saturating_sub(1)
@@ -182,21 +186,25 @@ where
 	}
 
 	/// Checks if `Window` is empty (`length` == 0). Returns `true` if `Window` is empty or false otherwise.
+	#[must_use]
 	pub fn is_empty(&self) -> bool {
 		self.buf.is_empty()
 	}
 
 	/// Casts `Window` to a regular vector of `T`
+	#[must_use]
 	pub fn as_vec(&self) -> &Vec<T> {
 		&self.buf
 	}
 
 	/// Casts `Window` as a slice of `T`
+	#[must_use]
 	pub fn as_slice(&self) -> &[T] {
 		self.buf.as_slice()
 	}
 
 	/// Returns the length (elements count) of the `Window`
+	#[must_use]
 	pub fn len(&self) -> PeriodType {
 		self.size
 	}

@@ -38,11 +38,13 @@ impl Action {
 	/// Any negative number converts to `SELL_ALL`
 	///
 	/// Zero converts to None
+	#[must_use]
 	pub fn from_analog(value: i8) -> Self {
 		Self::from(value)
 	}
 
 	/// Converts value with the interval [-1.0; 1.0]
+	#[must_use]
 	pub fn ratio(self) -> Option<ValueType> {
 		self.into()
 	}
@@ -50,6 +52,7 @@ impl Action {
 	/// Returns a sign (1 or -1) of internal value if value exists and not zero.
 	///
 	/// Otherwise returns 0
+	#[must_use]
 	pub fn analog(self) -> i8 {
 		self.into()
 	}
@@ -57,11 +60,13 @@ impl Action {
 	/// Returns a sign of internal value if value exists
 	///
 	/// Otherwise returns None
+	#[must_use]
 	pub fn sign(self) -> Option<i8> {
 		self.into()
 	}
 
 	/// Return an internal representation of the value if signal exists or None if it doesn't.
+	#[must_use]
 	pub fn value(self) -> Option<SignalType> {
 		match self {
 			Self::None => None,
@@ -70,11 +75,13 @@ impl Action {
 	}
 
 	/// Checks if there is no signal
+	#[must_use]
 	pub fn is_none(self) -> bool {
 		matches!(self, Self::None)
 	}
 
 	/// Checks if there is signal
+	#[must_use]
 	pub fn is_some(self) -> bool {
 		!self.is_none()
 	}

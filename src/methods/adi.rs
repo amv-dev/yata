@@ -84,6 +84,7 @@ pub struct ADI<T: OHLCV> {
 
 impl<T: OHLCV> ADI<T> {
 	/// Returns last calculated value
+	#[must_use]
 	pub fn get_value(&self) -> ValueType {
 		self.cmf_sum
 	}

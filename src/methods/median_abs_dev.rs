@@ -36,6 +36,7 @@ pub struct MedianAbsDev {
 
 impl MedianAbsDev {
 	/// Returns reference to inner SMA. Useful for implementing in other methods and indicators.
+	#[must_use]
 	pub fn get_smm(&self) -> &SMM {
 		&self.smm
 	}
