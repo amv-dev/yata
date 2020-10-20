@@ -10,7 +10,6 @@
 #![allow(clippy::copy_iterator)]
 #![deny(clippy::nursery)]
 #![allow(clippy::missing_const_for_fn)]
-#![allow(clippy::suboptimal_flops)]
 /*
 
 Copyright 2020 AMvDev (amv-dev@protonmail.com)

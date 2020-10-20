@@ -90,6 +90,7 @@ impl Method for RMA {
 }
 
 #[cfg(test)]
+#[allow(clippy::suboptimal_flops)]
 mod tests {
 	use super::{Method, RMA as TestingMethod};
 	use crate::core::ValueType;

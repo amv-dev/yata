@@ -114,7 +114,7 @@ impl<T: OHLC> IndicatorInstance<T> for KeltnerChannelsInstance<T> {
 		let ma: ValueType = self.ma.next(source);
 		let atr = self.sma.next(tr);
 
-		let upper = ma + atr * self.cfg.sigma;
+		let upper = atr.mul_add(self.cfg.sigma, ma);
 		let lower = ma - atr * self.cfg.sigma;
 
 		let signal =

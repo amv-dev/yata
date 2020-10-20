@@ -107,6 +107,7 @@ impl Method for SWMA {
 }
 
 #[cfg(test)]
+#[allow(clippy::suboptimal_flops)]
 mod tests {
 	use super::{Method, SWMA as TestingMethod};
 	use crate::core::{PeriodType, ValueType};

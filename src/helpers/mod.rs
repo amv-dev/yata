@@ -138,6 +138,7 @@ impl Default for RandomCandles {
 impl Iterator for RandomCandles {
 	type Item = Candle;
 
+	#[allow(clippy::suboptimal_flops)]
 	fn next(&mut self) -> Option<Self::Item> {
 		let prev_position = self.0.wrapping_sub(1) as ValueType;
 		let position = self.0 as ValueType;

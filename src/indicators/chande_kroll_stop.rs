@@ -133,7 +133,7 @@ impl<T: OHLC> IndicatorInstance<T> for ChandeKrollStopInstance<T> {
 		let lowest = &mut self.lowest1;
 
 		let phs = highest.next(candle.high()) - atr * self.cfg.x;
-		let pls = lowest.next(candle.low()) + atr * self.cfg.x;
+		let pls = atr.mul_add(self.cfg.x, lowest.next(candle.low()));
 
 		let stop_short = self.highest2.next(phs);
 		let stop_long = self.lowest2.next(pls);

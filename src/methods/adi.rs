@@ -127,6 +127,7 @@ impl<T: OHLCV> Method for ADI<T> {
 }
 
 #[cfg(test)]
+#[allow(clippy::suboptimal_flops)]
 mod tests {
 	use crate::helpers::{assert_eq_float, assert_neq_float};
 

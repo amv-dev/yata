@@ -116,7 +116,7 @@ impl<T: OHLC> IndicatorInstance<T> for BollingerBandsInstance {
 		let middle = self.ma.next(source);
 		let sq_error = self.st_dev.next(source);
 
-		let upper = middle + sq_error * self.cfg.sigma;
+		let upper = sq_error.mul_add(self.cfg.sigma, middle);
 		let lower = middle - sq_error * self.cfg.sigma;
 
 		let values = [upper, middle, lower];

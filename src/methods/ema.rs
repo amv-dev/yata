@@ -293,6 +293,7 @@ impl Method for TEMA {
 }
 
 #[cfg(test)]
+#[allow(clippy::suboptimal_flops)]
 mod tests {
 	#![allow(unused_imports)]
 	use super::{DEMA, DMA, EMA, TEMA, TMA};

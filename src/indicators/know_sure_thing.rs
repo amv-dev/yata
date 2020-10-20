@@ -174,7 +174,7 @@ impl<T: OHLC> IndicatorInstance<T> for KnowSureThingInstance {
 		let rcma3: ValueType = self.ma3.next(roc3);
 		let rcma4: ValueType = self.ma4.next(roc4);
 
-		let kst = rcma1 + rcma2 * 2. + rcma3 * 3. + rcma4 * 4.;
+		let kst = rcma2.mul_add(2., rcma1) + rcma3.mul_add(3., rcma4 * 4.);
 		let sl: ValueType = self.ma5.next(kst);
 
 		let signal = self.cross.next((kst, sl));

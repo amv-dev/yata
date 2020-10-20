@@ -92,6 +92,7 @@ impl Method for StDev {
 }
 
 #[cfg(test)]
+#[allow(clippy::suboptimal_flops)]
 mod tests {
 	use super::{Method, StDev as TestingMethod};
 	use crate::core::ValueType;

@@ -91,6 +91,7 @@ impl Method for WMA {
 }
 
 #[cfg(test)]
+#[allow(clippy::suboptimal_flops)]
 mod tests {
 	use super::{Method, WMA as TestingMethod};
 	use crate::core::ValueType;

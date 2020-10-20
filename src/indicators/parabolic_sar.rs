@@ -141,11 +141,11 @@ impl<T: OHLC> IndicatorInstance<T> for ParabolicSARInstance<T> {
 
 		match self.trend.cmp(&0) {
 			Ordering::Greater => {
-				self.sar = self.sar + af * (self.high - self.sar);
+				self.sar = af.mul_add(self.high - self.sar, self.sar);
 				self.sar = self.sar.min(candle.low()).min(self.prev_candle.low());
 			}
 			Ordering::Less => {
-				self.sar = self.sar + af * (self.low - self.sar);
+				self.sar = af.mul_add(self.low - self.sar, self.sar);
 				self.sar = self.sar.max(candle.high()).max(self.prev_candle.high());
 			}
 			Ordering::Equal => {}

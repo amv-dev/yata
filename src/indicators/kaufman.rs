@@ -152,7 +152,7 @@ impl<T: OHLC> IndicatorInstance<T> for KaufmanInstance {
 			smooth = smooth * smooth;
 		}
 
-		let value = self.prev_value + smooth * (src - self.prev_value);
+		let value = smooth.mul_add(src - self.prev_value, self.prev_value);
 		self.prev_value = value;
 
 		let cross = self.cross.next((src, value));

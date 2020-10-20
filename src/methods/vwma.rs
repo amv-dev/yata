@@ -80,6 +80,7 @@ impl Method for VWMA {
 }
 
 #[cfg(test)]
+#[allow(clippy::suboptimal_flops)]
 mod tests {
 	use super::{Method, VWMA as TestingMethod};
 	use crate::core::ValueType;

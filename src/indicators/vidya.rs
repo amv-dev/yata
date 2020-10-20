@@ -133,7 +133,7 @@ impl<T: OHLC> IndicatorInstance<T> for VidyaInstance {
 		} else {
 			let cmo = ((self.up_sum - self.dn_sum) / (self.up_sum + self.dn_sum)).abs();
 			let f_cmo = self.f * cmo;
-			let result = src * f_cmo + (1.0 - f_cmo) * self.last_result;
+			let result = src.mul_add(f_cmo, (1.0 - f_cmo) * self.last_result);
 			value = result;
 			self.last_result = result;
 		}

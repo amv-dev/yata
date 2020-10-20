@@ -94,7 +94,7 @@ impl<T: OHLC> IndicatorInstance<T> for PriceChannelStrategyInstance {
 		let middle = (highest + lowest) * 0.5;
 		let delta = highest - middle;
 
-		let upper = middle + delta * self.cfg.sigma;
+		let upper = delta.mul_add(self.cfg.sigma, middle);
 		let lower = middle - delta * self.cfg.sigma;
 
 		// let signal_up = if candle.high() >= upper { 1 } else { 0 };

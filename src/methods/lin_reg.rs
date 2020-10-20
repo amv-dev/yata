@@ -87,6 +87,7 @@ impl Method for LinReg {
 }
 
 #[cfg(test)]
+#[allow(clippy::suboptimal_flops)]
 mod tests {
 	use super::{LinReg as TestingMethod, Method};
 	use crate::core::ValueType;

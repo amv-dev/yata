@@ -81,6 +81,7 @@ impl Method for Conv {
 }
 
 #[cfg(test)]
+#[allow(clippy::suboptimal_flops)]
 mod tests {
 	use super::{Conv as TestingMethod, Method};
 	use crate::core::{PeriodType, ValueType};
