@@ -134,7 +134,7 @@ where
 	/// ```
 	#[inline]
 	pub fn iter(&self) -> WindowIterator<T> {
-		WindowIterator::new(&self)
+		WindowIterator::new(self)
 	}
 
 	/// Returns an oldest value

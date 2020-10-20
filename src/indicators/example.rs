@@ -49,7 +49,7 @@ impl IndicatorConfig for Example {
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
@@ -127,17 +127,17 @@ impl<T: OHLC> IndicatorInstance<T> for ExampleInstance {
 				self.last_signal_position = 0;
 				new_signal
 			}
-			_ => match self.last_signal {
-				Action::None => self.last_signal,
-				_ => {
+			_ => {
+				if let Action::None = self.last_signal {
+					self.last_signal
+				} else {
 					self.last_signal_position += 1;
 					if self.last_signal_position > self.cfg.period {
 						self.last_signal = Action::None;
 					}
-
 					self.last_signal
 				}
-			},
+			}
 		};
 
 		let some_other_signal = Action::from(0.5);

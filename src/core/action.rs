@@ -32,9 +32,9 @@ impl Action {
 
 	/// Create instance from *analog* signal (which can be only -1, 0 or 1)
 	///
-	/// Any positive number converts to BUY_ALL
+	/// Any positive number converts to `BUY_ALL`
 	///
-	/// Any negative number converts to SELL_ALL
+	/// Any negative number converts to `SELL_ALL`
 	///
 	/// Zero converts to None
 	pub fn from_analog(value: i8) -> Self {
@@ -42,39 +42,39 @@ impl Action {
 	}
 
 	/// Converts value with the interval [-1.0; 1.0]
-	pub fn ratio(&self) -> Option<ValueType> {
-		(*self).into()
+	pub fn ratio(self) -> Option<ValueType> {
+		self.into()
 	}
 
 	/// Returns a sign (1 or -1) of internal value if value exists and not zero.
 	///
 	/// Otherwise returns 0
-	pub fn analog(&self) -> i8 {
-		(*self).into()
+	pub fn analog(self) -> i8 {
+		self.into()
 	}
 
 	/// Returns a sign of internal value if value exists
 	///
 	/// Otherwise returns None
-	pub fn sign(&self) -> Option<i8> {
-		(*self).into()
+	pub fn sign(self) -> Option<i8> {
+		self.into()
 	}
 
 	/// Return an internal representation of the value if signal exists or None if it doesn't.
-	pub fn value(&self) -> Option<SignalType> {
-		match *self {
+	pub fn value(self) -> Option<SignalType> {
+		match self {
 			Self::None => None,
 			Self::Buy(v) | Self::Sell(v) => Some(v),
 		}
 	}
 
 	/// Checks if there is no signal
-	pub fn is_none(&self) -> bool {
+	pub fn is_none(self) -> bool {
 		matches!(self, Self::None)
 	}
 
 	/// Checks if there is signal
-	pub fn is_some(&self) -> bool {
+	pub fn is_some(self) -> bool {
 		!self.is_none()
 	}
 }
@@ -82,9 +82,10 @@ impl Action {
 impl PartialEq for Action {
 	fn eq(&self, other: &Self) -> bool {
 		match (*self, *other) {
-			(Self::None, Self::None) => true,
+			(Self::None, Self::None)
+			| (Self::Buy(0), Self::Sell(0))
+			| (Self::Sell(0), Self::Buy(0)) => true,
 			(Self::Buy(a), Self::Buy(b)) | (Self::Sell(a), Self::Sell(b)) => a == b,
-			(Self::Buy(0), Self::Sell(0)) | (Self::Sell(0), Self::Buy(0)) => true,
 			_ => false,
 		}
 	}
@@ -98,9 +99,10 @@ impl Default for Action {
 
 impl From<bool> for Action {
 	fn from(value: bool) -> Self {
-		match value {
-			true => Self::BUY_ALL,
-			false => Self::None,
+		if value {
+			Self::BUY_ALL
+		} else {
+			Self::None
 		}
 	}
 }
@@ -123,9 +125,9 @@ impl From<i8> for Action {
 impl From<Action> for i8 {
 	fn from(value: Action) -> Self {
 		match value {
-			Action::Buy(value) => (value > 0) as i8,
+			Action::Buy(value) => (value > 0) as Self,
 			Action::None => 0,
-			Action::Sell(value) => -((value > 0) as i8),
+			Action::Sell(value) => -((value > 0) as Self),
 		}
 	}
 }
@@ -156,20 +158,18 @@ impl From<f64> for Action {
 
 		let normalized = v.max(-1.0).min(1.0);
 
-		let value = (normalized.abs() * (BOUND as f64)).round() as SignalType;
+		let value = (normalized.abs() * f64::from(BOUND)).round() as SignalType;
 
 		if normalized.is_sign_negative() {
-			if value >= BOUND {
+			if value == BOUND {
 				Self::SELL_ALL
 			} else {
 				Self::Sell(value)
 			}
+		} else if value == BOUND {
+			Self::BUY_ALL
 		} else {
-			if value >= BOUND {
-				Self::BUY_ALL
-			} else {
-				Self::Buy(value)
-			}
+			Self::Buy(value)
 		}
 	}
 }
@@ -191,20 +191,18 @@ impl From<f32> for Action {
 
 		let normalized = v.max(-1.0).min(1.0);
 
-		let value = (normalized.abs() * (BOUND as f32)).round() as SignalType;
+		let value = (normalized.abs() * f32::from(BOUND)).round() as SignalType;
 
 		if normalized.is_sign_negative() {
-			if value >= BOUND {
+			if value == BOUND {
 				Self::SELL_ALL
 			} else {
 				Self::Sell(value)
 			}
+		} else if value == BOUND {
+			Self::BUY_ALL
 		} else {
-			if value >= BOUND {
-				Self::BUY_ALL
-			} else {
-				Self::Buy(value)
-			}
+			Self::Buy(value)
 		}
 	}
 }
@@ -320,20 +318,20 @@ mod tests {
 			BOUND / 2
 		};
 		// f64
-		assert_eq!(Action::from(0.0f64), Action::Buy(0));
-		assert_eq!(Action::from(-0.5f64), Action::Sell(half_bound));
-		assert_eq!(Action::from(1.0f64), Action::BUY_ALL);
-		assert_eq!(Action::from(-1.0f64), Action::SELL_ALL);
-		assert_eq!(Action::from(2.0f64), Action::BUY_ALL);
-		assert_eq!(Action::from(-2.0f64), Action::SELL_ALL);
+		assert_eq!(Action::from(0.0_f64), Action::Buy(0));
+		assert_eq!(Action::from(-0.5_f64), Action::Sell(half_bound));
+		assert_eq!(Action::from(1.0_f64), Action::BUY_ALL);
+		assert_eq!(Action::from(-1.0_f64), Action::SELL_ALL);
+		assert_eq!(Action::from(2.0_f64), Action::BUY_ALL);
+		assert_eq!(Action::from(-2.0_f64), Action::SELL_ALL);
 
 		// f32
-		assert_eq!(Action::from(0.0f32), Action::Buy(0));
-		assert_eq!(Action::from(-0.5f32), Action::Sell(half_bound));
-		assert_eq!(Action::from(1.0f32), Action::BUY_ALL);
-		assert_eq!(Action::from(-1.0f32), Action::SELL_ALL);
-		assert_eq!(Action::from(2.0f32), Action::BUY_ALL);
-		assert_eq!(Action::from(-2.0f32), Action::SELL_ALL);
+		assert_eq!(Action::from(0.0_f32), Action::Buy(0));
+		assert_eq!(Action::from(-0.5_f32), Action::Sell(half_bound));
+		assert_eq!(Action::from(1.0_f32), Action::BUY_ALL);
+		assert_eq!(Action::from(-1.0_f32), Action::SELL_ALL);
+		assert_eq!(Action::from(2.0_f32), Action::BUY_ALL);
+		assert_eq!(Action::from(-2.0_f32), Action::SELL_ALL);
 
 		// other
 		assert_eq!(Action::from(1. / BOUND as ValueType), Action::Buy(1));

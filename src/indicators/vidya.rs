@@ -36,7 +36,7 @@ impl IndicatorConfig for Vidya {
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
@@ -146,16 +146,16 @@ impl<T: OHLC> IndicatorInstance<T> for VidyaInstance {
 		let signal;
 
 		if value * upper_zone > src {
-			if self.last_signal != -1 {
-				signal = -1;
-			} else {
+			if self.last_signal == -1 {
 				signal = 0;
+			} else {
+				signal = -1;
 			}
 		} else if value * lower_zone < src {
-			if self.last_signal != 1 {
-				signal = 1;
-			} else {
+			if self.last_signal == 1 {
 				signal = 0;
+			} else {
+				signal = 1;
 			}
 		} else {
 			signal = 0;

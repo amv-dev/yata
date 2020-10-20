@@ -15,7 +15,7 @@ use std::fmt;
 /// let mut ma = SMA::new(2, s[0]).unwrap();
 ///
 /// s.iter().enumerate().for_each(|(index, &value)| {
-/// 	assert_eq!(ma.next(value), (value + s[index.saturating_sub(1)])/2.);
+///     assert_eq!(ma.next(value), (value + s[index.saturating_sub(1)])/2.);
 /// });
 /// ```
 ///

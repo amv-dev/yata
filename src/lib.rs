@@ -1,3 +1,22 @@
+#![deny(clippy::all)]
+#![allow(clippy::comparison_chain)]
+#![allow(clippy::float_cmp)]
+#![deny(clippy::pedantic)]
+#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::similar_names)]
+#![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::cast_sign_loss)]
+#![allow(clippy::cast_lossless)]
+#![allow(clippy::doc_markdown)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::unsafe_derive_deserialize)]
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::cast_precision_loss)]
+#![allow(clippy::shadow_unrelated)]
+#![allow(clippy::copy_iterator)]
+#![deny(clippy::nursery)]
+#![allow(clippy::missing_const_for_fn)]
+#![allow(clippy::suboptimal_flops)]
 /*
 
 Copyright 2020 AMvDev (amv-dev@protonmail.com)
@@ -15,7 +34,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 */
-
 #![warn(
 	missing_docs,
 	missing_debug_implementations,
@@ -30,7 +48,7 @@ limitations under the License.
 
 //! Yet Another Technical Analysis library
 //!
-//! YaTa implements most common technical analysis [methods](crate::methods) and [indicators](crate::indicators)
+//! `YaTa` implements most common technical analysis [methods](crate::methods) and [indicators](crate::indicators)
 //!
 //! It also provides you an interface to create your own indicators.
 //!
@@ -112,9 +130,9 @@ limitations under the License.
 //! let mut macd = macd.init(candles.first()).unwrap();
 //!
 //! for candle in candles.take(10) {
-//! 	let result = macd.next(candle);
+//!     let result = macd.next(candle);
 //!
-//! 	println!("{:?}", result);
+//!     println!("{:?}", result);
 //! }
 //! ```
 //!

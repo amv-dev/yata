@@ -41,7 +41,7 @@ impl IndicatorConfig for Trix {
 				Ok(value) => self.source = value,
 			},
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
@@ -57,23 +57,22 @@ impl<T: OHLC> IndicatorInitializer<T> for Trix {
 	type Instance = TRIXInstance;
 
 	fn init(self, candle: T) -> Result<Self::Instance, Error> {
-		match self.validate() {
-			true => {
-				let src = candle.source(self.source);
+		if self.validate() {
+			let src = candle.source(self.source);
 
-				Ok(Self::Instance {
-					tma: TMA::new(self.period1, src)?,
-					sig: method(self.method2, self.period2, src)?,
-					change: Change::new(1, src)?,
-					cross1: Cross::new((), (src, src))?,
-					cross2: Cross::new((), (src, src))?,
-					prev_value: 0.0,
+			Ok(Self::Instance {
+				tma: TMA::new(self.period1, src)?,
+				sig: method(self.method2, self.period2, src)?,
+				change: Change::new(1, src)?,
+				cross1: Cross::new((), (src, src))?,
+				cross2: Cross::new((), (src, src))?,
+				prev_value: 0.0,
 
-					cfg: self,
-					// phantom: PhantomData::default(),
-				})
-			}
-			false => Err(Error::WrongConfig),
+				cfg: self,
+				// phantom: PhantomData::default(),
+			})
+		} else {
+			Err(Error::WrongConfig)
 		}
 	}
 }

@@ -60,7 +60,7 @@ impl IndicatorConfig for Kaufman {
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
@@ -141,10 +141,10 @@ impl<T: OHLC> IndicatorInstance<T> for KaufmanInstance {
 		let direction = self.change.next(src).abs();
 		let volatility = self.volatility.next(src);
 
-		let er = if volatility != 0. {
-			direction / volatility
-		} else {
+		let er = if volatility == 0. {
 			0.
+		} else {
+			direction / volatility
 		};
 		let mut smooth = er.mul_add(self.fastest - self.slowest, self.slowest);
 

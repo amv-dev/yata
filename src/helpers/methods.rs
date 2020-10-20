@@ -2,7 +2,11 @@
 use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, PeriodType, ValueType};
-use crate::methods::*;
+use crate::methods::{
+	Derivative, Highest, HighestLowestDelta, Integral, LinReg, Lowest, MeanAbsDev, MedianAbsDev,
+	Momentum, Past, RateOfChange, StDev, CCI, DEMA, DMA, EMA, HMA, RMA, SMA, SMM, SWMA, TEMA, TMA,
+	TRIMA, WMA, WSMA,
+};
 
 use std::convert::TryFrom;
 use std::str::FromStr;

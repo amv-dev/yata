@@ -34,8 +34,8 @@ use serde::{Deserialize, Serialize};
 /// let mut highest_index = HighestIndex::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-/// 	let v = highest_index.next(values[i]);
-/// 	assert_eq!(v, r[i]);
+///     let v = highest_index.next(values[i]);
+///     assert_eq!(v, r[i]);
 /// });
 /// ```
 ///
@@ -145,8 +145,8 @@ impl Method for HighestIndex {
 /// let mut lowest_index = LowestIndex::new(3, values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-/// 	let v = lowest_index.next(values[i]);
-/// 	assert_eq!(v, r[i]);
+///     let v = lowest_index.next(values[i]);
+///     assert_eq!(v, r[i]);
 /// });
 /// ```
 ///

@@ -36,7 +36,7 @@ impl IndicatorConfig for ChandeMomentumOscillator {
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value.to_string()));
+				return Some(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
@@ -68,7 +68,7 @@ impl<T: OHLC> IndicatorInitializer<T> for ChandeMomentumOscillator {
 			window: Window::new(cfg.period, 0.),
 			cross_under: CrossUnder::default(),
 			cross_above: CrossAbove::default(),
-			cfg: cfg,
+			cfg,
 		})
 	}
 }
