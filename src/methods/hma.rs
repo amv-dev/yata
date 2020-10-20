@@ -64,6 +64,7 @@ impl Method for HMA {
 	type Output = Self::Input;
 
 	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		#[allow(clippy::cast_possible_truncation)]
 		match length {
 			0 | 1 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
@@ -108,6 +109,7 @@ mod tests {
 
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 
+		#[allow(clippy::cast_possible_truncation)]
 		(2..20).for_each(|length| {
 			let mut wma1 = WMA::new(length, src[0]).unwrap();
 			let mut wma2 = WMA::new(length / 2, src[0]).unwrap();

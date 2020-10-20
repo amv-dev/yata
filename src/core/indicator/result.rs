@@ -72,6 +72,7 @@ impl IndicatorResult {
 		let signals_length = Self::SIZE.min(signals_slice.len());
 		signals[..signals_length].copy_from_slice(&signals_slice[..signals_length]);
 
+		#[allow(clippy::cast_possible_truncation)]
 		Self {
 			values,
 			signals,

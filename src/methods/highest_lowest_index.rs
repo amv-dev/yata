@@ -92,6 +92,7 @@ impl Method for HighestIndex {
 		self.window.push(value);
 		self.index += 1;
 
+		#[allow(clippy::cast_possible_truncation)]
 		if value >= self.value {
 			self.value = value;
 			self.index = 0;
@@ -203,6 +204,7 @@ impl Method for LowestIndex {
 		self.window.push(value);
 		self.index += 1;
 
+		#[allow(clippy::cast_possible_truncation)]
 		if value <= self.value {
 			self.value = value;
 			self.index = 0;
@@ -230,7 +232,7 @@ impl Method for LowestIndex {
 mod tests {
 	use super::*;
 	use crate::core::Method;
-	use crate::core::{PeriodType, ValueType};
+	use crate::core::ValueType;
 	use crate::helpers::RandomCandles;
 	use crate::methods::tests::test_const;
 
@@ -284,8 +286,8 @@ mod tests {
 				}
 
 				assert_eq!(
-					max_index as PeriodType,
-					ma.next(x),
+					max_index,
+					ma.next(x) as usize,
 					"{}, {:?}, {:?}",
 					length,
 					&src[i.saturating_sub(length)..=i],
@@ -345,8 +347,8 @@ mod tests {
 				}
 
 				assert_eq!(
-					max_index as PeriodType,
-					ma.next(x),
+					max_index,
+					ma.next(x) as usize,
 					"{}, {:?}, {:?}",
 					length,
 					&src[i.saturating_sub(length)..=i],

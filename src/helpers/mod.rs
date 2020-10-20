@@ -165,6 +165,7 @@ impl Iterator for RandomCandles {
 		Some(candle)
 	}
 
+	#[allow(clippy::cast_possible_truncation)]
 	fn nth(&mut self, n: usize) -> Option<Self::Item> {
 		self.0 = n as u16;
 		self.0 = self.0.wrapping_sub(1);

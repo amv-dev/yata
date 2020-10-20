@@ -6,6 +6,7 @@ use std::ops::{Neg, Sub};
 
 type SignalType = u8;
 const BOUND: SignalType = SignalType::MAX;
+const BOUND_FLOAT: f64 = BOUND as f64;
 
 /// Action is basic type of Indicator's signals
 ///
@@ -150,6 +151,14 @@ impl From<Action> for Option<i8> {
 	}
 }
 
+#[inline]
+#[allow(clippy::cast_possible_truncation)]
+fn from_normalized_f64_to_bounded(value: f64) -> SignalType {
+	debug_assert!(value >= 0.0 && value <= 1.0);
+
+	(value * BOUND_FLOAT).round() as SignalType
+}
+
 impl From<f64> for Action {
 	fn from(v: f64) -> Self {
 		if v.is_nan() {
@@ -158,7 +167,7 @@ impl From<f64> for Action {
 
 		let normalized = v.max(-1.0).min(1.0);
 
-		let value = (normalized.abs() * f64::from(BOUND)).round() as SignalType;
+		let value = from_normalized_f64_to_bounded(normalized.abs());
 
 		if normalized.is_sign_negative() {
 			if value == BOUND {
@@ -184,26 +193,9 @@ impl From<Option<f64>> for Action {
 }
 
 impl From<f32> for Action {
+	#[allow(clippy::cast_possible_truncation)]
 	fn from(v: f32) -> Self {
-		if v.is_nan() {
-			return Self::None;
-		}
-
-		let normalized = v.max(-1.0).min(1.0);
-
-		let value = (normalized.abs() * f32::from(BOUND)).round() as SignalType;
-
-		if normalized.is_sign_negative() {
-			if value == BOUND {
-				Self::SELL_ALL
-			} else {
-				Self::Sell(value)
-			}
-		} else if value == BOUND {
-			Self::BUY_ALL
-		} else {
-			Self::Buy(value)
-		}
+		Self::from(v as f64)
 	}
 }
 

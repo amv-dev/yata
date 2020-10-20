@@ -164,6 +164,7 @@ mod tests {
 			let wsum: ValueType = weights.iter().sum();
 			let length = weights.len();
 
+			#[allow(clippy::cast_possible_truncation)]
 			let mut ma = TestingMethod::new(length as PeriodType, src[0]).unwrap();
 			let mut conv = Conv::new(weights.clone(), src[0]).unwrap();
 

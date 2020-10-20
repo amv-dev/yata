@@ -14,7 +14,7 @@ pub struct WoodiesCCI {
 	pub period1: PeriodType,
 	pub period2: PeriodType,
 	pub signal1_period: PeriodType,
-	pub signal2_bars_count: isize,
+	pub signal2_bars_count: PeriodType,
 	pub signal3_zone: ValueType,
 }
 
@@ -88,7 +88,7 @@ impl<T: OHLC> IndicatorInitializer<T> for WoodiesCCI {
 			s2_sum: 0,
 			s3_sum: 0.,
 			s3_count: 0,
-			window: Window::new(cfg.signal2_bars_count as PeriodType, 0),
+			window: Window::new(cfg.signal2_bars_count, 0),
 			cross_above: CrossAbove::default(),
 			cross_under: CrossUnder::default(),
 			cfg,
@@ -152,8 +152,8 @@ impl<T: OHLC> IndicatorInstance<T> for WoodiesCCIInstance {
 		// } else {
 		// 	s2 = 0;
 		// }
-		let s2 = (self.s2_sum >= self.cfg.signal2_bars_count) as i8
-			- (self.s2_sum <= -self.cfg.signal2_bars_count) as i8;
+		let s2 = (self.s2_sum >= isize::from(self.cfg.signal2_bars_count)) as i8
+			- (self.s2_sum <= -isize::from(self.cfg.signal2_bars_count)) as i8;
 
 		// if s0.is_some() {
 		// 	self.s3_sum = 0.;

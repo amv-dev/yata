@@ -49,18 +49,22 @@ impl Method for Conv {
 	type Output = Self::Input;
 
 	fn new(weights: Self::Params, value: Self::Input) -> Result<Self, Error> {
-		if let 0 = weights.len() {
-			Err(Error::WrongMethodParameters)
-		} else {
-			let wsum_invert = weights.iter().sum::<ValueType>().recip();
+		const MAX_WEIGHTS_LEN: usize = PeriodType::MAX as usize;
 
-			Ok(Self {
-				window: Window::new(weights.len() as PeriodType, value),
-				weights,
-				wsum_invert,
+		match weights.len() {
+			1..=MAX_WEIGHTS_LEN => {
+				let wsum_invert = weights.iter().sum::<ValueType>().recip();
 
-				initialized: false,
-			})
+				#[allow(clippy::cast_possible_truncation)]
+				Ok(Self {
+					window: Window::new(weights.len() as PeriodType, value),
+					weights,
+					wsum_invert,
+
+					initialized: false,
+				})
+			}
+			_ => Err(Error::WrongMethodParameters),
 		}
 	}
 
