@@ -195,10 +195,8 @@ impl Method for SMM {
 mod tests {
 	use super::{Method, SMM as TestingMethod};
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
-
-	const SIGMA: ValueType = 1e-8;
 
 	#[test]
 	fn test_smm_const() {
@@ -218,7 +216,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -253,7 +251,7 @@ mod tests {
 				} else {
 					slice[ma_length / 2]
 				};
-				assert!((value2 - value).abs() < SIGMA);
+				assert_eq_float(value2, value);
 			});
 		});
 	}

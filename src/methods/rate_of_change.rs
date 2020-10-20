@@ -69,11 +69,9 @@ impl Method for RateOfChange {
 mod tests {
 	use super::{Method, ROC as TestingMethod};
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
 	use crate::methods::{Derivative, Past};
-
-	const SIGMA: ValueType = 1e-8;
 
 	#[test]
 	fn test_rate_of_change_const() {
@@ -97,7 +95,7 @@ mod tests {
 		candles.take(100).map(|x| x.close).for_each(|x| {
 			let value = ma.next(x);
 			let value2 = der.next(x) / mv.next(x);
-			assert!((value - value2).abs() < SIGMA);
+			assert_eq_float(value2, value);
 		});
 	}
 
@@ -116,14 +114,7 @@ mod tests {
 
 				let value2 = (x - left_value) / left_value;
 
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"{}, {} at index {} with length {}",
-					value,
-					value2,
-					i,
-					length
-				);
+				assert_eq_float(value2, value);
 			});
 		});
 	}

@@ -99,14 +99,10 @@ impl Method for Momentum {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{Method, Momentum as TestingMethod};
-	use crate::core::{Candle, ValueType};
-	use crate::helpers::RandomCandles;
+	use crate::core::ValueType;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
-
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-8;
 
 	#[test]
 	fn test_momentum_const() {
@@ -129,7 +125,8 @@ mod tests {
 		candles.take(100).map(|x| x.close).for_each(|x| {
 			let q = ma.next(x);
 			let p = prev.unwrap_or(x);
-			assert_eq!(q, x - p);
+			// assert_eq!(q, x - p);
+			assert_eq_float(x - p, q);
 			prev = Some(x);
 		});
 	}
@@ -143,7 +140,7 @@ mod tests {
 		(1..20).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			src.iter().enumerate().for_each(|(i, &x)| {
-				assert_eq!(x - src[i.saturating_sub(length as usize)], ma.next(x))
+				assert_eq_float(x - src[i.saturating_sub(length as usize)], ma.next(x));
 			});
 		});
 	}

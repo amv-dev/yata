@@ -110,11 +110,9 @@ impl Method for SWMA {
 mod tests {
 	use super::{Method, SWMA as TestingMethod};
 	use crate::core::{PeriodType, ValueType};
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
 	use crate::methods::Conv;
-
-	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_swma_const() {
@@ -134,7 +132,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -179,15 +177,8 @@ mod tests {
 				let value2 = wcv / wsum;
 				let value3 = conv.next(x);
 
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"Got {}, should {} at {} with length {}",
-					value2,
-					value,
-					i,
-					length
-				);
-				assert!((value3 - value).abs() < SIGMA);
+				assert_eq_float(value2, value);
+				assert_eq_float(value3, value);
 			});
 		});
 	}

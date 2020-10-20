@@ -68,10 +68,7 @@ impl Method for MeanAbsDev {
 mod tests {
 	use super::{MeanAbsDev as TestingMethod, Method};
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
-
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-5;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 
 	#[test]
 	fn test_mean_abs_dev_const() {
@@ -80,7 +77,7 @@ mod tests {
 			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
-			assert_eq!(output, 0.0);
+			assert_eq_float(0.0, output);
 		}
 	}
 
@@ -91,7 +88,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((0.0 - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(0.0, ma.next(x.close));
 		});
 	}
 
@@ -121,7 +118,7 @@ mod tests {
 				let q = sum / length as ValueType;
 
 				let value = method.next(x);
-				assert!((q - value).abs() < SIGMA);
+				assert_eq_float(q, value);
 			});
 		});
 	}

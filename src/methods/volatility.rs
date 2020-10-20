@@ -86,11 +86,9 @@ impl Method for LinearVolatility {
 mod tests {
 	use super::{LinearVolatility as TestingMethod, Method};
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
 	use crate::methods::Derivative;
-
-	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_volatility_const() {
@@ -112,7 +110,8 @@ mod tests {
 		candles.take(100).for_each(|x| {
 			let v1 = der.next(x.close).abs();
 			let v2 = ma.next(x.close);
-			assert!((v1 - v2).abs() < SIGMA, "{}, {}", v1, v2);
+
+			assert_eq_float(v1, v2);
 		});
 	}
 
@@ -135,7 +134,8 @@ mod tests {
 
 				let value = ma.next(x);
 				let value2 = s;
-				assert!((value2 - value).abs() < SIGMA);
+
+				assert_eq_float(value2, value);
 			});
 		});
 	}

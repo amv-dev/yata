@@ -65,6 +65,46 @@ pub fn signi(value: ValueType) -> i8 {
 	(value > 0.) as i8 - (value < 0.) as i8
 }
 
+#[cfg(test)]
+pub fn assert_eq_float(original: ValueType, calculated: ValueType) {
+	const SIGMA: ValueType = if cfg!(feature = "value_type_f32") {
+		4e-3
+	} else {
+		1e-10
+	};
+	let diff = original - calculated;
+
+	if original != 0. {
+		assert!(
+			(diff / original).abs() <= SIGMA,
+			"orignial={}, calculated={}, diff={}, relative diff={}",
+			original,
+			calculated,
+			diff,
+			(diff / original).abs(),
+		);
+	}
+}
+
+#[cfg(test)]
+pub fn assert_neq_float(value1: ValueType, value2: ValueType) {
+	const SIGMA: ValueType = if cfg!(feature = "value_type_f32") {
+		1e-10
+	} else {
+		1e-20
+	};
+
+	let mid = (value1 + value2) / 2.0;
+	let diff = value1 - value2;
+
+	assert!(
+		(diff / mid).abs() > SIGMA,
+		"value#1={}, value#2={}",
+		value1,
+		value2
+	);
+}
+
 /// Random Candles iterator for testing purposes
 #[derive(Debug, Clone, Copy)]
 pub struct RandomCandles(u16);

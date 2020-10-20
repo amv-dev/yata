@@ -74,11 +74,8 @@ impl Method for MedianAbsDev {
 mod tests {
 	use super::{MedianAbsDev as TestingMethod, Method};
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use std::cmp::Ordering;
-
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_median_abs_dev_const() {
@@ -87,7 +84,7 @@ mod tests {
 			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
-			assert_eq!(output, 0.0);
+			assert_eq_float(0.0, output);
 		}
 	}
 
@@ -99,7 +96,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((0.0 - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(0.0, ma.next(x.close));
 		});
 	}
 
@@ -141,7 +138,7 @@ mod tests {
 				let q = sum / length as ValueType;
 
 				let value = method.next(x);
-				assert!((q - value).abs() < SIGMA);
+				assert_eq_float(q, value);
 			});
 		});
 	}

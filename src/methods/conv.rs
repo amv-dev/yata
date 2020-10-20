@@ -78,13 +78,9 @@ impl Method for Conv {
 
 #[cfg(test)]
 mod tests {
-	// #![allow(unused_imports)]
 	use super::{Conv as TestingMethod, Method};
 	use crate::core::{PeriodType, ValueType};
-	use crate::helpers::RandomCandles;
-
-	// #[allow(dead_code)]
-	const SIGMA: ValueType = 1e-6;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 
 	fn get_weights(length: PeriodType) -> Vec<ValueType> {
 		(0..length)
@@ -118,9 +114,9 @@ mod tests {
 		let weights = get_weights(1);
 		let mut ma = TestingMethod::new(weights, candles.first().close).unwrap();
 
-		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
-		});
+		candles
+			.take(100)
+			.for_each(|x| assert_eq_float(x.close, ma.next(x.close)));
 	}
 
 	#[test]
@@ -144,13 +140,7 @@ mod tests {
 
 				let value = ma.next(x);
 				let value2 = wcv / wsum;
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"{}, {}, {:?}",
-					value,
-					value2,
-					&weights
-				);
+				assert_eq_float(value2, value);
 			});
 		});
 	}

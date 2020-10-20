@@ -85,15 +85,11 @@ impl Method for HMA {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{HMA as TestingMethod, WMA};
 	use crate::core::Method;
 	use crate::core::{PeriodType, ValueType};
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const_float;
-
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-8;
 
 	#[test]
 	fn test_hma_const() {
@@ -122,7 +118,7 @@ mod tests {
 			src.iter().for_each(|&x| {
 				let value1 = ma.next(x);
 				let value2 = wma3.next(2. * wma2.next(x) - wma1.next(x));
-				assert!((value2 - value1).abs() < SIGMA);
+				assert_eq_float(value2, value1);
 			});
 		});
 	}

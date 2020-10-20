@@ -73,10 +73,8 @@ impl Method for TRIMA {
 mod tests {
 	use super::{Method, TRIMA as TestingMethod};
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
-
-	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_trima_const() {
@@ -96,7 +94,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -128,7 +126,7 @@ mod tests {
 					sum += (sma_length as usize - level2.len()) as ValueType * src.first().unwrap();
 				}
 
-				assert!((sum / sma_length as ValueType - value).abs() < SIGMA);
+				assert_eq_float(sum / sma_length as ValueType, value);
 			});
 		});
 	}

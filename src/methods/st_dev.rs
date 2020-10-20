@@ -95,10 +95,8 @@ impl Method for StDev {
 mod tests {
 	use super::{Method, StDev as TestingMethod};
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const_float;
-
-	const SIGMA: ValueType = 5e-4;
 
 	#[test]
 	fn test_st_dev_const() {
@@ -109,17 +107,6 @@ mod tests {
 			test_const_float(&mut method, input, 0.0);
 		}
 	}
-
-	// #[test]
-	// fn test_st_dev1() {
-	// 	let mut candles = RandomCandles::default();
-
-	// 	let mut ma = TestingMethod::new(1, candles.first().close);
-
-	// 	candles.take(100).for_each(|x| {
-	// 		assert!((0.0 - ma.next(x.close)).abs() < SIGMA, "{:?}", ma);
-	// 	});
-	// }
 
 	#[test]
 	fn test_st_dev() {
@@ -148,13 +135,7 @@ mod tests {
 
 				let value = ma.next(x);
 				let value2 = (diff_sq_sum / (ma_length - 1) as ValueType).sqrt();
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"{}, {}, index: {}",
-					value2,
-					value,
-					i
-				);
+				assert_eq_float(value, value2);
 			});
 		});
 	}

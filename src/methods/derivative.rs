@@ -88,11 +88,8 @@ mod tests {
 	#![allow(unused_imports)]
 	use super::{Derivative as TestingMethod, Method};
 	use crate::core::{Candle, ValueType};
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
-
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_derivative_const() {
@@ -112,7 +109,7 @@ mod tests {
 		let mut prev = None;
 
 		candles.take(100).map(|x| x.close).for_each(|x| {
-			assert!(((x - prev.unwrap_or(x)) - ma.next(x)).abs() < SIGMA);
+			assert_eq_float(x - prev.unwrap_or(x), ma.next(x));
 			prev = Some(x);
 		});
 	}
@@ -132,14 +129,7 @@ mod tests {
 
 				value2 = (x - src[i.saturating_sub(length as usize)]) / (length as ValueType);
 
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"{}, {} at index {} with length {}",
-					value2,
-					value,
-					i,
-					length
-				);
+				assert_eq_float(value2, value);
 			});
 		});
 	}

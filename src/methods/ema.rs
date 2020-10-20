@@ -297,11 +297,8 @@ mod tests {
 	#![allow(unused_imports)]
 	use super::{DEMA, DMA, EMA, TEMA, TMA};
 	use crate::core::{Method, ValueType};
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const_float;
-
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-5;
 
 	#[test]
 	fn test_ema_const() {
@@ -322,7 +319,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -339,21 +336,14 @@ mod tests {
 			let alpha = 2. / (length + 1) as ValueType;
 
 			let mut prev_value = src[0];
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let value2 = alpha * x + (1. - alpha) * prev_value;
 
 				prev_value = value2;
 
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"{}, {} at index {} with length {}",
-					value2,
-					value,
-					i,
-					length
-				);
+				assert_eq_float(value2, value);
 			});
 		});
 	}
@@ -377,7 +367,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -395,7 +385,7 @@ mod tests {
 
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let ema1 = alpha * x + (1. - alpha) * prev_value1;
@@ -406,14 +396,7 @@ mod tests {
 
 				let value2 = ema2;
 
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"{}, {} at index {} with length {}",
-					value2,
-					value,
-					i,
-					length
-				);
+				assert_eq_float(value2, value);
 			});
 		});
 	}
@@ -437,7 +420,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -455,7 +438,7 @@ mod tests {
 
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let ema1 = alpha * x + (1. - alpha) * prev_value1;
@@ -466,14 +449,7 @@ mod tests {
 
 				let value2 = 2. * ema1 - ema2;
 
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"{}, {} at index {} with length {}",
-					value2,
-					value,
-					i,
-					length
-				);
+				assert_eq_float(value2, value);
 			});
 		});
 	}
@@ -497,7 +473,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -516,7 +492,7 @@ mod tests {
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
 			let mut prev_value3 = src[0];
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let ema1 = alpha * x + (1. - alpha) * prev_value1;
@@ -529,14 +505,7 @@ mod tests {
 
 				let value2 = ema3;
 
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"{}, {} at index {} with length {}",
-					value2,
-					value,
-					i,
-					length
-				);
+				assert_eq_float(value2, value);
 			});
 		});
 	}
@@ -560,7 +529,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -579,7 +548,7 @@ mod tests {
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
 			let mut prev_value3 = src[0];
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let ema = alpha * x + (1. - alpha) * prev_value1;
@@ -592,14 +561,7 @@ mod tests {
 
 				let value2 = 3. * ema - 3. * dma + tma;
 
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"{}, {} at index {} with length {}",
-					value2,
-					value,
-					i,
-					length
-				);
+				assert_eq_float(value2, value);
 			});
 		});
 	}

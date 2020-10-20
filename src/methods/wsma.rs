@@ -73,10 +73,8 @@ impl Method for WSMA {
 mod tests {
 	use crate::core::Method;
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const_float;
-
-	const SIGMA: ValueType = 1e-5;
 
 	use super::WSMA as TestingMethod;
 
@@ -97,7 +95,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -110,21 +108,14 @@ mod tests {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let mut prev_value = src[0];
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let value2 = prev_value + (x - prev_value) / length as ValueType;
 
 				prev_value = value2;
 
-				assert!(
-					(value2 - value).abs() < SIGMA,
-					"{}, {} at index {} with length {}",
-					value2,
-					value,
-					i,
-					length
-				);
+				assert_eq_float(value2, value);
 			});
 		});
 	}

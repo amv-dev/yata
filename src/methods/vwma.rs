@@ -83,10 +83,8 @@ impl Method for VWMA {
 mod tests {
 	use super::{Method, VWMA as TestingMethod};
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
-
-	const SIGMA: ValueType = 5e-4;
 
 	#[test]
 	fn test_vwma_const() {
@@ -107,7 +105,7 @@ mod tests {
 			TestingMethod::new(1, (candles.first().close, candles.first().volume)).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next((x.close, x.volume))).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next((x.close, x.volume)));
 		});
 	}
 
@@ -134,7 +132,8 @@ mod tests {
 				let vol_sum = slice.iter().fold(0.0, |s, &(_close, vol)| s + vol);
 
 				let value2 = sum / vol_sum;
-				assert!((value2 - ma.next(x)).abs() < SIGMA);
+
+				assert_eq_float(value2, ma.next(x));
 			});
 		});
 	}

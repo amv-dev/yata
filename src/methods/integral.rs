@@ -120,13 +120,10 @@ impl Default for Integral {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{Integral as TestingMethod, Method};
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
-
-	const SIGMA: ValueType = 1e-4;
 
 	#[test]
 	fn test_integral_const() {
@@ -142,8 +139,7 @@ mod tests {
 	#[test]
 	#[should_panic]
 	fn test_integral0_const() {
-		use super::*;
-		use crate::core::{Candle, Method};
+		use crate::core::Method;
 		use crate::methods::tests::test_const;
 
 		let input = (5.0 + 56.0) / 16.3251;
@@ -168,7 +164,8 @@ mod tests {
 			let value2 = src.iter().take(i + 1).fold(0.0, |s, &c| s + c);
 			q.push(x);
 
-			assert_eq!(value1, value2, "at index {} with value {}: {:?}", i, x, q);
+			// assert_eq!(value1, value2, "at index {} with value {}: {:?}", i, x, q);
+			assert_eq_float(value2, value1);
 		});
 	}
 
@@ -179,7 +176,7 @@ mod tests {
 		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert!((x.close - ma.next(x.close)).abs() < SIGMA);
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -198,14 +195,7 @@ mod tests {
 
 				let value2 = (0..length).fold(0.0, |s, j| s + src[i.saturating_sub(j)]);
 
-				assert!(
-					(value2 - value1).abs() < SIGMA,
-					"{}, {} at index {} with length {}",
-					value2,
-					value1,
-					i,
-					length
-				);
+				assert_eq_float(value2, value1);
 			});
 		});
 	}

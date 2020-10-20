@@ -90,25 +90,8 @@ impl Method for LinReg {
 mod tests {
 	use super::{LinReg as TestingMethod, Method};
 	use crate::core::ValueType;
-	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const_float;
-
-	#[cfg(feature = "value_type_f32")]
-	const SIGMA: ValueType = 1e-4;
-	#[cfg(not(feature = "value_type_f32"))]
-	const SIGMA: ValueType = 1e-8;
-
-	// #[test]
-	// fn test_lin_reg1() {
-	// 	let candles = RandomCandles::default();
-
-	// 	let mut ma = TestingMethod::new(1);
-
-	// 	candles.take(100).map(|x| x.close).for_each(|x| {
-	// 		let v = ma.next(x);
-	// 		assert!((x - v).abs() < SIGMA, "{}, {}", x, v);
-	// 	});
-	// }
 
 	#[test]
 	fn test_lin_reg_const() {
@@ -148,14 +131,7 @@ mod tests {
 				let a = (n * s_xy - s_x * s_y) / (n * s_x2 - s_x * s_x);
 				let b = (s_y - a * s_x) / n;
 
-				assert!(
-					(ma_value - b).abs() < SIGMA,
-					"{}, {} at index {} with length {}",
-					ma_value,
-					b,
-					i,
-					length
-				);
+				assert_eq_float(b, ma_value);
 			});
 		});
 	}

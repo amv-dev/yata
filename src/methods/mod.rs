@@ -91,6 +91,7 @@ pub use past::*;
 #[cfg(test)]
 mod tests {
 	use crate::core::{Method, ValueType};
+	use crate::helpers::assert_eq_float;
 	use std::fmt::Debug;
 
 	pub(super) fn test_const<P, I: Copy, O: Copy + Debug + PartialEq>(
@@ -103,18 +104,14 @@ mod tests {
 		}
 	}
 
-	#[cfg(feature = "value_type_f32")]
-	const SIGMA: ValueType = 1e-2;
-	#[cfg(not(feature = "value_type_f32"))]
-	const SIGMA: ValueType = 1e-7;
-
 	pub(super) fn test_const_float<P, I: Copy>(
 		method: &mut dyn Method<Params = P, Input = I, Output = ValueType>,
 		input: I,
 		output: ValueType,
 	) {
 		for _ in 0..100 {
-			assert!((method.next(input) - output).abs() < SIGMA);
+			// assert!((method.next(input) - output).abs() < SIGMA);
+			assert_eq_float(output, method.next(input));
 		}
 	}
 }

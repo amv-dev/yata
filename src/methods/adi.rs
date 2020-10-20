@@ -128,9 +128,7 @@ impl<T: OHLCV> Method for ADI<T> {
 
 #[cfg(test)]
 mod tests {
-	use super::ValueType;
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-4;
+	use crate::helpers::{assert_eq_float, assert_neq_float};
 
 	#[test]
 	fn test_adi_const() {
@@ -186,7 +184,7 @@ mod tests {
 		let mut adi = ADI::new(0, candles.first()).unwrap();
 
 		candles.take(100).fold(0., |s, candle| {
-			assert_eq!(adi.next(candle), s + candle.clv() * candle.volume());
+			assert_eq_float(adi.next(candle), s + candle.clv() * candle.volume());
 			s + candle.clv() * candle.volume()
 		});
 	}
@@ -216,9 +214,9 @@ mod tests {
 				adiw.iter_mut().enumerate().for_each(|(j, adiw)| {
 					let v2 = adiw.next(candle);
 					if i == j {
-						assert!((v1 - v2).abs() < SIGMA, "{}, {}", v1, v2);
+						assert_eq_float(v1, v2);
 					} else {
-						assert!((v1 - v2).abs() >= SIGMA, "{}, {}", v1, v2);
+						assert_neq_float(v1, v2);
 					}
 				});
 			});
