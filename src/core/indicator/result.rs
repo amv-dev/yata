@@ -29,25 +29,25 @@ impl IndicatorResult {
 
 	/// Returns a slice of raw indicator values of current indicator result
 	#[must_use]
-	pub fn values(&self) -> &[ValueType] {
+	pub const fn values(&self) -> &[ValueType] {
 		&self.values
 	}
 
 	/// Returns count of signals
 	#[must_use]
-	pub fn signals_length(&self) -> u8 {
+	pub const fn signals_length(&self) -> u8 {
 		self.length.1
 	}
 
 	/// Returns count of raw values
 	#[must_use]
-	pub fn values_length(&self) -> u8 {
+	pub const fn values_length(&self) -> u8 {
 		self.length.0
 	}
 
 	/// Returns a tuple of count of raw values and count of signals
 	#[must_use]
-	pub fn size(&self) -> (u8, u8) {
+	pub const fn size(&self) -> (u8, u8) {
 		self.length
 	}
 

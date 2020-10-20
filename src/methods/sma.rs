@@ -55,21 +55,21 @@ impl SMA {
 	/// Returns inner [`Window`](crate::core::Window). Useful for implementing in other methods and indicators.
 	#[inline]
 	#[must_use]
-	pub fn get_window(&self) -> &Window<ValueType> {
+	pub const fn get_window(&self) -> &Window<ValueType> {
 		&self.window
 	}
 
 	/// Returns 1/`length`. Useful for implementing in other methods and indicators.
 	#[inline]
 	#[must_use]
-	pub fn get_divider(&self) -> ValueType {
+	pub const fn get_divider(&self) -> ValueType {
 		self.divider
 	}
 
 	/// Returns last result value. Useful for implementing in other methods and indicators.
 	#[inline]
 	#[must_use]
-	pub fn get_last_value(&self) -> ValueType {
+	pub const fn get_last_value(&self) -> ValueType {
 		self.value
 	}
 }

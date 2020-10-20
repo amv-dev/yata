@@ -94,7 +94,7 @@ impl SMM {
 	/// Returns inner [`Window`](crate::core::Window). Useful for implementing in other methods and indicators.
 	#[inline]
 	#[must_use]
-	pub fn get_window(&self) -> &Window<ValueType> {
+	pub const fn get_window(&self) -> &Window<ValueType> {
 		&self.window
 	}
 

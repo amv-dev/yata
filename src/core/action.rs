@@ -67,7 +67,7 @@ impl Action {
 
 	/// Return an internal representation of the value if signal exists or None if it doesn't.
 	#[must_use]
-	pub fn value(self) -> Option<SignalType> {
+	pub const fn value(self) -> Option<SignalType> {
 		match self {
 			Self::None => None,
 			Self::Buy(v) | Self::Sell(v) => Some(v),
@@ -76,13 +76,13 @@ impl Action {
 
 	/// Checks if there is no signal
 	#[must_use]
-	pub fn is_none(self) -> bool {
+	pub const fn is_none(self) -> bool {
 		matches!(self, Self::None)
 	}
 
 	/// Checks if there is signal
 	#[must_use]
-	pub fn is_some(self) -> bool {
+	pub const fn is_some(self) -> bool {
 		!self.is_none()
 	}
 }
