@@ -27,7 +27,7 @@ pub trait IndicatorConfig: Clone {
 		Self::NAME
 	}
 
-	/// Returns an [IndicatorResult](crate::core::IndicatorResult) size processing by the indicator `(count of raw value, count of signals)`
+	/// Returns an [`IndicatorResult`](crate::core::IndicatorResult) size processing by the indicator `(count of raw value, count of signals)`
 	fn size(&self) -> (u8, u8);
 }
 

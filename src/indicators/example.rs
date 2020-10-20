@@ -62,7 +62,7 @@ impl IndicatorConfig for Example {
 	}
 }
 
-/// Implementing IndicatorInitializer to create **State** from the **Configuration**
+/// Implementing `IndicatorInitializer` to create **State** from the **Configuration**
 impl<T: OHLC> IndicatorInitializer<T> for Example {
 	type Instance = ExampleInstance;
 
@@ -109,7 +109,7 @@ pub struct ExampleInstance {
 	last_signal_position: PeriodType,
 }
 
-/// Implementing IndicatorInstance trait for Example
+/// Implementing `IndicatorInstance` trait for Example
 impl<T: OHLC> IndicatorInstance<T> for ExampleInstance {
 	type Config = Example;
 

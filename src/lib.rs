@@ -2,7 +2,6 @@
 #![deny(clippy::pedantic)]
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::cast_lossless)]
-#![allow(clippy::doc_markdown)]
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::unsafe_derive_deserialize)]
 #![allow(clippy::must_use_candidate)]
@@ -49,20 +48,20 @@ limitations under the License.
 //!
 //! ## Some commonly used methods:
 //!
-//! * [ADI](crate::methods::ADI) Accumulation-distribution index;
-//! * [Cross](crate::methods::Cross) / [CrossAbove](crate::methods::CrossAbove) / [CrossUnder](crate::methods::CrossUnder);
-//! * [Derivative](crate::methods::Derivative) (differential);
-//! * [Highest](crate::methods::Highest) / [Lowest](crate::methods::Lowest) / [Highest - Lowest Delta](crate::methods::HighestLowestDelta);
-//! * [HMA](crate::methods::HMA) Hull moving average;
-//! * [Integral](crate::methods::Integral) (sum);
-//! * [LinReg](crate::methods::LinReg) Linear regression moving average;
-//! * [Momentum](crate::methods::Momentum);
-//! * [Reverse points](crate::methods::ReverseSignal);
-//! * [SMA](crate::methods::SMA) Simple moving average;
-//! * [WMA](crate::methods::WMA) Weighted moving average;
-//! * [VWMA](crate::methods::VWMA) Volume weighted moving average;
-//! * [EMA](crate::methods::EMA), [DMA](crate::methods::DMA), [TMA](crate::methods::TMA), [DEMA](crate::methods::DEMA), [TEMA](crate::methods::TEMA) Exponential moving average family;
-//! * [SWMA](crate::methods::SWMA) Symmetrically weighted moving average.
+//! * [`ADI`](crate::methods::ADI) Accumulation-distribution index;
+//! * [`Cross`](crate::methods::Cross) / [`CrossAbove`](crate::methods::CrossAbove) / [`CrossUnder`](crate::methods::CrossUnder);
+//! * [`Derivative`](crate::methods::Derivative) (differential);
+//! * [`Highest`](crate::methods::Highest) / [`Lowest`](crate::methods::Lowest) / [`HighestLowestDelta`](crate::methods::HighestLowestDelta);
+//! * [`HMA`](crate::methods::HMA) Hull moving average;
+//! * [`Integral`](crate::methods::Integral) (sum);
+//! * [`LinReg`](crate::methods::LinReg) Linear regression moving average;
+//! * [`Momentum`](crate::methods::Momentum);
+//! * [`ReversePoints`](crate::methods::ReverseSignal);
+//! * [`SMA`](crate::methods::SMA) Simple moving average;
+//! * [`WMA`](crate::methods::WMA) Weighted moving average;
+//! * [`VWMA`](crate::methods::VWMA) Volume weighted moving average;
+//! * [`EMA`](crate::methods::EMA), [DMA](crate::methods::DMA), [TMA](crate::methods::TMA), [DEMA](crate::methods::DEMA), [TEMA](crate::methods::TEMA) Exponential moving average family;
+//! * [`SWMA`](crate::methods::SWMA) Symmetrically weighted moving average.
 //!
 //! And many others: [See Full list](crate::methods#structs)
 //!

@@ -37,17 +37,17 @@ pub use window::Window;
 ///
 /// # See also
 ///
-/// [PeriodType]
+/// [`PeriodType`]
 #[cfg(not(feature = "value_type_f32"))]
 pub type ValueType = f64;
 #[cfg(feature = "value_type_f32")]
 #[allow(missing_docs)]
 pub type ValueType = f32;
 
-/// PeriodType is a type for using on methods and indicators params.
+/// `PeriodType` is a type for using on methods and indicators params.
 ///
 /// For default it is u8 (from 0 to 255). That means you can use up to `SMA::new(254)`, `WMA::new(254)`, etc...
-/// That's right, there are not 255, but 254 (u8::MAX - 1)
+/// That's right, there are not 255, but 254 (`u8::MAX` - 1)
 ///
 /// If you want use larger periods, you can switch it by using crate features: `period_type_u16`, `period_type_u32`, `period_type_u64`.
 ///
@@ -64,7 +64,7 @@ pub type ValueType = f32;
 ///
 /// # See also
 ///
-/// [ValueType]
+/// [`ValueType`]
 #[cfg(not(any(
 	feature = "period_type_u16",
 	feature = "period_type_u32",

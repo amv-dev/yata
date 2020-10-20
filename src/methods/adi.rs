@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 /// For instance if the close is 3/4 the way up the range then [`CLV`] is +0.5.
 /// The accumulation/distribution index adds up volume multiplied by the [`CLV`] factor, i.e.
 ///
-/// ADI = ADI_prev + [`CLV`] * [`volume`]
+/// ADI = `ADI_prev` + [`CLV`] * [`volume`]
 ///
 /// The name accumulation/distribution comes from the idea that during accumulation buyers are in control
 /// and the price will be bid up through the day, or will make a recovery if sold down, in either case

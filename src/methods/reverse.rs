@@ -44,7 +44,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// # See also
 ///
-/// [ReverseHighSignal], [ReverseLowSignal]
+/// [`ReverseHighSignal`], [`ReverseLowSignal`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
@@ -57,7 +57,7 @@ pub struct ReverseSignal {
 }
 
 impl ReverseSignal {
-	/// Constructs new instanceof ReverseSignal
+	/// Constructs new instanceof `ReverseSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
 		Method::new((left, right), value)
@@ -131,7 +131,7 @@ impl Method for ReverseSignal {
 ///
 /// # See also
 ///
-/// [ReverseSignal], [ReverseLowSignal]
+/// [`ReverseSignal`], [`ReverseLowSignal`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
@@ -150,7 +150,7 @@ pub struct ReverseHighSignal {
 }
 
 impl ReverseHighSignal {
-	/// Constructs new instanceof ReverseHighSignal
+	/// Constructs new instanceof `ReverseHighSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
 		Method::new((left, right), value)
@@ -259,7 +259,7 @@ impl Method for ReverseHighSignal {
 ///
 /// # See also
 ///
-/// [ReverseSignal], [ReverseHighSignal]
+/// [`ReverseSignal`], [`ReverseHighSignal`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
@@ -281,7 +281,7 @@ pub struct ReverseLowSignal {
 }
 
 impl ReverseLowSignal {
-	/// Constructs new instanceof ReverseLowSignal
+	/// Constructs new instanceof `ReverseLowSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
 		Method::new((left, right), value)

@@ -91,7 +91,7 @@ pub struct ParabolicSARInstance<T: OHLC> {
 	prev_trend: i8,
 }
 
-/// Just an alias for ParabolicSAR
+/// Just an alias for `ParabolicSAR`
 pub type ParabolicStopAndReverse = ParabolicSAR;
 
 impl<T: OHLC> IndicatorInstance<T> for ParabolicSARInstance<T> {

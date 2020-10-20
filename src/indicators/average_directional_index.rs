@@ -9,9 +9,9 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 ///
 /// ## Links:
 ///
-/// * https://school.stockcharts.com/doku.php?id=technical_indicators:average_directional_index_adx
-/// * https://www.investopedia.com/terms/a/adx.asp
-/// * https://primexbt.com/blog/average-directional-index/
+/// * <https://school.stockcharts.com/doku.php?id=technical_indicators:average_directional_index_adx>
+/// * <https://www.investopedia.com/terms/a/adx.asp>
+/// * <https://primexbt.com/blog/average-directional-index/>
 ///
 /// # 3 values
 ///

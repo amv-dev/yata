@@ -101,7 +101,7 @@ pub struct RelativeStrengthIndexInstance {
 	cross_under: CrossUnder,
 }
 
-/// Just an alias for RelativeStrengthIndex
+/// Just an alias for `RelativeStrengthIndex`
 pub type RSI = RelativeStrengthIndex;
 
 impl<T: OHLC> IndicatorInstance<T> for RelativeStrengthIndexInstance {

@@ -82,14 +82,10 @@ where
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{Method, Past as TestingMethod};
-	use crate::core::{Candle, ValueType};
+	use crate::core::ValueType;
 	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
-
-	#[allow(dead_code)]
-	const SIGMA: ValueType = 1e-8;
 
 	#[test]
 	fn test_past_const() {

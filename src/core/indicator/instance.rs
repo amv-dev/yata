@@ -48,7 +48,7 @@ pub trait IndicatorInstance<T: OHLC> {
 
 	/// Returns count of indicator's raw values and count of indicator's signals.
 	///
-	/// See more at [IndicatorConfig](crate::core::IndicatorConfig#tymethod.size)
+	/// See more at [`IndicatorConfig`](crate::core::IndicatorConfig#tymethod.size)
 	fn size(&self) -> (u8, u8)
 	where
 		Self: Sized,

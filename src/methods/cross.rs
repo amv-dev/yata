@@ -6,11 +6,11 @@ use serde::{Deserialize, Serialize};
 
 /// Searches for two timeseries lines of type [`ValueType`] cross each other.
 ///
-/// If `value` crossed `base` upwards, then returns [Action::BUY_ALL](crate::core::Action::BUY_ALL)
+/// If `value` crossed `base` upwards, then returns [`Action::BUY_ALL`](crate::core::Action::BUY_ALL)
 ///
-/// If `value` crossed `base` downwards, then returns [Action::SELL_ALL](crate::core::Action::SELL_ALL)
+/// If `value` crossed `base` downwards, then returns [`Action::SELL_ALL`](crate::core::Action::SELL_ALL)
 ///
-/// Else (if series did not cross each other) returns [Action::None](crate::core::Action::None)
+/// Else (if series did not cross each other) returns [`Action::None`](crate::core::Action::None)
 ///
 /// # Parameters
 ///
@@ -50,7 +50,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// # See also
 ///
-/// [CrossAbove], [CrossUnder]
+/// [`CrossAbove`], [`CrossUnder`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
@@ -88,9 +88,9 @@ impl Method for Cross {
 
 /// Searches for `value` timeseries line crosses `base` line upwards
 ///
-/// If `value` crossed `base` upwards, then returns [Action::BUY_ALL](crate::core::Action::BUY_ALL)
+/// If `value` crossed `base` upwards, then returns [`Action::BUY_ALL`](crate::core::Action::BUY_ALL)
 ///
-/// Else returns [Action::None](crate::core::Action::None)
+/// Else returns [`Action::None`](crate::core::Action::None)
 ///
 /// # Parameters
 ///
@@ -130,7 +130,7 @@ impl Method for Cross {
 ///
 /// # See also
 ///
-/// [Cross], [CrossUnder]
+/// [`Cross`], [`CrossUnder`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
@@ -177,9 +177,9 @@ impl Method for CrossAbove {
 
 /// Searches for `value` timeseries line crosses `base` line downwards
 ///
-/// If `value` crossed `base` downwards, then returns [Action::BUY_ALL](crate::core::Action::BUY_ALL)
+/// If `value` crossed `base` downwards, then returns [`Action::BUY_ALL`](crate::core::Action::BUY_ALL)
 ///
-/// Else returns [Action::None](crate::core::Action::None)
+/// Else returns [`Action::None`](crate::core::Action::None)
 ///
 /// # Parameters
 ///
@@ -219,7 +219,7 @@ impl Method for CrossAbove {
 ///
 /// # See also
 ///
-/// [Cross], [CrossAbove]
+/// [`Cross`], [`CrossAbove`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType

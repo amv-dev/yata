@@ -198,7 +198,7 @@ impl TryFrom<String> for RegularMethods {
 	}
 }
 
-/// Returns a heap-allocated [RegularMethod] for timeseries by given `name` and window `length`.
+/// Returns a heap-allocated [`RegularMethod`] for timeseries by given `name` and window `length`.
 /// These methods are always gets an input value of type f64 and the same output value type
 ///
 /// Available methods:

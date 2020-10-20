@@ -113,7 +113,7 @@ impl RandomCandles {
 	const DEFAULT_PRICE: ValueType = 1.0;
 	const DEFAULT_VOLUME: ValueType = 10.0;
 
-	/// Returns new instance of RandomCandles for testing purposes
+	/// Returns new instance of `RandomCandles` for testing purposes
 	pub fn new() -> Self {
 		Self::default()
 	}
