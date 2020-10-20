@@ -93,13 +93,15 @@ impl Method for HighestLowestDelta {
 		let mut search = false;
 		if value >= self.highest {
 			self.highest = value;
-		} else if left_value == self.highest {
+		// It's not a mistake. We really need a bit-to-bit comparison of float values here
+		} else if left_value.to_bits() == self.highest.to_bits() {
 			search = true;
 		}
 
 		if value <= self.lowest {
 			self.lowest = value;
-		} else if left_value == self.lowest {
+		// It's not a mistake. We really need a bit-to-bit comparison of float values here
+		} else if left_value.to_bits() == self.lowest.to_bits() {
 			search = true;
 		}
 
@@ -200,7 +202,8 @@ impl Method for Highest {
 
 		if value >= self.value {
 			self.value = value;
-		} else if left_value == self.value {
+		// It's not a mistake. We really need a bit-to-bit comparison of float values here
+		} else if left_value.to_bits() == self.value.to_bits() {
 			self.value = self.window.iter().fold(value, |a, b| a.max(b));
 		}
 
@@ -292,7 +295,8 @@ impl Method for Lowest {
 
 		if value <= self.value {
 			self.value = value;
-		} else if left_value == self.value {
+		// It's not a mistake. We really need a bit-to-bit comparison of float values here
+		} else if left_value.to_bits() == self.value.to_bits() {
 			self.value = self.window.iter().fold(value, |a, b| a.min(b));
 		}
 

@@ -139,6 +139,8 @@ impl<T: OHLC> IndicatorInstance<T> for FisherTransformInstance {
 		// converting original value to between -1.0 and 1.0 over period1
 		let h = self.highest.next(src);
 		let l = self.lowest.next(src);
+		// we need to check division by zero, so we can really just check if `h` is equal to `l` without using any kind of round error checks
+		#[allow(clippy::float_cmp)]
 		let is_different = (h != l) as i8 as ValueType;
 		let v1 = is_different * (src * 2. - (h + l)) / (h - l + 1. - is_different);
 

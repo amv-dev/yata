@@ -91,6 +91,8 @@ pub trait OHLC: Copy + Debug + Default {
 	/// ```
 	#[inline]
 	fn clv(&self) -> ValueType {
+		// we need to check division by zero, so we can really just check if `high` is equal to `low` without using any kind of round error checks
+		#[allow(clippy::float_cmp)]
 		if self.high() == self.low() {
 			0.
 		} else {

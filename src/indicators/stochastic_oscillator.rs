@@ -71,6 +71,8 @@ impl<T: OHLC> IndicatorInitializer<T> for StochasticOscillator {
 		}
 
 		let cfg = self;
+		// we need to check division by zero, so we can really just check if `high` is equal to `low` without using any kind of round error checks
+		#[allow(clippy::float_cmp)]
 		let k_rows = if candle.high() == candle.low() {
 			0.
 		} else {
@@ -134,6 +136,8 @@ impl<T: OHLC> IndicatorInstance<T> for StochasticOscillatorInstance {
 		let highest = self.highest.next(high);
 		let lowest = self.lowest.next(low);
 
+		// we need to check division by zero, so we can really just check if `highest` is equal to `lowest` without using any kind of round error checks
+		#[allow(clippy::float_cmp)]
 		let k_rows = if highest == lowest {
 			0.
 		} else {
