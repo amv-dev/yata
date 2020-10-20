@@ -59,7 +59,7 @@ use serde::{Deserialize, Serialize};
 /// assert!((windowless.next(candle)-windowed.next(candle)).abs() < 1e-5); // Must be equal here
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///

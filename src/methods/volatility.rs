@@ -38,7 +38,7 @@ use serde::{Deserialize, Serialize};
 /// assert_eq!(vol.next(1.0), 4.0);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///

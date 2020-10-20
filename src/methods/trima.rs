@@ -37,7 +37,7 @@ use serde::{Deserialize, Serialize};
 /// assert_eq!(trima.next(4.0), 1.625);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///

@@ -38,7 +38,7 @@ use serde::{Deserialize, Serialize};
 /// assert_eq!(r2, r2);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(`left`+`right`)
 ///
@@ -125,7 +125,7 @@ impl Method for ReverseSignal {
 /// assert_eq!(r2, r2);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(`left`+`right`)
 ///
@@ -253,7 +253,7 @@ impl Method for ReverseHighSignal {
 /// assert_eq!(r2, r2);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(`left`+`right`)
 ///

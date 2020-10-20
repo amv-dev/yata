@@ -72,7 +72,7 @@ fn find_insert_index(value: ValueType, slice: &[ValueType], padding: usize) -> u
 /// assert_eq!(smm.next(100.0), 3.0);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(log(`length`))
 ///

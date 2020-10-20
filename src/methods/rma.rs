@@ -36,7 +36,7 @@ use serde::{Deserialize, Serialize};
 /// assert!((rma.next(4.0)-2.5925925925).abs() < 1e-5);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///

@@ -36,7 +36,7 @@ use serde::{Deserialize, Serialize};
 /// assert_eq!(wma.next(12.0), 10.0);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///

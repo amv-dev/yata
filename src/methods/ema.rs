@@ -35,7 +35,7 @@ use serde::{Deserialize, Serialize};
 /// assert_eq!(ema.next(9.0), 6.75);
 /// assert_eq!(ema.next(12.0), 9.375);
 /// ```
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///
@@ -173,7 +173,7 @@ impl Method for TMA {
 /// assert_eq!(dema.next(4.0), 3.8125);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///
@@ -247,7 +247,7 @@ impl Method for DEMA {
 /// assert_eq!(tema.next(4.0), 4.0);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///

@@ -39,7 +39,7 @@ use serde::{Deserialize, Serialize};
 /// });
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(`length`)
 ///
@@ -150,7 +150,7 @@ impl Method for HighestIndex {
 /// });
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(`length`)
 ///

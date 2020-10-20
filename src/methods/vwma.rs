@@ -38,7 +38,7 @@ use serde::{Deserialize, Serialize};
 /// assert!((vwma.next((12.0, 0.5))- 8.571428571428571).abs() < 1e-10);
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///

@@ -51,7 +51,7 @@ use serde::{Deserialize, Serialize};
 /// assert_eq!(change.next(2.0), derivative.next(2.0));
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///

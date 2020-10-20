@@ -68,7 +68,7 @@ use serde::{Deserialize, Serialize};
 /// });
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///

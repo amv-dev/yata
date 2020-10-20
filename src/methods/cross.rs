@@ -44,7 +44,7 @@ use serde::{Deserialize, Serialize};
 /// });
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///
@@ -124,7 +124,7 @@ impl Method for Cross {
 /// });
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///
@@ -213,7 +213,7 @@ impl Method for CrossAbove {
 /// });
 /// ```
 ///
-/// # Perfomance
+/// # Performance
 ///
 /// O(1)
 ///
