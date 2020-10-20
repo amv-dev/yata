@@ -17,11 +17,11 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Input type
 ///
-/// Input type is [`ValueType`]
+/// Input type is any `T: Copy + std::fmt::Debug`
 ///
 /// # Output type
 ///
-/// Output type is [`ValueType`]
+/// Output type is the same as input type
 ///
 /// # Examples
 ///
@@ -57,11 +57,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Past<T>(Window<T>)
 where
-	T: Sized + Copy + Default + fmt::Debug;
+	T: Copy + fmt::Debug;
 
 impl<T> Method for Past<T>
 where
-	T: Sized + Copy + Default + fmt::Debug,
+	T: Copy + fmt::Debug,
 {
 	type Params = PeriodType;
 	type Input = T;
@@ -112,9 +112,8 @@ mod tests {
 		candles.take(100).for_each(|x| {
 			let q = ma.next(x);
 			let p = prev.unwrap_or(x);
-			assert_eq_float(p.close, q.close);
-			assert_eq_float(p.volume, q.volume);
-			assert_eq_float(p.high, q.high);
+
+			assert_eq!(p, q);
 			prev = Some(x);
 		});
 	}
