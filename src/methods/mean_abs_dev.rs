@@ -111,12 +111,12 @@ mod tests {
 
 				let sma = sum / length as ValueType;
 
-				let mut sum = 0.0;
+				let mut sum2 = 0.0;
 				for j in 0..length {
-					sum += (sma - src[i.saturating_sub(j as usize)]).abs();
+					sum2 += (sma - src[i.saturating_sub(j as usize)]).abs();
 				}
 
-				let q = sum / length as ValueType;
+				let q = sum2 / length as ValueType;
 
 				let value = method.next(x);
 				assert_eq_float(q, value);

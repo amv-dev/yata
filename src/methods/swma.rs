@@ -93,14 +93,14 @@ impl Method for SWMA {
 			return value;
 		}
 
-		let prev_value = self.right_window.push(value);
-		self.right_total += value - prev_value;
-		self.numerator += prev_value.mul_add(self.right_float_length, self.right_total);
+		let right_prev_value = self.right_window.push(value);
+		self.right_total += value - right_prev_value;
+		self.numerator += right_prev_value.mul_add(self.right_float_length, self.right_total);
 
-		let value = prev_value;
-		let prev_value = self.left_window.push(value);
-		self.numerator += value.mul_add(self.left_float_length, self.left_total);
-		self.left_total += prev_value - value;
+		let right_value = right_prev_value;
+		let left_prev_value = self.left_window.push(right_value);
+		self.numerator += right_value.mul_add(self.left_float_length, self.left_total);
+		self.left_total += left_prev_value - right_value;
 
 		self.numerator * self.invert_sum
 	}
