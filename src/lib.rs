@@ -1,11 +1,3 @@
-#![deny(clippy::all)]
-#![deny(clippy::pedantic)]
-#![allow(clippy::module_name_repetitions)]
-#![allow(clippy::cast_lossless)]
-#![allow(clippy::missing_errors_doc)]
-#![allow(clippy::unsafe_derive_deserialize)]
-#![allow(clippy::cast_precision_loss)]
-#![deny(clippy::nursery)]
 /*
 
 Copyright 2020 AMvDev (amv-dev@protonmail.com)
@@ -34,6 +26,14 @@ limitations under the License.
 	unused_import_braces,
 	unused_qualifications
 )]
+#![deny(clippy::all)]
+#![deny(clippy::pedantic)]
+#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::cast_lossless)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::unsafe_derive_deserialize)]
+#![allow(clippy::cast_precision_loss)]
+#![deny(clippy::nursery)]
 
 //! Yet Another Technical Analysis library
 //!
