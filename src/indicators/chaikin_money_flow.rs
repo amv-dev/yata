@@ -5,9 +5,21 @@ use crate::core::{Error, Method, PeriodType, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{Cross, ADI};
 
+/// [Chaikin Money Flow](https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/cmf)
+///
+/// # 1 value
+///
+/// * oscillator value [-1.0; 1.0]
+///
+/// # 1 digital signal
+///
+/// When `oscillator` value goes above zero, then returns full buy signal.
+/// When `oscillator` value goes below zero, then returns full sell signal.
+/// Otherwise no signal
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChaikinMoneyFlow {
+	/// main length size
 	pub size: PeriodType,
 	// phantom:  PhantomData<T>,
 }
