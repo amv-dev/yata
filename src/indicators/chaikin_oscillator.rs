@@ -127,7 +127,9 @@ impl<T: OHLCV> IndicatorInstance<T> for ChaikinOscillatorInstance<T> {
 		let data1 = self.ma1.next(adi);
 		let data2 = self.ma2.next(adi);
 
-		let signal = self.cross_over.next((data1, data2));
+		let value = data1 - data2;
+
+		let signal = self.cross_over.next((value, 0.));
 
 		IndicatorResult::new(&[value], &[signal])
 	}
