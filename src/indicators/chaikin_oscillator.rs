@@ -6,12 +6,27 @@ use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, Indi
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, ADI};
 
+/// [Chaikin Oscillator](https://en.wikipedia.org/wiki/Chaikin_Analytics)
+///
+/// # 1 value
+///
+/// * oscillator value [-1.0; 1.0]
+///
+/// # 1 digital signal
+///
+/// When `oscillator` value goes above zero, then returns full buy signal.
+/// When `oscillator` value goes below zero, then returns full sell signal.
+/// Otherwise no signal
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChaikinOscillator {
+	/// Short period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 3 [1; period2)
 	pub period1: PeriodType,
+	/// Long period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 10 (period1; ...)
 	pub period2: PeriodType,
+	/// Method for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is EMA.
 	pub method: RegularMethods,
+	/// [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index) size. Default is 0 (windowless) [0; ...)
 	pub window: PeriodType, // from 0 to ...
 }
 
@@ -112,9 +127,7 @@ impl<T: OHLCV> IndicatorInstance<T> for ChaikinOscillatorInstance<T> {
 		let data1 = self.ma1.next(adi);
 		let data2 = self.ma2.next(adi);
 
-		let value = data1 - data2;
-
-		let signal = self.cross_over.next((value, 0.));
+		let signal = self.cross_over.next((data1, data2));
 
 		IndicatorResult::new(&[value], &[signal])
 	}
