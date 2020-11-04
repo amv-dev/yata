@@ -5,7 +5,7 @@ use crate::core::{Error, Method, PeriodType, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{Cross, ADI};
 
-/// [Chaikin Money Flow](https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/cmf)
+/// [Chaikin Money Flow](https://en.wikipedia.org/wiki/Chaikin_Analytics)
 ///
 /// # 1 value
 ///
@@ -19,7 +19,7 @@ use crate::methods::{Cross, ADI};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChaikinMoneyFlow {
-	/// main length size
+	/// main length size. Default is 20
 	pub size: PeriodType,
 	// phantom:  PhantomData<T>,
 }
