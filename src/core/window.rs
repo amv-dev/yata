@@ -297,7 +297,6 @@ where
 			return None;
 		}
 
-		// let value = self.window.buf[self.index as usize];
 		let value = if cfg!(feature = "unsafe_performance") {
 			*unsafe { self.window.buf.get_unchecked(self.index as usize) }
 		} else {
@@ -327,3 +326,103 @@ where
 
 impl<'a, T> ExactSizeIterator for WindowIterator<'a, T> where T: Copy {}
 impl<'a, T> std::iter::FusedIterator for WindowIterator<'a, T> where T: Copy {}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::helpers::RandomCandles;
+
+	#[test]
+	fn test_push() {
+		let data: Vec<_> = RandomCandles::new().take(100).collect();
+
+		for length in 1..=20 {
+			let mut w = Window::new(length, data[0]);
+
+			data.iter().enumerate().for_each(|(i, &c)| {
+				let left = data[i.saturating_sub(length as usize)];
+				assert_eq!(left, w.push(c));
+			});
+		}
+	}
+
+	#[test]
+	fn test_first() {
+		let data: Vec<_> = RandomCandles::new().take(100).collect();
+
+		for length in 1..=20 {
+			let mut w = Window::new(length, data[0]);
+
+			data.iter().enumerate().for_each(|(i, &c)| {
+				let first = data[i.saturating_sub(length.saturating_sub(1) as usize)];
+				w.push(c);
+				assert_eq!(first, w.first());
+			});
+		}
+	}
+
+	#[test]
+	fn test_last() {
+		let data: Vec<_> = RandomCandles::new().take(100).collect();
+
+		for length in 1..=20 {
+			let mut w = Window::new(length, data[0]);
+
+			data.iter().for_each(|&c| {
+				w.push(c);
+				assert_eq!(c, w.last());
+			});
+		}
+	}
+
+	#[test]
+	fn test_iterator() {
+		let data: Vec<_> = RandomCandles::new().take(100).collect();
+
+		for length in 1..=20 {
+			let mut w = Window::new(length, data[0]);
+
+			data.iter().enumerate().for_each(|(i, &c)| {
+				w.push(c);
+
+				if i >= length as usize {
+					let iterated: Vec<_> = w.iter().collect();
+
+					let from = i.saturating_sub((length - 1) as usize);
+					let to = i;
+					assert_eq!(iterated.as_slice(), &data[from..=to]);
+				}
+
+				assert_eq!(Some(c), w.iter().last());
+			});
+
+			assert_eq!(
+				w.iter().size_hint(),
+				(length as usize, Some(length as usize))
+			);
+			assert_eq!(w.iter().count(), length as usize);
+		}
+	}
+
+	#[test]
+	fn test_index() {
+		let data: Vec<_> = RandomCandles::new().take(100).collect();
+
+		for length in 1..=20 {
+			let mut w = Window::new(length, data[0]);
+
+			data.iter().enumerate().for_each(|(i, &c)| {
+				w.push(c);
+
+				if i >= length as usize {
+					let from = i.saturating_sub((length - 1) as usize);
+					let to = i;
+					let slice = &data[from..=to];
+					for j in 0..length {
+						assert_eq!(slice[j as usize], w[j]);
+					}
+				}
+			});
+		}
+	}
+}
