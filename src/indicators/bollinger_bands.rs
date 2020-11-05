@@ -5,19 +5,23 @@ use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{StDev, SMA};
 
-/// [Bollinget Bands](https://en.wikipedia.org/wiki/Bollinger_Bands)
+/// Bollinget Bands
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/Bollinger_Bands>
 ///
 /// # 3 values
 ///
-/// * upper bound
-/// * source value
-/// * lower bound
+/// * `upper bound` \(range of values is the same as range of the `source` values\)
+/// * `source` value
+/// * `lower bound` \(range of values is the same as range of the `source` values\)
 ///
 /// # 1 digital signal
 ///
-/// When `source` value goes above the upper bound, then returns full buy signal.
-/// When `source` value goes under the lower bound, then returns full sell signal.
-/// Otherwise returns relative position of the `source` value based on upper and lower values.
+/// When `source` value goes above the `upper bound`, then returns full buy signal.
+/// When `source` value goes under the `lower bound`, then returns full sell signal.
+/// Otherwise returns signal according to relative position of the `source` value based on `upper bound` and `lower bound` values.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BollingerBands {

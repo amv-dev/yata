@@ -5,7 +5,7 @@ use crate::core::{Error, PeriodType, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 
-/// [Average Directional Index](https://www.investopedia.com/terms/a/adx.asp)
+/// Average Directional Index
 ///
 /// ## Links:
 ///
@@ -15,14 +15,14 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 ///
 /// # 3 values
 ///
-/// * ADX
-/// * +DI
-/// * -DI
+/// * `ADX` \[0.0; 1.0\]
+/// * `+DI` \[0.0; 1.0\]
+/// * `-DI` \[0.0; 1.0\]
 ///
 /// # 2 signals
 ///
-/// * `BUY_ALL` when ADX over `zone` and +DI > -DI, `SELL_ALL` when ADX over `zone` and -DI > +DI. Otherwise - no signal.
-/// * Digital signal by difference between +DI and -DI
+/// * `BUY_ALL` when `ADX` over `zone` and `+DI` > `-DI`, `SELL_ALL` when `ADX` over `zone` and `-DI` > `+DI`. Otherwise - no signal.
+/// * Digital signal by difference between `+DI` and `-DI`
 ///
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

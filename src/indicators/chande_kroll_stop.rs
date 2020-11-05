@@ -7,14 +7,17 @@ use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, Indi
 use crate::helpers::{method, signi, RegularMethod, RegularMethods};
 use crate::methods::{CrossAbove, Highest, Lowest};
 
-// ChandeKrollStop p=10, x=1.0, q=9
-/// [Chande Kroll Stop](https://tradingview.com/support/solutions/43000589105-chande-kroll-stop/)
+/// Chande Kroll Stop
+///
+/// ## Links
+///
+/// * <https://tradingview.com/support/solutions/43000589105-chande-kroll-stop/>
 ///
 /// # 3 values
 ///
-/// * `stop long`
+/// * `stop long` \(range of values is the same as range of the `source` values\)
 /// * `source` value
-/// * `stop short`
+/// * `stop short` \(range of values is the same as range of the `source` values\)
 ///
 /// # 2 signals
 ///

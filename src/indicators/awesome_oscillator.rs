@@ -6,10 +6,15 @@ use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, Indi
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, ReverseSignal};
 
-/// [Awesome Oscillator](https://www.tradingview.com/scripts/awesomeoscillator/)
+/// Awesome Oscillator
+///
+/// ## Links
+///
+/// * <https://www.tradingview.com/scripts/awesomeoscillator/>
+///
 /// # 1 value
 ///
-/// * Absolute difference between fast and slow periods MA
+/// * Absolute difference between fast and slow periods MA \(-inf; +inf\)
 ///
 /// # 2 signals
 ///

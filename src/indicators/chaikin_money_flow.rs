@@ -5,16 +5,20 @@ use crate::core::{Error, Method, PeriodType, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{Cross, ADI};
 
-/// [Chaikin Money Flow](https://en.wikipedia.org/wiki/Chaikin_Analytics)
+/// Chaikin Money Flow
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/Chaikin_Analytics>
 ///
 /// # 1 value
 ///
-/// * oscillator value [-1.0; 1.0]
+/// * `main` value \[-1.0; 1.0\]
 ///
-/// # 1 digital signal
+/// # 1 signal
 ///
-/// When `oscillator` value goes above zero, then returns full buy signal.
-/// When `oscillator` value goes below zero, then returns full sell signal.
+/// When `main` value goes above zero, then returns full buy signal.
+/// When `main` value goes below zero, then returns full sell signal.
 /// Otherwise no signal
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

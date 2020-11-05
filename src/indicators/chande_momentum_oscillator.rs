@@ -5,11 +5,21 @@ use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{Change, CrossAbove, CrossUnder};
 
+/// Chande Momentum Oscillator
+///
+/// ## Links
+///
+/// * <https://www.investopedia.com/terms/c/chandemomentumoscillator.asp>
+///
+///
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChandeMomentumOscillator {
+	/// main period length. Default is `9`.
 	pub period: PeriodType,
+	/// Zone size of overbought and oversold. Default is `0.5`.
 	pub zone: ValueType,
+	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
 }
 

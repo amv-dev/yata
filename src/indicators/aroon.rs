@@ -13,7 +13,11 @@ use std::marker::PhantomData;
 // crosses above the Aroon-Up, then a new downtrend may start soon.
 // When Aroon-Up reaches 1.0, a new uptrend may have begun. If it remains persistently between 0.7 and 1.0,
 // and the Aroon-Down remains between 0 and 0.3, then a new uptrend is underway.
-/// [Aroon](https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/aroon-indicator) indicator
+/// Aroon indicator
+///
+/// ## Links
+///
+/// * <https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/aroon-indicator>
 ///
 /// # 2 values
 ///

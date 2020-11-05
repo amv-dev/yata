@@ -6,13 +6,17 @@ use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, Indi
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, ADI};
 
-/// [Chaikin Oscillator](https://en.wikipedia.org/wiki/Chaikin_Analytics)
+/// Chaikin Oscillator
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/Chaikin_Analytics>
 ///
 /// # 1 value
 ///
-/// * oscillator value [-1.0; 1.0]
+/// * `oscillator` value \[-1.0; 1.0\]
 ///
-/// # 1 digital signal
+/// # 1 signal
 ///
 /// When `oscillator` value goes above zero, then returns full buy signal.
 /// When `oscillator` value goes below zero, then returns full sell signal.
