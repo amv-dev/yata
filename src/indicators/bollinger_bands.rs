@@ -25,7 +25,7 @@ pub struct BollingerBands {
 	pub avg_size: PeriodType,
 	/// Standart deviation multiplier for bounds. Default is 2.0
 	pub sigma: ValueType,
-	/// Source type of values. Default is [Close](crate::core::Source#variant.Close)
+	/// Source type of values. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
 }
 

@@ -27,12 +27,12 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AverageDirectionalIndex {
-	/// Default is [RMA](crate::methods::RMA)
+	/// Default is [`RMA`](crate::methods::RMA)
 	pub method1: RegularMethods,
 	/// Default is 14
 	pub di_length: PeriodType,
 
-	/// Default is [RMA](crate::methods::RMA)
+	/// Default is [`RMA`](crate::methods::RMA)
 	pub method2: RegularMethods,
 	/// Default is 14
 	pub adx_smoothing: PeriodType,

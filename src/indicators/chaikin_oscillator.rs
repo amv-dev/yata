@@ -24,7 +24,7 @@ pub struct ChaikinOscillator {
 	pub period1: PeriodType,
 	/// Long period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 10 (period1; ...)
 	pub period2: PeriodType,
-	/// Method for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is EMA.
+	/// Method for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
 	/// [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index) size. Default is 0 (windowless) [0; ...)
 	pub window: PeriodType, // from 0 to ...
