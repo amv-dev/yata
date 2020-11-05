@@ -141,8 +141,8 @@ impl<T: OHLC> IndicatorInstance<T> for CommodityChannelIndexInstance {
 		// 	t_signal -= 1;
 		// }
 
-		let t_signal = (cci > self.cfg.zone && self.last_cci <= self.cfg.zone) as i8
-			- (cci < -self.cfg.zone && self.last_cci >= -self.cfg.zone) as i8;
+		let t_signal = (cci < -self.cfg.zone && self.last_cci >= -self.cfg.zone) as i8
+			- (cci > self.cfg.zone && self.last_cci <= self.cfg.zone) as i8;
 
 		// if t_signal != 0 && self.last_signal != t_signal {
 		// 	signal = t_signal;
