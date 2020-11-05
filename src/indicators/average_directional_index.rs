@@ -15,9 +15,17 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 ///
 /// # 3 values
 ///
-/// * `ADX` \[0.0; 1.0\]
-/// * `+DI` \[0.0; 1.0\]
-/// * `-DI` \[0.0; 1.0\]
+/// * `ADX`
+///
+/// Range in \[0.0; 1.0\]
+///
+/// * `+DI`
+///
+/// Range in \[0.0; 1.0\]
+///
+/// * `-DI`
+///
+/// Range in \[0.0; 1.0\]
 ///
 /// # 2 signals
 ///
@@ -29,17 +37,25 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 pub struct AverageDirectionalIndex {
 	/// Default is [`RMA`](crate::methods::RMA)
 	pub method1: RegularMethods,
-	/// Default is 14
+	/// Default is 14.
+	///
+	/// Range in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub di_length: PeriodType,
 
 	/// Default is [`RMA`](crate::methods::RMA)
 	pub method2: RegularMethods,
 	/// Default is 14
+	///
+	/// Range in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub adx_smoothing: PeriodType,
 
 	/// Default is 1
+	///
+	/// Range in \[1; `min(di_length, adx_smoothing)`\)
 	pub period1: PeriodType,
 	/// Default is 0.2
+	///
+	/// Range in \[0.0; 1.0\]
 	pub zone: ValueType,
 }
 
@@ -48,7 +64,9 @@ impl IndicatorConfig for AverageDirectionalIndex {
 
 	fn validate(&self) -> bool {
 		self.di_length >= 1
+			&& self.di_length < PeriodType::MAX
 			&& self.adx_smoothing >= 1
+			&& self.adx_smoothing < PeriodType::MAX
 			&& self.zone >= 0.
 			&& self.zone <= 1.
 			&& self.period1 >= 1

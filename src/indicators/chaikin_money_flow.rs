@@ -13,7 +13,9 @@ use crate::methods::{Cross, ADI};
 ///
 /// # 1 value
 ///
-/// * `main` value \[-1.0; 1.0\]
+/// * `main` value
+///
+/// Range in \[-1.0; 1.0\]
 ///
 /// # 1 signal
 ///
@@ -24,15 +26,16 @@ use crate::methods::{Cross, ADI};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChaikinMoneyFlow {
 	/// main length size. Default is 20
+	///
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub size: PeriodType,
-	// phantom:  PhantomData<T>,
 }
 
 impl IndicatorConfig for ChaikinMoneyFlow {
 	const NAME: &'static str = "ChaikinMoneyFlow";
 
 	fn validate(&self) -> bool {
-		self.size > 1
+		self.size > 1 && self.size < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

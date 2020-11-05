@@ -21,8 +21,13 @@ use std::marker::PhantomData;
 ///
 /// # 2 values
 ///
-/// * `AroonUp` \[0.0; 1.0\]
-/// * `AroonDown` \[0.0; 1.0\]
+/// * `AroonUp`
+///
+/// Range in \[0.0; 1.0\]
+///
+/// * `AroonDown`
+///
+/// Range in \[0.0; 1.0\]
 ///
 /// # 3 signals
 ///
@@ -35,11 +40,17 @@ use std::marker::PhantomData;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Aroon {
-	/// main period length. Default is 14
+	/// main period length. Default is 14.
+	///
+	/// Range in *\[2; [`PeriodType::MAX`](crate::core::PeriodType)\)*
 	pub period: PeriodType,
-	/// zone value in range [0.0; 1.0] determines when signal #2 appears. Default is 0.3
+	/// zone value determines when signal #2 appears. Default is 0.3.
+	///
+	/// Range in *\[0.0; 1.0\]*
 	pub signal_zone: ValueType,
-	/// period until signal #2 appears in full strength. Default is 7
+	/// period until signal #2 appears in full strength. Default is 7.
+	///
+	/// Range in *\[1; [`PeriodType::MAX`](crate::core::PeriodType)\)*
 	pub over_zone_period: PeriodType,
 }
 
@@ -50,7 +61,9 @@ impl IndicatorConfig for Aroon {
 		self.signal_zone >= 0.0
 			&& self.signal_zone <= 1.0
 			&& self.period > 1
+			&& self.period < PeriodType::MAX
 			&& self.over_zone_period > 0
+			&& self.over_zone_period < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

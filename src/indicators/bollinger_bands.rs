@@ -26,8 +26,12 @@ use crate::methods::{StDev, SMA};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BollingerBands {
 	/// Main period length. Default is 20
+	///
+	/// Range in \[3; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub avg_size: PeriodType,
 	/// Standart deviation multiplier for bounds. Default is 2.0
+	///
+	/// Range in \(0.0; +inf\)
 	pub sigma: ValueType,
 	/// Source type of values. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
@@ -37,7 +41,7 @@ impl IndicatorConfig for BollingerBands {
 	const NAME: &'static str = "BollingerBands";
 
 	fn validate(&self) -> bool {
-		self.sigma > 0.0 && self.avg_size > 2
+		self.sigma > 0.0 && self.avg_size > 2 && self.avg_size < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

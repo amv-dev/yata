@@ -14,7 +14,9 @@ use crate::methods::{Cross, ADI};
 ///
 /// # 1 value
 ///
-/// * `oscillator` value \[-1.0; 1.0\]
+/// * `oscillator` value
+///
+/// Range in \[-1.0; 1.0\]
 ///
 /// # 1 signal
 ///
@@ -24,13 +26,19 @@ use crate::methods::{Cross, ADI};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChaikinOscillator {
-	/// Short period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 3 [1; period2)
+	/// Short period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 3.
+	///
+	/// Range in \[1; period2\)
 	pub period1: PeriodType,
-	/// Long period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 10 (period1; ...)
+	/// Long period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 10.
+	///
+	/// Range in \(period1; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
 	/// Method for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
-	/// [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index) size. Default is 0 (windowless) [0; ...)
+	/// [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index) size. Default is 0 (windowless)
+	///
+	/// Range in \[0; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub window: PeriodType, // from 0 to ...
 }
 
@@ -38,7 +46,7 @@ impl IndicatorConfig for ChaikinOscillator {
 	const NAME: &'static str = "ChaikinOscillator";
 
 	fn validate(&self) -> bool {
-		self.period1 < self.period2
+		self.period1 > 0 && self.period1 < self.period2 && self.period2 < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

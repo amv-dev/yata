@@ -35,12 +35,18 @@ use crate::methods::{CrossAbove, Highest, Lowest};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChandeKrollStop {
 	/// ATR period length. Default is 10.
+	///
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub p: PeriodType,
 	/// ATR method. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
-	/// ATR multiplier. Can be negative. Default is 1.0.
+	/// ATR multiplier. Default is 1.0.
+	///
+	/// Range in \[0; +inf\)
 	pub x: ValueType,
 	/// multiplied highest/lowest period length. Default is 9.
+	///
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub q: PeriodType,
 	/// price source. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
@@ -50,7 +56,7 @@ impl IndicatorConfig for ChandeKrollStop {
 	const NAME: &'static str = "ChandeKrollStop";
 
 	fn validate(&self) -> bool {
-		self.x >= 0.0
+		self.x >= 0.0 && self.p > 0 && self.q > 0
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {
