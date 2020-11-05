@@ -29,8 +29,9 @@ impl IndicatorResult {
 
 	/// Returns a slice of raw indicator values of current indicator result
 	#[must_use]
-	pub const fn values(&self) -> &[ValueType] {
-		&self.values
+	pub fn values(&self) -> &[ValueType] {
+		let len = self.length.0 as usize;
+		&self.values[..len]
 	}
 
 	/// Returns count of signals
@@ -81,10 +82,12 @@ impl IndicatorResult {
 		signals[..signals_length].copy_from_slice(&signals_slice[..signals_length]);
 
 		#[allow(clippy::cast_possible_truncation)]
+		let length = (values_length as u8, signals_length as u8);
+
 		Self {
 			values,
 			signals,
-			length: (values_length as u8, signals_length as u8),
+			length,
 		}
 	}
 }
@@ -94,7 +97,7 @@ impl fmt::Debug for IndicatorResult {
 		let values: Vec<String> = self
 			.values
 			.iter()
-			.take(self.length.1 as usize)
+			.take(self.length.0 as usize)
 			.map(|&x| format!("{:>7.4}", x))
 			.collect();
 		let signals: Vec<String> = self
