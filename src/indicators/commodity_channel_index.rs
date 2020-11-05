@@ -5,20 +5,46 @@ use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::CCI;
 
+const SCALE: ValueType = 1.0 / 1.5;
+/// Commodity Channel Index
+///
+/// ## Links
+///
+/// <https://en.wikipedia.org/wiki/Commodity_channel_index>
+///
+/// # 1 value
+///
+/// * `oscillator` value. Most of the time value is in the range around \[-1.0; +1.0\]
+///
+/// Range in \(-inf; +inf\)
+///
+/// # 1 signal
+///
+/// When `oscillator` value goes above `zone`, then returns full sell signal.
+/// When `oscillator` value goes below `-zone`, then returns full buy signal.
+/// Otherwise no signal
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CommodityChannelIndex {
+	/// Main period size. Default is 18
+	///
+	/// Range in \[2;[`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
+
+	/// Signal zone size. Default is 1.0
+	///
+	/// Range in \[0.0; +inf\)
 	pub zone: ValueType,
+
+	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
-	scale: ValueType, // doesnt change
 }
 
 impl IndicatorConfig for CommodityChannelIndex {
 	const NAME: &'static str = "CommodityChannelIndex";
 
 	fn validate(&self) -> bool {
-		self.zone >= 0.0 && self.zone <= 8.0
+		self.zone >= 0.0 && self.period > 1 && self.period < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {
@@ -79,13 +105,10 @@ impl Default for CommodityChannelIndex {
 			period: 18,
 			zone: 1.0,
 			source: Source::Close,
-			scale: 1.5,
 		}
 	}
 }
 
-//period=20, zone=1.0, #from 0.0 to ~7.0
-//source='close'
 #[derive(Debug)]
 pub struct CommodityChannelIndexInstance {
 	cfg: CommodityChannelIndex,
@@ -105,7 +128,7 @@ impl<T: OHLC> IndicatorInstance<T> for CommodityChannelIndexInstance {
 	fn next(&mut self, candle: T) -> IndicatorResult {
 		let value = candle.source(self.cfg.source);
 
-		let cci = self.cci.next(value);
+		let cci = self.cci.next(value) * SCALE;
 
 		// let mut t_signal = 0;
 		// let mut signal = 0;

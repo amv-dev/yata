@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 /// [Commodity channel index](https://en.wikipedia.org/wiki/Commodity_channel_index) of specified `length` for time series of type [`ValueType`]
 ///
-/// In the original formula there is constant coefficient K = 1/0.015. This implementation does not include this coefficient (lt;dr it is 1.0).
+/// In the original formula there is constant coefficient K = 1/0.015. This implementation does not include this coefficient (tl;dr it is 1.0).
 ///
 /// # Parameters
 ///
