@@ -12,15 +12,15 @@ use crate::methods::{Highest, Lowest};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChandeKrollStop {
-	/// ATR period length
+	/// ATR period length. Default is 10.
 	pub p: PeriodType,
-	/// ATR method
+	/// ATR method. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
-	/// ATR multiplier
+	/// ATR multiplier. Default is 1.0.
 	pub x: ValueType,
-	/// multiplied highest/lowest period length
+	/// multiplied highest/lowest period length. Default is 9.
 	pub q: PeriodType,
-	/// price source
+	/// price source. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
 }
 
