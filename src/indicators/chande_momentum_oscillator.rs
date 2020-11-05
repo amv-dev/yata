@@ -11,13 +11,27 @@ use crate::methods::{Change, CrossAbove, CrossUnder};
 ///
 /// * <https://www.investopedia.com/terms/c/chandemomentumoscillator.asp>
 ///
+/// # 1 value
 ///
+/// * `oscillator` value
+///
+/// Range in \[-1.0; 1.0\]
+///
+/// # 1 signal
+///
+/// When `oscillator` value goes above `zone`, then returns full sell signal.
+/// When `oscillator` value goes below `-zone`, then returns full buy signal.
+/// Otherwise no signal
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChandeMomentumOscillator {
 	/// main period length. Default is `9`.
+	///
+	/// Range in [2; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub period: PeriodType,
 	/// Zone size of overbought and oversold. Default is `0.5`.
+	///
+	/// Range in [0.0; 1.0]
 	pub zone: ValueType,
 	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
@@ -27,7 +41,7 @@ impl IndicatorConfig for ChandeMomentumOscillator {
 	const NAME: &'static str = "ChandeMomentumOscillator";
 
 	fn validate(&self) -> bool {
-		self.zone >= 0. && self.zone <= 1.0
+		self.zone >= 0. && self.zone <= 1.0 && self.period > 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {
