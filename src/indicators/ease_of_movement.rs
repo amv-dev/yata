@@ -1,15 +1,41 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, PeriodType, Window, OHLCV};
+use crate::core::{Error, PeriodType, Window, OHLCV, Method};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, signi, RegularMethod, RegularMethods};
+use crate::methods::Cross;
+use crate::helpers::{method, RegularMethod, RegularMethods};
 
+/// Ease Of Movement
+/// 
+/// ## Links
+/// 
+/// * <https://en.wikipedia.org/wiki/Ease_of_movement>
+/// * <https://www.investopedia.com/terms/e/easeofmovement.asp>
+/// 
+/// # 1 value
+/// 
+/// * Main value \(range in \(-inf; +inf\)\)
+/// 
+/// # 1 signal
+/// 
+/// * Signal 1 appears when `main value` crosses zero line. 
+/// When `main value` crosses zero line upwards, returns full buy signal. 
+/// When `main value` crosses zero line downwards, returns full sell signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EaseOfMovement {
+	/// MA period length \(using `method`\). Default is 13
+	/// 
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
+
+	/// Differencial period size. Default is 1
+	/// 
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub period2: PeriodType,
+
+	/// MA type \(using `period1`\). Default is [`SMA`](crate::methods::SMA)
 	pub method: RegularMethods,
 }
 
@@ -17,7 +43,7 @@ impl IndicatorConfig for EaseOfMovement {
 	const NAME: &'static str = "EaseOfMovement";
 
 	fn validate(&self) -> bool {
-		self.period1 > 1 && self.period2 >= 1
+		self.period1 > 1 && self.period1 < PeriodType::MAX && self.period2 >= 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {
@@ -67,6 +93,7 @@ impl<T: OHLCV> IndicatorInitializer<T> for EaseOfMovement {
 		Ok(Self::Instance {
 			m1: method(cfg.method, cfg.period1, 0.)?,
 			w: Window::new(cfg.period2, candle),
+			cross: Cross::new((), (0.0, 0.0))?,
 
 			cfg,
 		})
@@ -89,6 +116,7 @@ pub struct EaseOfMovementInstance<T: OHLCV> {
 
 	m1: RegularMethod,
 	w: Window<T>,
+	cross: Cross,
 }
 
 impl<T: OHLCV> IndicatorInstance<T> for EaseOfMovementInstance<T> {
@@ -118,8 +146,8 @@ impl<T: OHLCV> IndicatorInstance<T> for EaseOfMovementInstance<T> {
 		// } else {
 		// 	0
 		// };
-		let signal = signi(value);
+		let signal = self.cross.next((value, 0.0));
 
-		IndicatorResult::new(&[value], &[Action::from(signal)])
+		IndicatorResult::new(&[value], &[signal])
 	}
 }
