@@ -28,7 +28,7 @@ const SCALE: ValueType = 1.0 / 1.5;
 pub struct CommodityChannelIndex {
 	/// Main period size. Default is 18
 	///
-	/// Range in \[2;[`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
 
 	/// Signal zone size. Default is 1.0

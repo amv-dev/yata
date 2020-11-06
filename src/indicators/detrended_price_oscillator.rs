@@ -12,18 +12,30 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 // SMA = Simple Moving Average \begin{aligned}
 // &DPO=Price from X/2+1 periods ago - X period SMA
 
-/// [Detrended Price Oscillator](https://www.investopedia.com/terms/d/detrended-price-oscillator-dpo.asp)
+/// Detrended Price Oscillator
+/// 
+/// ## Links
+/// 
+/// <https://en.wikipedia.org/wiki/Detrended_price_oscillator>
 ///
 /// # 1 value
 ///
-/// * DPO \[-inf; +inf\]
+/// * DPO \(-inf; +inf\)
 ///
 /// # Has no signals
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct DetrendedPriceOscillator {
+
+	/// MA period size. Default is 21
+	/// 
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
+
+	/// MA method type. Default is [`SMA`](crate::methods::SMA)
 	pub method: RegularMethods,
+
+	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
 }
 
@@ -31,7 +43,7 @@ impl IndicatorConfig for DetrendedPriceOscillator {
 	const NAME: &'static str = "DetrendedPriceOscillator";
 
 	fn validate(&self) -> bool {
-		self.period > 1
+		self.period > 1 && self.period < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

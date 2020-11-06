@@ -58,10 +58,10 @@ pub struct CoppockCurve {
 	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
 
-	/// Main MA type \(using `period1`\). Default is [WMA](crate::methods::WMA)
+	/// Main MA type \(using `period1`\). Default is [`WMA`](crate::methods::WMA)
 	pub method1: RegularMethods,
 
-	/// Signal line MA type \(using `s3_period`\). Default is [EMA](crate::methods::EMA)
+	/// Signal line MA type \(using `s3_period`\). Default is [`EMA`](crate::methods::EMA)
 	pub method2: RegularMethods,
 }
 
