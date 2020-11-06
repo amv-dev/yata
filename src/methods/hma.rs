@@ -95,7 +95,7 @@ mod tests {
 
 	#[test]
 	fn test_hma_const() {
-		for i in 2..30 {
+		for i in 2..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = TestingMethod::new(i, input).unwrap();
 
@@ -108,11 +108,11 @@ mod tests {
 	fn test_hma() {
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		#[allow(clippy::cast_possible_truncation)]
 		#[allow(clippy::cast_sign_loss)]
-		(2..20).for_each(|length| {
+		(2..255).for_each(|length| {
 			let mut wma1 = WMA::new(length, src[0]).unwrap();
 			let mut wma2 = WMA::new(length / 2, src[0]).unwrap();
 			let mut wma3 = WMA::new((length as ValueType).sqrt() as PeriodType, src[0]).unwrap();

@@ -80,7 +80,7 @@ mod tests {
 
 	#[test]
 	fn test_median_abs_dev_const() {
-		for i in 2..30 {
+		for i in 2..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = TestingMethod::new(i, input).unwrap();
 
@@ -106,9 +106,9 @@ mod tests {
 		#![allow(clippy::similar_names)]
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(2..20).for_each(|length| {
+		(2..255).for_each(|length| {
 			let mut method = TestingMethod::new(length, src[0]).unwrap();
 
 			src.iter().enumerate().for_each(|(i, &x)| {

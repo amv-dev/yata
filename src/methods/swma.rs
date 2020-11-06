@@ -117,7 +117,7 @@ mod tests {
 
 	#[test]
 	fn test_swma_const() {
-		for i in 2..30 {
+		for i in 2..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = TestingMethod::new(i, input).unwrap();
 

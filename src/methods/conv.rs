@@ -102,7 +102,7 @@ mod tests {
 		use crate::core::Method;
 		use crate::methods::tests::test_const_float;
 
-		for i in 1..30 {
+		for i in 1..255 {
 			let weights = get_weights(i);
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = TestingMethod::new(weights, input).unwrap();
@@ -128,9 +128,9 @@ mod tests {
 	fn test_conv() {
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(1..30).for_each(|weights_count| {
+		(1..255).for_each(|weights_count| {
 			let mut weights = get_weights(weights_count);
 			let wsum: ValueType = weights.iter().sum();
 

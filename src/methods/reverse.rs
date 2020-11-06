@@ -356,9 +356,9 @@ mod tests {
 	use crate::methods::tests::test_const;
 
 	#[test]
-	fn test_pivot_low_const() {
-		for i in 1..10 {
-			for j in 1..10 {
+	fn test_reverse_low_const() {
+		for i in 1..254 {
+			for j in 1..(254-i) {
 				let input = (i as ValueType + 56.0) / 16.3251;
 				let mut method = ReverseLowSignal::new(i, j, input).unwrap();
 
@@ -370,7 +370,7 @@ mod tests {
 
 	#[test]
 	#[rustfmt::skip]
-	fn test_pivot_low() {
+	fn test_reverse_low() {
 		let v: Vec<ValueType> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
 		let r: Vec<i8> =  vec![ 0,   0,   0,   1,   0,   0,   0,   0,   1,   0,   0,   1,   0,   0,   0,   0,   1 ];
 
@@ -381,9 +381,9 @@ mod tests {
 	}
 
 	#[test]
-	fn test_pivot_high_const() {
-		for i in 1..10 {
-			for j in 1..10 {
+	fn test_reverse_high_const() {
+		for i in 1..254 {
+			for j in 1..(254-i) {
 				let input = (i as ValueType + 56.0) / 16.3251;
 				let mut method = ReverseHighSignal::new(i, j, input).unwrap();
 
@@ -395,7 +395,7 @@ mod tests {
 
 	#[test]
 	#[rustfmt::skip]
-	fn test_pivot_high() {
+	fn test_reverse_high() {
 		let v: Vec<ValueType> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
 		let r: Vec<i8> =  vec![ 0,   0,   0,   0,   0,   0,   1,   0,   0,   0,   0,   0,   0,   1,   0,   0,   0 ];
 

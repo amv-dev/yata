@@ -303,7 +303,7 @@ mod tests {
 
 	#[test]
 	fn test_ema_const() {
-		for i in 1..30 {
+		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = EMA::new(i, input).unwrap();
 
@@ -329,9 +329,9 @@ mod tests {
 		use super::EMA as TestingMethod;
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(1..20).for_each(|length| {
+		(1..255).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
@@ -351,7 +351,7 @@ mod tests {
 
 	#[test]
 	fn test_dma_const() {
-		for i in 1..30 {
+		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = DMA::new(i, input).unwrap();
 
@@ -377,9 +377,9 @@ mod tests {
 		use super::DMA as TestingMethod;
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(1..20).for_each(|length| {
+		(1..255).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
@@ -404,7 +404,7 @@ mod tests {
 
 	#[test]
 	fn test_dema_const() {
-		for i in 1..30 {
+		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = DEMA::new(i, input).unwrap();
 
@@ -430,9 +430,9 @@ mod tests {
 		use super::DEMA as TestingMethod;
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(1..20).for_each(|length| {
+		(1..255).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
@@ -457,7 +457,7 @@ mod tests {
 
 	#[test]
 	fn test_tma_const() {
-		for i in 1..30 {
+		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = TMA::new(i, input).unwrap();
 
@@ -483,9 +483,9 @@ mod tests {
 		use super::TMA as TestingMethod;
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(1..20).for_each(|length| {
+		(1..255).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
@@ -513,7 +513,7 @@ mod tests {
 
 	#[test]
 	fn test_tema_const() {
-		for i in 1..30 {
+		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = TEMA::new(i, input).unwrap();
 
@@ -539,9 +539,9 @@ mod tests {
 		use super::{Method, TEMA as TestingMethod};
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(1..20).for_each(|length| {
+		(1..255).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;

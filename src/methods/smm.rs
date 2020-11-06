@@ -203,7 +203,7 @@ mod tests {
 
 	#[test]
 	fn test_smm_const() {
-		for i in 1..30 {
+		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = TestingMethod::new(i, input).unwrap();
 
@@ -227,9 +227,9 @@ mod tests {
 	fn test_smm0() {
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(1..20).for_each(|ma_length| {
+		(1..255).for_each(|ma_length| {
 			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
 			let ma_length = ma_length as usize;
 

@@ -313,7 +313,7 @@ mod tests {
 
 	#[test]
 	fn test_highest_const() {
-		for i in 1..30 {
+		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = Highest::new(i, input).unwrap();
 
@@ -341,9 +341,9 @@ mod tests {
 
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(2..20).for_each(|length| {
+		(2..255).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
@@ -357,7 +357,7 @@ mod tests {
 
 	#[test]
 	fn test_lowest_const() {
-		for i in 1..30 {
+		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = Lowest::new(i, input).unwrap();
 
@@ -383,9 +383,9 @@ mod tests {
 		use super::Lowest as TestingMethod;
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(2..20).for_each(|length| {
+		(2..255).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
@@ -399,7 +399,7 @@ mod tests {
 
 	#[test]
 	fn test_highest_lowest_delta_const() {
-		for i in 1..30 {
+		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = HighestLowestDelta::new(i, input).unwrap();
 
@@ -425,9 +425,9 @@ mod tests {
 		use super::HighestLowestDelta as TestingMethod;
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(2..20).for_each(|length| {
+		(2..255).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 

@@ -334,9 +334,9 @@ mod tests {
 
 	#[test]
 	fn test_push() {
-		let data: Vec<_> = RandomCandles::new().take(100).collect();
+		let data: Vec<_> = RandomCandles::new().take(300).collect();
 
-		for length in 1..=20 {
+		for length in 1..255 {
 			let mut w = Window::new(length, data[0]);
 
 			data.iter().enumerate().for_each(|(i, &c)| {
@@ -348,9 +348,9 @@ mod tests {
 
 	#[test]
 	fn test_first() {
-		let data: Vec<_> = RandomCandles::new().take(100).collect();
+		let data: Vec<_> = RandomCandles::new().take(300).collect();
 
-		for length in 1..=20 {
+		for length in 1..255 {
 			let mut w = Window::new(length, data[0]);
 
 			data.iter().enumerate().for_each(|(i, &c)| {
@@ -363,9 +363,9 @@ mod tests {
 
 	#[test]
 	fn test_last() {
-		let data: Vec<_> = RandomCandles::new().take(100).collect();
+		let data: Vec<_> = RandomCandles::new().take(300).collect();
 
-		for length in 1..=20 {
+		for length in 1..255 {
 			let mut w = Window::new(length, data[0]);
 
 			data.iter().for_each(|&c| {
@@ -377,9 +377,9 @@ mod tests {
 
 	#[test]
 	fn test_iterator() {
-		let data: Vec<_> = RandomCandles::new().take(100).collect();
+		let data: Vec<_> = RandomCandles::new().take(300).collect();
 
-		for length in 1..=20 {
+		for length in 1..255 {
 			let mut w = Window::new(length, data[0]);
 
 			data.iter().enumerate().for_each(|(i, &c)| {
@@ -406,9 +406,9 @@ mod tests {
 
 	#[test]
 	fn test_index() {
-		let data: Vec<_> = RandomCandles::new().take(100).collect();
+		let data: Vec<_> = RandomCandles::new().take(300).collect();
 
-		for length in 1..=20 {
+		for length in 1..255 {
 			let mut w = Window::new(length, data[0]);
 
 			data.iter().enumerate().for_each(|(i, &c)| {
