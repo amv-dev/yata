@@ -6,17 +6,62 @@ use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, Indi
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, RateOfChange, ReverseSignal};
 
+/// Coppock curve
+///
+/// ## Links
+///
+/// <https://en.wikipedia.org/wiki/Coppock_curve>
+///
+/// # 2 values
+///
+/// * `Main value` \(range of values is the same as range of the `source` values\)
+/// * `Signal line` value \(range of values is the same as range of the `source` values\)
+///
+/// # 3 signals
+///
+/// * Signal 1 appears when `main value` crosses zero line. When `main value` crosses zero line upwards, returns full buy signal. When `main value` crosses zero line downwards, returns full sell signal.
+/// * Signal 2 appears on reverse points of `main value`. When top reverse point appears,
+/// * Signal 3 appears on `main value` crosses `signal line`. When `main value` crosses `signal line` upwards, returns full buy signal. When `main value` crosses `signal line` downwards, returns full sell signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CoppockCurve {
+	/// MA period \(using `method1`\). Default is 10
+	///
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
+
+	/// Long rate of change period. Default is 14
+	///
+	/// Range in \(`period3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
+
+	/// Short rate of change period. Default is 11
+	///
+	/// Range in \[1; `period2`\)
 	pub period3: PeriodType,
+
+	/// Signal 2 reverse points left limit. Default is 4
+	///
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)-`s2_right`\)
 	pub s2_left: PeriodType,
+
+	/// Signal 2 reverse points right limit. Default is 2
+	///
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)-`s2_left`\)
 	pub s2_right: PeriodType,
+
+	/// Signal line period (using `method2`). Default is 5
+	///
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub s3_period: PeriodType,
+
+	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
+
+	/// Main MA type \(using `period1`\). Default is [WMA](crate::methods::WMA)
 	pub method1: RegularMethods,
+
+	/// Signal line MA type \(using `s3_period`\). Default is [EMA](crate::methods::EMA)
 	pub method2: RegularMethods,
 }
 
@@ -24,7 +69,17 @@ impl IndicatorConfig for CoppockCurve {
 	const NAME: &'static str = "CoppockCurve";
 
 	fn validate(&self) -> bool {
-		true
+		self.period1 > 1
+			&& self.period2 > self.period3
+			&& self.period2 < PeriodType::MAX
+			&& self.period3 > 0
+			&& self.s3_period > 1
+			&& self.s2_left > 0
+			&& self.s2_right > 0
+			&& PeriodType::MAX
+				.saturating_sub(self.s2_left)
+				.saturating_sub(self.s2_right)
+				> 0
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

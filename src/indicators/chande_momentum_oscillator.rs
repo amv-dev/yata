@@ -27,11 +27,11 @@ use crate::methods::{Change, CrossAbove, CrossUnder};
 pub struct ChandeMomentumOscillator {
 	/// main period length. Default is `9`.
 	///
-	/// Range in [2; [`PeriodType::MAX`](crate::core::PeriodType)\]
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub period: PeriodType,
 	/// Zone size of overbought and oversold. Default is `0.5`.
 	///
-	/// Range in [0.0; 1.0]
+	/// Range in \[0.0; 1.0\]
 	pub zone: ValueType,
 	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
