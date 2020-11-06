@@ -10,7 +10,7 @@ const SCALE: ValueType = 1.0 / 1.5;
 ///
 /// ## Links
 ///
-/// <https://en.wikipedia.org/wiki/Commodity_channel_index>
+/// * <https://en.wikipedia.org/wiki/Commodity_channel_index>
 ///
 /// # 1 value
 ///

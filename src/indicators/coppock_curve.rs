@@ -10,7 +10,7 @@ use crate::methods::{Cross, RateOfChange, ReverseSignal};
 ///
 /// ## Links
 ///
-/// <https://en.wikipedia.org/wiki/Coppock_curve>
+/// * <https://en.wikipedia.org/wiki/Coppock_curve>
 ///
 /// # 2 values
 ///

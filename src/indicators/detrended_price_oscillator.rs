@@ -16,7 +16,7 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 /// 
 /// ## Links
 /// 
-/// <https://en.wikipedia.org/wiki/Detrended_price_oscillator>
+/// * <https://en.wikipedia.org/wiki/Detrended_price_oscillator>
 ///
 /// # 1 value
 ///
