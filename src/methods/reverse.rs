@@ -358,7 +358,7 @@ mod tests {
 	#[test]
 	fn test_reverse_low_const() {
 		for i in 1..254 {
-			for j in 1..(254-i) {
+			for j in 1..(254 - i) {
 				let input = (i as ValueType + 56.0) / 16.3251;
 				let mut method = ReverseLowSignal::new(i, j, input).unwrap();
 
@@ -383,7 +383,7 @@ mod tests {
 	#[test]
 	fn test_reverse_high_const() {
 		for i in 1..254 {
-			for j in 1..(254-i) {
+			for j in 1..(254 - i) {
 				let input = (i as ValueType + 56.0) / 16.3251;
 				let mut method = ReverseHighSignal::new(i, j, input).unwrap();
 

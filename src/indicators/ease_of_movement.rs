@@ -1,37 +1,37 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, PeriodType, Window, OHLCV, Method};
+use crate::core::{Error, Method, PeriodType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::methods::Cross;
 use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::methods::Cross;
 
 /// Ease Of Movement
-/// 
+///
 /// ## Links
-/// 
+///
 /// * <https://en.wikipedia.org/wiki/Ease_of_movement>
 /// * <https://www.investopedia.com/terms/e/easeofmovement.asp>
-/// 
+///
 /// # 1 value
-/// 
+///
 /// * Main value \(range in \(-inf; +inf\)\)
-/// 
+///
 /// # 1 signal
-/// 
-/// * Signal 1 appears when `main value` crosses zero line. 
-/// When `main value` crosses zero line upwards, returns full buy signal. 
+///
+/// * Signal 1 appears when `main value` crosses zero line.
+/// When `main value` crosses zero line upwards, returns full buy signal.
 /// When `main value` crosses zero line downwards, returns full sell signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EaseOfMovement {
 	/// MA period length \(using `method`\). Default is 13
-	/// 
+	///
 	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
 
 	/// Differencial period size. Default is 1
-	/// 
+	///
 	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub period2: PeriodType,
 

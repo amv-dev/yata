@@ -13,9 +13,9 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 // &DPO=Price from X/2+1 periods ago - X period SMA
 
 /// Detrended Price Oscillator
-/// 
+///
 /// ## Links
-/// 
+///
 /// * <https://en.wikipedia.org/wiki/Detrended_price_oscillator>
 ///
 /// # 1 value
@@ -26,9 +26,8 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct DetrendedPriceOscillator {
-
 	/// MA period size. Default is 21
-	/// 
+	///
 	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
 
