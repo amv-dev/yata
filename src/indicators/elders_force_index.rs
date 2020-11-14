@@ -85,7 +85,7 @@ impl Default for EldersForceIndex {
 		Self {
 			period1: 13,
 			period2: 1,
-			method: RegularMethods::SMA,
+			method: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}
