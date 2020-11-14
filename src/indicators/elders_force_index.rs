@@ -6,12 +6,36 @@ use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, Indi
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::Cross;
 
+/// Elders Force Index
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/Force_index>
+/// * <https://www.investopedia.com/terms/f/force-index.asp>
+///
+/// # 1 value
+///
+/// * Main value \(range in \(-inf; +inf\)\)
+///
+/// # 1 signal
+///
+/// * Signal 1 appears when `main value` crosses zero line.
+/// When `main value` crosses zero line upwards, returns full buy signal.
+/// When `main value` crosses zero line downwards, returns full sell signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EldersForceIndex {
+	/// MA period. Default is 13.
+	/// 
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
+	/// Price change period. Default is 1.
+	/// 
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
+	/// MA method. Default is [`EMA`](crate::methods::EMA)
 	pub method: RegularMethods,
+	/// Price source type of values. Default is [`Close`](crate::core::Source#variant.Close)
 	pub source: Source,
 }
 
