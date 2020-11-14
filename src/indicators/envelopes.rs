@@ -5,13 +5,39 @@ use crate::core::{Action, Error, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 
+/// Envelopes
+///
+/// ## Links
+///
+/// * <https://www.investopedia.com/terms/e/envelope.asp>
+///
+/// # 3 values
+///
+/// * `Upper bound` \(range of values is the same as range of the `source` values\)
+/// * `Lower bound` \(range of values is the same as range of the `source` values\)
+/// *  Raw `Source2` value
+///
+/// # 1 signal
+///
+/// * Signal 1 appears when `Source2` value crosses bounds.
+/// When `Source2` value crosses `upper bound` upwards, returns full sell signal.
+/// When `Source2` value crosses `lower bound` downwards, returns full buy signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Envelopes {
+	/// MA period length. Default is `20`.
+	/// 
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
+	/// Bound relative size. Default is `0.1`.
+	/// 
+	/// Range in (0; +inf)
 	pub k: ValueType,
+	/// MA method. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
+	/// Source value type for bounds. Default is [`Close`](crate::core::Source#variant.Close).
 	pub source: Source,
+	/// Source2 value type for actual price. Default is [`Close`](crate::core::Source#variant.Close).
 	pub source2: Source,
 }
 
@@ -19,7 +45,7 @@ impl IndicatorConfig for Envelopes {
 	const NAME: &'static str = "Envelopes";
 
 	fn validate(&self) -> bool {
-		true
+		self.k > 0.0 && self.period > 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {
@@ -54,7 +80,7 @@ impl IndicatorConfig for Envelopes {
 	}
 
 	fn size(&self) -> (u8, u8) {
-		(2, 1)
+		(3, 1)
 	}
 }
 
@@ -125,6 +151,6 @@ impl<T: OHLC> IndicatorInstance<T> for EnvelopesInstance {
 
 		let signal = (src2 < value2) as i8 - (src2 > value1) as i8;
 
-		IndicatorResult::new(&[value1, value2], &[Action::from(signal)])
+		IndicatorResult::new(&[value1, value2, src2], &[Action::from(signal)])
 	}
 }
