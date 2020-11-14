@@ -9,33 +9,27 @@ use crate::core::{Error, Sequence, ValueType, OHLC, OHLCV};
 /// Source enum represents common parts of a *Candle*
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "lowercase"))]
 pub enum Source {
 	/// *Close* part of a candle
-	#[cfg_attr(feature = "serde", serde(rename = "close"))]
 	Close,
 
 	/// *Open* part of a candle
-	#[cfg_attr(feature = "serde", serde(rename = "open"))]
 	Open,
 
 	/// *High* part of a candle
-	#[cfg_attr(feature = "serde", serde(rename = "high"))]
 	High,
 
 	/// *Low* part of a candle
-	#[cfg_attr(feature = "serde", serde(rename = "low"))]
 	Low,
 
 	/// (*High*+*Low*)/2 part of a candle
-	#[cfg_attr(feature = "serde", serde(rename = "hl2"))]
 	HL2,
 
 	/// Typical price of a candle
-	#[cfg_attr(feature = "serde", serde(rename = "tp"))]
 	TP,
 
 	/// *Volume* part of a candle
-	#[cfg_attr(feature = "serde", serde(rename = "volume"))]
 	Volume,
 }
 
@@ -97,23 +91,18 @@ impl TryFrom<String> for Source {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Candle {
 	/// *Open* value of the candle
-	#[cfg_attr(feature = "serde", serde(rename = "open"))]
 	pub open: ValueType,
 
 	/// *High* value of the candle
-	#[cfg_attr(feature = "serde", serde(rename = "high"))]
 	pub high: ValueType,
 
 	/// *Low* value of the candle
-	#[cfg_attr(feature = "serde", serde(rename = "low"))]
 	pub low: ValueType,
 
 	/// *Close* value of the candle
-	#[cfg_attr(feature = "serde", serde(rename = "close"))]
 	pub close: ValueType,
 
 	/// *Volume* value of the candle
-	#[cfg_attr(feature = "serde", serde(rename = "volume"))]
 	pub volume: ValueType,
 }
 

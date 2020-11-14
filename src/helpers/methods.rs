@@ -26,57 +26,45 @@ pub type RegularMethod =
 /// Regular methods dictionary
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "lowercase"))]
 pub enum RegularMethods {
 	/// [Simple Moving Average](crate::methods::SMA)
-	#[cfg_attr(feature = "serde", serde(rename = "sma"))]
 	SMA,
 
 	/// [Weighed Moving Average](crate::methods::WMA)
-	#[cfg_attr(feature = "serde", serde(rename = "wma"))]
 	WMA,
 
 	/// [Hull Moving Average](crate::methods::HMA)
-	#[cfg_attr(feature = "serde", serde(rename = "hma"))]
 	HMA,
 
 	/// [Running Moving Average](crate::methods::RMA)
-	#[cfg_attr(feature = "serde", serde(rename = "rma"))]
 	RMA,
 
 	/// [Exponential Moving Average](crate::methods::EMA)
-	#[cfg_attr(feature = "serde", serde(rename = "ema"))]
 	EMA,
 
 	/// [Double Exponential Moving Average](crate::methods::DMA)
-	#[cfg_attr(feature = "serde", serde(rename = "dma"))]
 	DMA,
 
 	/// Another type of [Double Exponential Moving Average](crate::methods::DEMA)
-	#[cfg_attr(feature = "serde", serde(rename = "dema"))]
 	DEMA,
 
 	/// [Triple Exponential Moving Average](crate::methods::TMA)
-	#[cfg_attr(feature = "serde", serde(rename = "tma"))]
 	TMA,
 
 	/// Another type of [Triple Exponential Moving Average](crate::methods::DEMA)
-	#[cfg_attr(feature = "serde", serde(rename = "tema"))]
 	TEMA,
 
 	/// [Wilder's smoothing average](crate::methods::WSMA)
-	#[cfg_attr(feature = "serde", serde(rename = "wsma"))]
 	WSMA,
 
 	/// [Simple Moving Median](crate::methods::SMM)
-	#[cfg_attr(feature = "serde", serde(rename = "smm"))]
 	SMM,
 
 	/// [Symmetrically Weighted Moving Average](crate::methods::SWMA)
-	#[cfg_attr(feature = "serde", serde(rename = "swma"))]
 	SWMA,
 
 	/// [Triangular Moving Average](crate::methods::TRIMA)
-	#[cfg_attr(feature = "serde", serde(rename = "trima"))]
 	TRIMA,
 
 	/// [Linear regression](crate::methods::LinReg)
@@ -84,19 +72,15 @@ pub enum RegularMethods {
 	LinReg,
 
 	/// [Past](crate::methods::Past) moves timeseries forward
-	#[cfg_attr(feature = "serde", serde(rename = "move"))]
 	Past,
 
 	/// Just an alias for `Past`
-	#[cfg_attr(feature = "serde", serde(rename = "move"))]
 	Move,
 
 	/// [Derivative](crate::methods::Derivative)
-	#[cfg_attr(feature = "serde", serde(rename = "derivative"))]
 	Derivative,
 
 	/// [Integral](crate::methods::Integral)
-	#[cfg_attr(feature = "serde", serde(rename = "integral"))]
 	Integral,
 
 	/// [Mean Absolute Deviation](crate::methods::MeanAbsDev)
@@ -104,7 +88,7 @@ pub enum RegularMethods {
 	MeanAbsDev,
 
 	/// [Median Absolute Deviation](crate::methods::MedianAbsDev)
-	#[cfg_attr(feature = "serde", serde(rename = "mean_abs_dev"))]
+	#[cfg_attr(feature = "serde", serde(rename = "median_abs_dev"))]
 	MedianAbsDev,
 
 	/// [Standard Deviation](crate::methods::StDev)
@@ -112,11 +96,9 @@ pub enum RegularMethods {
 	StDev,
 
 	/// [Commodity channel index](crate::methods::CCI)
-	#[cfg_attr(feature = "serde", serde(rename = "st_dev"))]
 	CCI,
 
 	/// [Momentum](crate::methods::Momentum)
-	#[cfg_attr(feature = "serde", serde(rename = "momentum"))]
 	Momentum,
 
 	/// [Change](crate::methods::Change)
@@ -132,11 +114,9 @@ pub enum RegularMethods {
 	ROC,
 
 	/// [Highest](crate::methods::Highest)
-	#[cfg_attr(feature = "serde", serde(rename = "highest"))]
 	Highest,
 
 	/// [Lowest](crate::methods::Lowest)
-	#[cfg_attr(feature = "serde", serde(rename = "lowest"))]
 	Lowest,
 
 	/// [HighestLowestDelta](crate::methods::HighestLowestDelta)
