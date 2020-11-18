@@ -26,11 +26,11 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Envelopes {
 	/// MA period length. Default is `20`.
-	/// 
+	///
 	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
 	/// Bound relative size. Default is `0.1`.
-	/// 
+	///
 	/// Range in (0; +inf)
 	pub k: ValueType,
 	/// MA method. Default is [`SMA`](crate::methods::SMA).

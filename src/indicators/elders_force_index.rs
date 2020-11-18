@@ -26,11 +26,11 @@ use crate::methods::Cross;
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EldersForceIndex {
 	/// MA period. Default is 13.
-	/// 
+	///
 	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
 	/// Price change period. Default is 1.
-	/// 
+	///
 	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
 	/// MA method. Default is [`EMA`](crate::methods::EMA)

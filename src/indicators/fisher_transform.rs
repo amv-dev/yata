@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
+use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, Highest, Lowest};
@@ -10,13 +10,41 @@ use crate::methods::{Cross, Highest, Lowest};
 // FT = 1/2 * ln((1+x)/(1-x)) = arctanh(x)
 // x - transformation of price to a level between -1 and 1 for N periods
 
+/// Fisher transform
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/Fisher_transformation>
+/// * <https://www.investopedia.com/terms/f/fisher-transform.asp>
+///
+/// # 2 values
+///
+/// * FT `main value` \(range in \(-inf; +inf\)\)
+/// * `signal value` line \(range in \(-inf; +inf\)\)
+///
+/// # 2 signals
+///
+/// * Signal 1 appears when `main value` crosses zero line.
+/// When `main value` changes direction, returns signal corresponds to relative position of `main value` in `zone`
+/// * Signal 2 appears when `main value` crosses `signal line` and after signal 1 appears
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FisherTransform {
+	/// Main period for max/min values calculation. Default is `9`.
+	///
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
+	/// Signal value MA period. Default is `2`.
+	///
+	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
+	/// Zone size for signals. Default is `1.5`.
+	///
+	/// Range in \(0; +inf\)
 	pub zone: ValueType,
+	/// Signal value MA type. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
+	/// Source type of values. Default is [`TP`](crate::core::Source#variant.TP)
 	pub source: Source,
 }
 
@@ -94,7 +122,7 @@ impl Default for FisherTransform {
 	fn default() -> Self {
 		Self {
 			period1: 9,
-			period2: 1,
+			period2: 2,
 			zone: 1.5,
 			method: RegularMethods::SMA,
 			source: Source::TP,
