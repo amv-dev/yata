@@ -206,6 +206,8 @@ impl<T: OHLC> IndicatorInstance<T> for FisherTransformInstance {
 			* ((signal_line < 0.0 && self.last_reverse > 0 && crossed_ma > 0)
 				|| (signal_line > 0.0 && self.last_reverse < 0 && crossed_ma < 0)) as i8 as ValueType;
 
-		IndicatorResult::new(&[fisher_transform, signal_line], &[s1.into(), s2.into()])
+		self.prev_value = cumulative;
+
+		IndicatorResult::new(&[cumulative, signal_line], &[s1.into(), s2.into()])
 	}
 }
