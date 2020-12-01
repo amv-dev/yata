@@ -74,10 +74,14 @@ impl<T: OHLC> IndicatorInitializer<T> for WoodiesCCI {
 
 		let cfg = self;
 
-		let mut cci1 = CommodityChannelIndex::default();
-		cci1.period = cfg.period1;
-		let mut cci2 = CommodityChannelIndex::default();
-		cci2.period = cfg.period2;
+		let cci1 = CommodityChannelIndex {
+			period: cfg.period1,
+			..CommodityChannelIndex::default()
+		};
+		let cci2 = CommodityChannelIndex {
+			period: cfg.period2,
+			..CommodityChannelIndex::default()
+		};
 
 		Ok(Self::Instance {
 			cci1: cci1.init(candle)?,
