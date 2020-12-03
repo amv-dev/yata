@@ -41,24 +41,44 @@ limitations under the License.
 //!
 //! It also provides you an interface to create your own indicators.
 //!
-//! ## Some commonly used methods:
+//! ## Available **moving averages**:
+//! 
+//! - [Simple moving average (SMA)](crate::methods::SMA);
+//! - [Weighted moving average (WMA)](crate::methods::WMA);
+//! - Exponential moving average family: [EMA](crate::methods::EMA), [DMA](crate::methods::DMA), [TMA](crate::methods::TMA),
+//! [DEMA](crate::methods::DEMA), [TEMA](crate::methods::TEMA);
+//! - [Simple moving median (SMM)](crate::methods::SMM);
+//! - [Linear regression moving average](crate::methods::LinReg);
+//! - [Volume weighted moving average (VWMA)](crate::methods::VWMA);
+//! - [Symmetrically weighted moving average (SWMA)](crate::methods::SWMA);
+//! - [Hull moving average (HMA)](crate::methods::HMA);
+//! - [Running Moving Average (RMA)](crate::methods::RMA);
+//! - [Triangular Moving Average (TRIMA)](crate::methods::TRIMA);
+//! - [Wilder’s Smoothing Average (WSMA)](crate::methods::WSMA);
+//! - [Kaufman Adaptive Moving Average (KAMA)](crate::indicators::Kaufman);
+//! - [Convolution Moving Average](crate::methods::Conv);
+//! 
+//! [See all](crate::methods#structs)
+//! 
+//! ## Some commonly used **methods**:
 //!
-//! * [`ADI`](crate::methods::ADI) Accumulation-distribution index;
-//! * [`Cross`](crate::methods::Cross) / [`CrossAbove`](crate::methods::CrossAbove) / [`CrossUnder`](crate::methods::CrossUnder);
-//! * [`Derivative`](crate::methods::Derivative) (differential);
-//! * [`Highest`](crate::methods::Highest) / [`Lowest`](crate::methods::Lowest) / [`HighestLowestDelta`](crate::methods::HighestLowestDelta);
-//! * [`HMA`](crate::methods::HMA) Hull moving average;
-//! * [`Integral`](crate::methods::Integral) (sum);
-//! * [`LinReg`](crate::methods::LinReg) Linear regression moving average;
-//! * [`Momentum`](crate::methods::Momentum);
-//! * [`ReversePoints`](crate::methods::ReverseSignal);
-//! * [`SMA`](crate::methods::SMA) Simple moving average;
-//! * [`WMA`](crate::methods::WMA) Weighted moving average;
-//! * [`VWMA`](crate::methods::VWMA) Volume weighted moving average;
-//! * [`EMA`](crate::methods::EMA), [DMA](crate::methods::DMA), [TMA](crate::methods::TMA), [DEMA](crate::methods::DEMA), [TEMA](crate::methods::TEMA) Exponential moving average family;
-//! * [`SWMA`](crate::methods::SWMA) Symmetrically weighted moving average.
+//! - [Accumulation-distribution index](crate::methods::ADI);
+//! - [Commodity channel index](crate::methods::CCI);
+//! - [`Cross`](crate::methods::Cross) / [`CrossAbove`](crate::methods::CrossAbove) / [`CrossUnder`](crate::methods::CrossUnder);
+//! - [Derivative](crate::methods::Derivative) (differential);
+//! - [Highest](crate::methods::Highest) / [Lowest](crate::methods::Lowest) / [Highest-Lowest Delta](crate::methods::HighestLowestDelta);
+//! - [Highest Index](crate::methods::HighestIndex) / [Lowest Index](crate::methods::LowestIndex);
+//! - [Integral](crate::methods::Integral) (sum);
+//! - [Mean absolute deviation](crate::methods::MeanAbsDev);
+//! - [Median absolute deviation](crate::methods::MedianAbsDev);
+//! - [Momentum](crate::methods::Momentum);
+//! - [Past](crate::methods::Past);
+//! - [Rate Of Change](crate::methods::RateOfChange) (ROC);
+//! - [Reverse points](crate::methods::ReverseSignal);
+//! - [Standart Deviation](crate::methods::StDev);
+//! - [Volatility](crate::methods::LinearVolatility);
 //!
-//! And many others: [See Full list](crate::methods#structs)
+//! [See all](crate::methods#structs)
 //!
 //! ## Some commonly used **indicators**:
 //!
