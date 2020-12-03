@@ -6,21 +6,53 @@ use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, Indi
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{CrossAbove, CrossUnder, SMA};
 
-// https://en.wikipedia.org/wiki/Keltner_channel
+/// Keltner Channel
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/Keltner_channel>
+///
+/// # 3 values
+///
+/// * `upper bound`
+///
+/// Range of values is the same as the range of the `source` values.
+///
+/// * `source` value
+/// * `lower bound`
+///
+/// Range of values is the same as the range of the `source` values.
+///
+/// # 1 digital signal
+///
+/// When `source` value goes above the `upper bound`, then returns full buy signal.
+/// When `source` value goes under the `lower bound`, then returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct KeltnerChannels {
+pub struct KeltnerChannel {
+	/// Period for the middle moving average. Default is `20`.
+	/// 
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
+	
+	/// Middle moving average type. Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
+	
+	/// True range multiplier. Default is `1.0`.
+	/// 
+	/// Range in \(`0.0`; `+inf`\)
 	pub sigma: ValueType,
+
+	/// Middle moving average source value type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
-impl IndicatorConfig for KeltnerChannels {
-	const NAME: &'static str = "KeltnerChannels";
+impl IndicatorConfig for KeltnerChannel {
+	const NAME: &'static str = "KeltnerChannel";
 
 	fn validate(&self) -> bool {
-		self.period > 1 && self.sigma > 1e-4
+		self.period > 1 && self.sigma > 0.0
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {
@@ -55,8 +87,8 @@ impl IndicatorConfig for KeltnerChannels {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for KeltnerChannels {
-	type Instance = KeltnerChannelsInstance<T>;
+impl<T: OHLC> IndicatorInitializer<T> for KeltnerChannel {
+	type Instance = KeltnerChannelInstance<T>;
 
 	fn init(self, candle: T) -> Result<Self::Instance, Error>
 	where
@@ -79,7 +111,7 @@ impl<T: OHLC> IndicatorInitializer<T> for KeltnerChannels {
 	}
 }
 
-impl Default for KeltnerChannels {
+impl Default for KeltnerChannel {
 	fn default() -> Self {
 		Self {
 			period: 20,
@@ -91,8 +123,8 @@ impl Default for KeltnerChannels {
 }
 
 #[derive(Debug)]
-pub struct KeltnerChannelsInstance<T: OHLC> {
-	cfg: KeltnerChannels,
+pub struct KeltnerChannelInstance<T: OHLC> {
+	cfg: KeltnerChannel,
 
 	prev_candle: T,
 	ma: RegularMethod,
@@ -101,8 +133,8 @@ pub struct KeltnerChannelsInstance<T: OHLC> {
 	cross_under: CrossUnder,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for KeltnerChannelsInstance<T> {
-	type Config = KeltnerChannels;
+impl<T: OHLC> IndicatorInstance<T> for KeltnerChannelInstance<T> {
+	type Config = KeltnerChannel;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

@@ -57,8 +57,8 @@ pub use ichimoku_cloud::IchimokuCloud;
 mod kaufman;
 pub use kaufman::{Kaufman, KAMA};
 
-mod keltner_channels;
-pub use keltner_channels::KeltnerChannels;
+mod keltner_channel;
+pub use keltner_channel::KeltnerChannel;
 
 mod klinger_volume_oscillator;
 pub use klinger_volume_oscillator::KlingerVolumeOscillator;

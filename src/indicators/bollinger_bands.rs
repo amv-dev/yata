@@ -5,7 +5,7 @@ use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{StDev, SMA};
 
-/// Bollinget Bands
+/// Bollinger Bands
 ///
 /// ## Links
 ///
