@@ -16,7 +16,7 @@ It also provides you an interface to create your own indicators.
 
 ```yaml
 [dependencies]
-yata = "0.2"
+yata = "0.3"
 ```
 
 ## Some commonly used **methods**:
@@ -209,10 +209,7 @@ By default, there is no `unsafe` code in the crate. But you can optionally enabl
 
 # Rust version
 
-YaTa library supports **Rust stable** except two things:
-
-- You can't run benchmarks with it;
-- `cargo doc` will generate docs without cross-links;
+YaTa library supports **Rust stable** except that you can't run benchmarks with it.
 
 # Suggestions
 
