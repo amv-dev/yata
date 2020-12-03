@@ -31,6 +31,9 @@ pub enum Source {
 
 	/// *Volume* part of a candle
 	Volume,
+
+	/// Same as `typical price * volume`
+	VolumedPrice,
 }
 
 impl FromStr for Source {
@@ -45,6 +48,7 @@ impl FromStr for Source {
 			"tp" => Ok(Self::TP),
 			"hl2" => Ok(Self::HL2),
 			"open" => Ok(Self::Open),
+			"volumed_price" => Ok(Self::VolumedPrice),
 
 			value => Err(Error::SourceParse(value.to_string())),
 		}

@@ -229,6 +229,7 @@ pub trait OHLC: Copy + Debug + Default {
 			Source::HL2 => self.hl2(),
 			Source::Open => self.open(),
 			Source::Volume => panic!("Volume is not implemented for OHLC"),
+			Source::VolumedPrice => panic!("Volume is not implemented for OHLC"),
 		}
 	}
 }
@@ -252,6 +253,13 @@ pub trait OHLCV: OHLC {
 	/// Should return *volume* value for the period
 	fn volume(&self) -> ValueType;
 
+	/// Volumed price
+	/// 
+	/// Same as [`OHLC::tp()`] * [`OHLCV::volume()`]
+	fn volumed_price(&self) -> ValueType {
+		self.tp() * self.volume()
+	}
+
 	/// Validates candle attributes
 	///
 	/// See more at [OHLC#method.validate].
@@ -267,6 +275,7 @@ pub trait OHLCV: OHLC {
 	fn source(&self, source: Source) -> ValueType {
 		match source {
 			Source::Volume => self.volume(),
+			Source::VolumedPrice => self.volumed_price(),
 			_ => OHLC::source(self, source),
 		}
 	}
