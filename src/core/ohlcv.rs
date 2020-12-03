@@ -29,7 +29,7 @@ pub trait OHLC: Copy + Debug + Default {
 	fn close(&self) -> ValueType;
 
 	/// Calculates [Typical price](https://en.wikipedia.org/wiki/Typical_price).
-	/// It's just a simple (High + Low + Close) / 3
+	/// It's just a simple \(High + Low + Close\) / 3
 	///
 	/// # Examples
 	///
@@ -72,7 +72,7 @@ pub trait OHLC: Copy + Debug + Default {
 		(self.high() + self.low()) * 0.5
 	}
 
-	/// CLV = \[(close - low) - (high - close)\] / (high - low)
+	/// CLV = \[\(close - low\) - \(high - close\)\] / \(high - low\)
 	///
 	/// # Examples
 	///
@@ -202,7 +202,7 @@ pub trait OHLC: Copy + Debug + Default {
 			&& self.low().is_finite()
 	}
 
-	/// Returns [Source] field value of the candle.
+	/// Returns [`Source`] field value of the candle.
 	///
 	/// # Examples
 	///
@@ -248,7 +248,7 @@ pub trait OHLC: Copy + Debug + Default {
 /// assert_eq!(row.volume(), row.4);
 /// ```
 ///
-/// See also [Candle](crate::prelude::Candle).
+/// See also [`Candle`](crate::prelude::Candle).
 pub trait OHLCV: OHLC {
 	/// Should return *volume* value for the period
 	fn volume(&self) -> ValueType;
@@ -262,15 +262,15 @@ pub trait OHLCV: OHLC {
 
 	/// Validates candle attributes
 	///
-	/// See more at [OHLC#method.validate].
+	/// See more at [`OHLC::validate()`].
 	#[inline]
 	fn validate(&self) -> bool {
 		OHLC::validate(self) && self.volume() >= 0. && self.volume().is_finite()
 	}
 
-	/// Returns [Source] field value of the candle.
+	/// Returns [`Source`] field value of the candle.
 	///
-	/// See more at [OHLC#method.source].
+	/// See more at [`OHLC::source()`].
 	#[inline]
 	fn source(&self, source: Source) -> ValueType {
 		match source {

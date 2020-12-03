@@ -71,9 +71,9 @@ impl TryFrom<String> for Source {
 	}
 }
 
-/// Simple Candlestick structure for implementing [OHLC] and [OHLCV]
+/// Simple Candlestick structure for implementing [`OHLC`] and [`OHLCV`]
 ///
-/// Can be also used by an alias [Candlestick]
+/// Can be also used by an alias [`Candlestick`]
 ///
 /// You may convert simple tuples of 4 or 5 float values into Candle:
 /// ```
