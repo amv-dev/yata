@@ -23,7 +23,7 @@ use crate::methods::{CrossAbove, CrossUnder, SMA};
 ///
 /// Range of values is the same as the range of the `source` values.
 ///
-/// # 1 digital signal
+/// # 1 signal
 ///
 /// When `source` value goes above the `upper bound`, then returns full buy signal.
 /// When `source` value goes under the `lower bound`, then returns full sell signal.
@@ -32,15 +32,15 @@ use crate::methods::{CrossAbove, CrossUnder, SMA};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KeltnerChannel {
 	/// Period for the middle moving average. Default is `20`.
-	/// 
+	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
-	
+
 	/// Middle moving average type. Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
-	
+
 	/// True range multiplier. Default is `1.0`.
-	/// 
+	///
 	/// Range in \(`0.0`; `+inf`\)
 	pub sigma: ValueType,
 

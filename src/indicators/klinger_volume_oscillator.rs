@@ -6,13 +6,48 @@ use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, Indi
 use crate::helpers::{method, sign, RegularMethod, RegularMethods};
 use crate::methods::Cross;
 
+/// Klinger Volume Oscillator
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/Volume_analysis#Klinger_Volume_Oscillator>
+/// * <https://www.investopedia.com/terms/k/klingeroscillator.asp>
+///
+/// # 2 values
+///
+/// * `main` value
+///
+/// Range in \(`-inf`; `+inf`\)
+///
+/// * `signal line` value
+///
+/// Range in \(`-inf`; `+inf`\)
+///
+/// # 2 signals
+///
+/// * When `main` value crosses `0.0` upwards, then returns full buy signal.
+/// When `main` value crosses `0.0` downwards, then returns full sell signal.
+/// Otherwise returns no signal.
+///
+/// * When `main` value crosses `signal line` value  upwards, then returns full buy signal.
+/// When `main` value crosses `signal line` downwards, then returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KlingerVolumeOscillator {
+	/// Fast moving average period. Default is `34`.
 	pub period1: PeriodType,
+
+	/// Slow moving average period. Default is `55`.
 	pub period2: PeriodType,
+
+	/// Signal line moving average period. Default is `13`.
 	pub period3: PeriodType,
+
+	/// Fast and slow moving averages method. Default is [`EMA`](crate::methods::EMA).
 	pub method1: RegularMethods,
+
+	/// Signal line moving average method. Default is [`EMA`](crate::methods::EMA).
 	pub method2: RegularMethods,
 }
 
@@ -20,7 +55,7 @@ impl IndicatorConfig for KlingerVolumeOscillator {
 	const NAME: &'static str = "KlingerVolumeOscillator";
 
 	fn validate(&self) -> bool {
-		self.period1 < self.period2
+		self.period1 > 1 && self.period3 > 1 && self.period1 < self.period2
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {
