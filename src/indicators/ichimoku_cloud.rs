@@ -5,13 +5,54 @@ use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, Window, 
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{Cross, Highest, Lowest};
 
+/// Ichimoku cloud
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/Ichimoku_Kink%C5%8D_Hy%C5%8D>
+///
+/// # 4 values
+///
+/// * `Tenkan Sen`
+/// * `Kijun Sen`
+/// * `Senkou Span A`
+/// * `Senkou Span B`
+///
+/// # 2 signals
+///
+/// * When `Tenkan Sen` crosses `Kijun Sen` upwards and `source` value is greter than both `Senkou Span A and B` and when `Senkou Span A` is greter than `Senkou Span B`,
+/// returns full buy signal.
+/// When `Tenkan Sen` crosses `Kijun Sen` downwards and `source` value is lower than both `Senkou Span A and B` and when `Senkou Span A` is lower than `Senkou Span B`,
+/// returns full sell signal.
+/// 
+/// * When `source` value crosses `Kijun Sen` upwards and `source` value is greter than both `Senkou Span A and B` and when `Senkou Span A` is greter than `Senkou Span B`,
+/// returns full buy signal.
+/// When `source` value crosses `Kijun Sen` downwards and `source` value is lower than both `Senkou Span A and B` and when `Senkou Span A` is lower than `Senkou Span B`,
+/// returns full sell signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct IchimokuCloud {
+	/// `Tenkan Sen` period. Default is 9.
+	/// 
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub l1: PeriodType,
+
+	/// `Kijun Sen` period. Default is 26.
+	/// 
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub l2: PeriodType,
+
+	/// Senkou Span B period. Default is 52.
+	/// 
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub l3: PeriodType,
+
+	/// Move `Senkou Span A and B` forward by this period. Default is 26.
+	/// 
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub m: PeriodType,
+
+	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
@@ -135,9 +176,6 @@ impl<T: OHLC> IndicatorInstance<T> for IchimokuCloudInstance {
 
 		let s1_cross = self.cross1.next((tenkan_sen, kijun_sen));
 		let s2_cross = self.cross2.next((src, kijun_sen));
-
-		// let mut s1 = 0;
-		// let mut s2 = 0;
 
 		let green: bool = senkou_span_a > senkou_span_b;
 		let red: bool = senkou_span_a < senkou_span_b;

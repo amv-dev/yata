@@ -17,7 +17,9 @@ use crate::methods::{ReverseSignal, HMA};
 ///
 /// # 1 signal
 ///
-/// * When `HMA value` reverses upwards, gives full positive signal. When `HMA value` reverses downwards, gives full negative signal.
+/// * When `HMA value` reverses upwards, gives full positive signal.
+/// When `HMA value` reverses downwards, gives full negative signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HullMovingAverage {
