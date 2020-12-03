@@ -228,8 +228,7 @@ pub trait OHLC: Copy + Debug + Default {
 			Source::TP => self.tp(),
 			Source::HL2 => self.hl2(),
 			Source::Open => self.open(),
-			Source::Volume => panic!("Volume is not implemented for OHLC"),
-			Source::VolumedPrice => panic!("Volume is not implemented for OHLC"),
+			Source::Volume|Source::VolumedPrice => ValueType::NAN,
 		}
 	}
 }
