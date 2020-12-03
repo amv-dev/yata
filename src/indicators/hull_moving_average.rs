@@ -5,12 +5,38 @@ use crate::core::{Error, Method, PeriodType, Source, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{ReverseSignal, HMA};
 
+/// Hull Moving Average indicator
+///
+/// ## Links
+///
+/// * <https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/hull-moving-average>
+///
+/// # 1 value
+///
+/// * `HMA value`
+///
+/// # 1 signal
+///
+/// * When `HMA value` reverses upwards, gives full positive signal. When `HMA value` reverses downwards, gives full negative signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HullMovingAverage {
+	/// HMA period. Default is 9.
+	/// 
+	/// Range in \[3; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
+
+	/// Left lag for reverse point detection. Default is 3.
+	/// 
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)/2\]
 	pub left: PeriodType,
+
+	/// Right lag for reverse point detection. Default is 2.
+	/// 
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)/2\]
 	pub right: PeriodType,
+
+	/// Source type of values. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
@@ -18,7 +44,7 @@ impl IndicatorConfig for HullMovingAverage {
 	const NAME: &'static str = "HullMovingAverage";
 
 	fn validate(&self) -> bool {
-		self.period > 2 && self.left >= 1 && self.right >= 1
+		self.period > 2 && self.left >= 1 && self.right >= 1 && self.left <= PeriodType::MAX/2 && self.right <= PeriodType::MAX/2
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

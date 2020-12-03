@@ -6,7 +6,6 @@ use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, Indi
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, Highest, Lowest};
 
-// https://www.investopedia.com/terms/f/fisher-transform.asp
 // FT = 1/2 * ln((1+x)/(1-x)) = arctanh(x)
 // x - transformation of price to a level between -1 and 1 for N periods
 
