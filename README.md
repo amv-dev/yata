@@ -19,24 +19,43 @@ It also provides you an interface to create your own indicators.
 yata = "0.3"
 ```
 
+## Available moving averages:
+
+- [Simple moving average (SMA)](https://docs.rs/yata/latest/yata/methods/struct.SMA.html)
+- [Weighted moving average (WMA)](https://docs.rs/yata/latest/yata/methods/struct.WMA.html)
+- Exponential moving average family: [EMA](https://docs.rs/yata/latest/yata/methods/struct.EMA.html), [DMA](https://docs.rs/yata/latest/yata/methods/struct.DMA.html), [TMA](https://docs.rs/yata/latest/yata/methods/struct.TMA.html), [DEMA](https://docs.rs/yata/latest/yata/methods/struct.DEMA.html), [TEMA](https://docs.rs/yata/latest/yata/methods/struct.TEMA.html)
+- [Simple moving median (SMM)](https://docs.rs/yata/latest/yata/methods/struct.SMM.html)
+- [Linear regression moving average](https://docs.rs/yata/latest/yata/methods/struct.LinReg.html)
+- [Volume weighted moving average (VWMA)](https://docs.rs/yata/latest/yata/methods/struct.VWMA.html)
+- [Symmetrically weighted moving average (SWMA)](https://docs.rs/yata/latest/yata/methods/struct.SWMA.html)
+- [Hull moving average (HMA)](https://docs.rs/yata/latest/yata/methods/struct.HMA.html)
+- [Running Moving Average (RMA)](https://docs.rs/yata/latest/yata/methods/struct.RMA.html)
+- [Triangular Moving Average (TRIMA)](https://docs.rs/yata/latest/yata/methods/struct.TRIMA.html)
+- [Wilder’s Smoothing Average (WSMA)](https://docs.rs/yata/latest/yata/methods/struct.WSMA.html)
+- [Kaufman Adaptive Moving Average (KAMA)](https://docs.rs/yata/latest/yata/indicators/struct.Kaufman.html)
+- [Convolution Moving Average](https://docs.rs/yata/latest/yata/methods/struct.Conv.html)
+
+[See all](https://docs.rs/yata/latest/yata/methods/index.html#structs)
+
 ## Some commonly used **methods**:
 
 - [Accumulation-distribution index](https://docs.rs/yata/latest/yata/methods/struct.ADI.html);
+- [Commodity channel index](https://docs.rs/yata/latest/yata/methods/struct.CCI.html);
 - [Cross](https://docs.rs/yata/latest/yata/methods/struct.Cross.html) / [CrossAbove](https://docs.rs/yata/latest/yata/methods/struct.CrossAbove.html) / [CrossUnder](https://docs.rs/yata/latest/yata/methods/struct.CrossUnder.html);
 - [Derivative](https://docs.rs/yata/latest/yata/methods/struct.Derivative.html) (differential)
 - [Highest](https://docs.rs/yata/latest/yata/methods/struct.Highest.html) / [Lowest](https://docs.rs/yata/latest/yata/methods/struct.Lowest.html) / [Highest-Lowest Delta](https://docs.rs/yata/latest/yata/methods/struct.HighestLowestDelta.html)
-- [Hull moving average](https://docs.rs/yata/latest/yata/methods/struct.HMA.html)
+- [Highest Index](https://docs.rs/yata/latest/yata/methods/struct.HighestIndex.html) / [Lowest Index](https://docs.rs/yata/latest/yata/methods/struct.LowestIndex.html)
 - [Integral](https://docs.rs/yata/latest/yata/methods/struct.Integral.html) (sum)
-- [Linear regression moving average](https://docs.rs/yata/latest/yata/methods/struct.LinReg.html)
+- [Mean absolute deviation](https://docs.rs/yata/latest/yata/methods/struct.MeanAbsDev.html)
+- [Median absolute deviation](https://docs.rs/yata/latest/yata/methods/struct.MedianAbsDev.html)
 - [Momentum](https://docs.rs/yata/latest/yata/methods/struct.Momentum.html)
+- [Past](https://docs.rs/yata/latest/yata/methods/struct.Past.html)
+- [Rate Of Change](https://docs.rs/yata/latest/yata/methods/struct.RateOfChange.html) (ROC)
 - [Reverse points](https://docs.rs/yata/latest/yata/methods/struct.ReverseSignal.html)
-- [Simple moving average](https://docs.rs/yata/latest/yata/methods/struct.SMA.html)
-- [Weighted moving average](https://docs.rs/yata/latest/yata/methods/struct.WMA.html)
-- [Volume weighted moving average](https://docs.rs/yata/latest/yata/methods/struct.VWMA.html)
-- Exponential moving average family: [EMA](https://docs.rs/yata/latest/yata/methods/struct.EMA.html), [DMA](https://docs.rs/yata/latest/yata/methods/struct.DMA.html), [TMA](https://docs.rs/yata/latest/yata/methods/struct.TMA.html), [DEMA](https://docs.rs/yata/latest/yata/methods/struct.DEMA.html), [TEMA](https://docs.rs/yata/latest/yata/methods/struct.TEMA.html)
-- [Symmetrically weighted moving average](https://docs.rs/yata/latest/yata/methods/struct.SWMA.html)
+- [Standart Deviation](https://docs.rs/yata/latest/yata/methods/struct.StDev.html)
+- [Volatility](https://docs.rs/yata/latest/yata/methods/struct.LinearVolatility.html)
 
-And many others. [See all](https://docs.rs/yata/latest/yata/methods/index.html#structs)
+[See all](https://docs.rs/yata/latest/yata/methods/index.html#structs)
 
 ## Some commonly used **indicators**:
 

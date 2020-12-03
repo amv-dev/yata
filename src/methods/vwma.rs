@@ -5,7 +5,7 @@ use crate::core::{Error, PeriodType, ValueType, Window};
 use serde::{Deserialize, Serialize};
 
 /// [Volume Weighed Moving Average](https://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average) of specified `length`
-/// for timeseries of type ([`ValueType`], [`ValueType`]) which represents pair of values (`value`, `weight`)
+/// for timeseries of type ([`ValueType`], [`ValueType`]) which represents pair of values (`value`, `volume`)
 ///
 /// # Parameters
 ///
