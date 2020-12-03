@@ -228,7 +228,7 @@ pub trait OHLC: Copy + Debug + Default {
 			Source::TP => self.tp(),
 			Source::HL2 => self.hl2(),
 			Source::Open => self.open(),
-			Source::Volume|Source::VolumedPrice => ValueType::NAN,
+			Source::Volume | Source::VolumedPrice => ValueType::NAN,
 		}
 	}
 }
@@ -253,7 +253,7 @@ pub trait OHLCV: OHLC {
 	fn volume(&self) -> ValueType;
 
 	/// Volumed price
-	/// 
+	///
 	/// Same as [`OHLC::tp()`] * [`OHLCV::volume()`]
 	fn volumed_price(&self) -> ValueType {
 		self.tp() * self.volume()

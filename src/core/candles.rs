@@ -26,7 +26,7 @@ pub enum Source {
 	/// (*High*+*Low*)/2 part of a candle
 	HL2,
 
-	/// [Typical price](https://en.wikipedia.org/wiki/Typical_price) of a candle 
+	/// [Typical price](https://en.wikipedia.org/wiki/Typical_price) of a candle
 	TP,
 
 	/// *Volume* part of a candle
@@ -46,7 +46,7 @@ impl FromStr for Source {
 			"high" => Ok(Self::High),
 			"low" => Ok(Self::Low),
 			"volume" => Ok(Self::Volume),
-			"tp"|"hlc3" => Ok(Self::TP),
+			"tp" | "hlc3" => Ok(Self::TP),
 			"hl2" => Ok(Self::HL2),
 			"open" => Ok(Self::Open),
 			"volumed_price" => Ok(Self::VolumedPrice),

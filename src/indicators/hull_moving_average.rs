@@ -22,17 +22,17 @@ use crate::methods::{ReverseSignal, HMA};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HullMovingAverage {
 	/// HMA period. Default is 9.
-	/// 
+	///
 	/// Range in \[3; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
 
 	/// Left lag for reverse point detection. Default is 3.
-	/// 
+	///
 	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)/2\]
 	pub left: PeriodType,
 
 	/// Right lag for reverse point detection. Default is 2.
-	/// 
+	///
 	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)/2\]
 	pub right: PeriodType,
 
@@ -44,7 +44,11 @@ impl IndicatorConfig for HullMovingAverage {
 	const NAME: &'static str = "HullMovingAverage";
 
 	fn validate(&self) -> bool {
-		self.period > 2 && self.left >= 1 && self.right >= 1 && self.left <= PeriodType::MAX/2 && self.right <= PeriodType::MAX/2
+		self.period > 2
+			&& self.left >= 1
+			&& self.right >= 1
+			&& self.left <= PeriodType::MAX / 2
+			&& self.right <= PeriodType::MAX / 2
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

@@ -318,8 +318,8 @@ where
 
 		self.size -= 1;
 
-		let at_start  = (self.index == 0) as PeriodType; // self.index != self.window.s_1;
-		self.index = self.index.saturating_sub(1) * (1 - at_start) + at_start * self.window.s_1; // (self.index + 1);
+		let at_start = (self.index == 0) as PeriodType;
+		self.index = self.index.saturating_sub(1) * (1 - at_start) + at_start * self.window.s_1;
 
 		let value = if cfg!(feature = "unsafe_performance") {
 			*unsafe { self.window.buf.get_unchecked(self.index as usize) }
@@ -389,7 +389,7 @@ where
 
 		self.size -= 1;
 
-		let not_at_the_end  = (self.index != self.window.s_1) as PeriodType;
+		let not_at_the_end = (self.index != self.window.s_1) as PeriodType;
 		self.index = (self.index + 1) * not_at_the_end;
 
 		Some(value)
@@ -472,7 +472,7 @@ mod tests {
 
 				if i >= length as usize {
 					let iterated: Vec<_> = w.iter().collect();
-					
+
 					let original_slice: Vec<_> = {
 						let from = i.saturating_sub((length - 1) as usize);
 						let to = i;
@@ -482,7 +482,10 @@ mod tests {
 					assert_eq!(iterated, original_slice);
 				}
 
-				assert_eq!(data[i.saturating_sub((length - 1) as usize)], w.iter().last().unwrap());
+				assert_eq!(
+					data[i.saturating_sub((length - 1) as usize)],
+					w.iter().last().unwrap()
+				);
 			});
 
 			assert_eq!(
@@ -505,7 +508,7 @@ mod tests {
 
 				if i >= length as usize {
 					let iterated: Vec<_> = w.rev_iter().collect();
-					
+
 					let original_slice = {
 						let from = i.saturating_sub((length - 1) as usize);
 						let to = i;
