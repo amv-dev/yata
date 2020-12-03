@@ -14,9 +14,9 @@ const SCALE: ValueType = 1.0 / 1.5;
 ///
 /// # 1 value
 ///
-/// * `oscillator` value. Most of the time value is in the range around \[-1.0; +1.0\]
+/// * `oscillator` value. Most of the time value is in the range around \[`-1.0`; `+1.0`\]
 ///
-/// Range in \(-inf; +inf\)
+/// Range in \(`-inf`; `+inf`\)
 ///
 /// # 1 signal
 ///
@@ -26,17 +26,17 @@ const SCALE: ValueType = 1.0 / 1.5;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CommodityChannelIndex {
-	/// Main period size. Default is 18
+	/// Main period size. Default is `18`.
 	///
-	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period: PeriodType,
 
-	/// Signal zone size. Default is 1.0
+	/// Signal zone size. Default is `1.0`.
 	///
-	/// Range in \[0.0; +inf\)
+	/// Range in \[`0.0`; `+inf`\).
 	pub zone: ValueType,
 
-	/// Source type. Default is [`Close`](crate::core::Source::Close)
+	/// Source type. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
 }
 

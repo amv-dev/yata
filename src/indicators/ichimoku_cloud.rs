@@ -18,13 +18,15 @@ use crate::methods::{Cross, Highest, Lowest};
 /// * `Senkou Span A`
 /// * `Senkou Span B`
 ///
+/// Range of all the values is the same as the range of the `source` values.
+///
 /// # 2 signals
 ///
 /// * When `Tenkan Sen` crosses `Kijun Sen` upwards and `source` value is greter than both `Senkou Span A and B` and when `Senkou Span A` is greter than `Senkou Span B`,
 /// returns full buy signal.
 /// When `Tenkan Sen` crosses `Kijun Sen` downwards and `source` value is lower than both `Senkou Span A and B` and when `Senkou Span A` is lower than `Senkou Span B`,
 /// returns full sell signal.
-/// 
+///
 /// * When `source` value crosses `Kijun Sen` upwards and `source` value is greter than both `Senkou Span A and B` and when `Senkou Span A` is greter than `Senkou Span B`,
 /// returns full buy signal.
 /// When `source` value crosses `Kijun Sen` downwards and `source` value is lower than both `Senkou Span A and B` and when `Senkou Span A` is lower than `Senkou Span B`,
@@ -32,27 +34,27 @@ use crate::methods::{Cross, Highest, Lowest};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct IchimokuCloud {
-	/// `Tenkan Sen` period. Default is 9.
-	/// 
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// `Tenkan Sen` period. Default is `9`.
+	///
+	/// Range in \[`1`; `l2`\).
 	pub l1: PeriodType,
 
-	/// `Kijun Sen` period. Default is 26.
-	/// 
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// `Kijun Sen` period. Default is `26`.
+	///
+	/// Range in \(`l1`; `l3`\).
 	pub l2: PeriodType,
 
-	/// Senkou Span B period. Default is 52.
-	/// 
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Senkou Span B period. Default is `52`.
+	///
+	/// Range in \(`l2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub l3: PeriodType,
 
-	/// Move `Senkou Span A and B` forward by this period. Default is 26.
-	/// 
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Move `Senkou Span A and B` forward by this period. Default is `26`.
+	///
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub m: PeriodType,
 
-	/// Source type. Default is [`Close`](crate::core::Source::Close)
+	/// Source type. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
 }
 

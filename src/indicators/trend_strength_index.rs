@@ -10,13 +10,13 @@ use crate::methods::{CrossAbove, CrossUnder, ReverseSignal, WMA};
 ///
 /// There are bunch of different indicators named "Trend Strength Index" on the internet.
 ///
-/// This particular one was seen somewhere a long time ago. I can't even tell where. It produces an oscillator which may move in range \[-1.0; 1.0\].
+/// This particular one was seen somewhere a long time ago. I can't even tell where. It produces an oscillator which may move in range \[`-1.0`; `1.0`\].
 ///
 /// # 1 value
 ///
 /// * `Main value`
 ///
-/// Range in \[-1.0; 1.0\]
+/// Range in \[`-1.0`; `1.0`\]
 ///
 /// # 2 signals
 ///
@@ -28,21 +28,22 @@ use crate::methods::{CrossAbove, CrossUnder, ReverseSignal, WMA};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TrendStrengthIndex {
-	/// main period length. Default is 14.
+	/// Main period length. Default is `14`.
 	///
-	/// Range in *\[2; [`PeriodType::MAX`](crate::core::PeriodType)\)*
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period: PeriodType,
 
-	/// zone value determines when signal #2 appears. Default is 0.75.
+	/// Zone value determines when signal #2 appears. Default is `0.75`.
 	///
-	/// Range in *\[0.0; 1.0\)*
+	/// Range in \[`0.0`; `1.0`\).
 	pub zone: ValueType,
 
 	/// Reverse period
 	///
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)/`2`\].
 	pub reverse_offset: PeriodType,
 
-	/// Source type of values. Default is [`Close`](crate::core::Source::Close)
+	/// Source type of values. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
 }
 

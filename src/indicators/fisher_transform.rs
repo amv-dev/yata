@@ -18,8 +18,13 @@ use crate::methods::{Cross, Highest, Lowest};
 ///
 /// # 2 values
 ///
-/// * FT `main value` \(range in \(-inf; +inf\)\)
-/// * `signal value` line \(range in \(-inf; +inf\)\)
+/// * FT `main value`
+///
+/// Range in \(`-inf`; `+inf`\).
+///
+/// * `signal value` line
+///
+/// Range in \(`-inf`; `+inf`\).
 ///
 /// # 2 signals
 ///
@@ -31,15 +36,15 @@ use crate::methods::{Cross, Highest, Lowest};
 pub struct FisherTransform {
 	/// Main period for max/min values calculation. Default is `9`.
 	///
-	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
 	/// Signal value MA period. Default is `2`.
 	///
-	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period2: PeriodType,
 	/// Zone size for signals. Default is `1.5`.
 	///
-	/// Range in \(0; +inf\)
+	/// Range in \(`0.0`; `+inf`\)
 	pub zone: ValueType,
 	/// Signal value MA type. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,

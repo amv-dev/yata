@@ -15,6 +15,8 @@ use crate::methods::{ReverseSignal, HMA};
 ///
 /// * `HMA value`
 ///
+/// Range of values is the same as the range of the `source` values.
+///
 /// # 1 signal
 ///
 /// * When `HMA value` reverses upwards, gives full positive signal.
@@ -23,19 +25,19 @@ use crate::methods::{ReverseSignal, HMA};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HullMovingAverage {
-	/// HMA period. Default is 9.
+	/// HMA period. Default is `9`.
 	///
-	/// Range in \[3; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period: PeriodType,
 
-	/// Left lag for reverse point detection. Default is 3.
+	/// Left lag for reverse point detection. Default is `3`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)/2\]
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)/`2`\]
 	pub left: PeriodType,
 
-	/// Right lag for reverse point detection. Default is 2.
+	/// Right lag for reverse point detection. Default is `2`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)/2\]
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)/`2`\].
 	pub right: PeriodType,
 
 	/// Source type of values. Default is [`Close`](crate::core::Source::Close)

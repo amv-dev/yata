@@ -13,8 +13,14 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 ///
 /// # 3 values
 ///
-/// * `Upper bound` \(range of values is the same as range of the `source` values\)
-/// * `Lower bound` \(range of values is the same as range of the `source` values\)
+/// * `Upper bound`
+///
+/// Range of values is the same as the range of the `source` values.
+///
+/// * `Lower bound`
+///
+/// Range of values is the same as the range of the `source` values.Action
+///
 /// *  Raw `Source2` value
 ///
 /// # 1 signal
@@ -27,11 +33,11 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 pub struct Envelopes {
 	/// MA period length. Default is `20`.
 	///
-	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period: PeriodType,
 	/// Bound relative size. Default is `0.1`.
 	///
-	/// Range in (0; +inf)
+	/// Range in (`0.0`; `+inf`).
 	pub k: ValueType,
 	/// MA method. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,

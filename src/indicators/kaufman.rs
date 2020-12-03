@@ -7,14 +7,16 @@ use crate::methods::{Change, Cross, LinearVolatility, StDev};
 
 /// Kaufman Adaptive Moving Average (KAMA)
 /// # Links
-/// 
+///
 /// * <https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/kaufmans-adaptive-moving-average-kama/>
 /// * <https://ru.wikipedia.org/wiki/%D0%90%D0%B4%D0%B0%D0%BF%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F_%D1%81%D0%BA%D0%BE%D0%BB%D1%8C%D0%B7%D1%8F%D1%89%D0%B0%D1%8F_%D1%81%D1%80%D0%B5%D0%B4%D0%BD%D1%8F%D1%8F_%D0%9A%D0%B0%D1%83%D1%84%D0%BC%D0%B0%D0%BD%D0%B0>
 /// * <https://www.marketvolume.com/technicalanalysis/kama.asp>
-/// 
+///
 /// # 1 value
 ///
 /// * `KAMA` value
+///
+/// Range of `KAMA` values is the same as the range of the `source` values.
 ///
 /// # 1 signal
 ///
@@ -22,27 +24,37 @@ use crate::methods::{Change, Cross, LinearVolatility, StDev};
 /// When `source` crosses `KAMA` upwards, returns full buy signal.
 /// When `source` crosses `KAMA` downwards, returns full sell signal.
 /// Otherwise returns no signal.
-/// 
+///
 /// * if `filter_period` is greater than `1`, it uses same cross between `source` and `KAMA`, but with additional filtering using standart deviation.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Kaufman {
+	/// Volatility calculation period. Default is `10`.
+	///
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
 
 	/// Fast period. Default is `2`.
-	/// 
+	///
+	/// Range in \[`1`; `period3`\).
 	pub period2: PeriodType,
 
 	/// Slow period. Default is `30`.
+	///
+	/// Range in \(`period2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period3: PeriodType,
 
 	/// Filter period. Default is `10`.
+	///
+	/// Range in \[`0`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub filter_period: PeriodType,
 
-	/// Do double smooth. Default is `true`.
+	/// Apply double smoothing. Default is `true`.
 	pub square_smooth: bool,
 
 	/// Standart deviation multiplier. Default is `0.3`.
+	///
+	/// Range in \(`0.0`; `+inf`\)
 	pub k: ValueType,
 
 	/// Source type. Default is [`Close`](crate::core::Source::Close)

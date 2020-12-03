@@ -14,8 +14,13 @@ use crate::methods::{Cross, RateOfChange, ReverseSignal};
 ///
 /// # 2 values
 ///
-/// * `Main value` \(range of values is the same as range of the `source` values\)
-/// * `Signal line` value \(range of values is the same as range of the `source` values\)
+/// * `Main value`
+///
+/// Range of values is the same as the range of the `source` values.
+///
+/// * `Signal line` value
+///
+/// Range of values is the same as the range of the `source` values.
 ///
 /// # 3 signals
 ///
@@ -25,37 +30,37 @@ use crate::methods::{Cross, RateOfChange, ReverseSignal};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CoppockCurve {
-	/// MA period \(using `method1`\). Default is 10
+	/// MA period \(using `method1`\). Default is `10`.
 	///
-	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
 
-	/// Long rate of change period. Default is 14
+	/// Long rate of change period. Default is `14`.
 	///
-	/// Range in \(`period3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \(`period3`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period2: PeriodType,
 
-	/// Short rate of change period. Default is 11
+	/// Short rate of change period. Default is `11`.
 	///
-	/// Range in \[1; `period2`\)
+	/// Range in \[`1`; `period2`\).
 	pub period3: PeriodType,
 
-	/// Signal 2 reverse points left limit. Default is 4
+	/// Signal 2 reverse points left limit. Default is `4`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)-`s2_right`\)
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)-`s2_right`\).
 	pub s2_left: PeriodType,
 
-	/// Signal 2 reverse points right limit. Default is 2
+	/// Signal 2 reverse points right limit. Default is `2`
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)-`s2_left`\)
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)-`s2_left`\).
 	pub s2_right: PeriodType,
 
-	/// Signal line period (using `method2`). Default is 5
+	/// Signal line period (using `method2`). Default is `5`.
 	///
-	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub s3_period: PeriodType,
 
-	/// Source type. Default is [`Close`](crate::core::Source::Close)
+	/// Source type. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
 
 	/// Main MA type \(using `period1`\). Default is [`WMA`](crate::methods::WMA)

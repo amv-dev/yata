@@ -13,9 +13,14 @@ use crate::methods::{StDev, SMA};
 ///
 /// # 3 values
 ///
-/// * `upper bound` \(range of values is the same as range of the `source` values\)
+/// * `upper bound`
+///
+/// Range of values is the same as the range of the `source` values.
+///
 /// * `source` value
-/// * `lower bound` \(range of values is the same as range of the `source` values\)
+/// * `lower bound`
+///
+/// Range of values is the same as the range of the `source` values.
 ///
 /// # 1 digital signal
 ///
@@ -25,13 +30,13 @@ use crate::methods::{StDev, SMA};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BollingerBands {
-	/// Main period length. Default is 20
+	/// Main period length. Default is `20`
 	///
-	/// Range in \[3; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub avg_size: PeriodType,
-	/// Standart deviation multiplier for bounds. Default is 2.0
+	/// Standart deviation multiplier for bounds. Default is `2.0`
 	///
-	/// Range in \(0.0; +inf\)
+	/// Range in \(`0.0`; `+inf`\)
 	pub sigma: ValueType,
 	/// Source type of values. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,

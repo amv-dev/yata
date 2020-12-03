@@ -15,7 +15,9 @@ use crate::methods::Cross;
 ///
 /// # 1 value
 ///
-/// * Main value \(range in \(-inf; +inf\)\)
+/// * Main value
+///
+/// Range in \(`-inf`; `+inf`\)
 ///
 /// # 1 signal
 ///
@@ -25,17 +27,17 @@ use crate::methods::Cross;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EaseOfMovement {
-	/// MA period length \(using `method`\). Default is 13
+	/// MA period length \(using `method`\). Default is `13`.
 	///
-	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
 
-	/// Differencial period size. Default is 1
+	/// Differencial period size. Default is `1`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\]
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\].
 	pub period2: PeriodType,
 
-	/// MA type \(using `period1`\). Default is [`SMA`](crate::methods::SMA)
+	/// MA type \(using `period1`\). Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
 }
 

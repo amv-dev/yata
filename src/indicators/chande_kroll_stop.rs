@@ -15,9 +15,14 @@ use crate::methods::{CrossAbove, Highest, Lowest};
 ///
 /// # 3 values
 ///
-/// * `stop long` \(range of values is the same as range of the `source` values\)
+/// * `stop long`
+/// Range of values is the same as the range of the `source` values.
+///
 /// * `source` value
-/// * `stop short` \(range of values is the same as range of the `source` values\)
+///
+/// * `stop short`
+///
+/// Range of values is the same as the range of the `source` values.
 ///
 /// # 2 signals
 ///
@@ -34,21 +39,21 @@ use crate::methods::{CrossAbove, Highest, Lowest};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChandeKrollStop {
-	/// ATR period length. Default is 10.
+	/// ATR period length. Default is `10`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\]
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub p: PeriodType,
 	/// ATR method. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
-	/// ATR multiplier. Default is 1.0.
+	/// ATR multiplier. Default is `1.0`.
 	///
-	/// Range in \[0; +inf\)
+	/// Range in \[`0`; `+inf`\)
 	pub x: ValueType,
-	/// multiplied highest/lowest period length. Default is 9.
+	/// multiplied highest/lowest period length. Default is `9`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\]
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub q: PeriodType,
-	/// price source. Default is [`Close`](crate::core::Source::Close)
+	/// Price source. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 

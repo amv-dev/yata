@@ -15,7 +15,7 @@ use crate::methods::{Cross, ADI};
 ///
 /// * `main` value
 ///
-/// Range in \[-1.0; 1.0\]
+/// Range in \[`-1.0`; `1.0`\]
 ///
 /// # 1 signal
 ///
@@ -25,9 +25,9 @@ use crate::methods::{Cross, ADI};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChaikinMoneyFlow {
-	/// main length size. Default is 20
+	/// main length size. Default is `20`
 	///
-	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub size: PeriodType,
 }
 

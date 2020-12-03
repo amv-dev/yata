@@ -11,7 +11,7 @@ use std::marker::PhantomData;
 // Aroon-Down = [(Period Specified – Periods Since the Lowest Low for Period Specified) / Period Specified]
 // If the Aroon-Up crosses above the Aroon-Down, then a new uptrend may start soon. Conversely, if Aroon-Down
 // crosses above the Aroon-Up, then a new downtrend may start soon.
-// When Aroon-Up reaches 1.0, a new uptrend may have begun. If it remains persistently between 0.7 and 1.0,
+// When Aroon-Up reaches `1.0`, a new uptrend may have begun. If it remains persistently between `0.7` and `1.0`,
 // and the Aroon-Down remains between 0 and 0.3, then a new uptrend is underway.
 /// Aroon indicator
 ///
@@ -23,11 +23,11 @@ use std::marker::PhantomData;
 ///
 /// * `AroonUp`
 ///
-/// Range in \[0.0; 1.0\]
+/// Range in \[`0.0`; `1.0`\]
 ///
 /// * `AroonDown`
 ///
-/// Range in \[0.0; 1.0\]
+/// Range in \[`0.0`; `1.0`\]
 ///
 /// # 3 signals
 ///
@@ -40,17 +40,17 @@ use std::marker::PhantomData;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Aroon {
-	/// main period length. Default is 14.
+	/// main period length. Default is `14`.
 	///
-	/// Range in *\[2; [`PeriodType::MAX`](crate::core::PeriodType)\)*
+	/// Range in *\[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)*
 	pub period: PeriodType,
-	/// zone value determines when signal #2 appears. Default is 0.3.
+	/// zone value determines when signal #2 appears. Default is `0.3`.
 	///
-	/// Range in *\[0.0; 1.0\]*
+	/// Range in *\[`0.0`; `1.0`\]*
 	pub signal_zone: ValueType,
-	/// period until signal #2 appears in full strength. Default is 7.
+	/// period until signal #2 appears in full strength. Default is `7`.
 	///
-	/// Range in *\[1; [`PeriodType::MAX`](crate::core::PeriodType)\)*
+	/// Range in *\[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\)*
 	pub over_zone_period: PeriodType,
 }
 

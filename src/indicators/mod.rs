@@ -55,7 +55,7 @@ mod ichimoku_cloud;
 pub use ichimoku_cloud::IchimokuCloud;
 
 mod kaufman;
-pub use kaufman::Kaufman;
+pub use kaufman::{Kaufman, KAMA};
 
 mod keltner_channels;
 pub use keltner_channels::KeltnerChannels;

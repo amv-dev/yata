@@ -20,15 +20,17 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 ///
 /// # 1 value
 ///
-/// * DPO \(-inf; +inf\)
+/// * `DPO` value
+///
+/// Range in \(`-inf`; `+inf`\).
 ///
 /// # Has no signals
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct DetrendedPriceOscillator {
-	/// MA period size. Default is 21
+	/// MA period size. Default is `21`.
 	///
-	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
 
 	/// MA method type. Default is [`SMA`](crate::methods::SMA)

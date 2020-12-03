@@ -16,7 +16,7 @@ use crate::methods::{Cross, ReverseSignal};
 ///
 /// * Absolute difference between fast and slow periods MA
 ///
-/// Range in \(-inf; +inf\)
+/// Range in \(`-inf`; `+inf`\)
 ///
 /// # 2 signals
 ///
@@ -27,29 +27,29 @@ use crate::methods::{Cross, ReverseSignal};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AwesomeOscillator {
-	/// Default is 34
+	/// Default is `34`.
 	///
-	/// Range in \(`period2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \(`period2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
-	/// Default is 5
+	/// Default is `5`.
 	///
-	/// Range in \(1; `period1`\)
+	/// Range in \[`3`; `period1`\).
 	pub period2: PeriodType,
-	/// Default is [`SMA`](crate::methods::SMA)
+	/// Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
-	/// Default is [`HL2`](crate::core::Source::HL2)
+	/// Default is [`HL2`](crate::core::Source::HL2).
 	pub source: Source,
-	/// Default is 1
+	/// Default is `1`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)-`right`\)
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)-`right`\).
 	pub left: PeriodType,
-	/// Default is 1
+	/// Default is `1`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)-`left`\)
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)-`left`\).
 	pub right: PeriodType,
-	/// Default is 2
+	/// Default is `2`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\]
+	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\].
 	pub conseq_peaks: u8,
 }
 

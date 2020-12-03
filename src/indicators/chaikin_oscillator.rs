@@ -16,7 +16,7 @@ use crate::methods::{Cross, ADI};
 ///
 /// * `oscillator` value
 ///
-/// Range in \[-1.0; 1.0\]
+/// Range in \[`-1.0`; `1.0`\]
 ///
 /// # 1 signal
 ///
@@ -28,17 +28,17 @@ use crate::methods::{Cross, ADI};
 pub struct ChaikinOscillator {
 	/// Short period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 3.
 	///
-	/// Range in \[1; period2\)
+	/// Range in \[`1`; `period2`\)
 	pub period1: PeriodType,
 	/// Long period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 10.
 	///
-	/// Range in \(period1; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	/// Range in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
 	/// Method for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
 	/// [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index) size. Default is 0 (windowless)
 	///
-	/// Range in \[0; [`PeriodType::MAX`](crate::core::PeriodType)\]
+	/// Range in \[`0`; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub window: PeriodType, // from 0 to ...
 }
 
