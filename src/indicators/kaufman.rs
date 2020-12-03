@@ -5,18 +5,51 @@ use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::{Change, Cross, LinearVolatility, StDev};
 
-// https://ru.wikipedia.org/wiki/%D0%90%D0%B4%D0%B0%D0%BF%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F_%D1%81%D0%BA%D0%BE%D0%BB%D1%8C%D0%B7%D1%8F%D1%89%D0%B0%D1%8F_%D1%81%D1%80%D0%B5%D0%B4%D0%BD%D1%8F%D1%8F_%D0%9A%D0%B0%D1%83%D1%84%D0%BC%D0%B0%D0%BD%D0%B0
+/// Kaufman Adaptive Moving Average (KAMA)
+/// # Links
+/// 
+/// * <https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/kaufmans-adaptive-moving-average-kama/>
+/// * <https://ru.wikipedia.org/wiki/%D0%90%D0%B4%D0%B0%D0%BF%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F_%D1%81%D0%BA%D0%BE%D0%BB%D1%8C%D0%B7%D1%8F%D1%89%D0%B0%D1%8F_%D1%81%D1%80%D0%B5%D0%B4%D0%BD%D1%8F%D1%8F_%D0%9A%D0%B0%D1%83%D1%84%D0%BC%D0%B0%D0%BD%D0%B0>
+/// * <https://www.marketvolume.com/technicalanalysis/kama.asp>
+/// 
+/// # 1 value
+///
+/// * `KAMA` value
+///
+/// # 1 signal
+///
+/// * if `filter_period` is less or equal than `0`, then returns signal when `KAMA` crosses `source` value.
+/// When `source` crosses `KAMA` upwards, returns full buy signal.
+/// When `source` crosses `KAMA` downwards, returns full sell signal.
+/// Otherwise returns no signal.
+/// 
+/// * if `filter_period` is greater than `1`, it uses same cross between `source` and `KAMA`, but with additional filtering using standart deviation.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Kaufman {
 	pub period1: PeriodType,
+
+	/// Fast period. Default is `2`.
+	/// 
 	pub period2: PeriodType,
+
+	/// Slow period. Default is `30`.
 	pub period3: PeriodType,
+
+	/// Filter period. Default is `10`.
 	pub filter_period: PeriodType,
+
+	/// Do double smooth. Default is `true`.
 	pub square_smooth: bool,
+
+	/// Standart deviation multiplier. Default is `0.3`.
 	pub k: ValueType,
+
+	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
+
+pub type KAMA = Kaufman;
 
 impl IndicatorConfig for Kaufman {
 	const NAME: &'static str = "Kaufman";
