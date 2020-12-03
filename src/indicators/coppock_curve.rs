@@ -55,7 +55,7 @@ pub struct CoppockCurve {
 	/// Range in \[2; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub s3_period: PeriodType,
 
-	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
+	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 
 	/// Main MA type \(using `period1`\). Default is [`WMA`](crate::methods::WMA)

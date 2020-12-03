@@ -33,7 +33,7 @@ pub struct ChandeMomentumOscillator {
 	///
 	/// Range in \[0.0; 1.0\]
 	pub zone: ValueType,
-	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
+	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 

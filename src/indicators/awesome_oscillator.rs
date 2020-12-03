@@ -37,7 +37,7 @@ pub struct AwesomeOscillator {
 	pub period2: PeriodType,
 	/// Default is [`SMA`](crate::methods::SMA)
 	pub method: RegularMethods,
-	/// Default is [`HL2`](crate::core::Source#variant.HL2)
+	/// Default is [`HL2`](crate::core::Source::HL2)
 	pub source: Source,
 	/// Default is 1
 	///

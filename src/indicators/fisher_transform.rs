@@ -44,7 +44,7 @@ pub struct FisherTransform {
 	pub zone: ValueType,
 	/// Signal value MA type. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
-	/// Source type of values. Default is [`TP`](crate::core::Source#variant.TP)
+	/// Source type of values. Default is [`TP`](crate::core::Source::TP)
 	pub source: Source,
 }
 

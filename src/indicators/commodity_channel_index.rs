@@ -36,7 +36,7 @@ pub struct CommodityChannelIndex {
 	/// Range in \[0.0; +inf\)
 	pub zone: ValueType,
 
-	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
+	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 

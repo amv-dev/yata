@@ -26,7 +26,7 @@ pub enum Source {
 	/// (*High*+*Low*)/2 part of a candle
 	HL2,
 
-	/// Typical price of a candle
+	/// [Typical price](https://en.wikipedia.org/wiki/Typical_price) of a candle 
 	TP,
 
 	/// *Volume* part of a candle

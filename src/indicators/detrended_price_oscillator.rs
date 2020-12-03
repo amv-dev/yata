@@ -34,7 +34,7 @@ pub struct DetrendedPriceOscillator {
 	/// MA method type. Default is [`SMA`](crate::methods::SMA)
 	pub method: RegularMethods,
 
-	/// Source type. Default is [`Close`](crate::core::Source#variant.Close)
+	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 

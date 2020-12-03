@@ -48,7 +48,7 @@ pub struct ChandeKrollStop {
 	///
 	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub q: PeriodType,
-	/// price source. Default is [`Close`](crate::core::Source#variant.Close)
+	/// price source. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 

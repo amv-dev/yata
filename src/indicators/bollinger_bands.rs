@@ -33,7 +33,7 @@ pub struct BollingerBands {
 	///
 	/// Range in \(0.0; +inf\)
 	pub sigma: ValueType,
-	/// Source type of values. Default is [`Close`](crate::core::Source#variant.Close)
+	/// Source type of values. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 

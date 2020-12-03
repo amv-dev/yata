@@ -35,9 +35,9 @@ pub struct Envelopes {
 	pub k: ValueType,
 	/// MA method. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
-	/// Source value type for bounds. Default is [`Close`](crate::core::Source#variant.Close).
+	/// Source value type for bounds. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
-	/// Source2 value type for actual price. Default is [`Close`](crate::core::Source#variant.Close).
+	/// Source2 value type for actual price. Default is [`Close`](crate::core::Source::Close).
 	pub source2: Source,
 }
 

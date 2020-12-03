@@ -35,7 +35,7 @@ pub struct EldersForceIndex {
 	pub period2: PeriodType,
 	/// MA method. Default is [`EMA`](crate::methods::EMA)
 	pub method: RegularMethods,
-	/// Price source type of values. Default is [`Close`](crate::core::Source#variant.Close)
+	/// Price source type of values. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
