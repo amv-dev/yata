@@ -187,10 +187,10 @@ impl Method for ReverseHighSignal {
 
 		if self.max_index < first_index {
 			let mut max_index = first_index;
-			let mut max_value = self.window.first();
+			let mut max_value = self.window.oldest();
 
 			self.window
-				.iter()
+				.rev_iter()
 				.zip(first_index..)
 				.skip(1)
 				.for_each(|(x, i)| {
@@ -318,10 +318,10 @@ impl Method for ReverseLowSignal {
 
 		if self.min_index < first_index {
 			let mut min_index = first_index;
-			let mut min_value = self.window.first();
+			let mut min_value = self.window.oldest();
 
 			self.window
-				.iter()
+				.rev_iter()
 				.zip(first_index..)
 				.skip(1)
 				.for_each(|(x, i)| {

@@ -39,8 +39,6 @@ pub struct Conv {
 	weights: Vec<ValueType>,
 	window: Window<ValueType>,
 	wsum_invert: ValueType,
-
-	initialized: bool,
 }
 
 impl Method for Conv {
@@ -60,8 +58,6 @@ impl Method for Conv {
 					window: Window::new(weights.len() as PeriodType, value),
 					weights,
 					wsum_invert,
-
-					initialized: false,
 				})
 			}
 			_ => Err(Error::WrongMethodParameters),
@@ -73,7 +69,7 @@ impl Method for Conv {
 		self.window.push(value);
 		self.window
 			.iter()
-			.zip(self.weights.iter())
+			.zip(self.weights.iter().rev())
 			.map(|(value, &weight)| value * weight)
 			.sum::<ValueType>()
 			* self.wsum_invert

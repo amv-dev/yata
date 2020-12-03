@@ -32,19 +32,19 @@ use serde::{Deserialize, Serialize};
 ///
 /// w.push(1);
 /// w.push(2);
-/// assert_eq!(w[0], 0);
+/// assert_eq!(w[0], 2);
 /// assert_eq!(w[1], 1);
-/// assert_eq!(w[2], 2);
+/// assert_eq!(w[2], 0);
 ///
 /// w.push(3);
-/// assert_eq!(w[0], 1);
+/// assert_eq!(w[0], 3);
 /// assert_eq!(w[1], 2);
-/// assert_eq!(w[2], 3);
+/// assert_eq!(w[2], 1);
 ///
 /// w.push(4);
-/// assert_eq!(w[0], 2);
+/// assert_eq!(w[0], 4);
 /// assert_eq!(w[1], 3);
-/// assert_eq!(w[2], 4);
+/// assert_eq!(w[2], 2);
 /// ```
 ///
 /// # See also
@@ -116,7 +116,7 @@ where
 		old_value
 	}
 
-	/// Returns an iterator over the `Window`'s values (by copy) (from the oldest to the newest).
+	/// Returns an iterator over the `Window`'s values (by copy) (from the newest to the oldest).
 	///
 	/// # Examples
 	///
@@ -130,8 +130,8 @@ where
 	/// w.push(4);
 	/// w.push(5);
 	///
-	/// let p: Vec<i32> = w.iter().collect();
-	/// assert_eq!(p, [3, 4, 5]);
+	/// let p: Vec<_> = w.iter().collect();
+	/// assert_eq!(p, [5, 4, 3]);
 	/// ```
 	#[inline]
 	#[must_use]
@@ -139,15 +139,27 @@ where
 		WindowIterator::new(self)
 	}
 
-	/// Returns an oldest value
+	/// Returns a reversed iterator over the `Window`'s values (by copy) (from the oldest value to the newest).
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use yata::core::Window;
+	///
+	/// let mut w = Window::new(3, 1);
+	///
+	/// w.push(2);
+	/// w.push(3);
+	/// w.push(4);
+	/// w.push(5);
+	///
+	/// let p: Vec<_> = w.rev_iter().collect();
+	/// assert_eq!(p, [3, 4, 5]);
+	/// ```
 	#[inline]
 	#[must_use]
-	pub fn first(&self) -> T {
-		if cfg!(feature = "unsafe_performance") {
-			*unsafe { self.buf.get_unchecked(self.index as usize) }
-		} else {
-			self.buf[self.index as usize]
-		}
+	pub fn rev_iter(&self) -> ReversedWindowIterator<T> {
+		ReversedWindowIterator::new(self)
 	}
 
 	/// Returns a last pushed value
@@ -158,31 +170,37 @@ where
 	/// use yata::core::Window;
 	/// let mut w = Window::new(3, 1);
 	///
-	/// assert_eq!(w.last(), 1);
+	/// assert_eq!(w.newest(), 1);
 	/// w.push(2);
-	/// assert_eq!(w.last(), 2);
+	/// assert_eq!(w.newest(), 2);
 	/// w.push(3);
-	/// assert_eq!(w.last(), 3);
+	/// assert_eq!(w.newest(), 3);
 	/// w.push(4);
-	/// assert_eq!(w.last(), 4);
+	/// assert_eq!(w.newest(), 4);
 	/// w.push(5);
-	/// assert_eq!(w.last(), 5);
+	/// assert_eq!(w.newest(), 5);
 	/// w.push(6);
-	/// assert_eq!(w.last(), 6);
+	/// assert_eq!(w.newest(), 6);
 	/// ```
 	#[inline]
 	#[must_use]
-	pub fn last(&self) -> T {
+	pub fn newest(&self) -> T {
 		let is_zero = self.index == 0;
 		let index = !is_zero as PeriodType * self.index.saturating_sub(1)
 			+ is_zero as PeriodType * self.s_1;
-		// let index = if self.index > 0 {
-		// 	self.index - 1
-		// } else {
-		// 	self.s_1
-		// };
-		// self.buf[index as usize]
+
 		*unsafe { self.buf.get_unchecked(index as usize) }
+	}
+
+	/// Returns an oldest value
+	#[inline]
+	#[must_use]
+	pub fn oldest(&self) -> T {
+		if cfg!(feature = "unsafe_performance") {
+			*unsafe { self.buf.get_unchecked(self.index as usize) }
+		} else {
+			self.buf[self.index as usize]
+		}
 	}
 
 	/// Checks if `Window` is empty (`length` == 0). Returns `true` if `Window` is empty or false otherwise.
@@ -225,9 +243,10 @@ where
 {
 	type Output = T;
 
-	fn index(&self, index: PeriodType) -> &Self::Output {
+	fn index(&self, mut index: PeriodType) -> &Self::Output {
 		debug_assert!(index < self.size, "Window index {:} is out of range", index);
 
+		index = self.size - index - 1;
 		let saturated = self.index.saturating_add(index);
 		let overflow = (saturated >= self.size) as PeriodType;
 		let s = self.size - self.index;
@@ -297,15 +316,16 @@ where
 			return None;
 		}
 
+		self.size -= 1;
+
+		let at_start  = (self.index == 0) as PeriodType; // self.index != self.window.s_1;
+		self.index = self.index.saturating_sub(1) * (1 - at_start) + at_start * self.window.s_1; // (self.index + 1);
+
 		let value = if cfg!(feature = "unsafe_performance") {
 			*unsafe { self.window.buf.get_unchecked(self.index as usize) }
 		} else {
 			self.window.buf[self.index as usize]
 		};
-
-		self.size -= 1;
-		let not_at_end = self.index != self.window.s_1;
-		self.index = not_at_end as PeriodType * (self.index + 1);
 
 		Some(value)
 	}
@@ -320,12 +340,77 @@ where
 	}
 
 	fn last(self) -> Option<Self::Item> {
-		Some(self.window.last())
+		Some(self.window.oldest())
 	}
 }
 
 impl<'a, T> ExactSizeIterator for WindowIterator<'a, T> where T: Copy {}
 impl<'a, T> std::iter::FusedIterator for WindowIterator<'a, T> where T: Copy {}
+
+#[derive(Debug)]
+pub struct ReversedWindowIterator<'a, T>
+where
+	T: Copy,
+{
+	window: &'a Window<T>,
+	index: PeriodType,
+	size: PeriodType,
+}
+
+impl<'a, T> ReversedWindowIterator<'a, T>
+where
+	T: Copy,
+{
+	pub fn new(window: &'a Window<T>) -> Self {
+		Self {
+			window,
+			index: window.index,
+			size: window.size,
+		}
+	}
+}
+
+impl<'a, T> Iterator for ReversedWindowIterator<'a, T>
+where
+	T: Copy,
+{
+	type Item = T;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.size == 0 {
+			return None;
+		}
+
+		let value = if cfg!(feature = "unsafe_performance") {
+			*unsafe { self.window.buf.get_unchecked(self.index as usize) }
+		} else {
+			self.window.buf[self.index as usize]
+		};
+
+		self.size -= 1;
+
+		let not_at_the_end  = (self.index != self.window.s_1) as PeriodType;
+		self.index = (self.index + 1) * not_at_the_end;
+
+		Some(value)
+	}
+
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		let size = self.size as usize;
+		(size, Some(size))
+	}
+
+	fn count(self) -> usize {
+		self.size as usize
+	}
+
+	fn last(self) -> Option<Self::Item> {
+		Some(self.window.newest())
+	}
+}
+
+impl<'a, T> ExactSizeIterator for ReversedWindowIterator<'a, T> where T: Copy {}
+impl<'a, T> std::iter::FusedIterator for ReversedWindowIterator<'a, T> where T: Copy {}
 
 #[cfg(test)]
 mod tests {
@@ -347,7 +432,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_first() {
+	fn test_oldest() {
 		let data: Vec<_> = RandomCandles::new().take(300).collect();
 
 		for length in 1..255 {
@@ -356,13 +441,13 @@ mod tests {
 			data.iter().enumerate().for_each(|(i, &c)| {
 				let first = data[i.saturating_sub(length.saturating_sub(1) as usize)];
 				w.push(c);
-				assert_eq!(first, w.first());
+				assert_eq!(first, w.oldest());
 			});
 		}
 	}
 
 	#[test]
-	fn test_last() {
+	fn test_newest() {
 		let data: Vec<_> = RandomCandles::new().take(300).collect();
 
 		for length in 1..255 {
@@ -370,14 +455,14 @@ mod tests {
 
 			data.iter().for_each(|&c| {
 				w.push(c);
-				assert_eq!(c, w.last());
+				assert_eq!(c, w.newest());
 			});
 		}
 	}
 
 	#[test]
 	fn test_iterator() {
-		let data: Vec<_> = RandomCandles::new().take(300).collect();
+		let data: Vec<_> = RandomCandles::new().take(600).collect();
 
 		for length in 1..255 {
 			let mut w = Window::new(length, data[0]);
@@ -387,13 +472,49 @@ mod tests {
 
 				if i >= length as usize {
 					let iterated: Vec<_> = w.iter().collect();
+					
+					let original_slice: Vec<_> = {
+						let from = i.saturating_sub((length - 1) as usize);
+						let to = i;
+						data[from..=to].iter().rev().copied().collect()
+					};
 
-					let from = i.saturating_sub((length - 1) as usize);
-					let to = i;
-					assert_eq!(iterated.as_slice(), &data[from..=to]);
+					assert_eq!(iterated, original_slice);
 				}
 
-				assert_eq!(Some(c), w.iter().last());
+				assert_eq!(data[i.saturating_sub((length - 1) as usize)], w.iter().last().unwrap());
+			});
+
+			assert_eq!(
+				w.iter().size_hint(),
+				(length as usize, Some(length as usize))
+			);
+			assert_eq!(w.iter().count(), length as usize);
+		}
+	}
+
+	#[test]
+	fn test_rev_iterator() {
+		let data: Vec<_> = RandomCandles::new().take(600).collect();
+
+		for length in 1..255 {
+			let mut w = Window::new(length, data[0]);
+
+			data.iter().enumerate().for_each(|(i, &c)| {
+				w.push(c);
+
+				if i >= length as usize {
+					let iterated: Vec<_> = w.rev_iter().collect();
+					
+					let original_slice = {
+						let from = i.saturating_sub((length - 1) as usize);
+						let to = i;
+						&data[from..=to]
+					};
+					assert_eq!(iterated.as_slice(), original_slice);
+				}
+
+				// assert_eq!(data[i.saturating_sub((length - 1) as usize)], w.rev_iter().last().unwrap());
 			});
 
 			assert_eq!(
@@ -419,7 +540,7 @@ mod tests {
 					let to = i;
 					let slice = &data[from..=to];
 					for j in 0..length {
-						assert_eq!(slice[j as usize], w[j]);
+						assert_eq!(slice[(length - 1 - j) as usize], w[j]);
 					}
 				}
 			});

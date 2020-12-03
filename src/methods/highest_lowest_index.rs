@@ -98,9 +98,9 @@ impl Method for HighestIndex {
 			self.index = 0;
 		} else if self.index == self.window.len() {
 			let (index, value) = self.window.iter().enumerate().fold(
-				(self.window.len() as usize - 1, value),
+				(0, value),
 				|a, b| {
-					if b.1 >= a.1 {
+					if b.1 > a.1 {
 						b
 					} else {
 						a
@@ -108,7 +108,7 @@ impl Method for HighestIndex {
 				},
 			);
 
-			self.index = self.window.len() - index as PeriodType - 1;
+			self.index = index as PeriodType; // self.window.len() - index as PeriodType - 1;
 			self.value = value;
 		}
 
@@ -210,9 +210,9 @@ impl Method for LowestIndex {
 			self.index = 0;
 		} else if self.index == self.window.len() {
 			let (index, value) = self.window.iter().enumerate().fold(
-				(self.window.len() as usize - 1, value),
+				(0, value),
 				|a, b| {
-					if b.1 <= a.1 {
+					if b.1 < a.1 {
 						b
 					} else {
 						a
@@ -220,7 +220,7 @@ impl Method for LowestIndex {
 				},
 			);
 
-			self.index = self.window.len() - index as PeriodType - 1;
+			self.index = index as PeriodType; // self.window.len() - index as PeriodType - 1;
 			self.value = value;
 		}
 
