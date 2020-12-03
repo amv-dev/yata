@@ -178,6 +178,8 @@ impl<T: OHLC> IndicatorInstance<T> for TrendStrengthIndexInstance {
 
 		let sma = self.inverted_period * self.sy;
 		let p = (self.wma.next(src) - sma) * self.sx;
+
+		// sy2 is always greater than sma * sy, so q is always positive
 		let q = self.k * (self.sy2 - sma * self.sy);
 
 		let value = p / q.sqrt();
@@ -185,8 +187,8 @@ impl<T: OHLC> IndicatorInstance<T> for TrendStrengthIndexInstance {
 		let cross_signal = self.cross_under.next((value, self.cfg.zone)) - self.cross_above.next((value, -self.cfg.zone));
 		let reverse = self.reverse.next(value).analog();
 
-		let is_upper_signal = reverse > 0 && self.window[self.cfg.reverse_offset] > self.cfg.zone;
-		let is_lower_signal = reverse < 0 && self.window[self.cfg.reverse_offset] < -self.cfg.zone;
+		let is_upper_signal = reverse < 0 && self.window[self.cfg.reverse_offset] >= self.cfg.zone;
+		let is_lower_signal = reverse > 0 && self.window[self.cfg.reverse_offset] <= -self.cfg.zone;
 		let reverse_signal = is_upper_signal as i8 - is_lower_signal as i8;
 
 		IndicatorResult::new(&[value], &[cross_signal, reverse_signal.into()])
