@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///
-/// `length` should be > 1
+/// `length` should be > `1`
 ///
 /// # Input type
 ///

@@ -7,7 +7,7 @@
 //! To get new output value over the input value use [`Method::next`](crate::core::Method::next).
 //!
 //! ```
-//! // creating Weighted Moving Average of length 5
+//! // creating Weighted Moving Average of length `5`
 //! use yata::prelude::*;
 //! use yata::methods::WMA;
 //!

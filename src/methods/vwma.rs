@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Parameters
 ///
-/// `length` should be > 0
+/// `length` should be > `0`
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///

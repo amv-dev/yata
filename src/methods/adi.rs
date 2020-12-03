@@ -7,8 +7,8 @@ use serde::{Deserialize, Serialize};
 
 /// [Accumulation Distribution Index](https://en.wikipedia.org/wiki/Accumulation/distribution_index) of specified `length` for timeseries of [`OHLCV`]
 ///
-/// [`CLV`] ranges from -1 when the close is the low of the day, to +1 when it's the high.
-/// For instance if the close is 3/4 the way up the range then [`CLV`] is +0.5.
+/// [`CLV`] ranges from `-1.0` when the close is the low of the day, to `+1.0` when it's the high.
+/// For instance if the close is `3/4` the way up the range then [`CLV`] is `+0.5`.
 /// The accumulation/distribution index adds up volume multiplied by the [`CLV`] factor, i.e.
 ///
 /// ADI = `ADI_prev` + [`CLV`] * [`volume`]
@@ -20,17 +20,17 @@ use serde::{Deserialize, Serialize};
 /// The accumulation/distribution index is similar to on balance volume, but acc/dist is based on the close
 /// within the day's range, instead of the close-to-close up or down that the latter uses.
 ///
-/// Can be used by a shortcut [ADI]
+/// Can be used by a shortcut [`ADI`]
 ///
-/// Used in indicators: [Chaikin Money Flow](crate::indicators::ChaikinMoneyFlow), [Chaikin Oscillator](crate::indicators::ChaikinOscillator)
+/// Used in indicators: [`Chaikin Money Flow`](crate::indicators::ChaikinMoneyFlow), [`Chaikin Oscillator`](crate::indicators::ChaikinOscillator)
 ///
 /// # Parameters
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///
-/// When `length` == 0, ADI becomes windowless. That means full ADI value accumulation over time.
+/// When `length == 0`, `ADI` becomes windowless. That means full `ADI` value accumulation over time.
 ///
-/// When `length` > 0, ADI will be calculated over the last `length` values.
+/// When `length > 0`, `ADI` will be calculated over the last `length` values.
 ///
 /// # Input type
 /// Input type is [`OHLCV`]

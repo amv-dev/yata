@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///
-/// If `length` == 0, then integrates since the beginning of timeseries
+/// If `length == 0`, then integrates since the beginning of timeseries
 ///
 /// # Input type
 ///

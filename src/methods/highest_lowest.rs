@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///
-/// `length` should be > 0
+/// `length` should be > `0`
 ///
 /// # Input type
 ///
@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Output type is [`ValueType`]
 ///
-/// Output value is always >= 0.0
+/// Output value is always >= `0.0`
 ///
 /// # Examples
 ///

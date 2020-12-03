@@ -6,13 +6,13 @@ use serde::{Deserialize, Serialize};
 
 /// [Hull Moving Average](https://www.tradingview.com/scripts/hullma/) for last `length` values for timeseries of type [`ValueType`]
 ///
-/// HMA = [`WMA`] from (2*[`WMA`] over `length`/2 − [`WMA`] over `length`) over sqrt(`length`))
+/// HMA = [`WMA`] from (2*[`WMA`] over `length`/`2` − [`WMA`] over `length`) over sqrt(`length`))
 ///
 /// # Parameters
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///
-/// `length` should be > 1
+/// `length` should be > `1`
 ///
 /// # Input type
 ///

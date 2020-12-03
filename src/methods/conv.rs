@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Has a single parameter `weights`: Vec<[`ValueType`]>
 ///
-/// `weights` vector's length must be > 0
+/// `weights` vector's length must be > `0`
 ///
 /// # Input type
 ///

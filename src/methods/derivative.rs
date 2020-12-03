@@ -10,9 +10,9 @@ use serde::{Deserialize, Serialize};
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///
-/// `length` should be > 0
+/// `length` should be > `0`
 ///
-/// Default is 1
+/// Default is `1`
 ///
 /// # Input type
 ///

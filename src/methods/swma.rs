@@ -5,15 +5,15 @@ use serde::{Deserialize, Serialize};
 
 /// Symmetrically Weighted Moving Average of specified `length` for timeseries of [`ValueType`].
 ///
-/// F.e. if `length` = 4, then weights are: [ 1.0, 2.0, 2.0, 1.0 ].
+/// F.e. if `length = 4`, then weights are: `[ 1.0, 2.0, 2.0, 1.0 ]`.
 ///
-/// If `length` = 5, then weights are: [ 1.0, 2.0, 3.0, 2.0, 1.0 ].
+/// If `length = 5`, then weights are: `[ 1.0, 2.0, 3.0, 2.0, 1.0 ]`.
 ///
 /// # Parameters
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///
-/// `length` should be > 0
+/// `length` should be > `0`
 ///
 /// # Input type
 ///

@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///
-/// `length` should be > 0 and < `PeriodType::MAX`/2
+/// `length` should be > `0` and < `PeriodType::MAX`/`2`
 ///
 /// # Input type
 ///

@@ -10,21 +10,21 @@ pub type ROC = RateOfChange;
 /// [Rate of change](https://en.wikipedia.org/wiki/Momentum_(technical_analysis)) calculates relative difference between current
 /// value and n-th value back, where n = `length`
 ///
-/// ROC = (`value` - `n_th_value`) / `n_th_value`
+/// `ROC` = (`value` - `n_th_value`) / `n_th_value`
 ///
-/// ROC = [`Momentum`] / `n_th_value`
+/// `ROC` = [`Momentum`] / `n_th_value`
 ///
 /// # Parameters
 ///
 /// Has a single parameter `length`: [`PeriodType`]
 ///
-/// `length` should be > 0
+/// `length` should be > `0`
 ///
 /// # Input type
 ///
 /// Input type is [`ValueType`]
 ///
-/// Input value should always be greater than 0.0. (`value` > 0.0)
+/// Input value should always be greater than `0.0.` (`value` > `0.0`)
 ///
 /// # Output type
 ///

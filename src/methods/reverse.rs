@@ -10,10 +10,10 @@ use serde::{Deserialize, Serialize};
 ///
 /// Has a tuple of 2 parameters (`left`: [`PeriodType`], `right`: [`PeriodType`])
 ///
-/// `left` should be > 0 and `right` should be > 0
+/// `left` should be > `0` and `right` should be > `0`
 ///
 /// There is an additional restriction on parameters: `left`+`right`+1 should be <= [`PeriodType`]::MAX.
-/// So if your [`PeriodType`] is default `u8`, then `left`+`right`+1 should be <= 255
+/// So if your [`PeriodType`] is default `u8`, then `left`+`right`+1 should be <= `255`
 ///
 /// [Read more about `PeriodType`][`PeriodType`]
 ///
