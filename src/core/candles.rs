@@ -33,6 +33,7 @@ pub enum Source {
 	Volume,
 
 	/// Same as `typical price * volume`
+	#[cfg_attr(feature = "serde", serde(rename = "volumed_price"))]
 	VolumedPrice,
 }
 
@@ -45,7 +46,7 @@ impl FromStr for Source {
 			"high" => Ok(Self::High),
 			"low" => Ok(Self::Low),
 			"volume" => Ok(Self::Volume),
-			"tp" => Ok(Self::TP),
+			"tp"|"hlc3" => Ok(Self::TP),
 			"hl2" => Ok(Self::HL2),
 			"open" => Ok(Self::Open),
 			"volumed_price" => Ok(Self::VolumedPrice),
@@ -68,6 +69,28 @@ impl TryFrom<String> for Source {
 
 	fn try_from(s: String) -> Result<Self, Self::Error> {
 		Self::from_str(s.as_str())
+	}
+}
+
+impl From<Source> for &'static str {
+	fn from(value: Source) -> Self {
+		match value {
+			Source::Close => "close",
+			Source::High => "high",
+			Source::Low => "low",
+			Source::Open => "open",
+			Source::TP => "tp",
+			Source::HL2 => "hl2",
+			Source::Volume => "volume",
+			Source::VolumedPrice => "volumed_price",
+		}
+	}
+}
+
+impl From<Source> for String {
+	fn from(value: Source) -> Self {
+		let s: &str = value.into();
+		s.to_string()
 	}
 }
 
@@ -180,3 +203,75 @@ impl Eq for Candle {}
 
 /// Just an alias for the Sequence of any `T`
 pub type Candles<T> = Sequence<T>;
+
+#[cfg(test)]
+mod tests {
+	use super::Source;
+
+	#[test]
+	fn test_source_to_string_str() {
+		let values = [
+			Source::Open,
+			Source::High,
+			Source::Low,
+			Source::Close,
+			Source::Volume,
+			Source::VolumedPrice,
+			Source::TP,
+			Source::HL2,
+		];
+
+		values.iter().for_each(|&v| {
+			let r1: String = v.into();
+			let r2: &str = v.into();
+
+			assert_eq!(r1, r2);
+
+			match v {
+				Source::Open => assert_eq!("open", r1),
+				Source::High => assert_eq!("high", r1),
+				Source::Low => assert_eq!("low", r1),
+				Source::Close => assert_eq!("close", r1),
+				Source::Volume => assert_eq!("volume", r1),
+				Source::VolumedPrice => assert_eq!("volumed_price", r1),
+				Source::TP => assert_eq!("tp", r1),
+				Source::HL2 => assert_eq!("hl2", r1),
+			}
+		});
+	}
+
+	#[test]
+	fn test_source_from_string() {
+		let values = [
+			"oPeN",
+			"HIGH",
+			"low",
+			"cLose",
+			"volume",
+			"vOluMeD_prIcE",
+			"tP",
+			"hlc3",
+			"Hl2",
+		];
+
+		values.iter().enumerate().for_each(|(i, s)| {
+			let r: Source = s.parse().unwrap();
+			match i {
+				0 => assert_eq!(Source::Open, r),
+				1 => assert_eq!(Source::High, r),
+				2 => assert_eq!(Source::Low, r),
+				3 => assert_eq!(Source::Close, r),
+				4 => assert_eq!(Source::Volume, r),
+				5 => assert_eq!(Source::VolumedPrice, r),
+				6 => assert_eq!(Source::TP, r),
+				7 => assert_eq!(Source::TP, r),
+				8 => assert_eq!(Source::HL2, r),
+				_ => panic!("Wow. You cannot be here."),
+			}
+		});
+
+		let src: Result<Source, _> = "some other string".parse();
+
+		assert!(src.is_err());
+	}
+}
