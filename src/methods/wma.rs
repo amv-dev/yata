@@ -4,7 +4,7 @@ use crate::core::{Error, PeriodType, ValueType, Window};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// [Weighed Moving Average](https://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average) of specified `length` for timeseries of type [`ValueType`].
+/// [Weighted Moving Average](https://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average) of specified `length` for timeseries of type [`ValueType`].
 ///
 /// # Parameters
 ///
