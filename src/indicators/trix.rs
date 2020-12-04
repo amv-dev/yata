@@ -1,6 +1,6 @@
 use crate::core::{
 	Error, IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult, Method,
-	PeriodType, Source, ValueType, OHLC,
+	PeriodType, Source, OHLC,
 };
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Change, Cross, ReverseSignal, TMA};

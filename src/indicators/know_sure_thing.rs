@@ -30,34 +30,34 @@ use crate::methods::{Cross, RateOfChange};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KnowSureThing {
-	/// ROC1 period. Default is 10.
+	/// ROC1 period. Default is `10`.
 	pub period1: PeriodType,
 
-	/// ROC2 period. Default is 15.
+	/// ROC2 period. Default is `15`.
 	pub period2: PeriodType,
 
-	/// ROC3 period. Default is 20.
+	/// ROC3 period. Default is `20`.
 	pub period3: PeriodType,
 
-	/// ROC4 period. Default is 30.
+	/// ROC4 period. Default is `30`.
 	pub period4: PeriodType,
 
-	/// ROC1 moving average period. Default is 10.
+	/// ROC1 moving average period. Default is `10`.
 	pub sma1: PeriodType,
 
-	/// ROC2 moving average period. Default is 10.
+	/// ROC2 moving average period. Default is `10`.
 	pub sma2: PeriodType,
 
-	/// ROC3 moving average period. Default is 10.
+	/// ROC3 moving average period. Default is `10`.
 	pub sma3: PeriodType,
 
-	/// ROC4 moving average period. Default is 15.
+	/// ROC4 moving average period. Default is `15`.
 	pub sma4: PeriodType,
 
 	/// ROCs lines moving average type. Defual is [`SMA`](crate::methods::SMA).
 	pub method1: RegularMethods,
 
-	/// Signal line moving average period. Default is 9.
+	/// Signal line moving average period. Default is `9`.
 	pub sma5: PeriodType,
 
 	/// Signal line moving average type. Defual is [`SMA`](crate::methods::SMA).
