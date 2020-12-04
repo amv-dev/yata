@@ -5,7 +5,26 @@ use crate::core::{Action, Error, ValueType, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use std::cmp::Ordering;
 
-// https://en.wikipedia.org/wiki/Parabolic_SAR
+/// Parabolic Stop And Reverse
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/Parabolic_SAR>
+///
+/// # 2 values
+///
+/// * `SAR` value
+///
+/// Range of values is the same as the range of the timeseries values.
+///
+/// * `trend` value
+///
+/// Can be one of the next values: {`-1.0`; `0.0`; `1.0`}
+///
+/// # 1 signal
+/// * When `trend` changes it's value to positive, then returns full buy signal.
+/// When `trend` changes it's value to negative, then returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ParabolicSAR {
@@ -153,12 +172,6 @@ impl<T: OHLC> IndicatorInstance<T> for ParabolicSARInstance<T> {
 
 		self.prev_candle = candle;
 
-		// let signal;
-		// if self.prev_trend != trend {
-		// 	signal = trend;
-		// } else {
-		// 	signal = 0;
-		// }
 		let signal = (self.prev_trend != trend) as i8 * trend;
 
 		self.prev_trend = trend;
