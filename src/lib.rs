@@ -74,7 +74,7 @@ limitations under the License.
 //! - [Momentum](crate::methods::Momentum);
 //! - [Past](crate::methods::Past);
 //! - [Rate Of Change](crate::methods::RateOfChange) (ROC);
-//! - [Reverse points](crate::methods::ReversalSignal);
+//! - [Reversal points](crate::methods::ReversalSignal);
 //! - [Standart Deviation](crate::methods::StDev);
 //! - [Volatility](crate::methods::LinearVolatility);
 //!
@@ -155,7 +155,7 @@ limitations under the License.
 //!
 //! # Say thanks
 //!
-//! If you like this library and you want to say thanks, you can do it also by donating to bitcoin address _1P3gTnaTK9LKSYx2nETrKe2zjP4HMkdhvK_
+//! If you like this library and you want to say thanks, you can do it also by donating to bitcoin address `1P3gTnaTK9LKSYx2nETrKe2zjP4HMkdhvK`
 
 pub mod core;
 pub mod helpers;

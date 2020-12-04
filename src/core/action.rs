@@ -10,9 +10,18 @@ const BOUND_FLOAT: f64 = BOUND as f64;
 
 /// Action is basic type of Indicator's signals
 ///
-/// It may be positive (means *Buy* some amount). It may be negative (means *Sell* some amount). Or there may be no signal at all.
+/// It may be positive \(means *Buy* some amount\). It may be negative \(means *Sell* some amount\). Or there may be no signal at all.
 ///
-/// `Action` may be analog {1, 0, -1} or digital in range [-1.0; 1.0]
+/// You can convert `Action` to *analog* `i8` value using [`analog()`](Action::analog) method, where:
+/// * `1` means *buy*;
+/// * `-1` means *sell*;
+/// * `0` means no signal.
+///
+/// You can convert `Action` to *digital* `Option<f64>` value using [`ratio()`](Action::ratio) method with internal value in range \[`-1.0`; `1.0`\], where:
+/// * negative value means *sell* some portion;
+/// * positive value means *buy* some potion;
+/// * zero value means there is no distinct decision;
+/// * [`None`](core::option::Option::None) means no signal.
 #[derive(Clone, Copy, Eq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum Action {
@@ -31,7 +40,7 @@ impl Action {
 	/// Shortcut for *Sell All* signal
 	pub const SELL_ALL: Self = Self::Sell(BOUND);
 
-	/// Create instance from *analog* signal (which can be only -1, 0 or 1)
+	/// Create instance from *analog* signal (which can be only `-1`, `0` or `1`)
 	///
 	/// Any positive number converts to `BUY_ALL`
 	///
@@ -43,15 +52,15 @@ impl Action {
 		Self::from(value)
 	}
 
-	/// Converts value with the interval [-1.0; 1.0]
+	/// Converts value with the interval \[`-1.0`; `1.0`\]
 	#[must_use]
 	pub fn ratio(self) -> Option<ValueType> {
 		self.into()
 	}
 
-	/// Returns a sign (1 or -1) of internal value if value exists and not zero.
+	/// Returns a sign (`1` or `-1`) of internal value if value exists and not zero.
 	///
-	/// Otherwise returns 0
+	/// Otherwise returns `0`.
 	#[must_use]
 	pub fn analog(self) -> i8 {
 		self.into()

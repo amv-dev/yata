@@ -53,7 +53,7 @@ yata = "0.3"
 - [Momentum](https://docs.rs/yata/latest/yata/methods/struct.Momentum.html);
 - [Past](https://docs.rs/yata/latest/yata/methods/struct.Past.html);
 - [Rate Of Change](https://docs.rs/yata/latest/yata/methods/struct.RateOfChange.html) (ROC);
-- [Reverse points](https://docs.rs/yata/latest/yata/methods/struct.ReverseSignal.html);
+- [Reversal points](https://docs.rs/yata/latest/yata/methods/struct.ReversalSignal.html);
 - [Standart Deviation](https://docs.rs/yata/latest/yata/methods/struct.StDev.html);
 - [Volatility](https://docs.rs/yata/latest/yata/methods/struct.LinearVolatility.html);
 
