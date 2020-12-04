@@ -42,7 +42,7 @@ limitations under the License.
 //! It also provides you an interface to create your own indicators.
 //!
 //! ## Available **moving averages**:
-//! 
+//!
 //! - [Simple moving average (SMA)](crate::methods::SMA);
 //! - [Weighted moving average (WMA)](crate::methods::WMA);
 //! - Exponential moving average family: [EMA](crate::methods::EMA), [DMA](crate::methods::DMA), [TMA](crate::methods::TMA),
@@ -57,9 +57,9 @@ limitations under the License.
 //! - [Wilder’s Smoothing Average (WSMA)](crate::methods::WSMA);
 //! - [Kaufman Adaptive Moving Average (KAMA)](crate::indicators::Kaufman);
 //! - [Convolution Moving Average](crate::methods::Conv);
-//! 
+//!
 //! [See all](crate::methods#structs)
-//! 
+//!
 //! ## Some commonly used **methods**:
 //!
 //! - [Accumulation-distribution index](crate::methods::ADI);

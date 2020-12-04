@@ -6,21 +6,61 @@ use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, Indi
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, RateOfChange};
 
-// https://en.wikipedia.org/wiki/KST_oscillator
+/// Know Sure Thing
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/KST_oscillator>
+///
+/// # 2 values
+///
+/// * `KST` value
+///
+/// Range in \(`-inf`; `+inf`\)
+///
+/// * `Sinal line` value
+///
+/// Range in \(`-inf`; `+inf`\)
+///
+/// # 1 signal
+///
+/// * When `KST` crosses `Signal line` upwards, returns full buy signal.
+/// When `KST` crosses `Signal line` downwards, returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KnowSureThing {
+	/// ROC1 period. Default is 10.
 	pub period1: PeriodType,
+
+	/// ROC2 period. Default is 15.
 	pub period2: PeriodType,
+
+	/// ROC3 period. Default is 20.
 	pub period3: PeriodType,
+
+	/// ROC4 period. Default is 30.
 	pub period4: PeriodType,
+
+	/// ROC1 moving average period. Default is 10.
 	pub sma1: PeriodType,
+
+	/// ROC2 moving average period. Default is 10.
 	pub sma2: PeriodType,
+
+	/// ROC3 moving average period. Default is 10.
 	pub sma3: PeriodType,
+
+	/// ROC4 moving average period. Default is 15.
 	pub sma4: PeriodType,
+
+	/// ROCs lines moving average type. Defual is [`SMA`](crate::methods::SMA).
 	pub method1: RegularMethods,
 
+	/// Signal line moving average period. Default is 9.
 	pub sma5: PeriodType,
+
+	/// Signal line moving average type. Defual is [`SMA`](crate::methods::SMA).
 	pub method2: RegularMethods,
 }
 

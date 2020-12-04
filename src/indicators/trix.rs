@@ -3,37 +3,37 @@ use crate::core::{
 	PeriodType, Source, ValueType, OHLC,
 };
 use crate::helpers::{method, RegularMethod, RegularMethods};
-use crate::methods::{Change, Cross, TMA, ReverseSignal};
+use crate::methods::{Change, Cross, ReverseSignal, TMA};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 /// TRIX (extended)
-/// 
+///
 /// ## Links
-/// 
+///
 /// * <https://en.wikipedia.org/wiki/Trix_(technical_analysis)>
-/// 
+///
 /// # 2 values
-/// 
+///
 /// * `main` value
-/// 
+///
 /// Range is \(`-inf`; `+inf`\)
-/// 
+///
 /// * `signal line` value
-/// 
+///
 /// Range is \(`-inf`; `+inf`\)
-/// 
+///
 /// # 3 signals
-/// 
+///
 /// * When `main` value changes direction upwards, returns full buy signal.
 /// When `main` value changes direction downwards, returns full sell signal.
 /// Otherwise returns no signal.
-/// 
+///
 /// * When `main` value crosses `signal line` value upwards, returns full buy signal.
 /// When `main` value crosses `signal line` value downwards, returns full sell signal.
 /// Otherwise returns no signal.
-/// 
+///
 /// * When `main` value crosses zero line upwards, returns full buy signal.
 /// When `main` value crosses zero line downwards, returns full sell signal.
 /// Otherwise returns no signal.
@@ -41,12 +41,12 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Trix {
 	/// TRIX period. Default is `18`.
-	/// 
+	///
 	/// Range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
 
 	/// Signal line period. Default is `6`.
-	/// 
+	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
 
@@ -157,7 +157,7 @@ impl<T: OHLC> IndicatorInstance<T> for TRIXInstance {
 		let src = candle.source(self.cfg.source);
 		let tma = self.tma.next(src);
 		let value = self.change.next(tma);
-		
+
 		let signal1 = self.reverse.next(value);
 
 		let sigline = self.sig.next(value);
