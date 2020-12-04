@@ -73,15 +73,9 @@ impl Method for ReversalSignal {
 	where
 		Self: Sized,
 	{
-		let (left, right) = params;
-
-		if left == 0 || right == 0 {
-			return Err(Error::WrongMethodParameters);
-		}
-
 		Ok(Self {
-			high: Method::new((left, right), value).unwrap(),
-			low: Method::new((left, right), value).unwrap(),
+			high: Method::new(params, value)?,
+			low: Method::new(params, value)?,
 		})
 	}
 
@@ -165,7 +159,7 @@ impl Method for UpperReversalSignal {
 	fn new(params: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		let (left, right) = params;
 
-		if left == 0 || right == 0 {
+		if left == 0 || right == 0 || left.saturating_add(right) == PeriodType::MAX {
 			return Err(Error::WrongMethodParameters);
 		}
 
@@ -296,7 +290,7 @@ impl Method for LowerReversalSignal {
 	fn new(params: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		let (left, right) = params;
 
-		if left == 0 || right == 0 {
+		if left == 0 || right == 0 || left.saturating_add(right) == PeriodType::MAX {
 			return Err(Error::WrongMethodParameters);
 		}
 

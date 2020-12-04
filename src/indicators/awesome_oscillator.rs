@@ -41,15 +41,15 @@ pub struct AwesomeOscillator {
 	pub source: Source,
 	/// Default is `1`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)-`right`\).
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)-`right`\).
 	pub left: PeriodType,
 	/// Default is `1`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)-`left`\).
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)-`left`\).
 	pub right: PeriodType,
 	/// Default is `2`.
 	///
-	/// Range in \[1; [`PeriodType::MAX`](crate::core::PeriodType)\].
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\].
 	pub conseq_peaks: u8,
 }
 
@@ -64,10 +64,7 @@ impl IndicatorConfig for AwesomeOscillator {
 			&& self.left > 0
 			&& self.right > 0
 			&& self.conseq_peaks > 0
-			&& PeriodType::MAX
-				.saturating_sub(self.left)
-				.saturating_sub(self.right)
-				> 0
+			&& self.left.saturating_add(self.right) < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

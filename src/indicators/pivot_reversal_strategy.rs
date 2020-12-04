@@ -16,7 +16,7 @@ impl IndicatorConfig for PivotReversalStrategy {
 	const NAME: &'static str = "PivotReversalStrategy";
 
 	fn validate(&self) -> bool {
-		self.left >= 1 && self.right >= 1
+		self.left >= 1 && self.right >= 1 && self.left.saturating_add(self.right) < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

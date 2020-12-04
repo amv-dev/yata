@@ -81,10 +81,7 @@ impl IndicatorConfig for CoppockCurve {
 			&& self.s3_period > 1
 			&& self.s2_left > 0
 			&& self.s2_right > 0
-			&& PeriodType::MAX
-				.saturating_sub(self.s2_left)
-				.saturating_sub(self.s2_right)
-				> 0
+			&& self.s2_left.saturating_add(self.s2_right) < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {

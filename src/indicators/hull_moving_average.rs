@@ -51,8 +51,7 @@ impl IndicatorConfig for HullMovingAverage {
 		self.period > 2
 			&& self.left >= 1
 			&& self.right >= 1
-			&& self.left <= PeriodType::MAX / 2
-			&& self.right <= PeriodType::MAX / 2
+			&& self.left.saturating_add(self.right) < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Option<Error> {
