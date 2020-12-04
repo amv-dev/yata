@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{Action, Error, Method, PeriodType, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::methods::{ReverseHighSignal, ReverseLowSignal};
+use crate::methods::{LowerReversalSignal, UpperReversalSignal};
 
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -56,8 +56,8 @@ impl<T: OHLC> IndicatorInitializer<T> for PivotReversalStrategy {
 
 		let cfg = self;
 		Ok(Self::Instance {
-			ph: ReverseHighSignal::new(cfg.left, cfg.right, candle.high())?,
-			pl: ReverseLowSignal::new(cfg.left, cfg.right, candle.low())?,
+			ph: UpperReversalSignal::new(cfg.left, cfg.right, candle.high())?,
+			pl: LowerReversalSignal::new(cfg.left, cfg.right, candle.low())?,
 			window: Window::new(cfg.right, candle),
 			hprice: 0.,
 			lprice: 0.,
@@ -76,8 +76,8 @@ impl Default for PivotReversalStrategy {
 pub struct PivotReversalStrategyInstance<T: OHLC> {
 	cfg: PivotReversalStrategy,
 
-	ph: ReverseHighSignal,
-	pl: ReverseLowSignal,
+	ph: UpperReversalSignal,
+	pl: LowerReversalSignal,
 	window: Window<T>,
 	hprice: ValueType,
 	lprice: ValueType,

@@ -4,7 +4,7 @@ use crate::core::{Action, Error, PeriodType, ValueType, Window};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Searches for reverse points over last `left`+`right`+1 values of type [`ValueType`]
+/// Searches for reversal points over last `left`+`right`+1 values of type [`ValueType`]
 ///
 /// # Parameters
 ///
@@ -27,12 +27,12 @@ use serde::{Deserialize, Serialize};
 ///
 /// ```
 /// use yata::prelude::*;
-/// use yata::methods::ReverseSignal;
+/// use yata::methods::ReversalSignal;
 ///
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
 /// let r = [ 0,   0,   1,   0,   -1,  0,   1 ];
 ///
-/// let mut pivot = ReverseSignal::new(2, 2, s[0]).unwrap();
+/// let mut pivot = ReversalSignal::new(2, 2, s[0]).unwrap();
 /// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
 ///
 /// assert_eq!(r2, r2);
@@ -44,27 +44,27 @@ use serde::{Deserialize, Serialize};
 ///
 /// # See also
 ///
-/// [`ReverseHighSignal`], [`ReverseLowSignal`]
+/// [`UpperReversalSignal`], [`LowerReversalSignal`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
 /// [`Action`]: crate::core::Action
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct ReverseSignal {
-	high: ReverseHighSignal,
-	low: ReverseLowSignal,
+pub struct ReversalSignal {
+	high: UpperReversalSignal,
+	low: LowerReversalSignal,
 }
 
-impl ReverseSignal {
-	/// Constructs new instanceof `ReverseSignal`
+impl ReversalSignal {
+	/// Constructs new instanceof `ReversalSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
 		Method::new((left, right), value)
 	}
 }
 
-impl Method for ReverseSignal {
+impl Method for ReversalSignal {
 	type Params = (PeriodType, PeriodType);
 	type Input = ValueType;
 	type Output = Action;
@@ -91,7 +91,7 @@ impl Method for ReverseSignal {
 	}
 }
 
-/// Searches for high Reverse points over last `left`+`right`+1 values of type [`ValueType`]
+/// Searches for upper reversal points over last `left`+`right`+1 values of type [`ValueType`]
 ///
 /// # Parameters
 ///
@@ -114,12 +114,12 @@ impl Method for ReverseSignal {
 ///
 /// ```
 /// use yata::core::Method;
-/// use yata::methods::ReverseHighSignal;
+/// use yata::methods::UpperReversalSignal;
 ///
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
 /// let r = [ 0,   0,   0,   0,   1,   0,   0 ];
 ///
-/// let mut pivot = ReverseHighSignal::new(2, 2, s[0]).unwrap();
+/// let mut pivot = UpperReversalSignal::new(2, 2, s[0]).unwrap();
 /// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
 ///
 /// assert_eq!(r2, r2);
@@ -131,7 +131,7 @@ impl Method for ReverseSignal {
 ///
 /// # See also
 ///
-/// [`ReverseSignal`], [`ReverseLowSignal`]
+/// [`ReversalSignal`], [`LowerReversalSignal`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
@@ -139,7 +139,7 @@ impl Method for ReverseSignal {
 ///
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct ReverseHighSignal {
+pub struct UpperReversalSignal {
 	left: PeriodType,
 	right: PeriodType,
 
@@ -149,15 +149,15 @@ pub struct ReverseHighSignal {
 	window: Window<ValueType>,
 }
 
-impl ReverseHighSignal {
-	/// Constructs new instanceof `ReverseHighSignal`
+impl UpperReversalSignal {
+	/// Constructs new instanceof `UpperReversalSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
 		Method::new((left, right), value)
 	}
 }
 
-impl Method for ReverseHighSignal {
+impl Method for UpperReversalSignal {
 	type Params = (PeriodType, PeriodType);
 	type Input = ValueType;
 	type Output = Action;
@@ -219,7 +219,7 @@ impl Method for ReverseHighSignal {
 	}
 }
 
-/// Searches for low reverse points over last `left`+`right`+1 values of type [`ValueType`]
+/// Searches for lower reversal points over last `left`+`right`+1 values of type [`ValueType`]
 ///
 /// # Parameters
 ///
@@ -242,12 +242,12 @@ impl Method for ReverseHighSignal {
 ///
 /// ```
 /// use yata::core::Method;
-/// use yata::methods::ReverseHighSignal;
+/// use yata::methods::UpperReversalSignal;
 ///
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
 /// let r = [ 0,   0,   1,   0,   0,   0,   1 ];
 ///
-/// let mut pivot = ReverseHighSignal::new(2, 2, s[0]).unwrap();
+/// let mut pivot = UpperReversalSignal::new(2, 2, s[0]).unwrap();
 /// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
 ///
 /// assert_eq!(r2, r2);
@@ -259,7 +259,7 @@ impl Method for ReverseHighSignal {
 ///
 /// # See also
 ///
-/// [`ReverseSignal`], [`ReverseHighSignal`]
+/// [`ReversalSignal`], [`UpperReversalSignal`]
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
@@ -267,7 +267,7 @@ impl Method for ReverseHighSignal {
 ///
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct ReverseLowSignal {
+pub struct LowerReversalSignal {
 	left: PeriodType,
 	right: PeriodType,
 
@@ -280,15 +280,15 @@ pub struct ReverseLowSignal {
 	window: Window<ValueType>,
 }
 
-impl ReverseLowSignal {
-	/// Constructs new instanceof `ReverseLowSignal`
+impl LowerReversalSignal {
+	/// Constructs new instanceof `LowerReversalSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
 		Method::new((left, right), value)
 	}
 }
 
-impl Method for ReverseLowSignal {
+impl Method for LowerReversalSignal {
 	type Params = (PeriodType, PeriodType);
 	type Input = ValueType;
 	type Output = Action;
@@ -360,7 +360,7 @@ mod tests {
 		for i in 1..254 {
 			for j in 1..(254 - i) {
 				let input = (i as ValueType + 56.0) / 16.3251;
-				let mut method = ReverseLowSignal::new(i, j, input).unwrap();
+				let mut method = LowerReversalSignal::new(i, j, input).unwrap();
 
 				let output = method.next(input);
 				test_const(&mut method, input, output);
@@ -374,7 +374,7 @@ mod tests {
 		let v: Vec<ValueType> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
 		let r: Vec<i8> =  vec![ 0,   0,   0,   1,   0,   0,   0,   0,   1,   0,   0,   1,   0,   0,   0,   0,   1 ];
 
-		let mut pivot = ReverseLowSignal::new(2, 2, v[0]).unwrap();
+		let mut pivot = LowerReversalSignal::new(2, 2, v[0]).unwrap();
 
 		let r2: Vec<i8> = v.iter().map(|&x| pivot.next(x).analog()).collect();
 		assert_eq!(r, r2);
@@ -385,7 +385,7 @@ mod tests {
 		for i in 1..254 {
 			for j in 1..(254 - i) {
 				let input = (i as ValueType + 56.0) / 16.3251;
-				let mut method = ReverseHighSignal::new(i, j, input).unwrap();
+				let mut method = UpperReversalSignal::new(i, j, input).unwrap();
 
 				let output = method.next(input);
 				test_const(&mut method, input, output);
@@ -399,7 +399,7 @@ mod tests {
 		let v: Vec<ValueType> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
 		let r: Vec<i8> =  vec![ 0,   0,   0,   0,   0,   0,   1,   0,   0,   0,   0,   0,   0,   1,   0,   0,   0 ];
 
-		let mut pivot = ReverseHighSignal::new(2, 2, v[0]).unwrap();
+		let mut pivot = UpperReversalSignal::new(2, 2, v[0]).unwrap();
 
 		let r2: Vec<i8> = v.iter().map(|&x| pivot.next(x).analog()).collect();
 		assert_eq!(r, r2);

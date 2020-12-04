@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, PeriodType, Source, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::methods::{ReverseSignal, HMA};
+use crate::methods::{ReversalSignal, HMA};
 
 /// Hull Moving Average indicator
 ///
@@ -103,7 +103,7 @@ impl<T: OHLC> IndicatorInitializer<T> for HullMovingAverage {
 
 		Ok(Self::Instance {
 			hma: HMA::new(cfg.period, src)?,
-			pivot: ReverseSignal::new(cfg.left, cfg.right, src)?,
+			pivot: ReversalSignal::new(cfg.left, cfg.right, src)?,
 			cfg,
 		})
 	}
@@ -125,7 +125,7 @@ pub struct HullMovingAverageInstance {
 	cfg: HullMovingAverage,
 
 	hma: HMA,
-	pivot: ReverseSignal,
+	pivot: ReversalSignal,
 }
 
 impl<T: OHLC> IndicatorInstance<T> for HullMovingAverageInstance {

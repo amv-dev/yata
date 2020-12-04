@@ -77,8 +77,8 @@ pub use median_abs_dev::*;
 
 mod cross;
 pub use cross::*;
-mod reverse;
-pub use reverse::*;
+mod reversal;
+pub use reversal::*;
 mod highest_lowest;
 pub use highest_lowest::*;
 mod adi;

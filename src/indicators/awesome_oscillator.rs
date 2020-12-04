@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::core::{Error, Method, PeriodType, Source, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
-use crate::methods::{Cross, ReverseSignal};
+use crate::methods::{Cross, ReversalSignal};
 
 /// Awesome Oscillator
 ///
@@ -157,7 +157,7 @@ pub struct AwesomeOscillatorInstance {
 	ma1: RegularMethod,
 	ma2: RegularMethod,
 	cross_over: Cross,
-	reverse: ReverseSignal,
+	reverse: ReversalSignal,
 	low_peaks: u8,
 	high_peaks: u8,
 }

@@ -3,7 +3,7 @@ use crate::core::{
 	PeriodType, Source, OHLC,
 };
 use crate::helpers::{method, RegularMethod, RegularMethods};
-use crate::methods::{Change, Cross, ReverseSignal, TMA};
+use crate::methods::{Change, Cross, ReversalSignal, TMA};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -104,7 +104,7 @@ impl<T: OHLC> IndicatorInitializer<T> for Trix {
 				change: Change::new(1, src)?,
 				cross1: Cross::new((), (src, src))?,
 				cross2: Cross::new((), (src, src))?,
-				reverse: ReverseSignal::new(1, 1, 0.0)?,
+				reverse: ReversalSignal::new(1, 1, 0.0)?,
 
 				cfg: self,
 				// phantom: PhantomData::default(),
@@ -136,7 +136,7 @@ pub struct TRIXInstance {
 	change: Change,
 	cross1: Cross,
 	cross2: Cross,
-	reverse: ReverseSignal,
+	reverse: ReversalSignal,
 }
 
 impl<T: OHLC> IndicatorInstance<T> for TRIXInstance {

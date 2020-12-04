@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::methods::{CrossAbove, CrossUnder, ReverseSignal, WMA};
+use crate::methods::{CrossAbove, CrossUnder, ReversalSignal, WMA};
 
 /// Trend Strength Index
 ///
@@ -121,7 +121,7 @@ impl<T: OHLC> IndicatorInitializer<T> for TrendStrengthIndex {
 				wma: WMA::new(cfg.period, src)?,
 				cross_under: CrossUnder::new((), (0.0, cfg.zone))?,
 				cross_above: CrossAbove::new((), (0.0, -cfg.zone))?,
-				reverse: ReverseSignal::new(1, 2, 0.0)?,
+				reverse: ReversalSignal::new(1, 2, 0.0)?,
 				sy,
 
 				cfg,
@@ -155,7 +155,7 @@ pub struct TrendStrengthIndexInstance {
 	wma: WMA,
 	cross_under: CrossUnder,
 	cross_above: CrossAbove,
-	reverse: ReverseSignal,
+	reverse: ReversalSignal,
 	window: Window<ValueType>,
 }
 
