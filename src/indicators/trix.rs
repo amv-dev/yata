@@ -3,19 +3,57 @@ use crate::core::{
 	PeriodType, Source, ValueType, OHLC,
 };
 use crate::helpers::{method, RegularMethod, RegularMethods};
-use crate::methods::{Change, Cross, TMA};
+use crate::methods::{Change, Cross, TMA, ReverseSignal};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-// Как идея: сигнал на покупку/продажу при пересекании графиком определённой зоны
-// Такой сигнал не может служить как основной, но может служить как усиливающий
+/// TRIX (extended)
+/// 
+/// ## Links
+/// 
+/// * <https://en.wikipedia.org/wiki/Trix_(technical_analysis)>
+/// 
+/// # 2 values
+/// 
+/// * `main` value
+/// 
+/// Range is \(`-inf`; `+inf`\)
+/// 
+/// * `signal line` value
+/// 
+/// Range is \(`-inf`; `+inf`\)
+/// 
+/// # 3 signals
+/// 
+/// * When `main` value changes direction upwards, returns full buy signal.
+/// When `main` value changes direction downwards, returns full sell signal.
+/// Otherwise returns no signal.
+/// 
+/// * When `main` value crosses `signal line` value upwards, returns full buy signal.
+/// When `main` value crosses `signal line` value downwards, returns full sell signal.
+/// Otherwise returns no signal.
+/// 
+/// * When `main` value crosses zero line upwards, returns full buy signal.
+/// When `main` value crosses zero line downwards, returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Trix {
+	/// TRIX period. Default is `18`.
+	/// 
+	/// Range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
+
+	/// Signal line period. Default is `6`.
+	/// 
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
+
+	/// Signal line moving average method. Default is [`EMA`](crate::methods::EMA).
 	pub method2: RegularMethods,
+
+	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
@@ -49,7 +87,7 @@ impl IndicatorConfig for Trix {
 	}
 
 	fn size(&self) -> (u8, u8) {
-		(1, 3)
+		(2, 3)
 	}
 }
 
@@ -66,7 +104,7 @@ impl<T: OHLC> IndicatorInitializer<T> for Trix {
 				change: Change::new(1, src)?,
 				cross1: Cross::new((), (src, src))?,
 				cross2: Cross::new((), (src, src))?,
-				prev_value: 0.0,
+				reverse: ReverseSignal::new(1, 1, 0.0)?,
 
 				cfg: self,
 				// phantom: PhantomData::default(),
@@ -91,17 +129,14 @@ impl Default for Trix {
 // https://en.wikipedia.org/wiki/Trix_(technical_analysis)
 #[derive(Debug)]
 pub struct TRIXInstance {
-	// <T: OHLC> {
 	cfg: Trix,
 
 	tma: TMA,
 	sig: RegularMethod,
 	change: Change,
-	// pivot:       Option<ReverseSignal>,
 	cross1: Cross,
 	cross2: Cross,
-	prev_value: ValueType,
-	// phantom:    PhantomData<T>,
+	reverse: ReverseSignal,
 }
 
 impl<T: OHLC> IndicatorInstance<T> for TRIXInstance {
@@ -122,21 +157,14 @@ impl<T: OHLC> IndicatorInstance<T> for TRIXInstance {
 		let src = candle.source(self.cfg.source);
 		let tma = self.tma.next(src);
 		let value = self.change.next(tma);
-		// let signal1;
-		// if value > self.prev_value {
-		// 	signal1 = Action::BUY_ALL;
-		// } else if value < self.prev_value {
-		// 	signal1 = Action::SELL_ALL;
-		// } else {
-		// 	signal1 = Action::None;
-		// }
-		let signal1 = (value > self.prev_value) as i8 - (value < self.prev_value) as i8;
+		
+		let signal1 = self.reverse.next(value);
 
 		let sigline = self.sig.next(value);
 
 		let signal2 = self.cross1.next((value, sigline));
 		let signal3 = self.cross2.next((value, 0.));
 
-		IndicatorResult::new(&[value], &[signal1.into(), signal2, signal3])
+		IndicatorResult::new(&[value, sigline], &[signal1, signal2, signal3])
 	}
 }
