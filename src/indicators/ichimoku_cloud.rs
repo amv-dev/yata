@@ -65,35 +65,35 @@ impl IndicatorConfig for IchimokuCloud {
 		self.l1 < self.l2 && self.l2 < self.l3
 	}
 
-	fn set(&mut self, name: &str, value: String) -> Option<Error> {
+	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
 			"l1" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.l1 = value,
 			},
 			"l2" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.l2 = value,
 			},
 			"l3" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.l3 = value,
 			},
 			"m" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.m = value,
 			},
 			"source" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.source = value,
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value));
+				return Err(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
-		None
+		Ok(())
 	}
 
 	fn size(&self) -> (u8, u8) {

@@ -49,27 +49,27 @@ impl IndicatorConfig for BollingerBands {
 		self.sigma > 0.0 && self.avg_size > 2 && self.avg_size < PeriodType::MAX
 	}
 
-	fn set(&mut self, name: &str, value: String) -> Option<Error> {
+	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
 			"avg_size" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.avg_size = value,
 			},
 			"sigma" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.sigma = value,
 			},
 			"source" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.source = value,
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value));
+				return Err(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
-		None
+		Ok(())
 	}
 
 	fn size(&self) -> (u8, u8) {

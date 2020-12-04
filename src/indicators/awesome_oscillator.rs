@@ -67,39 +67,39 @@ impl IndicatorConfig for AwesomeOscillator {
 			&& self.left.saturating_add(self.right) < PeriodType::MAX
 	}
 
-	fn set(&mut self, name: &str, value: String) -> Option<Error> {
+	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
 			"period1" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period1 = value,
 			},
 			"period2" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period2 = value,
 			},
 			"method" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.method = value,
 			},
 			"source" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.source = value,
 			},
 			"left" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.left = value,
 			},
 			"right" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.right = value,
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value));
+				return Err(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
-		None
+		Ok(())
 	}
 
 	fn size(&self) -> (u8, u8) {

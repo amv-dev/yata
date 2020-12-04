@@ -14,8 +14,8 @@ pub trait IndicatorConfig: Clone {
 	/// Validates if **Configuration** is OK
 	fn validate(&self) -> bool;
 
-	/// Sets dynamically **Configuration** parameters
-	fn set(&mut self, name: &str, value: String) -> Option<Error>;
+	/// Dynamically sets **Configuration** parameters
+	fn set(&mut self, name: &str, value: String) -> Result<(), Error>;
 
 	/// Should return `true` if indicator uses *volume* data
 	fn is_volume_based(&self) -> bool {

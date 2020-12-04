@@ -54,35 +54,35 @@ impl IndicatorConfig for Envelopes {
 		self.k > 0.0 && self.period > 1
 	}
 
-	fn set(&mut self, name: &str, value: String) -> Option<Error> {
+	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
 			"period" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period = value,
 			},
 			"k" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.k = value,
 			},
 			"method" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.method = value,
 			},
 			"source" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.source = value,
 			},
 			"source2" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.source2 = value,
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value));
+				return Err(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
-		None
+		Ok(())
 	}
 
 	fn size(&self) -> (u8, u8) {

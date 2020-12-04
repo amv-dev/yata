@@ -64,31 +64,31 @@ impl IndicatorConfig for ChandeKrollStop {
 		self.x >= 0.0 && self.p > 0 && self.q > 0
 	}
 
-	fn set(&mut self, name: &str, value: String) -> Option<Error> {
+	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
 			"p" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.p = value,
 			},
 			"x" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.x = value,
 			},
 			"q" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.q = value,
 			},
 			"source" => match value.parse() {
-				Err(_) => return Some(Error::ParameterParse(name.to_string(), value.to_string())),
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.source = value,
 			},
 
 			_ => {
-				return Some(Error::ParameterParse(name.to_string(), value));
+				return Err(Error::ParameterParse(name.to_string(), value));
 			}
 		};
 
-		None
+		Ok(())
 	}
 
 	fn size(&self) -> (u8, u8) {
