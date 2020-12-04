@@ -3,12 +3,48 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, PeriodType, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
-use crate::methods::{CrossAbove, CrossUnder};
+use crate::methods::Cross;
 
+/// Money Flow Index
+///
+/// ## Links
+///
+/// * <https://en.wikipedia.org/wiki/Money_flow_index>
+///
+/// # 3 values
+///
+/// * `upper bound` const value
+///
+/// Range in \[`0.5`; `1.0`\]
+///
+/// * `MFI` value
+///
+/// Range in \[`0.0`; `1.0`\]
+///
+/// * `lower bound` const value
+///
+/// Range in \[`0.0`; `0.5`\]
+///
+/// # 2 signals
+///
+/// * When `MFI` value crosses `lower bound` downwards, returns full buy signal.
+/// When `MFI` value crosses `upper bound` upwards, returns full sell signal.
+/// Otherwise returns no signal.
+///
+/// * When `MFI` value crosses `lower bound` upwards, returns full buy signal.
+/// When `MFI` value crosses `upper bound` downwards, returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MoneyFlowIndex {
+	/// Main period size. Default is `14`.
+	///
+	/// Range is \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period: PeriodType,
+
+	/// Signal zone size. Default is `0.2`.
+	///
+	/// Range is \[`0.0`; `0.5`\]. Value `0.5` means that the `lower bound` is the same as the `upper bound`.
 	pub zone: ValueType,
 }
 
@@ -43,7 +79,7 @@ impl IndicatorConfig for MoneyFlowIndex {
 	}
 
 	fn size(&self) -> (u8, u8) {
-		(3, 1)
+		(3, 2)
 	}
 }
 
@@ -65,8 +101,8 @@ impl<T: OHLCV> IndicatorInitializer<T> for MoneyFlowIndex {
 			last_prev_candle: candle,
 			pmf: 0.,
 			nmf: 0.,
-			cross_under: CrossUnder::default(),
-			cross_above: CrossAbove::default(),
+			cross_lower: Cross::default(),
+			cross_upper: Cross::default(),
 			cfg,
 		})
 	}
@@ -90,22 +126,14 @@ pub struct MoneyFlowIndexInstance<T: OHLCV> {
 	last_prev_candle: T,
 	pmf: ValueType,
 	nmf: ValueType,
-	cross_under: CrossUnder,
-	cross_above: CrossAbove,
+	cross_lower: Cross,
+	cross_upper: Cross,
 }
 
 #[inline]
 fn tfunc<T: OHLCV>(candle: &T, last_candle: &T) -> (ValueType, ValueType) {
 	let tp1 = candle.tp();
 	let tp2 = last_candle.tp();
-
-	// if tp1 < tp2 {
-	// 	(0., tp1 * candle.volume())
-	// } else if tp1 > tp2 {
-	// 	(tp1 * candle.volume(), 0.)
-	// } else {
-	// 	(0., 0.)
-	// }
 
 	(
 		(tp1 > tp2) as i8 as ValueType * candle.volume(),
@@ -140,14 +168,18 @@ impl<T: OHLCV> IndicatorInstance<T> for MoneyFlowIndexInstance<T> {
 
 		let value = 1. - (1. + mfr).recip();
 
-		let upper = self.cfg.zone;
-		let lower = 1. - self.cfg.zone;
+		let upper = 1. - self.cfg.zone;
+		let lower = self.cfg.zone;
 
-		let cross_under = self.cross_under.next((value, self.cfg.zone));
-		let cross_above = self.cross_above.next((value, 1. - self.cfg.zone));
+		let cross_upper: i8 = self.cross_upper.next((value, upper)).into();
+		let cross_lower: i8 = self.cross_lower.next((value, lower)).into();
 
-		let signal = cross_under - cross_above;
+		let enters_zone = (cross_lower < 0) as i8 - (cross_upper > 0) as i8;
+		let leaves_zone = (cross_lower > 0) as i8 - (cross_upper < 0) as i8;
 
-		IndicatorResult::new(&[upper, value, lower], &[signal])
+		IndicatorResult::new(
+			&[upper, value, lower],
+			&[enters_zone.into(), leaves_zone.into()],
+		)
 	}
 }
