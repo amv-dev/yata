@@ -5,11 +5,37 @@ use crate::core::{Action, Error, Method, PeriodType, Source, OHLC};
 use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
 use crate::methods::Momentum;
 
+/// Momentum Index
+///
+/// # 2 values
+///
+/// * `slow momentum` value
+///
+/// Range in \(`-inf`; `+inf`\)
+///
+/// * `fast momentum` value
+///
+/// Range in \(`-inf`; `+inf`\)
+///
+/// # 1 signal
+///
+/// * When both momentums are positive, returns full buy signal.
+/// When both momentums are negative, returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MomentumIndex {
+	/// Slow momentum period. Default is `10`.
+	///
+	/// Range in \(`period2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
+
+	/// Fast momentum period. Default is `1`.
+	///
+	/// Range in \[`1`; `period1`\)
 	pub period2: PeriodType,
+
+	/// Source value type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
