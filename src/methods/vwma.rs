@@ -57,7 +57,7 @@ impl Method for VWMA {
 	type Input = (ValueType, ValueType);
 	type Output = ValueType;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
@@ -69,7 +69,7 @@ impl Method for VWMA {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, &value: &Self::Input) -> Self::Output {
 		let past_value = self.window.push(value);
 
 		self.vol_sum += value.1 - past_value.1;
@@ -91,10 +91,10 @@ mod tests {
 	fn test_vwma_const() {
 		for i in 1..255 {
 			let input = ((i as ValueType + 56.0) / 16.3251, 3.55);
-			let mut method = TestingMethod::new(i, input).unwrap();
+			let mut method = TestingMethod::new(i, &input).unwrap();
 
-			let output = method.next(input);
-			test_const(&mut method, input, output);
+			let output = method.next(&input);
+			test_const(&mut method, &input, output);
 		}
 	}
 
@@ -103,10 +103,10 @@ mod tests {
 		let mut candles = RandomCandles::default();
 
 		let mut ma =
-			TestingMethod::new(1, (candles.first().close, candles.first().volume)).unwrap();
+			TestingMethod::new(1, &(candles.first().close, candles.first().volume)).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next((x.close, x.volume)));
+			assert_eq_float(x.close, ma.next(&(x.close, x.volume)));
 		});
 	}
 
@@ -118,7 +118,7 @@ mod tests {
 			candles.take(300).map(|x| (x.close, x.volume)).collect();
 
 		(1..255).for_each(|ma_length| {
-			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
+			let mut ma = TestingMethod::new(ma_length, &src[0]).unwrap();
 			let ma_length = ma_length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {
@@ -134,7 +134,7 @@ mod tests {
 
 				let value2 = sum / vol_sum;
 
-				assert_eq_float(value2, ma.next(x));
+				assert_eq_float(value2, ma.next(&x));
 			});
 		});
 	}

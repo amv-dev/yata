@@ -58,7 +58,7 @@ impl Method for LinearVolatility {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
@@ -70,7 +70,7 @@ impl Method for LinearVolatility {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, &value: &Self::Input) -> Self::Output {
 		let derivative = (value - self.prev_value).abs();
 		self.prev_value = value;
 
@@ -94,9 +94,9 @@ mod tests {
 	fn test_volatility_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input).unwrap();
+			let mut method = TestingMethod::new(i, &input).unwrap();
 
-			test_const(&mut method, input, 0.0);
+			test_const(&mut method, &input, 0.0);
 		}
 	}
 
@@ -104,12 +104,12 @@ mod tests {
 	fn test_volatility1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
-		let mut der = Derivative::new(1, candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut der = Derivative::new(1, &candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			let v1 = der.next(x.close).abs();
-			let v2 = ma.next(x.close);
+			let v1 = der.next(&x.close).abs();
+			let v2 = ma.next(&x.close);
 
 			assert_eq_float(v1, v2);
 		});
@@ -122,10 +122,10 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|ma_length| {
-			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
+			let mut ma = TestingMethod::new(ma_length, &src[0]).unwrap();
 			let ma_length = ma_length as usize;
 
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().enumerate().for_each(|(i, x)| {
 				let mut s = 0.;
 				for j in 0..ma_length {
 					let d = src[i.saturating_sub(j)] - src[i.saturating_sub(j + 1)];

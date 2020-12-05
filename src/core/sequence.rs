@@ -54,7 +54,7 @@ impl<T: Copy> Sequence<T> {
 	/// ```
 	pub fn apply<P>(&mut self, method: &mut dyn Method<Params = P, Input = T, Output = T>) {
 		self.iter_mut().for_each(|x| {
-			*x = method.next(*x);
+			*x = method.next(x);
 		});
 	}
 
@@ -63,7 +63,7 @@ impl<T: Copy> Sequence<T> {
 		&self,
 		method: &mut dyn Method<Params = P, Input = T, Output = O>,
 	) -> Sequence<O> {
-		self.iter().map(|&x| method.next(x)).collect()
+		self.iter().map(|x| method.next(x)).collect()
 	}
 }
 

@@ -1,5 +1,5 @@
 use super::{Sequence, Source, ValueType};
-use std::fmt::Debug;
+// use std::fmt::Debug;
 
 /// Basic trait for implementing [Open-High-Low-Close timeseries data](https://en.wikipedia.org/wiki/Candlestick_chart).
 ///
@@ -15,7 +15,7 @@ use std::fmt::Debug;
 /// ```
 ///
 /// See also [Candle](crate::prelude::Candle).
-pub trait OHLC: Copy + Debug + Default {
+pub trait OHLC {
 	/// Should return an *open* value of the period
 	fn open(&self) -> ValueType;
 
@@ -142,7 +142,7 @@ pub trait OHLC: Copy + Debug + Default {
 	/// assert_eq!(tr, 70.);
 	/// ```
 	#[inline]
-	fn tr(&self, prev_candle: &Self) -> ValueType {
+	fn tr(&self, prev_candle: &dyn OHLC) -> ValueType {
 		// Original formula
 
 		// let (a, b, c) = (
@@ -280,7 +280,7 @@ pub trait OHLCV: OHLC {
 	}
 }
 
-impl<T: OHLC> Sequence<T> {
+impl<T: OHLC + Copy> Sequence<T> {
 	/// Validates a whole sequence
 	///
 	/// Returns `true` if every candle validates OK

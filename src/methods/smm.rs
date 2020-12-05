@@ -120,7 +120,7 @@ impl Method for SMM {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
 		if !value.is_finite() {
 			return Err(Error::InvalidCandles);
 		}
@@ -142,7 +142,7 @@ impl Method for SMM {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, &value: &Self::Input) -> Self::Output {
 		assert!(
 			value.is_finite(),
 			"SMM method cannot operate with NAN values"
@@ -205,10 +205,10 @@ mod tests {
 	fn test_smm_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input).unwrap();
+			let mut method = TestingMethod::new(i, &input).unwrap();
 
-			let output = method.next(input);
-			test_const(&mut method, input, output);
+			let output = method.next(&input);
+			test_const(&mut method, &input, output);
 		}
 	}
 
@@ -216,10 +216,10 @@ mod tests {
 	fn test_smm1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(x.close));
+			assert_eq_float(x.close, ma.next(&x.close));
 		});
 	}
 
@@ -230,10 +230,10 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|ma_length| {
-			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
+			let mut ma = TestingMethod::new(ma_length, &src[0]).unwrap();
 			let ma_length = ma_length as usize;
 
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().enumerate().for_each(|(i, x)| {
 				let value = ma.next(x);
 				let slice_from = i.saturating_sub(ma_length - 1);
 				let slice_to = i;

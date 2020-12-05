@@ -58,7 +58,7 @@ impl Method for StDev {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: &Self::Input) -> Result<Self, Error> {
 		match length {
 			0 | 1 => Err(Error::WrongMethodParameters),
 			length => {
@@ -70,7 +70,7 @@ impl Method for StDev {
 					val_sum,
 					sq_val_sum: value * val_sum,
 					k,
-					window: Window::new(length, value),
+					window: Window::new(length, *value),
 					ma: SMA::new(length, value)?,
 				})
 			}
@@ -78,8 +78,8 @@ impl Method for StDev {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
-		let prev_value = self.window.push(value);
+	fn next(&mut self, value: &Self::Input) -> Self::Output {
+		let prev_value = self.window.push(*value);
 		self.sq_val_sum += value * value - prev_value * prev_value;
 		self.val_sum += value - prev_value;
 		let ma_value = self.ma.next(value);
@@ -102,7 +102,7 @@ mod tests {
 	#[test]
 	fn test_st_dev_const() {
 		for i in 2..255 {
-			let input = (i as ValueType + 56.0) / 16.3251;
+			let input = &((i as ValueType + 56.0) / 16.3251);
 			let mut method = TestingMethod::new(i, input).unwrap();
 
 			test_const_float(&mut method, input, 0.0);
@@ -120,10 +120,10 @@ mod tests {
 			.collect();
 
 		(2..255).for_each(|ma_length| {
-			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
+			let mut ma = TestingMethod::new(ma_length, &src[0]).unwrap();
 			let ma_length = ma_length as usize;
 
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().enumerate().for_each(|(i, x)| {
 				let mut avg = 0.;
 				for j in 0..ma_length {
 					avg += src[i.saturating_sub(j)] / ma_length as ValueType;

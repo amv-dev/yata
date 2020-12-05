@@ -1,6 +1,5 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window, OHLCV};
-use std::marker::PhantomData;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -75,27 +74,26 @@ use serde::{Deserialize, Serialize};
 /// [`CLV`]: crate::core::OHLC::clv
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct ADI<T: OHLCV> {
+pub struct ADI {
 	length: PeriodType,
 	cmf_sum: ValueType,
 	window: Window<ValueType>,
-	phantom: PhantomData<T>,
 }
 
-impl<T: OHLCV> ADI<T> {
+impl ADI {
 	/// Returns last calculated value
 	#[must_use]
-	pub fn get_value(&self) -> ValueType {
+	pub const fn get_value(&self) -> ValueType {
 		self.cmf_sum
 	}
 }
 
-impl<T: OHLCV> Method for ADI<T> {
+impl<'a> Method for ADI {
 	type Params = PeriodType;
-	type Input = T;
+	type Input = dyn OHLCV;
 	type Output = ValueType;
 
-	fn new(length: Self::Params, candle: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, candle: &Self::Input) -> Result<Self, Error> {
 		let mut cmf_sum = 0.0;
 		let window = if length > 0 {
 			let clvv = candle.clv() * candle.volume();
@@ -110,12 +108,11 @@ impl<T: OHLCV> Method for ADI<T> {
 
 			cmf_sum,
 			window,
-			phantom: PhantomData::default(),
 		})
 	}
 
 	#[inline]
-	fn next(&mut self, candle: Self::Input) -> Self::Output {
+	fn next(&mut self, candle: &Self::Input) -> Self::Output {
 		let clvv = candle.clv() * candle.volume();
 		self.cmf_sum += clvv;
 
@@ -130,14 +127,15 @@ impl<T: OHLCV> Method for ADI<T> {
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]
 mod tests {
+	use super::ADI;
+	use crate::core::{OHLC, OHLCV};
 	use crate::helpers::{assert_eq_float, assert_neq_float};
+	use crate::core::{Candle, Method};
+	use crate::methods::tests::test_const;
+	use crate::helpers::RandomCandles;
 
 	#[test]
 	fn test_adi_const() {
-		use super::ADI;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		let candle = Candle {
 			open: 121.0,
 			high: 133.0,
@@ -147,20 +145,16 @@ mod tests {
 		};
 
 		for i in 1..30 {
-			let mut adi = ADI::new(i, candle).unwrap();
-			let output = adi.next(candle);
+			let mut adi = ADI::new(i, &candle).unwrap();
+			let output = adi.next(&candle);
 
-			test_const(&mut adi, candle, output);
+			test_const(&mut adi, &candle, output);
 		}
 	}
 
 	#[test]
 	#[should_panic]
 	fn test_adi_windowless_const() {
-		use super::ADI;
-		use crate::core::{Candle, Method};
-		use crate::methods::tests::test_const;
-
 		let candle = Candle {
 			open: 121.0,
 			high: 133.0,
@@ -169,52 +163,44 @@ mod tests {
 			volume: 531.0,
 		};
 
-		let mut adi = ADI::new(0, candle).unwrap();
-		let output = adi.next(candle);
+		let mut adi = ADI::new(0, &candle).unwrap();
+		let output = adi.next(&candle);
 
-		test_const(&mut adi, candle, output);
+		test_const(&mut adi, &candle, output);
 	}
 
 	#[test]
 	fn test_adi() {
-		use crate::core::Method as _;
-		use crate::core::{OHLC, OHLCV};
-		use crate::helpers::RandomCandles;
-		use crate::methods::ADI;
-
 		let mut candles = RandomCandles::default();
-		let mut adi = ADI::new(0, candles.first()).unwrap();
+		let mut adi = ADI::new(0, &candles.first()).unwrap();
 
 		candles.take(100).fold(0., |s, candle| {
-			assert_eq_float(adi.next(candle), s + candle.clv() * candle.volume());
+			assert_eq_float(adi.next(&candle), s + candle.clv() * candle.volume());
 			s + candle.clv() * candle.volume()
 		});
 	}
 
 	#[test]
 	fn test_adi_windowed() {
-		use crate::core::Method as _;
-		use crate::helpers::RandomCandles;
-		use crate::methods::ADI;
-
 		let mut candles = RandomCandles::default();
-		let mut adi = ADI::new(0, candles.first()).unwrap();
+		let first = candles.first();
+		let mut adi = ADI::new(0, &first).unwrap();
 		let mut adiw = [
-			ADI::new(1, candles.first()).unwrap(),
-			ADI::new(2, candles.first()).unwrap(),
-			ADI::new(3, candles.first()).unwrap(),
-			ADI::new(4, candles.first()).unwrap(),
-			ADI::new(5, candles.first()).unwrap(),
+			ADI::new(1, &first).unwrap(),
+			ADI::new(2, &first).unwrap(),
+			ADI::new(3, &first).unwrap(),
+			ADI::new(4, &first).unwrap(),
+			ADI::new(5, &first).unwrap(),
 		];
 
 		candles
 			.take(adiw.len())
 			.enumerate()
 			.for_each(|(i, candle)| {
-				let v1 = adi.next(candle);
+				let v1 = adi.next(&candle);
 
 				adiw.iter_mut().enumerate().for_each(|(j, adiw)| {
-					let v2 = adiw.next(candle);
+					let v2 = adiw.next(&candle);
 					if i == j {
 						assert_eq_float(v1, v2);
 					} else {

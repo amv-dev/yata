@@ -44,7 +44,7 @@ impl Method for LinReg {
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
 		match length {
 			0 | 1 => Err(Error::WrongMethodParameters),
 			length => {
@@ -74,7 +74,7 @@ impl Method for LinReg {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, &value: &Self::Input) -> Self::Output {
 		let past_value = self.window.push(value);
 
 		self.s_xy += past_value.mul_add(self.float_length, self.s_y);
@@ -97,7 +97,7 @@ mod tests {
 	#[test]
 	fn test_lin_reg_const() {
 		for i in 2..255 {
-			let input = (i as ValueType + 56.0) / 16.3251;
+			let input = &((i as ValueType + 56.0) / 16.3251);
 			let mut method = TestingMethod::new(i, input).unwrap();
 
 			let output = method.next(input);
@@ -114,7 +114,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(2..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
 			let length = length as usize;
 
 			let n = length as ValueType;
@@ -124,7 +124,7 @@ mod tests {
 			let s_x = s_x as ValueType;
 			let s_x2 = s_x2 as ValueType;
 
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().enumerate().for_each(|(i, x)| {
 				let ma_value = ma.next(x);
 
 				let s_xy =

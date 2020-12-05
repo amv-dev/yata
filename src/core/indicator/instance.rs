@@ -2,7 +2,7 @@ use super::{IndicatorConfig, IndicatorResult};
 use crate::core::OHLC;
 
 /// Base trait for implementing indicators **State**
-pub trait IndicatorInstance<T: OHLC> {
+pub trait IndicatorInstance {
 	// type Config: IndicatorConfig + IndicatorInitializer<T>;
 	/// Type of Indicator **Configuration**
 	type Config: IndicatorConfig;
@@ -13,9 +13,7 @@ pub trait IndicatorInstance<T: OHLC> {
 	// fn config(&self) -> &dyn IndicatorConfig<T>;
 
 	/// Preceed given candle and returns [`IndicatorResult`](crate::core::IndicatorResult)
-	fn next(&mut self, candle: T) -> IndicatorResult
-	where
-		Self: Sized;
+	fn next(&mut self, candle: &dyn OHLC) -> IndicatorResult;
 
 	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`s.
 	/// ```
@@ -31,11 +29,11 @@ pub trait IndicatorInstance<T: OHLC> {
 	/// println!("{:?}", results);
 	/// ```
 	#[inline]
-	fn over(&mut self, candles: &[T]) -> Vec<IndicatorResult>
+	fn over<T: OHLC>(&mut self, candles: &[T]) -> Vec<IndicatorResult>
 	where
 		Self: Sized,
 	{
-		candles.iter().map(|&x| self.next(x)).collect()
+		candles.iter().map(|x| self.next(x)).collect()
 	}
 
 	/// Returns true if indicator is using volume data
@@ -61,23 +59,3 @@ pub trait IndicatorInstance<T: OHLC> {
 		self.config().name()
 	}
 }
-
-// pub trait IndicatorInstanceDyn<T: OHLC>: Debug {
-// 	fn config(&self) -> &dyn IndicatorConfigDyn<T>;
-
-// 	fn next(&mut self, candle: T) -> IndicatorResult;
-
-// 	fn name(&self) -> &str {
-// 		let parts = std::any::type_name::<Self>().split("::");
-// 		parts.last().unwrap_or_default()
-// 	}
-
-// 	fn is_volume_based(&self) -> bool { false }
-
-// 	#[inline]
-// 	fn over(&mut self, candles: &Sequence<T>) -> Vec<IndicatorResult> {
-// 		candles.iter().map(|&x| self.next(x)).collect()
-// 	}
-
-// 	fn size(&self) -> (u8, u8);
-// }

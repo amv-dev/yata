@@ -1,4 +1,6 @@
-use super::{Error, Sequence};
+// use super::{Error, Sequence};
+use super::Error;
+
 use std::fmt;
 
 /// Trait for creating methods for timeseries
@@ -52,17 +54,17 @@ pub trait Method: fmt::Debug {
 	/// Method parameters
 	type Params;
 	/// Input value type
-	type Input: Copy;
+	type Input: ?Sized;
 	/// Output value type
 	type Output: Copy; // = Self::Input;
 
 	/// Static method for creating an instance of the method with given `parameters` and initial `value` (simply first input value)
-	fn new(parameters: Self::Params, initial_value: Self::Input) -> Result<Self, Error>
+	fn new(parameters: Self::Params, initial_value: &Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized;
 
 	/// Generates next output value based on the given input `value`
-	fn next(&mut self, value: Self::Input) -> Self::Output;
+	fn next(&mut self, value: &Self::Input) -> Self::Output;
 
 	/// Returns a name of the method
 	fn name(&self) -> &str {
@@ -78,69 +80,69 @@ pub trait Method: fmt::Debug {
 		(std::mem::size_of::<Self>(), std::mem::align_of::<Self>())
 	}
 
-	/// Creates an `iterator` which produces values by the `Method` over given input data `Iterator`
-	fn iter_data<I>(&mut self, input: I) -> MethodOverIterator<Self, I>
-	where
-		I: Iterator<Item = Self::Input>,
-		Self: Sized,
-	{
-		MethodOverIterator::new(self, input)
-	}
+	// /// Creates an `iterator` which produces values by the `Method` over given input data `Iterator`
+	// fn iter_data<'a, I>(&'a mut self, input: I) -> MethodOverIterator<Self, I>
+	// where
+	// 	I: Iterator<Item = &'a Self::Input>,
+	// 	Self: Sized,
+	// {
+	// 	MethodOverIterator::new(self, input)
+	// }
 
-	/// Iterates the `Method` over the given `Iterator` and returns timeserie of output values
-	///
-	/// # Guarantees
-	///
-	/// The length of an output `Sequence` is always equal to the length of input one
-	/// ```
-	/// use yata::methods::SMA;
-	/// use yata::prelude::*;
-	///
-	/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
-	/// let mut ma = SMA::new(5, s[0]).unwrap();
-	///
-	/// let result = ma.over(s.iter().copied());
-	/// assert_eq!(result.len(), s.len());
-	/// ```
-	///
-	/// ```
-	/// use yata::methods::SMA;
-	/// use yata::prelude::*;
-	///
-	/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
-	/// let mut ma = SMA::new(100, s[0]).unwrap();
-	///
-	/// let result = ma.over(s.iter().copied());
-	/// assert_eq!(result.len(), s.len());
-	/// ```
-	#[inline]
-	fn over<I>(&mut self, sequence: I) -> Sequence<Self::Output>
-	where
-		I: Iterator<Item = Self::Input>,
-		Self: Sized,
-	{
-		sequence.map(|x| self.next(x)).collect()
-	}
+	// /// Iterates the `Method` over the given `Iterator` and returns timeserie of output values
+	// ///
+	// /// # Guarantees
+	// ///
+	// /// The length of an output `Sequence` is always equal to the length of input one
+	// /// ```
+	// /// use yata::methods::SMA;
+	// /// use yata::prelude::*;
+	// ///
+	// /// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
+	// /// let mut ma = SMA::new(5, s[0]).unwrap();
+	// ///
+	// /// let result = ma.over(s.iter().copied());
+	// /// assert_eq!(result.len(), s.len());
+	// /// ```
+	// ///
+	// /// ```
+	// /// use yata::methods::SMA;
+	// /// use yata::prelude::*;
+	// ///
+	// /// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
+	// /// let mut ma = SMA::new(100, s[0]).unwrap();
+	// ///
+	// /// let result = ma.over(s.iter().copied());
+	// /// assert_eq!(result.len(), s.len());
+	// /// ```
+	// #[inline]
+	// fn over<I>(&mut self, sequence: I) -> Sequence<Self::Output>
+	// where
+	// 	I: Iterator<Item = Self::Input>,
+	// 	Self: Sized,
+	// {
+	// 	sequence.map(|x| self.next(x)).collect()
+	// }
 }
 
-#[derive(Debug)]
-pub struct MethodOverIterator<'a, T: Method, I: Iterator<Item = T::Input>> {
-	method: &'a mut T,
-	over: I,
-}
+// #[derive(Debug)]
+// pub struct MethodOverIterator<'a, T: Method, I: Iterator<Item = T::Input>> {
+// 	method: &'a mut T,
+// 	over: I,
+// }
 
-impl<'a, T: Method, I: Iterator<Item = T::Input>> MethodOverIterator<'a, T, I> {
-	pub fn new(method: &'a mut T, over: I) -> Self {
-		Self { method, over }
-	}
-}
+// impl<'a, T: Method, I: Iterator<Item = T::Input>> MethodOverIterator<'a, T, I> {
+// 	pub fn new(method: &'a mut T, over: I) -> Self {
+// 		Self { method, over }
+// 	}
+// }
 
-impl<'a, T: Method, I: Iterator<Item = T::Input>> Iterator for MethodOverIterator<'a, T, I> {
-	type Item = T::Output;
+// impl<'a, T: Method, I: Iterator<Item = &'a T::Input>> Iterator for MethodOverIterator<'a, T, I> {
+// 	type Item = T::Output;
 
-	fn next(&mut self) -> Option<Self::Item> {
-		let input = self.over.next()?;
-		let output = self.method.next(input);
-		Some(output)
-	}
-}
+// 	fn next(&'a mut self) -> Option<Self::Item> {
+// 		let input = self.over.next()?;
+// 		let output = self.method.next(&input);
+// 		Some(output)
+// 	}
+// }

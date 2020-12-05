@@ -2,9 +2,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, PeriodType, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{Cross, HighestIndex, LowestIndex};
-use std::marker::PhantomData;
 
 // https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/aroon-indicator
 // Aroon-Up = [(Period Specified – Periods Since the Highest High within Period Specified) / Period Specified]
@@ -55,7 +54,26 @@ pub struct Aroon {
 }
 
 impl IndicatorConfig for Aroon {
+	type Instance = AroonInstance;
+
 	const NAME: &'static str = "Aroon";
+
+	fn init(self, candle: &dyn OHLC) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+
+		Ok(Self::Instance {
+			lowest_index: LowestIndex::new(cfg.period, &candle.low())?,
+			highest_index: HighestIndex::new(cfg.period, &candle.high())?,
+			cross: Cross::default(),
+			uptrend: 0,
+			downtrend: 0,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.signal_zone >= 0.0
@@ -94,31 +112,6 @@ impl IndicatorConfig for Aroon {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for Aroon {
-	type Instance = AroonInstance<T>;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-
-		Ok(Self::Instance {
-			lowest_index: LowestIndex::new(cfg.period, candle.low())?,
-			highest_index: HighestIndex::new(cfg.period, candle.high())?,
-			cross: Cross::default(),
-			uptrend: 0,
-			downtrend: 0,
-			cfg,
-			phantom: PhantomData::default(),
-		})
-	}
-}
-
 impl Default for Aroon {
 	fn default() -> Self {
 		Self {
@@ -131,26 +124,25 @@ impl Default for Aroon {
 
 /// Aroon state structure
 #[derive(Debug)]
-pub struct AroonInstance<T: OHLC> {
+pub struct AroonInstance {
 	cfg: Aroon,
 	lowest_index: LowestIndex,
 	highest_index: HighestIndex,
 	cross: Cross,
-	phantom: PhantomData<T>,
 	uptrend: isize,
 	downtrend: isize,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for AroonInstance<T> {
+impl IndicatorInstance for AroonInstance {
 	type Config = Aroon;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
-		let highest_index = self.highest_index.next(candle.high());
-		let lowest_index = self.lowest_index.next(candle.low());
+	fn next(&mut self, candle: &dyn OHLC) -> IndicatorResult {
+		let highest_index = self.highest_index.next(&candle.high());
+		let lowest_index = self.lowest_index.next(&candle.low());
 
 		let aroon_up =
 			(self.cfg.period - highest_index) as ValueType / self.cfg.period as ValueType;
@@ -158,7 +150,7 @@ impl<T: OHLC> IndicatorInstance<T> for AroonInstance<T> {
 		let aroon_down =
 			(self.cfg.period - lowest_index) as ValueType / self.cfg.period as ValueType;
 
-		let trend_signal = self.cross.next((aroon_up, aroon_down));
+		let trend_signal = self.cross.next(&(aroon_up, aroon_down));
 		let edge_signal = (highest_index == 0) as i8 - (lowest_index == 0) as i8;
 
 		let is_up_over = (aroon_up >= (1.0 - self.cfg.signal_zone)) as isize;
