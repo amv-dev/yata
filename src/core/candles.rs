@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::str::FromStr;
 
-use crate::core::{Error, Sequence, ValueType, OHLCV};
+use crate::core::{Error, ValueType, OHLCV};
 
 /// Source enum represents common parts of a *Candle*
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
@@ -198,9 +198,6 @@ impl PartialEq for Candle {
 }
 
 impl Eq for Candle {}
-
-/// Just an alias for the Sequence of any `T`
-pub type Candles<T> = Sequence<T>;
 
 #[cfg(test)]
 mod tests {

@@ -44,19 +44,20 @@ pub trait IndicatorConfig {
 	/// let results = trix.over(&candles).unwrap();
 	/// println!("{:?}", results);
 	/// ```
-	fn eval<T: OHLCV>(self, over_slice: &[T]) -> Result<Vec<IndicatorResult>, Error>
+	fn over<T, S>(self, inputs: S) -> Result<Vec<IndicatorResult>, Error>
 	where
+		T: OHLCV,
+		S: AsRef<[T]>,
 		Self: Sized,
 	{
-		if over_slice.is_empty() {
+		let inputs_ref = inputs.as_ref();
+
+		if inputs_ref.is_empty() {
 			return Ok(Vec::new());
 		}
 
-		let first_element = &over_slice[0];
-		let mut state = self.init(first_element)?;
+		let mut state = self.init(&inputs_ref[0])?;
 
-		let result = over_slice.iter().map(|x| state.next(x)).collect();
-
-		Ok(result)
+		Ok(state.over(inputs))
 	}
 }

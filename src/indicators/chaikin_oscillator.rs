@@ -57,8 +57,8 @@ impl IndicatorConfig for ChaikinOscillator {
 		let adi = ADI::new(cfg.window, c)?;
 
 		Ok(Self::Instance {
-			ma1: method(cfg.method, cfg.period1, adi.get_value())?,
-			ma2: method(cfg.method, cfg.period2, adi.get_value())?,
+			ma1: method(cfg.method, cfg.period1, &adi.get_value())?,
+			ma2: method(cfg.method, cfg.period2, &adi.get_value())?,
 			adi,
 			cross_over: Cross::default(),
 			cfg,

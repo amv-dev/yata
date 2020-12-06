@@ -1,4 +1,4 @@
-use super::{Sequence, Source, ValueType};
+use super::{Source, ValueType};
 // use std::fmt::Debug;
 
 /// Basic trait for implementing [Open-High-Low-Close-Volume timeseries data](https://en.wikipedia.org/wiki/Candlestick_chart).
@@ -244,14 +244,14 @@ pub trait OHLCV: 'static {
 	}
 }
 
-impl<T: OHLCV + Copy> Sequence<T> {
-	/// Validates a whole sequence
-	///
-	/// Returns `true` if every candle validates OK
-	pub fn validate(&self) -> bool {
-		self.iter().all(T::validate)
-	}
-}
+// impl<T: OHLCV + Copy> Sequence<T> {
+// 	/// Validates a whole sequence
+// 	///
+// 	/// Returns `true` if every candle validates OK
+// 	pub fn validate(&self) -> bool {
+// 		self.iter().all(T::validate)
+// 	}
+// }
 
 impl OHLCV for (ValueType, ValueType, ValueType, ValueType, ValueType) {
 	#[inline]

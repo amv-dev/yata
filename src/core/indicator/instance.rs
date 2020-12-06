@@ -18,7 +18,8 @@ pub trait IndicatorInstance {
 	// fn config(&self) -> &dyn IndicatorConfig<T>;
 
 	/// Preceed given candle and returns [`IndicatorResult`](crate::core::IndicatorResult)
-	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult;
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult
+	where Self: Sized;
 
 	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`s.
 	/// ```
@@ -34,11 +35,14 @@ pub trait IndicatorInstance {
 	/// println!("{:?}", results);
 	/// ```
 	#[inline]
-	fn over<T: OHLCV>(&mut self, candles: &[T]) -> Vec<IndicatorResult>
+	fn over<T, S>(&mut self, inputs: S) -> Vec<IndicatorResult>
 	where
+		T: OHLCV,
+		S: AsRef<[T]>,
 		Self: Sized,
 	{
-		candles.iter().map(|x| self.next(x)).collect()
+		let inputs_ref = inputs.as_ref();
+		inputs_ref.iter().map(|x| self.next(x)).collect()
 	}
 
 	/// Returns count of indicator's raw values and count of indicator's signals.

@@ -1,4 +1,4 @@
-use super::{Error, Sequence};
+use super::Error;
 // use super::Error;
 
 use std::fmt;
@@ -52,7 +52,7 @@ use std::fmt;
 /// There is no `reset` method on the trait. If you need reset a state of the `Method` instance, you should just create a new one.
 pub trait Method: fmt::Debug {
 	/// Method parameters
-	type Params: ?Sized;
+	type Params;
 	/// Input value type
 	type Input: ?Sized;
 	/// Output value type
@@ -80,11 +80,11 @@ pub trait Method: fmt::Debug {
 		(std::mem::size_of::<Self>(), std::mem::align_of::<Self>())
 	}
 
-	/// Iterates the `Method` over the given `Iterator` and returns timeserie of output values
+	/// Iterates the `Method` over the given `inputs` slice and returns `Vec` of output values.
 	///
 	/// # Guarantees
 	///
-	/// The length of an output `Sequence` is always equal to the length of input one
+	/// The length of an output `Vec` is always equal to the length of an `inputs` slice.
 	/// ```
 	/// use yata::methods::SMA;
 	/// use yata::prelude::*;
@@ -107,7 +107,32 @@ pub trait Method: fmt::Debug {
 	/// assert_eq!(result.len(), s.len());
 	/// ```
 	#[inline]
-	fn over(&mut self, sequence: &mut dyn Iterator<Item = &Self::Input>) -> Sequence<Self::Output> {
-		sequence.map(|x| self.next(x)).collect()
+	fn over<S: AsRef<[Self::Input]>>(&mut self, inputs: S) -> Vec<Self::Output> 
+	where 
+		Self::Input: Sized,
+		Self: Sized
+	{
+		inputs.as_ref().iter().map(|x| self.next(x)).collect()
+	}
+
+	/// Creates new `Method` instance and iterates it over the given `inputs` slice and returns `Vec` of output values.
+	///
+	/// # Guarantees
+	///
+	/// The length of an output `Vec` is always equal to the length of an `inputs` slice.
+	fn new_over<S: AsRef<[Self::Input]>>(parameters: Self::Params, inputs: S) -> Result<Vec<Self::Output>, Error>
+	where 
+		Self::Input: Sized,
+		Self: Sized
+	{
+		let inputs_ref = inputs.as_ref();
+
+		if inputs_ref.is_empty() {
+			return Ok(Vec::new());
+		}
+
+		let mut method = Self::new(parameters, &inputs_ref[0])?;
+
+		Ok(method.over(inputs))
 	}
 }
