@@ -88,7 +88,7 @@ impl ADI {
 	}
 }
 
-impl<'a> Method for ADI {
+impl Method for ADI {
 	type Params = PeriodType;
 	type Input = dyn OHLCV;
 	type Output = ValueType;
@@ -128,11 +128,11 @@ impl<'a> Method for ADI {
 #[allow(clippy::suboptimal_flops)]
 mod tests {
 	use super::ADI;
-	use crate::core::{OHLC, OHLCV};
-	use crate::helpers::{assert_eq_float, assert_neq_float};
+	use crate::core::OHLCV;
 	use crate::core::{Candle, Method};
-	use crate::methods::tests::test_const;
 	use crate::helpers::RandomCandles;
+	use crate::helpers::{assert_eq_float, assert_neq_float};
+	use crate::methods::tests::test_const;
 
 	#[test]
 	fn test_adi_const() {

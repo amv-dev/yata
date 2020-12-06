@@ -16,7 +16,7 @@ pub use candles::*;
 pub use errors::Error;
 pub use indicator::*;
 pub use method::Method;
-pub use ohlcv::{OHLC, OHLCV};
+pub use ohlcv::OHLCV;
 pub use sequence::Sequence;
 pub use window::Window;
 

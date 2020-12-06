@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::str::FromStr;
 
-use crate::core::{Error, Sequence, ValueType, OHLC, OHLCV};
+use crate::core::{Error, Sequence, ValueType, OHLCV};
 
 /// Source enum represents common parts of a *Candle*
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
@@ -136,7 +136,7 @@ pub struct Candle {
 /// Just an alias for [Candle]
 pub type Candlestick = Candle;
 
-impl OHLC for Candle {
+impl OHLCV for Candle {
 	#[inline]
 	fn open(&self) -> ValueType {
 		self.open
@@ -156,9 +156,7 @@ impl OHLC for Candle {
 	fn close(&self) -> ValueType {
 		self.close
 	}
-}
 
-impl OHLCV for Candle {
 	#[inline]
 	fn volume(&self) -> ValueType {
 		self.volume
@@ -172,7 +170,7 @@ impl From<(ValueType, ValueType, ValueType, ValueType)> for Candle {
 			high: value.1,
 			low: value.2,
 			close: value.3,
-			volume: 0.0,
+			volume: ValueType::NAN,
 		}
 	}
 }

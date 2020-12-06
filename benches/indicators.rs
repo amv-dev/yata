@@ -6,9 +6,7 @@ use yata::prelude::*;
 
 extern crate test;
 
-fn bench_indicator<T: IndicatorConfig + Default>(
-	b: &mut test::Bencher,
-) {
+fn bench_indicator<T: IndicatorConfig + Default>(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(1000).collect();
 	let mut iter = candles.iter().cycle();
 	let mut indicator = T::default().init(iter.next().unwrap()).unwrap();

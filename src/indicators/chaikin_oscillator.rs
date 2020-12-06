@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, PeriodType, OHLCV};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, ADI};
 
@@ -43,7 +43,27 @@ pub struct ChaikinOscillator {
 }
 
 impl IndicatorConfig for ChaikinOscillator {
+	type Instance = ChaikinOscillatorInstance;
+
 	const NAME: &'static str = "ChaikinOscillator";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let c: &dyn OHLCV = candle;
+		let adi = ADI::new(cfg.window, c)?;
+
+		Ok(Self::Instance {
+			ma1: method(cfg.method, cfg.period1, adi.get_value())?,
+			ma2: method(cfg.method, cfg.period2, adi.get_value())?,
+			adi,
+			cross_over: Cross::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 > 0 && self.period1 < self.period2 && self.period2 < PeriodType::MAX
@@ -72,36 +92,8 @@ impl IndicatorConfig for ChaikinOscillator {
 		Ok(())
 	}
 
-	fn is_volume_based(&self) -> bool {
-		true
-	}
-
 	fn size(&self) -> (u8, u8) {
 		(1, 1)
-	}
-}
-
-impl<T: OHLCV> IndicatorInitializer<T> for ChaikinOscillator {
-	type Instance = ChaikinOscillatorInstance<T>;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let adi = ADI::new(cfg.window, candle)?;
-
-		Ok(Self::Instance {
-			ma1: method(cfg.method, cfg.period1, adi.get_value())?,
-			ma2: method(cfg.method, cfg.period2, adi.get_value())?,
-			adi,
-			cross_over: Cross::default(),
-			cfg,
-		})
 	}
 }
 
@@ -117,31 +109,33 @@ impl Default for ChaikinOscillator {
 }
 
 #[derive(Debug)]
-pub struct ChaikinOscillatorInstance<T: OHLCV> {
+pub struct ChaikinOscillatorInstance {
 	cfg: ChaikinOscillator,
 
-	adi: ADI<T>,
+	adi: ADI,
 	ma1: RegularMethod,
 	ma2: RegularMethod,
 	cross_over: Cross,
 }
 
-impl<T: OHLCV> IndicatorInstance<T> for ChaikinOscillatorInstance<T> {
+impl IndicatorInstance for ChaikinOscillatorInstance {
 	type Config = ChaikinOscillator;
+
+	// type Input = dyn OHLCV;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
-		let adi = self.adi.next(candle);
+	fn next<T: OHLCV + 'static>(&mut self, candle: &T) -> IndicatorResult {
+		let adi = &self.adi.next(candle);
 
 		let data1 = self.ma1.next(adi);
 		let data2 = self.ma2.next(adi);
 
 		let value = data1 - data2;
 
-		let signal = self.cross_over.next((value, 0.));
+		let signal = self.cross_over.next(&(value, 0.));
 
 		IndicatorResult::new(&[value], &[signal])
 	}

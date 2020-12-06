@@ -1,5 +1,5 @@
 use super::{IndicatorInstance, IndicatorResult};
-use crate::core::{Error, OHLC};
+use crate::core::{Error, OHLCV};
 
 /// Each indicator has it's own **Configuration** with parameters
 ///
@@ -20,11 +20,6 @@ pub trait IndicatorConfig {
 	/// Dynamically sets **Configuration** parameters
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error>;
 
-	/// Should return `true` if indicator uses *volume* data
-	fn is_volume_based(&self) -> bool {
-		false
-	}
-
 	/// Returns a name of the indicator
 	fn name(&self) -> &'static str {
 		Self::NAME
@@ -34,7 +29,9 @@ pub trait IndicatorConfig {
 	fn size(&self) -> (u8, u8);
 
 	/// Initializes the **State** based on current **Configuration**
-	fn init(self, initial_value: &dyn OHLC) -> Result<Self::Instance, Error>;
+	fn init<T: OHLCV>(self, initial_value: &T) -> Result<Self::Instance, Error>
+	where
+		Self: Sized;
 
 	/// Evaluates indicator config over sequence of OHLC and returns sequence of `IndicatorResult`s
 	/// ```
@@ -47,7 +44,7 @@ pub trait IndicatorConfig {
 	/// let results = trix.over(&candles).unwrap();
 	/// println!("{:?}", results);
 	/// ```
-	fn over<T: OHLC>(self, over_slice: &[T]) -> Result<Vec<IndicatorResult>, Error>
+	fn eval<T: OHLCV>(self, over_slice: &[T]) -> Result<Vec<IndicatorResult>, Error>
 	where
 		Self: Sized,
 	{
@@ -57,6 +54,9 @@ pub trait IndicatorConfig {
 
 		let first_element = &over_slice[0];
 		let mut state = self.init(first_element)?;
-		Ok(state.over(over_slice))
+
+		let result = over_slice.iter().map(|x| state.next(x)).collect();
+
+		Ok(result)
 	}
 }

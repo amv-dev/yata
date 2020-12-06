@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, ValueType, OHLC};
+use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{Cross, HighestIndex, LowestIndex};
 
@@ -58,7 +58,7 @@ impl IndicatorConfig for Aroon {
 
 	const NAME: &'static str = "Aroon";
 
-	fn init(self, candle: &dyn OHLC) -> Result<Self::Instance, Error> {
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
 		if !self.validate() {
 			return Err(Error::WrongConfig);
 		}
@@ -136,11 +136,13 @@ pub struct AroonInstance {
 impl IndicatorInstance for AroonInstance {
 	type Config = Aroon;
 
+	// type Input = dyn OHLC;
+
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: &dyn OHLC) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let highest_index = self.highest_index.next(&candle.high());
 		let lowest_index = self.lowest_index.next(&candle.low());
 
