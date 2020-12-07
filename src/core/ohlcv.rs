@@ -238,7 +238,7 @@ pub trait OHLCV: 'static {
 
 	/// Volumed price
 	///
-	/// Same as [`OHLC::tp()`] * [`OHLCV::volume()`]
+	/// Same as [`OHLCV::tp()`] * [`OHLCV::volume()`]
 	fn volumed_price(&self) -> ValueType {
 		self.tp() * self.volume()
 	}

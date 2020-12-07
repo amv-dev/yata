@@ -1,6 +1,5 @@
 use crate::core::{
-	Error, IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult, Method,
-	PeriodType, Source, OHLC,
+	Error, IndicatorConfig, IndicatorInstance, IndicatorResult, Method, PeriodType, Source, OHLCV,
 };
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Change, Cross, ReversalSignal, TMA};
@@ -58,7 +57,29 @@ pub struct Trix {
 }
 
 impl IndicatorConfig for Trix {
+	type Instance = TRIXInstance;
+
 	const NAME: &'static str = "Trix";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if self.validate() {
+			let src = candle.source(self.source);
+
+			Ok(Self::Instance {
+				tma: TMA::new(self.period1, &src)?,
+				sig: method(self.method2, self.period2, src)?,
+				change: Change::new(1, &src)?,
+				cross1: Cross::new((), &(src, src))?,
+				cross2: Cross::new((), &(src, src))?,
+				reverse: ReversalSignal::new(1, 1, 0.0)?,
+
+				cfg: self,
+				// phantom: PhantomData::default(),
+			})
+		} else {
+			Err(Error::WrongConfig)
+		}
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 > 2 && self.period2 > 1
@@ -91,30 +112,6 @@ impl IndicatorConfig for Trix {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for Trix {
-	type Instance = TRIXInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error> {
-		if self.validate() {
-			let src = candle.source(self.source);
-
-			Ok(Self::Instance {
-				tma: TMA::new(self.period1, src)?,
-				sig: method(self.method2, self.period2, src)?,
-				change: Change::new(1, src)?,
-				cross1: Cross::new((), (src, src))?,
-				cross2: Cross::new((), (src, src))?,
-				reverse: ReversalSignal::new(1, 1, 0.0)?,
-
-				cfg: self,
-				// phantom: PhantomData::default(),
-			})
-		} else {
-			Err(Error::WrongConfig)
-		}
-	}
-}
-
 impl Default for Trix {
 	fn default() -> Self {
 		Self {
@@ -126,7 +123,6 @@ impl Default for Trix {
 	}
 }
 
-// https://en.wikipedia.org/wiki/Trix_(technical_analysis)
 #[derive(Debug)]
 pub struct TRIXInstance {
 	cfg: Trix,
@@ -139,7 +135,7 @@ pub struct TRIXInstance {
 	reverse: ReversalSignal,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for TRIXInstance {
+impl IndicatorInstance for TRIXInstance {
 	type Config = Trix;
 
 	fn config(&self) -> &Self::Config
@@ -150,20 +146,20 @@ impl<T: OHLC> IndicatorInstance<T> for TRIXInstance {
 	}
 
 	#[inline]
-	fn next(&mut self, candle: T) -> IndicatorResult
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult
 	where
 		Self: Sized,
 	{
 		let src = candle.source(self.cfg.source);
-		let tma = self.tma.next(src);
-		let value = self.change.next(tma);
+		let tma = self.tma.next(&src);
+		let value = self.change.next(&tma);
 
-		let signal1 = self.reverse.next(value);
+		let signal1 = self.reverse.next(&value);
 
-		let sigline = self.sig.next(value);
+		let sigline = self.sig.next(&value);
 
-		let signal2 = self.cross1.next((value, sigline));
-		let signal3 = self.cross2.next((value, 0.));
+		let signal2 = self.cross1.next(&(value, sigline));
+		let signal3 = self.cross2.next(&(value, 0.));
 
 		IndicatorResult::new(&[value, sigline], &[signal1, signal2, signal3])
 	}

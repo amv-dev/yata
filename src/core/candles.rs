@@ -94,7 +94,7 @@ impl From<Source> for String {
 	}
 }
 
-/// Simple Candlestick structure for implementing [`OHLC`] and [`OHLCV`]
+/// Simple Candlestick structure for implementing [`OHLCV`]
 ///
 /// Can be also used by an alias [`Candlestick`]
 ///

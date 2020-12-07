@@ -96,8 +96,8 @@ pub use chaikin_oscillator::ChaikinOscillator;
 // mod stochastic_oscillator;
 // pub use stochastic_oscillator::StochasticOscillator;
 
-// mod trix;
-// pub use trix::Trix;
+mod trix;
+pub use trix::Trix;
 
 // mod trend_strength_index;
 // pub use trend_strength_index::TrendStrengthIndex;

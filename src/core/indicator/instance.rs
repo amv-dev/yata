@@ -4,22 +4,15 @@ use crate::core::OHLCV;
 /// Base trait for implementing indicators **State**
 pub trait IndicatorInstance {
 	/// Type of Indicator **Configuration**
-	type Config: IndicatorConfig;
-
-	// /// Input value type. For the most of the time it is `dyn OHLC` or `dyn OHLCV`.
-	// type Input: ?Sized;
-
-	/// Indicator name. By default it is inherited from `Self::Config`.
-	const NAME: &'static str = Self::Config::NAME;
+	type Config: IndicatorConfig<Instance = Self>;
 
 	/// Returns a reference to the indicator **Configuration**
 	fn config(&self) -> &Self::Config;
 
-	// fn config(&self) -> &dyn IndicatorConfig<T>;
-
-	/// Preceed given candle and returns [`IndicatorResult`](crate::core::IndicatorResult)
+	/// Evaluates given candle and returns [`IndicatorResult`](crate::core::IndicatorResult)
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult
-	where Self: Sized;
+	where
+		Self: Sized;
 
 	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`s.
 	/// ```
@@ -47,13 +40,13 @@ pub trait IndicatorInstance {
 
 	/// Returns count of indicator's raw values and count of indicator's signals.
 	///
-	/// See more at [`IndicatorConfig`](crate::core::IndicatorConfig#tymethod.size)
+	/// See more at [`IndicatorConfig`](crate::core::IndicatorConfig::size)
 	fn size(&self) -> (u8, u8) {
 		self.config().size()
 	}
 
 	/// Returns a name of the indicator
 	fn name(&self) -> &'static str {
-		Self::NAME
+		Self::Config::NAME
 	}
 }

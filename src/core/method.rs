@@ -56,7 +56,7 @@ pub trait Method: fmt::Debug {
 	/// Input value type
 	type Input: ?Sized;
 	/// Output value type
-	type Output: Copy; 
+	type Output: Copy;
 
 	/// Static method for creating an instance of the method with given `parameters` and initial `value` (simply first input value)
 	fn new(parameters: Self::Params, initial_value: &Self::Input) -> Result<Self, Error>
@@ -107,10 +107,10 @@ pub trait Method: fmt::Debug {
 	/// assert_eq!(result.len(), s.len());
 	/// ```
 	#[inline]
-	fn over<S: AsRef<[Self::Input]>>(&mut self, inputs: S) -> Vec<Self::Output> 
-	where 
+	fn over<S: AsRef<[Self::Input]>>(&mut self, inputs: S) -> Vec<Self::Output>
+	where
 		Self::Input: Sized,
-		Self: Sized
+		Self: Sized,
 	{
 		inputs.as_ref().iter().map(|x| self.next(x)).collect()
 	}
@@ -120,10 +120,11 @@ pub trait Method: fmt::Debug {
 	/// # Guarantees
 	///
 	/// The length of an output `Vec` is always equal to the length of an `inputs` slice.
-	fn new_over<S: AsRef<[Self::Input]>>(parameters: Self::Params, inputs: S) -> Result<Vec<Self::Output>, Error>
-	where 
+	fn new_over<S>(parameters: Self::Params, inputs: S) -> Result<Vec<Self::Output>, Error>
+	where
+		S: AsRef<[Self::Input]>,
 		Self::Input: Sized,
-		Self: Sized
+		Self: Sized,
 	{
 		let inputs_ref = inputs.as_ref();
 

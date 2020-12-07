@@ -71,7 +71,7 @@ use serde::{Deserialize, Serialize};
 /// [`volume`]: crate::core::OHLCV::volume
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
-/// [`CLV`]: crate::core::OHLC::clv
+/// [`CLV`]: crate::core::OHLCV::clv
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ADI {

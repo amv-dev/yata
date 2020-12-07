@@ -165,4 +165,9 @@ pub mod methods;
 /// Contains main traits you need to start using this library
 pub mod prelude {
 	pub use super::core::{Candle, Error, IndicatorConfig, IndicatorInstance, Method, OHLCV};
+
+	/// dynamically dispatchable traits for indicators creation
+	pub mod dd {
+		pub use crate::core::{IndicatorConfigDyn, IndicatorInstanceDyn};
+	}
 }

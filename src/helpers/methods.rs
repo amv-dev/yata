@@ -256,43 +256,43 @@ impl TryFrom<String> for RegularMethods {
 pub fn method(
 	method: RegularMethods,
 	length: PeriodType,
-	initial_value: &ValueType,
+	initial_value: ValueType,
 ) -> Result<RegularMethod, Error> {
 	match method {
-		RegularMethods::SMA => Ok(Box::new(SMA::new(length, initial_value)?)),
-		RegularMethods::WMA => Ok(Box::new(WMA::new(length, initial_value)?)),
-		RegularMethods::HMA => Ok(Box::new(HMA::new(length, initial_value)?)),
-		RegularMethods::RMA => Ok(Box::new(RMA::new(length, initial_value)?)),
-		RegularMethods::EMA => Ok(Box::new(EMA::new(length, initial_value)?)),
-		RegularMethods::DMA => Ok(Box::new(DMA::new(length, initial_value)?)),
-		RegularMethods::DEMA => Ok(Box::new(DEMA::new(length, initial_value)?)),
-		RegularMethods::TMA => Ok(Box::new(TMA::new(length, initial_value)?)),
-		RegularMethods::TEMA => Ok(Box::new(TEMA::new(length, initial_value)?)),
-		RegularMethods::WSMA => Ok(Box::new(WSMA::new(length, initial_value)?)),
-		RegularMethods::SMM => Ok(Box::new(SMM::new(length, initial_value)?)),
-		RegularMethods::SWMA => Ok(Box::new(SWMA::new(length, initial_value)?)),
-		RegularMethods::LinReg => Ok(Box::new(LinReg::new(length, initial_value)?)),
-		RegularMethods::TRIMA => Ok(Box::new(TRIMA::new(length, initial_value)?)),
+		RegularMethods::SMA => Ok(Box::new(SMA::new(length, &initial_value)?)),
+		RegularMethods::WMA => Ok(Box::new(WMA::new(length, &initial_value)?)),
+		RegularMethods::HMA => Ok(Box::new(HMA::new(length, &initial_value)?)),
+		RegularMethods::RMA => Ok(Box::new(RMA::new(length, &initial_value)?)),
+		RegularMethods::EMA => Ok(Box::new(EMA::new(length, &initial_value)?)),
+		RegularMethods::DMA => Ok(Box::new(DMA::new(length, &initial_value)?)),
+		RegularMethods::DEMA => Ok(Box::new(DEMA::new(length, &initial_value)?)),
+		RegularMethods::TMA => Ok(Box::new(TMA::new(length, &initial_value)?)),
+		RegularMethods::TEMA => Ok(Box::new(TEMA::new(length, &initial_value)?)),
+		RegularMethods::WSMA => Ok(Box::new(WSMA::new(length, &initial_value)?)),
+		RegularMethods::SMM => Ok(Box::new(SMM::new(length, &initial_value)?)),
+		RegularMethods::SWMA => Ok(Box::new(SWMA::new(length, &initial_value)?)),
+		RegularMethods::LinReg => Ok(Box::new(LinReg::new(length, &initial_value)?)),
+		RegularMethods::TRIMA => Ok(Box::new(TRIMA::new(length, &initial_value)?)),
 
 		RegularMethods::Past | RegularMethods::Move => {
-			Ok(Box::new(Past::new(length, initial_value)?))
+			Ok(Box::new(Past::new(length, &initial_value)?))
 		}
-		RegularMethods::Derivative => Ok(Box::new(Derivative::new(length, initial_value)?)),
-		RegularMethods::Integral => Ok(Box::new(Integral::new(length, initial_value)?)),
-		RegularMethods::MeanAbsDev => Ok(Box::new(MeanAbsDev::new(length, initial_value)?)),
-		RegularMethods::MedianAbsDev => Ok(Box::new(MedianAbsDev::new(length, initial_value)?)),
-		RegularMethods::StDev => Ok(Box::new(StDev::new(length, initial_value)?)),
-		RegularMethods::CCI => Ok(Box::new(CCI::new(length, initial_value)?)),
+		RegularMethods::Derivative => Ok(Box::new(Derivative::new(length, &initial_value)?)),
+		RegularMethods::Integral => Ok(Box::new(Integral::new(length, &initial_value)?)),
+		RegularMethods::MeanAbsDev => Ok(Box::new(MeanAbsDev::new(length, &initial_value)?)),
+		RegularMethods::MedianAbsDev => Ok(Box::new(MedianAbsDev::new(length, &initial_value)?)),
+		RegularMethods::StDev => Ok(Box::new(StDev::new(length, &initial_value)?)),
+		RegularMethods::CCI => Ok(Box::new(CCI::new(length, &initial_value)?)),
 		RegularMethods::Momentum | RegularMethods::Change => {
-			Ok(Box::new(Momentum::new(length, initial_value)?))
+			Ok(Box::new(Momentum::new(length, &initial_value)?))
 		}
 		RegularMethods::RateOfChange | RegularMethods::ROC => {
-			Ok(Box::new(RateOfChange::new(length, initial_value)?))
+			Ok(Box::new(RateOfChange::new(length, &initial_value)?))
 		}
-		RegularMethods::Highest => Ok(Box::new(Highest::new(length, initial_value)?)),
-		RegularMethods::Lowest => Ok(Box::new(Lowest::new(length, initial_value)?)),
+		RegularMethods::Highest => Ok(Box::new(Highest::new(length, &initial_value)?)),
+		RegularMethods::Lowest => Ok(Box::new(Lowest::new(length, &initial_value)?)),
 		RegularMethods::HighestLowestDelta => {
-			Ok(Box::new(HighestLowestDelta::new(length, initial_value)?))
+			Ok(Box::new(HighestLowestDelta::new(length, &initial_value)?))
 		}
 	}
 }

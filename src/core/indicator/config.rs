@@ -7,9 +7,9 @@ use crate::core::{Error, OHLCV};
 ///
 /// See example with [`Example Indicator`](crate::indicators::example)
 // Config cannot be Copy because it might consist ov Vec-s. F.e. if indicator using Conv method with custom weights.
-pub trait IndicatorConfig {
+pub trait IndicatorConfig: Clone {
 	/// Type of **State**
-	type Instance: IndicatorInstance;
+	type Instance: IndicatorInstance<Config = Self>;
 
 	/// Name of an indicator
 	const NAME: &'static str;
@@ -25,7 +25,7 @@ pub trait IndicatorConfig {
 		Self::NAME
 	}
 
-	/// Returns an [`IndicatorResult`](crate::core::IndicatorResult) size processing by the indicator `(count of raw value, count of signals)`
+	/// Returns an [`IndicatorResult`](crate::core::IndicatorResult) size processing by the indicator `(count of raw values, count of signals)`
 	fn size(&self) -> (u8, u8);
 
 	/// Initializes the **State** based on current **Configuration**
@@ -58,6 +58,6 @@ pub trait IndicatorConfig {
 
 		let mut state = self.init(&inputs_ref[0])?;
 
-		Ok(state.over(inputs))
+		Ok(IndicatorInstance::over(&mut state, inputs))
 	}
 }
