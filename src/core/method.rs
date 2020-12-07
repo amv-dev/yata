@@ -1,4 +1,4 @@
-use super::Error;
+use super::{Error, Sequence};
 // use super::Error;
 
 use std::fmt;
@@ -102,6 +102,15 @@ pub trait Method: fmt::Debug {
 		inputs.as_ref().iter().map(|x| self.next(x)).collect()
 	}
 
+	/// Applies method to the sequence in-place.
+	fn apply<T, S>(&mut self, sequence: &mut S)
+	where
+		S: Sequence<T>,
+		Self: Method<Input = T, Output = T> + Sized,
+	{
+		sequence.apply(self);
+	}
+
 	/// Creates new `Method` instance and iterates it over the given `inputs` slice and returns `Vec` of output values.
 	///
 	/// # Guarantees
@@ -122,5 +131,22 @@ pub trait Method: fmt::Debug {
 		let mut method = Self::new(parameters, &inputs_ref[0])?;
 
 		Ok(method.over(inputs))
+	}
+
+	/// Creates new `Method` instance and applies it to the `sequence`.
+	fn new_apply<T, S>(parameters: Self::Params, sequence: &mut S) -> Result<(), Error>
+	where
+		T: Copy,
+		S: Sequence<T>,
+		Self: Method<Input = T, Output = T> + Sized,
+	{
+		match sequence.get_initial_value() {
+			Some(&v) => {
+				let mut m = Self::new(parameters, &v)?;
+				sequence.apply(&mut m);
+				Ok(())
+			}
+			None => Ok(()),
+		}
 	}
 }

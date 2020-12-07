@@ -8,6 +8,7 @@ mod errors;
 mod indicator;
 mod method;
 mod ohlcv;
+mod sequence;
 mod window;
 
 pub use action::Action;
@@ -16,6 +17,7 @@ pub use errors::Error;
 pub use indicator::*;
 pub use method::Method;
 pub use ohlcv::OHLCV;
+pub use sequence::*;
 pub use window::Window;
 
 /// Main value type for calculations
