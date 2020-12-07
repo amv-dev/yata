@@ -110,13 +110,13 @@ limitations under the License.
 //! use yata::methods::EMA;
 //!
 //! // EMA of length=3
-//! let mut ema = EMA::new(3, 3.0).unwrap();
+//! let mut ema = EMA::new(3, &3.0).unwrap();
 //!
-//! ema.next(3.0);
-//! ema.next(6.0);
+//! ema.next(&3.0);
+//! ema.next(&6.0);
 //!
-//! assert_eq!(ema.next(9.0), 6.75);
-//! assert_eq!(ema.next(12.0), 9.375);
+//! assert_eq!(ema.next(&9.0), 6.75);
+//! assert_eq!(ema.next(&12.0), 9.375);
 //! ```
 //!
 //! ## Indicator usage example
@@ -125,21 +125,20 @@ limitations under the License.
 //! use yata::helpers::{RandomCandles, RegularMethods};
 //! use yata::indicators::MACD;
 //! use yata::prelude::*;
-//! use std::convert::TryInto;
 //!
 //! let mut candles = RandomCandles::new();
 //! let mut macd = MACD::default();
 //!
 //! macd.period3 = 4; // setting signal period MA to 4
 //!
-//! macd.method1 = "sma".try_into().unwrap(); // one way of defining methods inside indicators
+//! macd.method1 = "sma".parse().unwrap(); // one way of defining methods inside indicators
 //!
 //! macd.method3 = RegularMethods::TEMA; // another way of defining methods inside indicators
 //!
-//! let mut macd = macd.init(candles.first()).unwrap();
+//! let mut macd = macd.init(&candles.first()).unwrap();
 //!
 //! for candle in candles.take(10) {
-//!     let result = macd.next(candle);
+//!     let result = macd.next(&candle);
 //!
 //!     println!("{:?}", result);
 //! }

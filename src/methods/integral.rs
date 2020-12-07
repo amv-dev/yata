@@ -27,13 +27,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::Integral;
 ///
 /// // Integrates over last 3 values
-/// let mut integral = Integral::new(3, 1.0).unwrap();
+/// let mut integral = Integral::new(3, &1.0).unwrap();
 ///
-/// integral.next(1.0);
-/// integral.next(2.0);
-/// assert_eq!(integral.next(3.0), 6.0); // 1 + 2 + 3
-/// assert_eq!(integral.next(4.0), 9.0); // 2 + 3 + 4
-/// assert_eq!(integral.next(5.0), 12.0); // 3 + 4 + 5
+/// integral.next(&1.0);
+/// integral.next(&2.0);
+/// assert_eq!(integral.next(&3.0), 6.0); // 1 + 2 + 3
+/// assert_eq!(integral.next(&4.0), 9.0); // 2 + 3 + 4
+/// assert_eq!(integral.next(&5.0), 12.0); // 3 + 4 + 5
 /// ```
 ///
 /// ```
@@ -41,13 +41,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::Integral;
 ///
 /// // Integrates since the beginning
-/// let mut integral = Integral::new(0, 1.0).unwrap(); // same as Integral::default()
+/// let mut integral = Integral::new(0, &1.0).unwrap(); // same as Integral::default()
 ///
-/// integral.next(1.0);
-/// integral.next(2.0);
-/// assert_eq!(integral.next(3.0), 6.0); // 1 + 2 + 3
-/// assert_eq!(integral.next(4.0), 10.0); // 1 + 2 + 3 + 4
-/// assert_eq!(integral.next(5.0), 15.0); // 1 + 2 + 3 + 4 + 5
+/// integral.next(&1.0);
+/// integral.next(&2.0);
+/// assert_eq!(integral.next(&3.0), 6.0); // 1 + 2 + 3
+/// assert_eq!(integral.next(&4.0), 10.0); // 1 + 2 + 3 + 4
+/// assert_eq!(integral.next(&5.0), 15.0); // 1 + 2 + 3 + 4 + 5
 /// ```
 ///
 /// ### Intergal is opposite method for Derivative
@@ -57,14 +57,14 @@ use serde::{Deserialize, Serialize};
 ///
 /// let s = [1.0, 2.0, 3.0, 3.0, 2.5, 3.5, 5.0];
 /// let mut integral = Integral::default();
-/// let mut derivative = Derivative::new(1, s[0]).unwrap();
+/// let mut derivative = Derivative::new(1, &s[0]).unwrap();
 ///
-/// (&s).iter().for_each(|&v| {
-///     let integration_constant = s[0];
+/// let integration_constant = s[0];
+/// s.iter().for_each(|v| {
 ///     let der = derivative.next(v);
-///     let integr = integral.next(der) + integration_constant;
+///     let integr = integral.next(&der) + integration_constant;
 ///
-///     assert_eq!(integr, v);
+///     assert_eq!(integr, *v);
 /// });
 /// ```
 ///

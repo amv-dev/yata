@@ -27,13 +27,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::RMA;
 ///
 /// // RMA of length=3
-/// let mut rma = RMA::new(3, 1.0).unwrap();
+/// let mut rma = RMA::new(3, &1.0).unwrap();
 ///
-/// rma.next(1.0);
-/// rma.next(2.0);
+/// rma.next(&1.0);
+/// rma.next(&2.0);
 ///
-/// assert!((rma.next(3.0)-1.8888888).abs() < 1e-5);
-/// assert!((rma.next(4.0)-2.5925925925).abs() < 1e-5);
+/// assert!((rma.next(&3.0)-1.8888888).abs() < 1e-5);
+/// assert!((rma.next(&4.0)-2.5925925925).abs() < 1e-5);
 /// ```
 ///
 /// # Performance

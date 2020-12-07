@@ -27,13 +27,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::EMA;
 ///
 /// // EMA of length=3
-/// let mut ema = EMA::new(3, 3.0).unwrap();
+/// let mut ema = EMA::new(3, &3.0).unwrap();
 ///
-/// ema.next(3.0);
-/// ema.next(6.0);
+/// ema.next(&3.0);
+/// ema.next(&6.0);
 ///
-/// assert_eq!(ema.next(9.0), 6.75);
-/// assert_eq!(ema.next(12.0), 9.375);
+/// assert_eq!(ema.next(&9.0), 6.75);
+/// assert_eq!(ema.next(&12.0), 9.375);
 /// ```
 /// # Performance
 ///
@@ -164,13 +164,13 @@ impl Method for TMA {
 /// use yata::methods::DEMA;
 ///
 /// // DEMA of length=3
-/// let mut dema = DEMA::new(3, 1.0).unwrap();
+/// let mut dema = DEMA::new(3, &1.0).unwrap();
 ///
-/// dema.next(1.0);
-/// dema.next(2.0);
+/// dema.next(&1.0);
+/// dema.next(&2.0);
 ///
-/// assert_eq!(dema.next(3.0), 2.75);
-/// assert_eq!(dema.next(4.0), 3.8125);
+/// assert_eq!(dema.next(&3.0), 2.75);
+/// assert_eq!(dema.next(&4.0), 3.8125);
 /// ```
 ///
 /// # Performance
@@ -238,13 +238,13 @@ impl Method for DEMA {
 /// use yata::methods::TEMA;
 ///
 /// // TEMA of length=3
-/// let mut tema = TEMA::new(3, 1.0).unwrap();
+/// let mut tema = TEMA::new(3, &1.0).unwrap();
 ///
-/// tema.next(1.0);
-/// tema.next(2.0);
+/// tema.next(&1.0);
+/// tema.next(&2.0);
 ///
-/// assert_eq!(tema.next(3.0), 2.9375);
-/// assert_eq!(tema.next(4.0), 4.0);
+/// assert_eq!(tema.next(&3.0), 2.9375);
+/// assert_eq!(tema.next(&4.0), 4.0);
 /// ```
 ///
 /// # Performance

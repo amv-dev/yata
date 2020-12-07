@@ -31,10 +31,10 @@ use serde::{Deserialize, Serialize};
 /// let values = [1.0, 2.0, 3.0, 2.0, 1.0, 0.5, 2.0, 3.0];
 /// let r      = [ 0,   0,   0,   1,   2,   2,   0,   0 ];
 ///
-/// let mut highest_index = HighestIndex::new(3, values[0]).unwrap();
+/// let mut highest_index = HighestIndex::new(3, &values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-///     let v = highest_index.next(values[i]);
+///     let v = highest_index.next(&values[i]);
 ///     assert_eq!(v, r[i]);
 /// });
 /// ```
@@ -144,10 +144,10 @@ impl Method for HighestIndex {
 /// let values = [1.0, 2.0, 3.0, 2.0, 1.0, 0.5, 2.0, 3.0];
 /// let r      = [ 0,   1,   2,   0,   0,   0,   1,   2 ];
 ///
-/// let mut lowest_index = LowestIndex::new(3, values[0]).unwrap();
+/// let mut lowest_index = LowestIndex::new(3, &values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-///     let v = lowest_index.next(values[i]);
+///     let v = lowest_index.next(&values[i]);
 ///     assert_eq!(v, r[i]);
 /// });
 /// ```

@@ -4,7 +4,7 @@ use crate::core::{Error, OHLCV};
 /// Dynamically dispatchable [`IndicatorConfig`](crate::core::indicator::IndicatorConfig)
 pub trait IndicatorConfigDyn<T: OHLCV> {
 	/// Dynamically initializes the **State** based on the current **Configuration**
-	fn init(&self, initial_value: &T) -> Box<dyn IndicatorInstanceDyn<T>>;
+	fn init(&self, initial_value: &T) -> Result<Box<dyn IndicatorInstanceDyn<T>>, Error>;
 
 	/// Evaluates dynamically dispatched [`IndicatorConfig`](crate::core::indicator::IndicatorConfig)  over series of OHLC and returns series of `IndicatorResult`s
 	/// ```
@@ -39,9 +39,9 @@ where
 	I: IndicatorInstanceDyn<T> + 'static,
 	C: IndicatorConfig<Instance = I> + Clone + 'static,
 {
-	fn init(&self, initial_value: &T) -> Box<dyn IndicatorInstanceDyn<T>> {
-		let instance = IndicatorConfig::init(self.clone(), initial_value).unwrap();
-		Box::new(instance)
+	fn init(&self, initial_value: &T) -> Result<Box<dyn IndicatorInstanceDyn<T>>, Error> {
+		let instance = IndicatorConfig::init(self.clone(), initial_value)?;
+		Ok(Box::new(instance))
 	}
 
 	fn over(&self, inputs: &dyn AsRef<[T]>) -> Result<Vec<IndicatorResult>, Error> {
@@ -72,14 +72,14 @@ pub trait IndicatorInstanceDyn<T: OHLCV> {
 
 	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`s.
 	/// ```
-	/// use yata::prelude::dd:*;
+	/// use yata::prelude::dd::*;
 	/// use yata::helpers::{RandomCandles};
 	/// use yata::indicators::Trix;
 	///
 	/// let candles: Vec<_> = RandomCandles::new().take(10).collect();
 	/// let static_config = Trix::default();
-	/// let dyn_config: Box<dyn IndicatorConfigDyn> = Box::new(static_config); // here we are loosing information about `IndicatorConfig`s type.
-	/// let mut state = trix.init(candles[0]).unwrap();
+	/// let dyn_config: Box<dyn IndicatorConfigDyn<_>> = Box::new(static_config); // here we are loosing information about `IndicatorConfig`s type.
+	/// let mut state = dyn_config.init(&candles[0]).unwrap();
 	///
 	/// let results = state.over(&candles);
 	/// println!("{:?}", results);

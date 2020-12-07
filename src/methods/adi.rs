@@ -45,17 +45,17 @@ use serde::{Deserialize, Serialize};
 /// use yata::helpers::RandomCandles;
 ///
 /// let mut candles = RandomCandles::default();
-/// let mut windowless = ADI::new(0, candles.first()).unwrap();
-/// let mut windowed = ADI::new(3, candles.first()).unwrap(); // <----- Window size 3
+/// let mut windowless = ADI::new(0, &candles.first()).unwrap();
+/// let mut windowed = ADI::new(3, &candles.first()).unwrap(); // <----- Window size 3
 ///
 /// let candle = candles.next().unwrap();
-/// assert_ne!(windowless.next(candle), windowed.next(candle));
+/// assert_ne!(windowless.next(&candle), windowed.next(&candle));
 ///
 /// let candle = candles.next().unwrap();
-/// assert_ne!(windowless.next(candle), windowed.next(candle));
+/// assert_ne!(windowless.next(&candle), windowed.next(&candle));
 ///
 /// let candle = candles.next().unwrap();
-/// assert!((windowless.next(candle)-windowed.next(candle)).abs() < 1e-5); // Must be equal here
+/// assert!((windowless.next(&candle)-windowed.next(&candle)).abs() < 1e-5); // Must be equal here
 /// ```
 ///
 /// # Performance

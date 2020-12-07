@@ -28,13 +28,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::TRIMA;
 ///
 /// // TRIMA of length=3
-/// let mut trima = TRIMA::new(4, 1.0).unwrap();
+/// let mut trima = TRIMA::new(4, &1.0).unwrap();
 ///
-/// trima.next(1.0);
-/// trima.next(2.0);
+/// trima.next(&1.0);
+/// trima.next(&2.0);
 ///
-/// assert_eq!(trima.next(3.0), 1.25);
-/// assert_eq!(trima.next(4.0), 1.625);
+/// assert_eq!(trima.next(&3.0), 1.25);
+/// assert_eq!(trima.next(&4.0), 1.625);
 /// ```
 ///
 /// # Performance

@@ -5,13 +5,14 @@ use super::{Source, ValueType};
 ///
 /// It has already implemented for tuple of 5 float values:
 /// ```
-/// use yata::prelude::OHLC;
-/// //         open high low  close
-/// let row = (2.0, 5.0, 1.0,  4.0 );
+/// use yata::prelude::OHLCV;
+/// //         open high low  close, volume
+/// let row = (2.0, 5.0, 1.0,  4.0,   10.0 );
 /// assert_eq!(row.open(), row.0);
 /// assert_eq!(row.high(), row.1);
 /// assert_eq!(row.low(), row.2);
 /// assert_eq!(row.close(), row.3);
+/// assert_eq!(row.volume(), row.4);
 /// ```
 ///
 /// See also [Candle](crate::prelude::Candle).
@@ -189,8 +190,8 @@ pub trait OHLCV: 'static {
 	///     ..Candle::default()
 	/// };
 	///
-	/// assert!(!OHLC::validate(&candle1));
-	/// assert!(!OHLC::validate(&candle2));
+	/// assert!(!candle1.validate());
+	/// assert!(!candle2.validate());
 	/// ```
 	#[inline]
 	fn validate(&self) -> bool {
@@ -203,6 +204,7 @@ pub trait OHLCV: 'static {
 			&& self.open().is_finite()
 			&& self.high().is_finite()
 			&& self.low().is_finite()
+			&& (self.volume().is_nan() || self.volume() >= 0.0)
 	}
 
 	/// Returns [`Source`] field value of the candle.

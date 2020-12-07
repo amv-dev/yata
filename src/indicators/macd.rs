@@ -3,8 +3,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Candle, Error, Method, PeriodType, Source, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Candle, Error, Method, PeriodType, Source, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::Cross;
 
@@ -66,7 +66,26 @@ pub struct MACD {
 }
 
 impl IndicatorConfig for MACD {
+	type Instance = MACDInstance;
+
 	const NAME: &'static str = "MACD";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if self.validate() {
+			let cfg = self;
+			let src = candle.source(cfg.source);
+			Ok(Self::Instance {
+				ma1: method(cfg.method1, cfg.period1, src)?,
+				ma2: method(cfg.method2, cfg.period2, src)?,
+				ma3: method(cfg.method3, cfg.period3, src)?,
+				cross1: Cross::default(),
+				cross2: Cross::default(),
+				cfg,
+			})
+		} else {
+			Err(Error::WrongConfig)
+		}
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 < self.period2 && self.period1 > 1 && self.period3 > 1
@@ -115,30 +134,6 @@ impl IndicatorConfig for MACD {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for MACD {
-	type Instance = MACDInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if self.validate() {
-			let cfg = self;
-			let src = candle.source(cfg.source);
-			Ok(Self::Instance {
-				ma1: method(cfg.method1, cfg.period1, src)?,
-				ma2: method(cfg.method2, cfg.period2, src)?,
-				ma3: method(cfg.method3, cfg.period3, src)?,
-				cross1: Cross::new((), (0.0, 0.0))?,
-				cross2: Cross::new((), (0.0, 0.0))?,
-				cfg,
-			})
-		} else {
-			Err(Error::WrongConfig)
-		}
-	}
-}
-
 impl Default for MACD {
 	fn default() -> Self {
 		Self {
@@ -167,31 +162,25 @@ pub struct MACDInstance {
 /// Just an alias for MACD
 pub type MovingAverageConvergenceDivergence = MACD;
 
-impl<T: OHLC> IndicatorInstance<T> for MACDInstance {
+impl IndicatorInstance for MACDInstance {
 	type Config = MACD;
 
-	fn config(&self) -> &Self::Config
-	where
-		Self: Sized,
-	{
+	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
 	#[inline]
-	fn next(&mut self, candle: T) -> IndicatorResult
-	where
-		Self: Sized,
-	{
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
-		let ema1 = self.ma1.next(src);
-		let ema2 = self.ma2.next(src);
+		let ema1 = self.ma1.next(&src);
+		let ema2 = self.ma2.next(&src);
 
 		let macd = ema1 - ema2;
-		let sigline = self.ma3.next(macd);
+		let sigline = self.ma3.next(&macd);
 
-		let signal1 = self.cross1.next((macd, sigline));
-		let signal2 = self.cross2.next((macd, 0.0));
+		let signal1 = self.cross1.next(&(macd, sigline));
+		let signal2 = self.cross2.next(&(macd, 0.0));
 
 		IndicatorResult::new(&[macd, sigline], &[signal1, signal2])
 	}

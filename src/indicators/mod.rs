@@ -66,8 +66,8 @@ pub use chaikin_oscillator::ChaikinOscillator;
 // mod know_sure_thing;
 // pub use know_sure_thing::KnowSureThing;
 
-// mod macd;
-// pub use macd::{MovingAverageConvergenceDivergence, MACD};
+mod macd;
+pub use macd::{MovingAverageConvergenceDivergence, MACD};
 
 // mod momentum_index;
 // pub use momentum_index::MomentumIndex;

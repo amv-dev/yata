@@ -30,13 +30,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::WSMA;
 ///
 /// // WSMA of length=3
-/// let mut wsma = WSMA::new(4, 2.0).unwrap();
+/// let mut wsma = WSMA::new(4, &2.0).unwrap();
 ///
-/// wsma.next(3.0);
-/// wsma.next(6.0);
+/// wsma.next(&3.0);
+/// wsma.next(&6.0);
 ///
-/// assert_eq!(wsma.next(9.0), 4.640625);
-/// assert_eq!(wsma.next(12.0), 6.48046875);
+/// assert_eq!(wsma.next(&9.0), 4.640625);
+/// assert_eq!(wsma.next(&12.0), 6.48046875);
 /// ```
 /// # Performance
 ///

@@ -213,40 +213,11 @@ impl TryFrom<String> for RegularMethods {
 ///
 /// let mut m = method(RegularMethods::SMA, 3, 1.0).unwrap();
 ///
-/// m.next(1.0);
-/// m.next(2.0);
+/// m.next(&1.0);
+/// m.next(&2.0);
 ///
-/// assert_eq!(m.next(3.0), 2.0);
-/// assert_eq!(m.next(4.0), 3.0);
-/// ```
-///
-/// ```
-/// use yata::core::Sequence;
-/// use yata::helpers::{method, RegularMethods};
-/// use std::convert::TryInto;
-///
-/// let mut s:Sequence<_> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
-/// let mut ma = method("sma".try_into().unwrap(), 2, s[0]).unwrap();
-///
-/// s.apply(ma.as_mut());
-/// assert_eq!(s.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);
-/// ```
-///
-/// ```
-/// use yata::prelude::*;
-/// use yata::core::{Sequence, ValueType};
-/// use yata::methods::WMA;
-/// use yata::helpers::method;
-/// use std::convert::TryInto;
-///
-/// let my_method = String::from("wma");
-/// let mut s:Sequence<_> = Sequence::from(vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.]);
-/// let mut wma1 = method(my_method.try_into().unwrap(), 4, s[0]).unwrap();
-/// let mut wma2 = WMA::new(4, s[0]).unwrap();
-///
-/// let s1:Vec<ValueType> = s.iter().map(|&x| wma1.next(x)).collect();
-/// let s2:Vec<ValueType> = wma2.iter_data(s.iter().copied()).collect();
-/// assert_eq!(s1.as_slice(), s2.as_slice());
+/// assert_eq!(m.next(&3.0), 2.0);
+/// assert_eq!(m.next(&4.0), 3.0);
 /// ```
 ///
 /// # See also
