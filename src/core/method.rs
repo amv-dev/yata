@@ -40,7 +40,7 @@ pub trait Method<'a>: fmt::Debug {
 	/// Method parameters
 	type Params;
 	/// Input value type
-	type Input: ?Sized;
+	type Input;
 	/// Output value type
 	type Output: Copy;
 
@@ -96,14 +96,13 @@ pub trait Method<'a>: fmt::Debug {
 	fn over<S>(&'a mut self, inputs: S) -> Vec<Self::Output>
 	where
 		S: Sequence<Self::Input>,
-		Self::Input: Sized,
-		Self: Method<'a> + Sized,
+		Self: Sized,
 	{
 		inputs.call(self)
 	}
 
 	/// Applies method to the sequence in-place.
-	fn apply<T, S>(&mut self, sequence: &'a mut S)
+	fn apply<'b: 'a, T, S>(&'a mut self, sequence: &'b mut S)
 	where
 		S: Sequence<T> + AsMut<[T]>,
 		Self: Method<'a, Input = T, Output = T> + Sized,
@@ -119,26 +118,24 @@ pub trait Method<'a>: fmt::Debug {
 	fn new_over<S>(parameters: Self::Params, inputs: S) -> Result<Vec<Self::Output>, Error>
 	where
 		S: Sequence<Self::Input>,
-		Self::Input: Copy,
-		Self: Sized,
+		Self::Input: Clone,
+		Self: Sized + 'a,
 	{
 		match inputs.get_initial_value() {
 			Some(v) => {
-				let mut method = Self::new(parameters, v)?;
-				Ok(inputs.call(&mut method))
-			},
-			None => {
-				Ok(Vec::new())
+				let method = Self::new(parameters, v.clone())?;
+				Ok(inputs.call(method))
 			}
+			None => Ok(Vec::new()),
 		}
 	}
 
 	/// Creates new `Method` instance and applies it to the `sequence`.
 	fn new_apply<T, S>(parameters: Self::Params, sequence: &'a mut S) -> Result<(), Error>
 	where
-		T: Copy,
+		T: Clone,
 		S: Sequence<T> + AsMut<[T]>,
-		Self: Method<'a, Input = T, Output = T> + Sized,
+		Self: Method<'a, Input = T, Output = T> + Sized + 'a,
 	{
 		let initial_value = {
 			// Why do we need to get immutable reference to get initial value?
@@ -147,13 +144,30 @@ pub trait Method<'a>: fmt::Debug {
 			let seq = &*sequence;
 
 			match seq.get_initial_value() {
-				Some(v) => v,
+				Some(v) => v.clone(),
 				None => return Ok(()),
 			}
 		};
 
-		let mut m = Self::new(parameters, initial_value)?;
-		sequence.apply(&mut m);
+		let m = Self::new(parameters, initial_value)?;
+		sequence.apply(m);
 		Ok(())
+	}
+}
+
+impl<'a, M: Method<'a>> Method<'a> for &'a mut M {
+	type Params = M::Params;
+	/// Input value type
+	type Input = M::Input;
+	/// Output value type
+	type Output = M::Output;
+
+	fn new(_parameters: Self::Params, _initial_value: Self::Input) -> Result<Self, Error> {
+		unimplemented!();
+	}
+
+	/// Generates next output value based on the given input `value`
+	fn next(&mut self, value: Self::Input) -> Self::Output {
+		(**self).next(value)
 	}
 }
