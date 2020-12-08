@@ -66,11 +66,11 @@ impl IndicatorConfig for Trix {
 			let src = candle.source(self.source);
 
 			Ok(Self::Instance {
-				tma: TMA::new(self.period1, &src)?,
+				tma: TMA::new(self.period1, src)?,
 				sig: method(self.method2, self.period2, src)?,
-				change: Change::new(1, &src)?,
-				cross1: Cross::new((), &(src, src))?,
-				cross2: Cross::new((), &(src, src))?,
+				change: Change::new(1, src)?,
+				cross1: Cross::new((), (src, src))?,
+				cross2: Cross::new((), (src, src))?,
 				reverse: ReversalSignal::new(1, 1, 0.0)?,
 
 				cfg: self,
@@ -151,15 +151,15 @@ impl IndicatorInstance for TRIXInstance {
 		Self: Sized,
 	{
 		let src = candle.source(self.cfg.source);
-		let tma = self.tma.next(&src);
-		let value = self.change.next(&tma);
+		let tma = self.tma.next(src);
+		let value = self.change.next(tma);
 
-		let signal1 = self.reverse.next(&value);
+		let signal1 = self.reverse.next(value);
 
-		let sigline = self.sig.next(&value);
+		let sigline = self.sig.next(value);
 
-		let signal2 = self.cross1.next(&(value, sigline));
-		let signal3 = self.cross2.next(&(value, 0.));
+		let signal2 = self.cross1.next((value, sigline));
+		let signal3 = self.cross2.next((value, 0.));
 
 		IndicatorResult::new(&[value, sigline], &[signal1, signal2, signal3])
 	}

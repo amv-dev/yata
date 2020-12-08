@@ -74,12 +74,12 @@ impl SMA {
 	}
 }
 
-impl Method for SMA {
+impl Method<'_> for SMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
@@ -91,7 +91,7 @@ impl Method for SMA {
 	}
 
 	#[inline]
-	fn next(&mut self, &value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		let prev_value = self.window.push(value);
 		self.value += (value - prev_value) * self.divider;
 
@@ -113,10 +113,10 @@ mod tests {
 	fn test_sma_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, &input).unwrap();
+			let mut method = TestingMethod::new(i, input).unwrap();
 
-			let output = method.next(&input);
-			test_const(&mut method, &input, output);
+			let output = method.next(input);
+			test_const(&mut method, input, output);
 		}
 	}
 
@@ -124,10 +124,10 @@ mod tests {
 	fn test_sma1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(&x.close));
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -138,9 +138,9 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|sma_length| {
-			let mut sma = TestingMethod::new(sma_length, &src[0]).unwrap();
+			let mut sma = TestingMethod::new(sma_length, src[0]).unwrap();
 
-			src.iter().enumerate().for_each(|(i, x)| {
+			src.iter().enumerate().for_each(|(i, &x)| {
 				let value = sma.next(x);
 				let slice_from = i.saturating_sub((sma_length - 1) as usize);
 				let slice_to = i;

@@ -36,7 +36,7 @@ use std::fmt;
 ///
 /// # Be advised
 /// There is no `reset` method on the trait. If you need reset a state of the `Method` instance, you should just create a new one.
-pub trait Method: fmt::Debug {
+pub trait Method<'a>: fmt::Debug {
 	/// Method parameters
 	type Params;
 	/// Input value type
@@ -45,12 +45,12 @@ pub trait Method: fmt::Debug {
 	type Output: Copy;
 
 	/// Static method for creating an instance of the method with given `parameters` and initial `value` (simply first input value)
-	fn new(parameters: Self::Params, initial_value: &Self::Input) -> Result<Self, Error>
+	fn new(parameters: Self::Params, initial_value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized;
 
 	/// Generates next output value based on the given input `value`
-	fn next(&mut self, value: &Self::Input) -> Self::Output;
+	fn next(&mut self, value: Self::Input) -> Self::Output;
 
 	/// Returns a name of the method
 	fn name(&self) -> &str {
@@ -93,20 +93,20 @@ pub trait Method: fmt::Debug {
 	/// assert_eq!(result.len(), s.len());
 	/// ```
 	#[inline]
-	fn over<S>(&mut self, inputs: S) -> Vec<Self::Output>
+	fn over<S>(&'a mut self, inputs: S) -> Vec<Self::Output>
 	where
-		S: AsRef<[Self::Input]>,
+		S: Sequence<Self::Input>,
 		Self::Input: Sized,
-		Self: Sized,
+		Self: Method<'a> + Sized,
 	{
-		inputs.as_ref().iter().map(|x| self.next(x)).collect()
+		inputs.call(self)
 	}
 
 	/// Applies method to the sequence in-place.
-	fn apply<T, S>(&mut self, sequence: &mut S)
+	fn apply<T, S>(&mut self, sequence: &'a mut S)
 	where
-		S: Sequence<T>,
-		Self: Method<Input = T, Output = T> + Sized,
+		S: Sequence<T> + AsMut<[T]>,
+		Self: Method<'a, Input = T, Output = T> + Sized,
 	{
 		sequence.apply(self);
 	}
@@ -118,35 +118,42 @@ pub trait Method: fmt::Debug {
 	/// The length of an output `Vec` is always equal to the length of an `inputs` slice.
 	fn new_over<S>(parameters: Self::Params, inputs: S) -> Result<Vec<Self::Output>, Error>
 	where
-		S: AsRef<[Self::Input]>,
-		Self::Input: Sized,
+		S: Sequence<Self::Input>,
+		Self::Input: Copy,
 		Self: Sized,
 	{
-		let inputs_ref = inputs.as_ref();
-
-		if inputs_ref.is_empty() {
-			return Ok(Vec::new());
+		match inputs.get_initial_value() {
+			Some(v) => {
+				let mut method = Self::new(parameters, v)?;
+				Ok(inputs.call(&mut method))
+			},
+			None => {
+				Ok(Vec::new())
+			}
 		}
-
-		let mut method = Self::new(parameters, &inputs_ref[0])?;
-
-		Ok(method.over(inputs))
 	}
 
 	/// Creates new `Method` instance and applies it to the `sequence`.
-	fn new_apply<T, S>(parameters: Self::Params, sequence: &mut S) -> Result<(), Error>
+	fn new_apply<T, S>(parameters: Self::Params, sequence: &'a mut S) -> Result<(), Error>
 	where
 		T: Copy,
-		S: Sequence<T>,
-		Self: Method<Input = T, Output = T> + Sized,
+		S: Sequence<T> + AsMut<[T]>,
+		Self: Method<'a, Input = T, Output = T> + Sized,
 	{
-		match sequence.get_initial_value() {
-			Some(&v) => {
-				let mut m = Self::new(parameters, &v)?;
-				sequence.apply(&mut m);
-				Ok(())
+		let initial_value = {
+			// Why do we need to get immutable reference to get initial value?
+			// If try to remove it, then compile error occured.
+			// Looks like some Rust type system bug?
+			let seq = &*sequence;
+
+			match seq.get_initial_value() {
+				Some(v) => v,
+				None => return Ok(()),
 			}
-			None => Ok(()),
-		}
+		};
+
+		let mut m = Self::new(parameters, initial_value)?;
+		sequence.apply(&mut m);
+		Ok(())
 	}
 }

@@ -66,8 +66,8 @@ impl IndicatorConfig for Aroon {
 		let cfg = self;
 
 		Ok(Self::Instance {
-			lowest_index: LowestIndex::new(cfg.period, &candle.low())?,
-			highest_index: HighestIndex::new(cfg.period, &candle.high())?,
+			lowest_index: LowestIndex::new(cfg.period, candle.low())?,
+			highest_index: HighestIndex::new(cfg.period, candle.high())?,
 			cross: Cross::default(),
 			uptrend: 0,
 			downtrend: 0,
@@ -143,8 +143,8 @@ impl IndicatorInstance for AroonInstance {
 	}
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let highest_index = self.highest_index.next(&candle.high());
-		let lowest_index = self.lowest_index.next(&candle.low());
+		let highest_index = self.highest_index.next(candle.high());
+		let lowest_index = self.lowest_index.next(candle.low());
 
 		let aroon_up =
 			(self.cfg.period - highest_index) as ValueType / self.cfg.period as ValueType;
@@ -152,7 +152,7 @@ impl IndicatorInstance for AroonInstance {
 		let aroon_down =
 			(self.cfg.period - lowest_index) as ValueType / self.cfg.period as ValueType;
 
-		let trend_signal = self.cross.next(&(aroon_up, aroon_down));
+		let trend_signal = self.cross.next((aroon_up, aroon_down));
 		let edge_signal = (highest_index == 0) as i8 - (lowest_index == 0) as i8;
 
 		let is_up_over = (aroon_up >= (1.0 - self.cfg.signal_zone)) as isize;

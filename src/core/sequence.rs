@@ -1,50 +1,79 @@
 use crate::core::Method;
 use crate::core::{ValueType, OHLCV};
+use std::borrow::BorrowMut;
 
 /// Implements some methods for sequence manipulations.
-pub trait Sequence<T> {
+pub trait Sequence<T>: AsRef<[T]> {
 	/// Validates the sequence.
 	fn validate(&self) -> bool;
 
 	/// Applies [`Method`](crate::core::Method) on the slice in-place.
-	fn apply<M>(&mut self, method: &mut M)
+	fn apply<'a, M>(&'a mut self, method: &mut M)
 	where
-		M: Method<Input = T, Output = T> + ?Sized;
+		M: Method<'a, Input = T, Output = T> + ?Sized,
+		Self: AsMut<[T]>;
+
+	/// Calls [`Method`](crate::core::Method) over the slice and returns `Vec` of result values.
+	fn call<'a, M>(&self, method: &mut M) -> Vec<M::Output>
+	where
+		M: Method<'a, Input = T>;
 
 	/// Returns a reference to the first value in the sequence or `None` if it's empty.
-	fn get_initial_value(&self) -> Option<&T>;
+	fn get_initial_value(&self) -> Option<T> where T: Copy;
 }
 
-impl<T: OHLCV + Sized> Sequence<T> for [T] {
+impl<Q: AsRef<[ValueType]>> Sequence<ValueType> for Q {
 	fn validate(&self) -> bool {
-		self.iter().all(OHLCV::validate)
+		self.as_ref().iter().copied().all(ValueType::is_finite)
 	}
 
-	fn apply<M>(&mut self, method: &mut M)
+	fn apply<'a, M>(&'a mut self, method: &mut M)
 	where
-		M: Method<Input = T, Output = T> + ?Sized,
+		M: Method<'a, Input = ValueType, Output = ValueType> + ?Sized,
+		Self: AsMut<[ValueType]>,
 	{
-		self.iter_mut().for_each(|x| *x = method.next(x));
+		self.as_mut().iter_mut().for_each(|x| *x = method.next(*x));
 	}
 
-	fn get_initial_value(&self) -> Option<&T> {
-		self.first()
+	fn call<'a, M>(&self, method: &mut M) -> Vec<M::Output>
+	where
+		M: Method<'a, Input = ValueType>,
+	{
+		let method = method.borrow_mut();
+		let inputs = self.as_ref();
+
+		inputs.iter().map(|x| method.next(*x)).collect()
+	}
+
+	fn get_initial_value(&self) -> Option<ValueType> {
+		self.as_ref().first().copied()
 	}
 }
 
-impl Sequence<ValueType> for [ValueType] {
+impl<T: OHLCV + Copy, Q: AsRef<[T]>> Sequence<T> for Q {
 	fn validate(&self) -> bool {
-		self.iter().copied().all(ValueType::is_finite)
+		self.as_ref().iter().all(OHLCV::validate)
 	}
 
-	fn apply<M>(&mut self, method: &mut M)
+	fn apply<'a, M>(&'a mut self, method: &mut M)
 	where
-		M: Method<Input = ValueType, Output = ValueType> + ?Sized,
+		M: Method<'a, Input = T, Output = T> + ?Sized,
+		Self: AsMut<[T]>,
 	{
-		self.iter_mut().for_each(|x| *x = method.next(x));
+		self.as_mut().iter_mut().for_each(|x| *x = method.next(*x));
 	}
 
-	fn get_initial_value(&self) -> Option<&ValueType> {
-		self.first()
+	fn call<'a, M>(&self, method: &mut M) -> Vec<M::Output>
+	where
+		M: Method<'a, Input = T>,
+	{
+		let method = method.borrow_mut();
+		let input = self.as_ref();
+
+		input.iter().map(|x| method.next(*x)).collect()
+	}
+
+	fn get_initial_value(&self) -> Option<T> {
+		self.as_ref().first().copied()
 	}
 }

@@ -35,12 +35,12 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CCI(MeanAbsDev);
 
-impl Method for CCI {
+impl Method<'_> for CCI {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self(MeanAbsDev::new(length, value)?)),
@@ -48,7 +48,7 @@ impl Method for CCI {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		let mean = self.0.next(value);
 		let ma = self.0.get_sma().get_last_value();
 
@@ -70,9 +70,9 @@ mod tests {
 	fn test_cci_const() {
 		for i in 2..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, &input).unwrap();
+			let mut method = TestingMethod::new(i, input).unwrap();
 
-			let output = method.next(&input);
+			let output = method.next(input);
 			assert_eq_float(output, 0.0);
 		}
 	}
@@ -81,10 +81,10 @@ mod tests {
 	fn test_cci1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(0., ma.next(&x.close));
+			assert_eq_float(0., ma.next(x.close));
 		});
 	}
 
@@ -95,9 +95,9 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(2..255).for_each(|length| {
-			let mut method = TestingMethod::new(length, &src[0]).unwrap();
+			let mut method = TestingMethod::new(length, src[0]).unwrap();
 
-			src.iter().enumerate().for_each(|(i, x)| {
+			src.iter().enumerate().for_each(|(i, &x)| {
 				let mut sum = 0.0;
 				for j in 0..length {
 					sum += src[i.saturating_sub(j as usize)];

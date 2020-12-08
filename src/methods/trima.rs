@@ -51,12 +51,12 @@ pub struct TRIMA {
 	sma2: SMA,
 }
 
-impl Method for TRIMA {
+impl Method<'_> for TRIMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		Ok(Self {
 			sma1: SMA::new(length, value)?,
 			sma2: SMA::new(length, value)?,
@@ -64,8 +64,8 @@ impl Method for TRIMA {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
-		self.sma2.next(&self.sma1.next(value))
+	fn next(&mut self, value: Self::Input) -> Self::Output {
+		self.sma2.next(self.sma1.next(value))
 	}
 }
 
@@ -80,10 +80,10 @@ mod tests {
 	fn test_trima_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, &input).unwrap();
+			let mut method = TestingMethod::new(i, input).unwrap();
 
-			let output = method.next(&input);
-			test_const(&mut method, &input, output);
+			let output = method.next(input);
+			test_const(&mut method, input, output);
 		}
 	}
 
@@ -91,10 +91,10 @@ mod tests {
 	fn test_trima1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(&x.close));
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -105,10 +105,10 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|sma_length| {
-			let mut ma = TestingMethod::new(sma_length, &src[0]).unwrap();
+			let mut ma = TestingMethod::new(sma_length, src[0]).unwrap();
 			let mut level2 = Vec::new();
 
-			src.iter().enumerate().for_each(|(i, x)| {
+			src.iter().enumerate().for_each(|(i, &x)| {
 				let value = ma.next(x);
 				let slice_from = i.saturating_sub((sma_length - 1) as usize);
 				let slice_to = i;

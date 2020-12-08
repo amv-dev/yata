@@ -173,14 +173,14 @@ impl IndicatorInstance for MACDInstance {
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
-		let ema1 = self.ma1.next(&src);
-		let ema2 = self.ma2.next(&src);
+		let ema1 = self.ma1.next(src);
+		let ema2 = self.ma2.next(src);
 
 		let macd = ema1 - ema2;
-		let sigline = self.ma3.next(&macd);
+		let sigline = self.ma3.next(macd);
 
-		let signal1 = self.cross1.next(&(macd, sigline));
-		let signal2 = self.cross2.next(&(macd, 0.0));
+		let signal1 = self.cross1.next((macd, sigline));
+		let signal2 = self.cross2.next((macd, 0.0));
 
 		IndicatorResult::new(&[macd, sigline], &[signal1, signal2])
 	}

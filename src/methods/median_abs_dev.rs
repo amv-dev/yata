@@ -42,12 +42,12 @@ impl MedianAbsDev {
 	}
 }
 
-impl Method for MedianAbsDev {
+impl Method<'_> for MedianAbsDev {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		match length {
 			0 | 1 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
@@ -58,7 +58,7 @@ impl Method for MedianAbsDev {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		let smm = self.smm.next(value);
 
 		self.smm
@@ -82,9 +82,9 @@ mod tests {
 	fn test_median_abs_dev_const() {
 		for i in 2..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, &input).unwrap();
+			let mut method = TestingMethod::new(i, input).unwrap();
 
-			let output = method.next(&input);
+			let output = method.next(input);
 			assert_eq_float(0.0, output);
 		}
 	}
@@ -94,10 +94,10 @@ mod tests {
 	fn test_median_abs_dev1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(0.0, ma.next(&x.close));
+			assert_eq_float(0.0, ma.next(x.close));
 		});
 	}
 
@@ -109,9 +109,9 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(2..255).for_each(|length| {
-			let mut method = TestingMethod::new(length, &src[0]).unwrap();
+			let mut method = TestingMethod::new(length, src[0]).unwrap();
 
-			src.iter().enumerate().for_each(|(i, x)| {
+			src.iter().enumerate().for_each(|(i, &x)| {
 				let mut smm_slice = Vec::with_capacity(length as usize);
 
 				for j in 0..length {

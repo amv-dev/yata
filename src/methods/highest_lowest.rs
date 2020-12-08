@@ -63,12 +63,12 @@ pub struct HighestLowestDelta {
 	window: Window<ValueType>,
 }
 
-impl Method for HighestLowestDelta {
+impl Method<'_> for HighestLowestDelta {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error>
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
@@ -87,7 +87,7 @@ impl Method for HighestLowestDelta {
 	}
 
 	#[inline]
-	fn next(&mut self, &value: &Self::Input) -> ValueType {
+	fn next(&mut self, value: Self::Input) -> ValueType {
 		let left_value = self.window.push(value);
 
 		let mut search = false;
@@ -172,12 +172,12 @@ pub struct Highest {
 	window: Window<ValueType>,
 }
 
-impl Method for Highest {
+impl Method<'_> for Highest {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		if !value.is_finite() {
 			return Err(Error::InvalidCandles);
 		}
@@ -192,7 +192,7 @@ impl Method for Highest {
 	}
 
 	#[inline]
-	fn next(&mut self, &value: &Self::Input) -> ValueType {
+	fn next(&mut self, value: Self::Input) -> ValueType {
 		assert!(
 			value.is_finite(),
 			"Highest method cannot operate with NAN values"
@@ -265,12 +265,12 @@ pub struct Lowest {
 	window: Window<ValueType>,
 }
 
-impl Method for Lowest {
+impl Method<'_> for Lowest {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		if !value.is_finite() {
 			return Err(Error::InvalidCandles);
 		}
@@ -285,7 +285,7 @@ impl Method for Lowest {
 	}
 
 	#[inline]
-	fn next(&mut self, &value: &Self::Input) -> ValueType {
+	fn next(&mut self, value: Self::Input) -> ValueType {
 		assert!(
 			value.is_finite(),
 			"Lowest method cannot operate with NAN values"
@@ -315,10 +315,10 @@ mod tests {
 	fn test_highest_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = Highest::new(i, &input).unwrap();
+			let mut method = Highest::new(i, input).unwrap();
 
-			let output = method.next(&input);
-			test_const(&mut method, &input, output);
+			let output = method.next(input);
+			test_const(&mut method, input, output);
 		}
 	}
 
@@ -328,10 +328,10 @@ mod tests {
 
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(&x.close));
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -344,10 +344,10 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(2..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
-			src.iter().enumerate().for_each(|(i, x)| {
+			src.iter().enumerate().for_each(|(i, &x)| {
 				let value1 = ma.next(x);
 				let value2 = (0..length).fold(src[i], |m, j| m.max(src[i.saturating_sub(j)]));
 				assert_eq_float(value2, value1);
@@ -359,10 +359,10 @@ mod tests {
 	fn test_lowest_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = Lowest::new(i, &input).unwrap();
+			let mut method = Lowest::new(i, input).unwrap();
 
-			let output = method.next(&input);
-			test_const(&mut method, &input, output);
+			let output = method.next(input);
+			test_const(&mut method, input, output);
 		}
 	}
 
@@ -371,10 +371,10 @@ mod tests {
 		use super::Lowest as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(&x.close));
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -386,10 +386,10 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(2..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
-			src.iter().enumerate().for_each(|(i, x)| {
+			src.iter().enumerate().for_each(|(i, &x)| {
 				let value1 = ma.next(x);
 				let value2 = (0..length).fold(src[i], |m, j| m.min(src[i.saturating_sub(j)]));
 				assert_eq_float(value2, value1);
@@ -401,10 +401,10 @@ mod tests {
 	fn test_highest_lowest_delta_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = HighestLowestDelta::new(i, &input).unwrap();
+			let mut method = HighestLowestDelta::new(i, input).unwrap();
 
-			let output = method.next(&input);
-			test_const(&mut method, &input, output);
+			let output = method.next(input);
+			test_const(&mut method, input, output);
 		}
 	}
 
@@ -413,10 +413,10 @@ mod tests {
 		use super::HighestLowestDelta as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(0.0, ma.next(&x.close));
+			assert_eq_float(0.0, ma.next(x.close));
 		});
 	}
 
@@ -428,10 +428,10 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(2..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
-			src.iter().enumerate().for_each(|(i, x)| {
+			src.iter().enumerate().for_each(|(i, &x)| {
 				let value1 = ma.next(x);
 				let min = (0..length).fold(src[i], |m, j| m.min(src[i.saturating_sub(j)]));
 				let max = (0..length).fold(src[i], |m, j| m.max(src[i.saturating_sub(j)]));

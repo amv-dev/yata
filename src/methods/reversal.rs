@@ -60,16 +60,16 @@ impl ReversalSignal {
 	/// Constructs new instanceof `ReversalSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
-		Method::new((left, right), &value)
+		Method::new((left, right), value)
 	}
 }
 
-impl Method for ReversalSignal {
+impl Method<'_> for ReversalSignal {
 	type Params = (PeriodType, PeriodType);
 	type Input = ValueType;
 	type Output = Action;
 
-	fn new(params: Self::Params, value: &Self::Input) -> Result<Self, Error>
+	fn new(params: Self::Params, value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
@@ -80,7 +80,7 @@ impl Method for ReversalSignal {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		self.low.next(value) - self.high.next(value)
 	}
 }
@@ -147,16 +147,16 @@ impl UpperReversalSignal {
 	/// Constructs new instanceof `UpperReversalSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
-		Method::new((left, right), &value)
+		Method::new((left, right), value)
 	}
 }
 
-impl Method for UpperReversalSignal {
+impl Method<'_> for UpperReversalSignal {
 	type Params = (PeriodType, PeriodType);
 	type Input = ValueType;
 	type Output = Action;
 
-	fn new(params: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
+	fn new(params: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		let (left, right) = params;
 
 		if left == 0 || right == 0 || left.saturating_add(right) == PeriodType::MAX {
@@ -174,7 +174,7 @@ impl Method for UpperReversalSignal {
 	}
 
 	#[inline]
-	fn next(&mut self, &value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		self.window.push(value);
 
 		let first_index = (self.index + 1).saturating_sub(self.window.len());
@@ -278,16 +278,16 @@ impl LowerReversalSignal {
 	/// Constructs new instanceof `LowerReversalSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
 	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
-		Method::new((left, right), &value)
+		Method::new((left, right), value)
 	}
 }
 
-impl Method for LowerReversalSignal {
+impl Method<'_> for LowerReversalSignal {
 	type Params = (PeriodType, PeriodType);
 	type Input = ValueType;
 	type Output = Action;
 
-	fn new(params: Self::Params, value: &Self::Input) -> Result<Self, Error> {
+	fn new(params: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		let (left, right) = params;
 
 		if left == 0 || right == 0 || left.saturating_add(right) == PeriodType::MAX {
@@ -297,15 +297,15 @@ impl Method for LowerReversalSignal {
 		Ok(Self {
 			left,
 			right,
-			min_value: *value,
+			min_value: value,
 			min_index: 0,
 			index: 0,
-			window: Window::new(left + right + 1, *value),
+			window: Window::new(left + right + 1, value),
 		})
 	}
 
 	#[inline]
-	fn next(&mut self, &value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		self.window.push(value);
 
 		let first_index = (self.index + 1).saturating_sub(self.window.len());
@@ -356,8 +356,8 @@ mod tests {
 				let input = (i as ValueType + 56.0) / 16.3251;
 				let mut method = LowerReversalSignal::new(i, j, input).unwrap();
 
-				let output = method.next(&input);
-				test_const(&mut method, &input, output);
+				let output = method.next(input);
+				test_const(&mut method, input, output);
 			}
 		}
 	}
@@ -370,7 +370,7 @@ mod tests {
 
 		let mut pivot = LowerReversalSignal::new(2, 2, v[0]).unwrap();
 
-		let r2: Vec<i8> = v.iter().map(|x| pivot.next(x).analog()).collect();
+		let r2: Vec<i8> = v.iter().map(|&x| pivot.next(x).analog()).collect();
 		assert_eq!(r, r2);
 	}
 
@@ -381,8 +381,8 @@ mod tests {
 				let input = (i as ValueType + 56.0) / 16.3251;
 				let mut method = UpperReversalSignal::new(i, j, input).unwrap();
 
-				let output = method.next(&input);
-				test_const(&mut method, &input, output);
+				let output = method.next(input);
+				test_const(&mut method, input, output);
 			}
 		}
 	}
@@ -395,7 +395,7 @@ mod tests {
 
 		let mut pivot = UpperReversalSignal::new(2, 2, v[0]).unwrap();
 
-		let r2: Vec<i8> = v.iter().map(|x| pivot.next(x).analog()).collect();
+		let r2: Vec<i8> = v.iter().map(|&x| pivot.next(x).analog()).collect();
 		assert_eq!(r, r2);
 	}
 }

@@ -52,12 +52,12 @@ pub struct EMA {
 	value: ValueType,
 }
 
-impl Method for EMA {
+impl Method<'_> for EMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => {
@@ -68,7 +68,7 @@ impl Method for EMA {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		self.value = (value - self.value).mul_add(self.alpha, self.value);
 
 		self.value
@@ -87,12 +87,12 @@ pub struct DMA {
 	dma: EMA,
 }
 
-impl Method for DMA {
+impl Method<'_> for DMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
@@ -103,8 +103,8 @@ impl Method for DMA {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
-		self.dma.next(&self.ema.next(value))
+	fn next(&mut self, value: Self::Input) -> Self::Output {
+		self.dma.next(self.ema.next(value))
 	}
 }
 
@@ -120,12 +120,12 @@ pub struct TMA {
 	tma: EMA,
 }
 
-impl Method for TMA {
+impl Method<'_> for TMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
@@ -136,8 +136,8 @@ impl Method for TMA {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
-		self.tma.next(&self.dma.next(value))
+	fn next(&mut self, value: Self::Input) -> Self::Output {
+		self.tma.next(self.dma.next(value))
 	}
 }
 
@@ -190,12 +190,12 @@ pub struct DEMA {
 	dma: EMA,
 }
 
-impl Method for DEMA {
+impl Method<'_> for DEMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
@@ -206,9 +206,9 @@ impl Method for DEMA {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		let e_ma = self.ema.next(value);
-		let d_ma = self.dma.next(&e_ma);
+		let d_ma = self.dma.next(e_ma);
 
 		// 2. * ema - dma
 		e_ma.mul_add(2., -d_ma)
@@ -265,12 +265,12 @@ pub struct TEMA {
 	tma: EMA,
 }
 
-impl Method for TEMA {
+impl Method<'_> for TEMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
@@ -282,10 +282,10 @@ impl Method for TEMA {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		let e_ma = self.ema.next(value);
-		let d_ma = self.dma.next(&e_ma);
-		let t_ma = self.tma.next(&d_ma);
+		let d_ma = self.dma.next(e_ma);
+		let t_ma = self.tma.next(d_ma);
 
 		// 3. * (ema - dma) + tma
 		(e_ma - d_ma).mul_add(3., t_ma)
@@ -304,7 +304,7 @@ mod tests {
 	#[test]
 	fn test_ema_const() {
 		for i in 1..255 {
-			let input = &((i as ValueType + 56.0) / 16.3251);
+			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = EMA::new(i, input).unwrap();
 
 			let output = method.next(input);
@@ -317,10 +317,10 @@ mod tests {
 		use super::EMA as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(&x.close));
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -332,12 +332,12 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
 
 			let mut prev_value = src[0];
-			src.iter().for_each(|x| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let value2 = alpha * x + (1. - alpha) * prev_value;
@@ -352,7 +352,7 @@ mod tests {
 	#[test]
 	fn test_dma_const() {
 		for i in 1..255 {
-			let input = &((i as ValueType + 56.0) / 16.3251);
+			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = DMA::new(i, input).unwrap();
 
 			let output = method.next(input);
@@ -365,10 +365,10 @@ mod tests {
 		use super::DMA as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(&x.close));
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -380,13 +380,13 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
 
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
-			src.iter().for_each(|x| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let ema1 = alpha * x + (1. - alpha) * prev_value1;
@@ -405,7 +405,7 @@ mod tests {
 	#[test]
 	fn test_dema_const() {
 		for i in 1..255 {
-			let input = &((i as ValueType + 56.0) / 16.3251);
+			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = DEMA::new(i, input).unwrap();
 
 			let output = method.next(input);
@@ -418,10 +418,10 @@ mod tests {
 		use super::DEMA as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(&x.close));
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -433,13 +433,13 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
 
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
-			src.iter().for_each(|x| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let ema1 = alpha * x + (1. - alpha) * prev_value1;
@@ -458,7 +458,7 @@ mod tests {
 	#[test]
 	fn test_tma_const() {
 		for i in 1..255 {
-			let input = &((i as ValueType + 56.0) / 16.3251);
+			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = TMA::new(i, input).unwrap();
 
 			let output = method.next(input);
@@ -471,10 +471,10 @@ mod tests {
 		use super::TMA as TestingMethod;
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(&x.close));
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -486,14 +486,14 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
 
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
 			let mut prev_value3 = src[0];
-			src.iter().for_each(|x| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let ema1 = alpha * x + (1. - alpha) * prev_value1;
@@ -514,7 +514,7 @@ mod tests {
 	#[test]
 	fn test_tema_const() {
 		for i in 1..255 {
-			let input = &((i as ValueType + 56.0) / 16.3251);
+			let input = (i as ValueType + 56.0) / 16.3251;
 			let mut method = TEMA::new(i, input).unwrap();
 
 			let output = method.next(input);
@@ -527,10 +527,10 @@ mod tests {
 		use super::{Method, TEMA as TestingMethod};
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(&x.close));
+			assert_eq_float(x.close, ma.next(x.close));
 		});
 	}
 
@@ -542,14 +542,14 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let alpha = 2. / (length + 1) as ValueType;
 
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
 			let mut prev_value3 = src[0];
-			src.iter().for_each(|x| {
+			src.iter().for_each(|&x| {
 				let value = ma.next(x);
 
 				let e_ma = alpha * x + (1. - alpha) * prev_value1;

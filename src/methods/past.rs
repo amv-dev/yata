@@ -59,7 +59,7 @@ pub struct Past<T>(Window<T>)
 where
 	T: Copy + fmt::Debug;
 
-impl<T> Method for Past<T>
+impl<'a, T> Method<'a> for Past<T>
 where
 	T: Copy + fmt::Debug,
 {
@@ -67,7 +67,7 @@ where
 	type Input = T;
 	type Output = T;
 
-	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self(Window::new(length, value))),
@@ -75,7 +75,7 @@ where
 	}
 
 	#[inline]
-	fn next(&mut self, &value: &T) -> T {
+	fn next(&mut self, value: T) -> T {
 		self.0.push(value)
 	}
 }
@@ -91,10 +91,10 @@ mod tests {
 	fn test_past_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, &input).unwrap();
+			let mut method = TestingMethod::new(i, input).unwrap();
 
-			let output = method.next(&input);
-			test_const(&mut method, &input, output);
+			let output = method.next(input);
+			test_const(&mut method, input, output);
 		}
 	}
 
@@ -102,11 +102,11 @@ mod tests {
 	fn test_past1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, &candles.first()).unwrap();
+		let mut ma = TestingMethod::new(1, candles.first()).unwrap();
 
 		let mut prev = None;
 		candles.take(100).for_each(|x| {
-			let q = ma.next(&x);
+			let q = ma.next(x);
 			let p = prev.unwrap_or(x);
 
 			assert_eq!(p, q);
@@ -121,9 +121,9 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			src.iter().enumerate().for_each(|(i, &x)| {
-				assert_eq_float(src[i.saturating_sub(length as usize)], ma.next(&x))
+				assert_eq_float(src[i.saturating_sub(length as usize)], ma.next(x))
 			});
 		});
 	}

@@ -39,7 +39,7 @@ use serde::{Deserialize, Serialize};
 /// (0..t1.len()).for_each(|i| {
 ///     let value = t1[i];
 ///     let base = t2[i];
-///     let cross_value = cross.next(&(value, base)).analog();
+///     let cross_value = cross.next((value, base)).analog();
 ///     assert_eq!(cross_value, r[i]);
 /// });
 /// ```
@@ -62,12 +62,12 @@ pub struct Cross {
 	down: CrossUnder,
 }
 
-impl Method for Cross {
+impl Method<'_> for Cross {
 	type Params = ();
 	type Input = (ValueType, ValueType);
 	type Output = Action;
 
-	fn new(_: Self::Params, value: &Self::Input) -> Result<Self, Error>
+	fn new(_: Self::Params, value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
@@ -78,7 +78,7 @@ impl Method for Cross {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		let up = self.up.binary(value.0, value.1);
 		let down = self.down.binary(value.0, value.1);
 
@@ -110,7 +110,7 @@ impl Method for Cross {
 /// use yata::core::Method;
 /// use yata::methods::CrossAbove;
 ///
-/// let mut cross_above = CrossAbove::new((), &(0.0, 5.0)).unwrap();
+/// let mut cross_above = CrossAbove::new((), (0.0, 5.0)).unwrap();
 ///
 /// let t1 = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
 /// let t2 = vec![5.0, 3.0, 1.8, 2.9, 4.1, 5.6];
@@ -119,7 +119,7 @@ impl Method for Cross {
 /// (0..t1.len()).for_each(|i| {
 ///     let value = t1[i];
 ///     let base = t2[i];
-///     let cross_value = cross_above.next(&(value, base)).analog();
+///     let cross_value = cross_above.next((value, base)).analog();
 ///     assert_eq!(cross_value, r[i]);
 /// });
 /// ```
@@ -155,12 +155,12 @@ impl CrossAbove {
 	}
 }
 
-impl Method for CrossAbove {
+impl Method<'_> for CrossAbove {
 	type Params = ();
 	type Input = (ValueType, ValueType);
 	type Output = Action;
 
-	fn new(_: Self::Params, value: &Self::Input) -> Result<Self, Error>
+	fn new(_: Self::Params, value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
@@ -170,7 +170,7 @@ impl Method for CrossAbove {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		Action::from(self.binary(value.0, value.1) as i8)
 	}
 }
@@ -199,7 +199,7 @@ impl Method for CrossAbove {
 /// use yata::core::Method;
 /// use yata::methods::CrossUnder;
 ///
-/// let mut cross_under = CrossUnder::new((), &(0.0, 5.0)).unwrap();
+/// let mut cross_under = CrossUnder::new((), (0.0, 5.0)).unwrap();
 ///
 /// let t1 = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
 /// let t2 = vec![5.0, 3.0, 1.8, 2.9, 4.1, 5.6];
@@ -208,7 +208,7 @@ impl Method for CrossAbove {
 /// (0..t1.len()).for_each(|i| {
 ///     let value = t1[i];
 ///     let base = t2[i];
-///     let cross_value = cross_under.next(&(value, base)).analog();
+///     let cross_value = cross_under.next((value, base)).analog();
 ///     assert_eq!(cross_value, r[i]);
 /// });
 /// ```
@@ -244,12 +244,12 @@ impl CrossUnder {
 	}
 }
 
-impl Method for CrossUnder {
+impl Method<'_> for CrossUnder {
 	type Params = ();
 	type Input = (ValueType, ValueType);
 	type Output = Action;
 
-	fn new(_: Self::Params, value: &Self::Input) -> Result<Self, Error>
+	fn new(_: Self::Params, value: Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
@@ -259,7 +259,7 @@ impl Method for CrossUnder {
 	}
 
 	#[inline]
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
+	fn next(&mut self, value: Self::Input) -> Self::Output {
 		Action::from(self.binary(value.0, value.1) as i8)
 	}
 }
@@ -275,7 +275,7 @@ mod tests {
 	fn test_cross_const() {
 		use super::Cross as TestingMethod;
 
-		let input = &(7.0, 1.0);
+		let input = (7.0, 1.0);
 		let mut cross = TestingMethod::new((), input).unwrap();
 		let output = cross.next(input);
 
@@ -291,10 +291,10 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 		let avg = src.iter().sum::<ValueType>() / src.len() as ValueType;
 
-		let mut ma = TestingMethod::new((), &(src[0], avg)).unwrap();
+		let mut ma = TestingMethod::new((), (src[0], avg)).unwrap();
 
 		src.iter().enumerate().for_each(|(i, &x)| {
-			let value1 = ma.next(&(x, avg)).analog();
+			let value1 = ma.next((x, avg)).analog();
 
 			let value2;
 			if x > avg && src[i.saturating_sub(1)] < avg {
@@ -312,7 +312,7 @@ mod tests {
 	fn test_cross_above_const() {
 		use super::CrossAbove as TestingMethod;
 
-		let input = &(7.0, 1.0);
+		let input = (7.0, 1.0);
 		let mut cross = TestingMethod::new((), input).unwrap();
 		let output = cross.next(input);
 
@@ -328,10 +328,10 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 		let avg = src.iter().sum::<ValueType>() / src.len() as ValueType;
 
-		let mut ma = TestingMethod::new((), &(src[0], avg)).unwrap();
+		let mut ma = TestingMethod::new((), (src[0], avg)).unwrap();
 
 		src.iter().enumerate().for_each(|(i, &x)| {
-			let value1 = ma.next(&(x, avg)).analog();
+			let value1 = ma.next((x, avg)).analog();
 
 			let value2 = if x > avg && src[i.saturating_sub(1)] < avg {
 				1
@@ -347,7 +347,7 @@ mod tests {
 	fn test_cross_under_const() {
 		use super::CrossUnder as TestingMethod;
 
-		let input = &(7.0, 1.0);
+		let input = (7.0, 1.0);
 		let mut cross = TestingMethod::new((), input).unwrap();
 		let output = cross.next(input);
 
@@ -363,10 +363,10 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(100).map(|x| x.close).collect();
 		let avg = src.iter().sum::<ValueType>() / src.len() as ValueType;
 
-		let mut ma = TestingMethod::new((), &(src[0], avg)).unwrap();
+		let mut ma = TestingMethod::new((), (src[0], avg)).unwrap();
 
 		src.iter().enumerate().for_each(|(i, &x)| {
-			let value1 = ma.next(&(x, avg)).analog();
+			let value1 = ma.next((x, avg)).analog();
 
 			let value2 = if x < avg && src[i.saturating_sub(1)] > avg {
 				1

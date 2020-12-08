@@ -18,8 +18,8 @@ pub use aroon::Aroon;
 // mod chaikin_money_flow;
 // pub use chaikin_money_flow::ChaikinMoneyFlow;
 
-mod chaikin_oscillator;
-pub use chaikin_oscillator::ChaikinOscillator;
+// mod chaikin_oscillator;
+// pub use chaikin_oscillator::ChaikinOscillator;
 
 // mod chande_kroll_stop;
 // pub use chande_kroll_stop::ChandeKrollStop;

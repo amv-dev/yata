@@ -53,7 +53,7 @@ impl IndicatorConfig for ChaikinOscillator {
 		}
 
 		let cfg = self;
-		let adi = ADI::new(cfg.window, candle)?;
+		let adi = ADI::new(cfg.window, &candle)?;
 
 		Ok(Self::Instance {
 			ma1: method(cfg.method, cfg.period1, adi.get_value())?,
@@ -127,14 +127,14 @@ impl IndicatorInstance for ChaikinOscillatorInstance {
 	}
 
 	fn next<T: OHLCV + 'static>(&mut self, candle: &T) -> IndicatorResult {
-		let adi = &self.adi.next(candle);
+		let adi = self.adi.next(candle);
 
 		let data1 = self.ma1.next(adi);
 		let data2 = self.ma2.next(adi);
 
 		let value = data1 - data2;
 
-		let signal = self.cross_over.next(&(value, 0.));
+		let signal = self.cross_over.next((value, 0.));
 
 		IndicatorResult::new(&[value], &[signal])
 	}
