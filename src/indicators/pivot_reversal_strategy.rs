@@ -1,16 +1,41 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, ValueType, Window, OHLCV};
+use crate::core::{Error, Method, PeriodType, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{LowerReversalSignal, UpperReversalSignal};
 
 use super::HLC;
 
+/// Pivot Reversal Strategy
+/// 
+/// Simply seaches for pivot points and returns signal.
+///
+/// ## Links
+///
+/// * <https://www.incrediblecharts.com/technical/pivot_point_reversal.php>
+///
+/// # No values
+///
+/// # 1 signal
+/// 
+/// * `main` pivot signal
+/// 
+///	When low pivot happens, returns full buy signal.
+/// When high pivot happens, returns full sell signal.
+/// Otherwise returns no signal.
+///
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PivotReversalStrategy {
+	/// How many periods should left before pivot point.
+	/// 
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)-`right`\).
 	pub left: PeriodType,
+
+	/// How many periods should appear after pivot point.
+	/// 
+	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)-`left`\).
 	pub right: PeriodType,
 }
 
@@ -59,7 +84,7 @@ impl IndicatorConfig for PivotReversalStrategy {
 	}
 
 	fn size(&self) -> (u8, u8) {
-		(1, 1)
+		(0, 1)
 	}
 }
 
@@ -116,6 +141,6 @@ impl IndicatorInstance for PivotReversalStrategyInstance {
 
 		let r = se - le;
 
-		IndicatorResult::new(&[r as ValueType], &[Action::from(r)])
+		IndicatorResult::new(&[], &[r.into()])
 	}
 }
