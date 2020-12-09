@@ -27,12 +27,12 @@ use serde::{Deserialize, Serialize};
 /// use yata::prelude::*;
 /// use yata::methods::Momentum;
 ///
-/// let mut change = Momentum::new(3, &1.0).unwrap(); // a.k.a. Change => let mut change = Change::new(3);
-/// change.next(&1.0);
-/// change.next(&2.0);
-/// assert_eq!(change.next(&3.0), 2.0);
-/// assert_eq!(change.next(&4.0), 3.0);
-/// assert_eq!(change.next(&2.0), 0.0);
+/// let mut change = Momentum::new(3, 1.0).unwrap(); // a.k.a. Change => let mut change = Change::new(3);
+/// change.next(1.0);
+/// change.next(2.0);
+/// assert_eq!(change.next(3.0), 2.0);
+/// assert_eq!(change.next(4.0), 3.0);
+/// assert_eq!(change.next(2.0), 0.0);
 /// ```
 ///
 /// ### At `length`=1 Momentum is the same as Derivative with `length`=1
@@ -42,13 +42,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::Momentum;
 /// use yata::methods::Derivative;
 ///
-/// let mut change = Momentum::new(1, &1.0).unwrap();
-/// let mut derivative = Derivative::new(1, &1.0).unwrap();
-/// change.next(&1.0); derivative.next(&1.0);
-/// change.next(&2.0); derivative.next(&2.0);
-/// assert_eq!(change.next(&3.0), derivative.next(&3.0));
-/// assert_eq!(change.next(&4.0), derivative.next(&4.0));
-/// assert_eq!(change.next(&2.0), derivative.next(&2.0));
+/// let mut change = Momentum::new(1, 1.0).unwrap();
+/// let mut derivative = Derivative::new(1, 1.0).unwrap();
+/// change.next(1.0); derivative.next(1.0);
+/// change.next(2.0); derivative.next(2.0);
+/// assert_eq!(change.next(3.0), derivative.next(3.0));
+/// assert_eq!(change.next(4.0), derivative.next(4.0));
+/// assert_eq!(change.next(2.0), derivative.next(2.0));
 /// ```
 ///
 /// # Performance

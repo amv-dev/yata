@@ -27,13 +27,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::SMA;
 ///
 /// // SMA of length=3
-/// let mut sma = SMA::new(3, &1.0).unwrap();
+/// let mut sma = SMA::new(3, 1.0).unwrap();
 ///
-/// sma.next(&1.0);
-/// sma.next(&2.0);
+/// sma.next(1.0);
+/// sma.next(2.0);
 ///
-/// assert_eq!(sma.next(&3.0), 2.0);
-/// assert_eq!(sma.next(&4.0), 3.0);
+/// assert_eq!(sma.next(3.0), 2.0);
+/// assert_eq!(sma.next(4.0), 3.0);
 /// ```
 ///
 /// # Performance

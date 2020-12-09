@@ -213,11 +213,11 @@ impl TryFrom<String> for RegularMethods {
 ///
 /// let mut m = method(RegularMethods::SMA, 3, 1.0).unwrap();
 ///
-/// m.next(&1.0);
-/// m.next(&2.0);
+/// m.next(1.0);
+/// m.next(2.0);
 ///
-/// assert_eq!(m.next(&3.0), 2.0);
-/// assert_eq!(m.next(&4.0), 3.0);
+/// assert_eq!(m.next(3.0), 2.0);
+/// assert_eq!(m.next(4.0), 3.0);
 /// ```
 ///
 /// # See also

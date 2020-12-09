@@ -31,11 +31,11 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::LinearVolatility;
 ///
 /// // volatility over 3 periods
-/// let mut vol = LinearVolatility::new(3, &1.0).unwrap();
-/// vol.next(&1.0);
-/// vol.next(&2.0);
-/// assert_eq!(vol.next(&3.0), 2.0);
-/// assert_eq!(vol.next(&1.0), 4.0);
+/// let mut vol = LinearVolatility::new(3, 1.0).unwrap();
+/// vol.next(1.0);
+/// vol.next(2.0);
+/// assert_eq!(vol.next(3.0), 2.0);
+/// assert_eq!(vol.next(1.0), 4.0);
 /// ```
 ///
 /// # Performance

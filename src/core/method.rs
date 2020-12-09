@@ -15,24 +15,49 @@ type BoxedFnMethod<'a, M> = Box<dyn FnMut(<M as Method<'a>>::Input) -> <M as Met
 /// use yata::prelude::*;
 ///
 /// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
-/// let mut ma = SMA::new(2, &s[0]).unwrap();
+/// let mut ma = SMA::new(2, s[0]).unwrap();
 ///
-/// s.iter().enumerate().for_each(|(index, value)| {
+/// s.iter().enumerate().for_each(|(index, &value)| {
 ///     assert_eq!(ma.next(value), (value + s[index.saturating_sub(1)])/2.);
 /// });
 /// ```
 ///
 /// ### Get a whole new vector over the input vector
-///
+/// 
+/// You can call method `over` any `Sequence`:
 /// ```
 /// use yata::methods::SMA;
 /// use yata::prelude::*;
 ///
 /// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
-/// let mut ma = SMA::new(2, &s[0]).unwrap();
+/// let mut ma = SMA::new(2, s[0]).unwrap();
 ///
 /// let result = ma.over(s);
 /// assert_eq!(result.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);
+/// ```
+/// 
+/// Or you can provide `Method` to `Sequence`:
+/// ```
+/// use yata::methods::SMA;
+/// use yata::prelude::*;
+///
+/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
+/// let mut ma = SMA::new(2, s[0]).unwrap();
+///
+/// let result = s.call(ma);
+/// assert_eq!(result.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);
+/// ```
+/// 
+/// Or you can even change `Sequence` values in-place:
+/// ```
+/// use yata::methods::SMA;
+/// use yata::prelude::*;
+///
+/// let mut s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
+/// let mut ma = SMA::new(2, s[0]).unwrap();
+///
+/// s.apply(ma);
+/// assert_eq!(s.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);
 /// ```
 ///
 /// # Be advised
@@ -77,7 +102,7 @@ pub trait Method<'a>: fmt::Debug {
 	/// use yata::prelude::*;
 	///
 	/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
-	/// let mut ma = SMA::new(5, &s[0]).unwrap();
+	/// let mut ma = SMA::new(5, s[0]).unwrap();
 	///
 	/// let result = ma.over(&s);
 	/// assert_eq!(result.len(), s.len());
@@ -88,7 +113,7 @@ pub trait Method<'a>: fmt::Debug {
 	/// use yata::prelude::*;
 	///
 	/// let s: Vec<_> = vec![1.,2.,3.,4.,5.,6.,7.,8.,9.,10.];
-	/// let mut ma = SMA::new(100, &s[0]).unwrap();
+	/// let mut ma = SMA::new(100, s[0]).unwrap();
 	///
 	/// let result = ma.over(&s);
 	/// assert_eq!(result.len(), s.len());

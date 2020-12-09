@@ -28,13 +28,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::StDev;
 ///
 /// // StDev over the window with length=3
-/// let mut stdev = StDev::new(3, &1.0).unwrap();
+/// let mut stdev = StDev::new(3, 1.0).unwrap();
 ///
-/// stdev.next(&1.0);
-/// stdev.next(&2.0);
+/// stdev.next(1.0);
+/// stdev.next(2.0);
 ///
-/// assert_eq!(stdev.next(&3.0), 1.0);
-/// assert_eq!(stdev.next(&4.0), 1.0);
+/// assert_eq!(stdev.next(3.0), 1.0);
+/// assert_eq!(stdev.next(4.0), 1.0);
 /// ```
 ///
 /// # Performance

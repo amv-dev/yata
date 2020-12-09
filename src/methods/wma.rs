@@ -27,13 +27,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::WMA;
 ///
 /// // WMA of length=3
-/// let mut wma = WMA::new(3, &3.0).unwrap();
+/// let mut wma = WMA::new(3, 3.0).unwrap();
 ///
-/// wma.next(&3.0);
-/// wma.next(&6.0);
+/// wma.next(3.0);
+/// wma.next(6.0);
 ///
-/// assert_eq!(wma.next(&9.0), 7.0);
-/// assert_eq!(wma.next(&12.0), 10.0);
+/// assert_eq!(wma.next(9.0), 7.0);
+/// assert_eq!(wma.next(12.0), 10.0);
 /// ```
 ///
 /// # Performance
