@@ -49,4 +49,15 @@ pub trait IndicatorInstance {
 	fn name(&self) -> &'static str {
 		Self::Config::NAME
 	}
+
+	/// Creates a function from `IndicatorInstance`
+	fn into_fn<'a, T>(mut self) -> Box<dyn FnMut(&'a T) -> IndicatorResult>
+	where
+		T: OHLCV,
+		Self: Sized + 'static,
+	{
+		let f = move |x| self.next(x);
+
+		Box::new(f)
+	}
 }

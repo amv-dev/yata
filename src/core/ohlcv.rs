@@ -16,7 +16,7 @@ use super::{Source, ValueType};
 /// ```
 ///
 /// See also [Candle](crate::prelude::Candle).
-pub trait OHLCV: 'static {
+pub trait OHLCV {
 	/// Should return an *open* value of the period
 	fn open(&self) -> ValueType;
 
@@ -306,5 +306,33 @@ impl OHLCV for [ValueType; 5] {
 	#[inline]
 	fn volume(&self) -> ValueType {
 		self[4]
+	}
+}
+
+impl<T: OHLCV> OHLCV for &T {
+	#[inline]
+	fn open(&self) -> ValueType {
+		(**self).open()
+	}
+
+	#[inline]
+	fn high(&self) -> ValueType {
+		(**self).high()
+	}
+
+	#[inline]
+	fn low(&self) -> ValueType {
+		(**self).low()
+	}
+
+	#[inline]
+	fn close(&self) -> ValueType {
+		(**self).close()
+	}
+
+	#[inline]
+	fn volume(&self) -> ValueType {
+		(**self).volume()
+
 	}
 }

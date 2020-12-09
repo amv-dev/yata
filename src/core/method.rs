@@ -3,6 +3,8 @@ use super::{Error, Sequence};
 
 use std::fmt;
 
+type BoxedFnMethod<'a, M> = Box<dyn FnMut(<M as Method<'a>>::Input) -> <M as Method<'a>>::Output>;
+
 /// Trait for creating methods for timeseries
 ///
 /// # Regular methods usage
@@ -152,6 +154,29 @@ pub trait Method<'a>: fmt::Debug {
 		let m = Self::new(parameters, initial_value)?;
 		sequence.apply(m);
 		Ok(())
+	}
+
+	/// Creates a function from the `Method` instance
+	fn into_fn(mut self) -> BoxedFnMethod<'a, Self>
+	where
+		Self: Sized + 'static,
+	{
+		let f = move |x| self.next(x);
+
+		Box::new(f)
+	}
+
+	/// Creates new function based on the method
+	fn new_fn(
+		params: Self::Params,
+		initial_value: Self::Input,
+	) -> Result<BoxedFnMethod<'a, Self>, Error>
+	where
+		Self: Sized + 'static,
+	{
+		let instance = Self::new(params, initial_value)?;
+
+		Ok(instance.into_fn())
 	}
 }
 

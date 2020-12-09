@@ -33,6 +33,19 @@ pub trait IndicatorConfig: Clone {
 	where
 		Self: Sized;
 
+	/// Creates an `IndicatorInstance` function from this `IndicatorConfig`.
+	fn init_fn<'a, T: OHLCV>(
+		self,
+		initial_value: &'a T,
+	) -> Result<Box<dyn FnMut(&'a T) -> IndicatorResult>, Error>
+	where
+		Self: Sized + 'static,
+	{
+		let instance = self.init(initial_value)?;
+
+		Ok(instance.into_fn())
+	}
+
 	/// Evaluates indicator config over sequence of OHLC and returns sequence of `IndicatorResult`s
 	/// ```
 	/// use yata::prelude::*;
