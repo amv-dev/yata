@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{CrossAbove, CrossUnder, SMA};
 
@@ -49,7 +49,26 @@ pub struct KeltnerChannel {
 }
 
 impl IndicatorConfig for KeltnerChannel {
+	type Instance = KeltnerChannelInstance;
+
 	const NAME: &'static str = "KeltnerChannel";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = candle.source(cfg.source);
+		Ok(Self::Instance {
+			prev_close: candle.close(),
+			ma: method(cfg.method, cfg.period, src)?,
+			sma: SMA::new(cfg.period, candle.high() - candle.low())?,
+			cross_above: CrossAbove::default(),
+			cross_under: CrossUnder::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period > 1 && self.sigma > 0.0
@@ -87,30 +106,6 @@ impl IndicatorConfig for KeltnerChannel {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for KeltnerChannel {
-	type Instance = KeltnerChannelInstance<T>;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = candle.source(cfg.source);
-		Ok(Self::Instance {
-			prev_candle: candle,
-			ma: method(cfg.method, cfg.period, src)?,
-			sma: SMA::new(cfg.period, candle.high() - candle.low())?,
-			cross_above: CrossAbove::default(),
-			cross_under: CrossUnder::default(),
-			cfg,
-		})
-	}
-}
-
 impl Default for KeltnerChannel {
 	fn default() -> Self {
 		Self {
@@ -123,26 +118,28 @@ impl Default for KeltnerChannel {
 }
 
 #[derive(Debug)]
-pub struct KeltnerChannelInstance<T: OHLC> {
+pub struct KeltnerChannelInstance {
 	cfg: KeltnerChannel,
 
-	prev_candle: T,
+	prev_close: ValueType,
 	ma: RegularMethod,
 	sma: SMA,
 	cross_above: CrossAbove,
 	cross_under: CrossUnder,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for KeltnerChannelInstance<T> {
+impl IndicatorInstance for KeltnerChannelInstance {
 	type Config = KeltnerChannel;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let source = candle.source(self.cfg.source);
-		let tr = candle.tr(&self.prev_candle);
+		let tr = candle.tr_close(self.prev_close);
+		self.prev_close = candle.close();
+
 		let ma: ValueType = self.ma.next(source);
 		let atr = self.sma.next(tr);
 

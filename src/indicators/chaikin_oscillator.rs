@@ -126,7 +126,7 @@ impl IndicatorInstance for ChaikinOscillatorInstance {
 		&self.cfg
 	}
 
-	fn next<T: OHLCV + 'static>(&mut self, candle: &T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let adi = self.adi.next(candle);
 
 		let data1 = self.ma1.next(adi);

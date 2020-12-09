@@ -4,7 +4,7 @@ use std::fmt;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Every `Indicator` proceed an input of [OHLC](crate::core::OHLC) or [OHLCV](crate::core::OHLCV) and returns an `IndicatorResult` which consist of some returned raw values and some calculated signals
+/// Every `Indicator` proceed an input of [`OHLCV`](crate::core::OHLCV) and returns an `IndicatorResult` which consist of some returned raw values and some calculated signals.
 ///
 /// `Indicator` may return up to 4 signals and 4 raw values at each step
 #[derive(Clone, Copy)]

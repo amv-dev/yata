@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, Source, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, Source, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::Momentum;
 
 /// Momentum Index
@@ -40,7 +40,24 @@ pub struct MomentumIndex {
 }
 
 impl IndicatorConfig for MomentumIndex {
+	type Instance = MomentumIndexInstance;
+
 	const NAME: &'static str = "MomentumIndex";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = candle.source(cfg.source);
+
+		Ok(Self::Instance {
+			momentum1: Momentum::new(cfg.period1, src)?,
+			momentum2: Momentum::new(cfg.period2, src)?,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period2 > 0 && self.period1 > self.period2
@@ -74,28 +91,6 @@ impl IndicatorConfig for MomentumIndex {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for MomentumIndex {
-	type Instance = MomentumIndexInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = candle.source(cfg.source);
-
-		Ok(Self::Instance {
-			momentum1: Momentum::new(cfg.period1, src)?,
-			momentum2: Momentum::new(cfg.period2, src)?,
-			cfg,
-		})
-	}
-}
-
 impl Default for MomentumIndex {
 	fn default() -> Self {
 		Self {
@@ -106,7 +101,7 @@ impl Default for MomentumIndex {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MomentumIndexInstance {
 	cfg: MomentumIndex,
 
@@ -114,14 +109,14 @@ pub struct MomentumIndexInstance {
 	momentum2: Momentum,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for MomentumIndexInstance {
+impl IndicatorInstance for MomentumIndexInstance {
 	type Config = MomentumIndex;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
 		let v = self.momentum1.next(src);

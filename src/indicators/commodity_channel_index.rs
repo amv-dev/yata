@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::CCI;
 
 const SCALE: ValueType = 1.0 / 1.5;
@@ -41,7 +41,26 @@ pub struct CommodityChannelIndex {
 }
 
 impl IndicatorConfig for CommodityChannelIndex {
+	type Instance = CommodityChannelIndexInstance;
+
 	const NAME: &'static str = "CommodityChannelIndex";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let value = candle.source(cfg.source);
+
+		Ok(Self::Instance {
+			last_cci: 0.,
+			last_signal: 0,
+			cci: CCI::new(cfg.period, value)?,
+
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.zone >= 0.0 && self.period > 1 && self.period < PeriodType::MAX
@@ -75,30 +94,6 @@ impl IndicatorConfig for CommodityChannelIndex {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for CommodityChannelIndex {
-	type Instance = CommodityChannelIndexInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let value = candle.source(cfg.source);
-
-		Ok(Self::Instance {
-			last_cci: 0.,
-			last_signal: 0,
-			cci: CCI::new(cfg.period, value)?,
-
-			cfg,
-		})
-	}
-}
-
 impl Default for CommodityChannelIndex {
 	fn default() -> Self {
 		Self {
@@ -109,7 +104,7 @@ impl Default for CommodityChannelIndex {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CommodityChannelIndexInstance {
 	cfg: CommodityChannelIndex,
 
@@ -118,14 +113,14 @@ pub struct CommodityChannelIndexInstance {
 	last_signal: i8,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for CommodityChannelIndexInstance {
+impl IndicatorInstance for CommodityChannelIndexInstance {
 	type Config = CommodityChannelIndex;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let value = candle.source(self.cfg.source);
 
 		let cci = self.cci.next(value) * SCALE;

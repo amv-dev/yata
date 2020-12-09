@@ -139,16 +139,12 @@ impl IndicatorInstance for TRIXInstance {
 	type Config = Trix;
 
 	fn config(&self) -> &Self::Config
-	where
-		Self: Sized,
 	{
 		&self.cfg
 	}
 
 	#[inline]
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult
-	where
-		Self: Sized,
 	{
 		let src = candle.source(self.cfg.source);
 		let tma = self.tma.next(src);

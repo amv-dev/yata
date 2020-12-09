@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, Method, PeriodType, Source, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, RateOfChange, ReversalSignal};
 
@@ -71,7 +71,29 @@ pub struct CoppockCurve {
 }
 
 impl IndicatorConfig for CoppockCurve {
+	type Instance = CoppockCurveInstance;
+
 	const NAME: &'static str = "CoppockCurve";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = candle.source(cfg.source);
+		Ok(Self::Instance {
+			roc1: RateOfChange::new(cfg.period2, src)?,
+			roc2: RateOfChange::new(cfg.period3, src)?,
+			ma1: method(cfg.method1, cfg.period1, 0.)?,
+			ma2: method(cfg.method2, cfg.s3_period, 0.)?,
+			cross_over1: Cross::default(),
+			pivot: ReversalSignal::new(cfg.s2_left, cfg.s2_right, 0.)?,
+			cross_over2: Cross::default(),
+
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 > 1
@@ -137,33 +159,6 @@ impl IndicatorConfig for CoppockCurve {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for CoppockCurve {
-	type Instance = CoppockCurveInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = candle.source(cfg.source);
-		Ok(Self::Instance {
-			roc1: RateOfChange::new(cfg.period2, src)?,
-			roc2: RateOfChange::new(cfg.period3, src)?,
-			ma1: method(cfg.method1, cfg.period1, 0.)?,
-			ma2: method(cfg.method2, cfg.s3_period, 0.)?,
-			cross_over1: Cross::default(),
-			pivot: ReversalSignal::new(cfg.s2_left, cfg.s2_right, 0.)?,
-			cross_over2: Cross::default(),
-
-			cfg,
-		})
-	}
-}
-
 impl Default for CoppockCurve {
 	fn default() -> Self {
 		Self {
@@ -193,14 +188,14 @@ pub struct CoppockCurveInstance {
 	cross_over2: Cross,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for CoppockCurveInstance {
+impl IndicatorInstance for CoppockCurveInstance {
 	type Config = CoppockCurve;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 		let roc1 = self.roc1.next(src);
 		let roc2 = self.roc2.next(src);

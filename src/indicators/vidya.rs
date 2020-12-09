@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, Window, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, Window, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::Change;
 
 #[derive(Debug, Clone, Copy)]
@@ -14,7 +14,30 @@ pub struct Vidya {
 }
 
 impl IndicatorConfig for Vidya {
+	type Instance = VidyaInstance;
+
 	const NAME: &'static str = "Vidya";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = candle.source(cfg.source);
+
+		Ok(Self::Instance {
+			f: 2. / (1 + cfg.period) as ValueType,
+			up_sum: 0.,
+			dn_sum: 0.,
+			last_value: src,
+			last_result: src,
+			window: Window::new(cfg.period, 0.),
+			change: Change::new(1, src)?,
+			last_signal: 0,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period > 1 && self.zone >= 0. && self.zone <= 5.
@@ -48,34 +71,6 @@ impl IndicatorConfig for Vidya {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for Vidya {
-	type Instance = VidyaInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = candle.source(cfg.source);
-
-		Ok(Self::Instance {
-			f: 2. / (1 + cfg.period) as ValueType,
-			up_sum: 0.,
-			dn_sum: 0.,
-			last_value: src,
-			last_result: src,
-			window: Window::new(cfg.period, 0.),
-			change: Change::new(1, src)?,
-			last_signal: 0,
-			cfg,
-		})
-	}
-}
-
 impl Default for Vidya {
 	fn default() -> Self {
 		Self {
@@ -86,7 +81,7 @@ impl Default for Vidya {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VidyaInstance {
 	cfg: Vidya,
 
@@ -100,14 +95,14 @@ pub struct VidyaInstance {
 	last_signal: i8,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for VidyaInstance {
+impl IndicatorInstance for VidyaInstance {
 	type Config = Vidya;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
 		let change = self.change.next(src);

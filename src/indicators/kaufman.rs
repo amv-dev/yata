@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{Change, Cross, LinearVolatility, StDev};
 
 /// Kaufman Adaptive Moving Average (KAMA)
@@ -64,7 +64,31 @@ pub struct Kaufman {
 pub type KAMA = Kaufman;
 
 impl IndicatorConfig for Kaufman {
+	type Instance = KaufmanInstance;
+
 	const NAME: &'static str = "Kaufman";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = candle.source(cfg.source);
+
+		Ok(Self::Instance {
+			volatility: LinearVolatility::new(cfg.period1, src)?,
+			change: Change::new(cfg.period1, src)?,
+			fastest: 2. / (cfg.period2 + 1) as ValueType,
+			slowest: 2. / (cfg.period3 + 1) as ValueType,
+			st_dev: StDev::new(cfg.filter_period, src)?,
+			cross: Cross::default(),
+			last_signal: Action::None,
+			last_signal_value: src,
+			prev_value: src,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period3 > self.period2
@@ -117,34 +141,6 @@ impl IndicatorConfig for Kaufman {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for Kaufman {
-	type Instance = KaufmanInstance;
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = candle.source(cfg.source);
-
-		Ok(Self::Instance {
-			volatility: LinearVolatility::new(cfg.period1, src)?,
-			change: Change::new(cfg.period1, src)?,
-			fastest: 2. / (cfg.period2 + 1) as ValueType,
-			slowest: 2. / (cfg.period3 + 1) as ValueType,
-			st_dev: StDev::new(cfg.filter_period, src)?,
-			cross: Cross::default(),
-			last_signal: Action::None,
-			last_signal_value: src,
-			prev_value: src,
-			cfg,
-		})
-	}
-}
-
 impl Default for Kaufman {
 	fn default() -> Self {
 		Self {
@@ -158,7 +154,7 @@ impl Default for Kaufman {
 		}
 	}
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct KaufmanInstance {
 	cfg: Kaufman,
 
@@ -173,14 +169,14 @@ pub struct KaufmanInstance {
 	prev_value: ValueType,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for KaufmanInstance {
+impl IndicatorInstance for KaufmanInstance {
 	type Config = Kaufman;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
 		let direction = self.change.next(src).abs();

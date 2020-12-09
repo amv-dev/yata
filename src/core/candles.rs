@@ -133,6 +133,19 @@ pub struct Candle {
 	pub volume: ValueType,
 }
 
+impl Candle {
+	/// Creates `Candle` from any another `OHLCV`-object.
+	pub fn from<T: OHLCV>(src: &T) -> Self {
+		Self {
+			open: src.open(),
+			high: src.high(),
+			low: src.low(),
+			close: src.close(),
+			volume: src.volume(),
+		}
+	}
+}
+
 /// Just an alias for [Candle]
 pub type Candlestick = Candle;
 

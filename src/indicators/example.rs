@@ -5,7 +5,7 @@
 //! The idea is to find signals where price of timeseries crosses this config's `price` for the last `period` frames.
 
 // Some core structures and traits
-use crate::core::{Action, Error, IndicatorResult, PeriodType, Source, ValueType};
+use crate::core::{Action, Error, IndicatorResult, PeriodType, Source, ValueType, OHLCV};
 use crate::prelude::*;
 
 // Cross method for searching crossover between price and our value
@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 
 /// # Example config for the indicator **Configuration**
 ///
-/// Must implement `Debug`, `Clone`, `Default`, [`IndicatorConfig`](crate::core::IndicatorConfig) and [`IndicatorInitializer`](crate::core::IndicatorInitializer) traits.
+/// Must implement `Debug`, `Clone`, `Default`, [`IndicatorConfig`](crate::core::IndicatorConfig) trait.
 ///
 /// Also it may implements `serde::{Serialize, Deserialize}` - it's up to you.
 ///
@@ -33,7 +33,23 @@ pub struct Example {
 
 /// Implementing [`IndicatorConfig`](crate::core::IndicatorConfig) trait
 impl IndicatorConfig for Example {
+	type Instance = ExampleInstance;
+
 	const NAME: &'static str = "Example";
+
+	fn init<T: OHLCV>(self, _candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		Ok(Self::Instance {
+			cross: Cross::default(),
+			last_signal: Action::None,
+			last_signal_position: 0,
+			cfg,
+		})
+	}
 
 	/// Validates config values to be consistent
 	fn validate(&self) -> bool {
@@ -59,28 +75,6 @@ impl IndicatorConfig for Example {
 	/// Our indicator will return single raw value and two signals
 	fn size(&self) -> (u8, u8) {
 		(1, 2)
-	}
-}
-
-/// Implementing `IndicatorInitializer` to create **State** from the **Configuration**
-impl<T: OHLC> IndicatorInitializer<T> for Example {
-	type Instance = ExampleInstance;
-
-	fn init(self, _candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		Ok(Self::Instance {
-			cross: Cross::default(),
-			last_signal: Action::None,
-			last_signal_position: 0,
-			cfg,
-		})
 	}
 }
 
@@ -110,15 +104,15 @@ pub struct ExampleInstance {
 }
 
 /// Implementing `IndicatorInstance` trait for Example
-impl<T: OHLC> IndicatorInstance<T> for ExampleInstance {
+impl IndicatorInstance for ExampleInstance {
 	type Config = Example;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	/// Calculates next value by giving [`OHLC`](crate::core::OHLC)-object
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	/// Calculates next value by giving [`OHLCV`](crate::core::OHLCV)-object
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let new_signal = self.cross.next((candle.close(), self.cfg.price));
 
 		let signal = match new_signal {

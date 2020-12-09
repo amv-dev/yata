@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, Method, PeriodType, Source, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, ReversalSignal};
 
@@ -54,7 +54,28 @@ pub struct AwesomeOscillator {
 }
 
 impl IndicatorConfig for AwesomeOscillator {
+	type Instance = AwesomeOscillatorInstance;
+
 	const NAME: &'static str = "AwesomeOscillator";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = candle.source(cfg.source);
+
+		Ok(Self::Instance {
+			ma1: method(cfg.method, cfg.period1, src)?,
+			ma2: method(cfg.method, cfg.period2, src)?,
+			cross_over: Cross::default(),
+			reverse: Method::new((cfg.left, cfg.right), 0.0)?,
+			low_peaks: 0,
+			high_peaks: 0,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 > 2
@@ -107,32 +128,6 @@ impl IndicatorConfig for AwesomeOscillator {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for AwesomeOscillator {
-	type Instance = AwesomeOscillatorInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = candle.source(cfg.source);
-
-		Ok(Self::Instance {
-			ma1: method(cfg.method, cfg.period1, src)?,
-			ma2: method(cfg.method, cfg.period2, src)?,
-			cross_over: Cross::default(),
-			reverse: Method::new((cfg.left, cfg.right), 0.0)?,
-			low_peaks: 0,
-			high_peaks: 0,
-			cfg,
-		})
-	}
-}
-
 impl Default for AwesomeOscillator {
 	fn default() -> Self {
 		Self {
@@ -159,14 +154,14 @@ pub struct AwesomeOscillatorInstance {
 	high_peaks: u8,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for AwesomeOscillatorInstance {
+impl IndicatorInstance for AwesomeOscillatorInstance {
 	type Config = AwesomeOscillator;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
 		let ma1 = &mut self.ma1;

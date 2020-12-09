@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, PeriodType, Source, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 
 /// Envelopes
@@ -48,7 +48,25 @@ pub struct Envelopes {
 }
 
 impl IndicatorConfig for Envelopes {
+	type Instance = EnvelopesInstance;
+
 	const NAME: &'static str = "Envelopes";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = candle.source(cfg.source);
+
+		Ok(Self::Instance {
+			ma: method(cfg.method, cfg.period, src)?,
+			k_high: 1.0 + cfg.k,
+			k_low: 1.0 - cfg.k,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.k > 0.0 && self.period > 1
@@ -90,28 +108,6 @@ impl IndicatorConfig for Envelopes {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for Envelopes {
-	type Instance = EnvelopesInstance;
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = candle.source(cfg.source);
-
-		Ok(Self::Instance {
-			ma: method(cfg.method, cfg.period, src)?,
-			k_high: 1.0 + cfg.k,
-			k_low: 1.0 - cfg.k,
-			cfg,
-		})
-	}
-}
-
 impl Default for Envelopes {
 	fn default() -> Self {
 		Self {
@@ -133,14 +129,14 @@ pub struct EnvelopesInstance {
 	k_low: ValueType,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for EnvelopesInstance {
+impl IndicatorInstance for EnvelopesInstance {
 	type Config = Envelopes;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 		let v = self.ma.next(src);
 

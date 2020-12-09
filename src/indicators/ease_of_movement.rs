@@ -2,9 +2,10 @@
 use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, PeriodType, Window, OHLCV};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::Cross;
+use super::HLC;
 
 /// Ease Of Movement
 ///
@@ -42,7 +43,24 @@ pub struct EaseOfMovement {
 }
 
 impl IndicatorConfig for EaseOfMovement {
+	type Instance = EaseOfMovementInstance;
+
 	const NAME: &'static str = "EaseOfMovement";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		Ok(Self::Instance {
+			m1: method(cfg.method, cfg.period1, 0.)?,
+			w: Window::new(cfg.period2, HLC::from(candle)),
+			cross: Cross::new((), (0.0, 0.0))?,
+
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 > 1 && self.period1 < PeriodType::MAX && self.period2 >= 1
@@ -71,34 +89,8 @@ impl IndicatorConfig for EaseOfMovement {
 		Ok(())
 	}
 
-	fn is_volume_based(&self) -> bool {
-		true
-	}
-
 	fn size(&self) -> (u8, u8) {
 		(1, 1)
-	}
-}
-
-impl<T: OHLCV> IndicatorInitializer<T> for EaseOfMovement {
-	type Instance = EaseOfMovementInstance<T>;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		Ok(Self::Instance {
-			m1: method(cfg.method, cfg.period1, 0.)?,
-			w: Window::new(cfg.period2, candle),
-			cross: Cross::new((), (0.0, 0.0))?,
-
-			cfg,
-		})
 	}
 }
 
@@ -113,23 +105,23 @@ impl Default for EaseOfMovement {
 }
 
 #[derive(Debug)]
-pub struct EaseOfMovementInstance<T: OHLCV> {
+pub struct EaseOfMovementInstance {
 	cfg: EaseOfMovement,
 
 	m1: RegularMethod,
-	w: Window<T>,
+	w: Window<HLC>,
 	cross: Cross,
 }
 
-impl<T: OHLCV> IndicatorInstance<T> for EaseOfMovementInstance<T> {
+impl IndicatorInstance for EaseOfMovementInstance {
 	type Config = EaseOfMovement;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
-		let prev_candle = self.w.push(candle);
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
+		let prev_candle = self.w.push(HLC::from(candle));
 
 		let d_high = candle.high() - prev_candle.high();
 		let d_low = candle.low() - prev_candle.low();

@@ -1,9 +1,10 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLC, OHLCV};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::core::Candle;
 use crate::methods::Cross;
 
 /// Elders Force Index
@@ -42,7 +43,24 @@ pub struct EldersForceIndex {
 }
 
 impl IndicatorConfig for EldersForceIndex {
+	type Instance = EldersForceIndexInstance;
+
 	const NAME: &'static str = "EldersForceIndex";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		Ok(Self::Instance {
+			ma: method(cfg.method, cfg.period1, 0.)?,
+			window: Window::new(cfg.period2, Candle::from(candle)),
+			vol_sum: candle.volume() * cfg.period2 as ValueType,
+			cross_over: Cross::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 > 1 && self.period2 >= 1
@@ -75,34 +93,8 @@ impl IndicatorConfig for EldersForceIndex {
 		Ok(())
 	}
 
-	fn is_volume_based(&self) -> bool {
-		true
-	}
-
 	fn size(&self) -> (u8, u8) {
 		(1, 1)
-	}
-}
-
-impl<T: OHLCV> IndicatorInitializer<T> for EldersForceIndex {
-	type Instance = EldersForceIndexInstance<T>;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		Ok(Self::Instance {
-			ma: method(cfg.method, cfg.period1, 0.)?,
-			window: Window::new(cfg.period2, candle),
-			vol_sum: candle.volume() * cfg.period2 as ValueType,
-			cross_over: Cross::default(),
-			cfg,
-		})
 	}
 }
 
@@ -118,28 +110,28 @@ impl Default for EldersForceIndex {
 }
 
 #[derive(Debug)]
-pub struct EldersForceIndexInstance<T: OHLCV> {
+pub struct EldersForceIndexInstance {
 	cfg: EldersForceIndex,
 
 	ma: RegularMethod,
-	window: Window<T>,
+	window: Window<Candle>,
 	vol_sum: ValueType,
 	cross_over: Cross,
 }
 
-impl<T: OHLCV> IndicatorInstance<T> for EldersForceIndexInstance<T> {
+impl IndicatorInstance for EldersForceIndexInstance {
 	type Config = EldersForceIndex;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
-		let left_candle = self.window.push(candle);
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
+		let left_candle = self.window.push(Candle::from(candle));
 
 		self.vol_sum += candle.volume() - left_candle.volume();
-		let r = (OHLC::source(&candle, self.cfg.source)
-			- OHLC::source(&left_candle, self.cfg.source))
+		let r = (OHLCV::source(&candle, self.cfg.source)
+			- OHLCV::source(&left_candle, self.cfg.source))
 			* self.vol_sum;
 
 		let value = self.ma.next(r);

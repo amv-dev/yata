@@ -123,7 +123,7 @@ impl Default for Aroon {
 }
 
 /// Aroon state structure
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AroonInstance {
 	cfg: Aroon,
 	lowest_index: LowestIndex,
@@ -136,7 +136,7 @@ pub struct AroonInstance {
 impl IndicatorInstance for AroonInstance {
 	type Config = Aroon;
 
-	// type Input = dyn OHLC;
+	// type Input = dyn OHLCV;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

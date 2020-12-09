@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, Window, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, Window, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{Cross, Highest, Lowest};
 
 /// Ichimoku cloud
@@ -59,7 +59,30 @@ pub struct IchimokuCloud {
 }
 
 impl IndicatorConfig for IchimokuCloud {
+	type Instance = IchimokuCloudInstance;
+
 	const NAME: &'static str = "IchimokuCloud";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		Ok(Self::Instance {
+			highest1: Highest::new(cfg.l1, candle.high())?,
+			highest2: Highest::new(cfg.l2, candle.high())?,
+			highest3: Highest::new(cfg.l3, candle.high())?,
+			lowest1: Lowest::new(cfg.l1, candle.low())?,
+			lowest2: Lowest::new(cfg.l2, candle.low())?,
+			lowest3: Lowest::new(cfg.l3, candle.low())?,
+			window1: Window::new(cfg.m, candle.hl2()),
+			window2: Window::new(cfg.m, candle.hl2()),
+			cross1: Cross::default(),
+			cross2: Cross::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.l1 < self.l2 && self.l2 < self.l3
@@ -101,33 +124,6 @@ impl IndicatorConfig for IchimokuCloud {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for IchimokuCloud {
-	type Instance = IchimokuCloudInstance;
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		Ok(Self::Instance {
-			highest1: Highest::new(cfg.l1, candle.high())?,
-			highest2: Highest::new(cfg.l2, candle.high())?,
-			highest3: Highest::new(cfg.l3, candle.high())?,
-			lowest1: Lowest::new(cfg.l1, candle.low())?,
-			lowest2: Lowest::new(cfg.l2, candle.low())?,
-			lowest3: Lowest::new(cfg.l3, candle.low())?,
-			window1: Window::new(cfg.m, candle.hl2()),
-			window2: Window::new(cfg.m, candle.hl2()),
-			cross1: Cross::default(),
-			cross2: Cross::default(),
-			cfg,
-		})
-	}
-}
-
 impl Default for IchimokuCloud {
 	fn default() -> Self {
 		Self {
@@ -140,7 +136,7 @@ impl Default for IchimokuCloud {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct IchimokuCloudInstance {
 	cfg: IchimokuCloud,
 
@@ -156,14 +152,14 @@ pub struct IchimokuCloudInstance {
 	cross2: Cross,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for IchimokuCloudInstance {
+impl IndicatorInstance for IchimokuCloudInstance {
 	type Config = IchimokuCloud;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 		let (high, low) = (candle.high(), candle.low());
 		let (highest1, lowest1) = (self.highest1.next(high), self.lowest1.next(low));

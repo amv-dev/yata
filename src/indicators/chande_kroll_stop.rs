@@ -2,8 +2,8 @@
 use serde::{Deserialize, Serialize};
 // use std::str::FromStr;
 
-use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, signi, RegularMethod, RegularMethods};
 use crate::methods::{CrossAbove, Highest, Lowest};
 
@@ -58,7 +58,37 @@ pub struct ChandeKrollStop {
 }
 
 impl IndicatorConfig for ChandeKrollStop {
+	type Instance = ChandeKrollStopInstance;
+
 	const NAME: &'static str = "ChandeKrollStop";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let tr = candle.high() - candle.low();
+
+		let cfg = self;
+		Ok(Self::Instance {
+			ma: method(cfg.method, cfg.p, candle.tr(&candle))?,
+
+			highest1: Highest::new(cfg.p, candle.high())?,
+			lowest1: Lowest::new(cfg.p, candle.low())?,
+
+			highest2: Highest::new(cfg.q, candle.high() - cfg.x * tr)?,
+			lowest2: Lowest::new(cfg.q, cfg.x.mul_add(tr, candle.low()))?,
+
+			prev_close: candle.close(),
+			prev_stop_short: candle.high() - cfg.x * tr,
+			prev_stop_long: cfg.x.mul_add(tr, candle.low()),
+			cross_above: CrossAbove::new(
+				(),
+				(cfg.x.mul_add(tr, candle.low()), candle.high() - cfg.x * tr),
+			)?,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.x >= 0.0 && self.p > 0 && self.q > 0
@@ -96,41 +126,6 @@ impl IndicatorConfig for ChandeKrollStop {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for ChandeKrollStop {
-	type Instance = ChandeKrollStopInstance<T>;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let tr = candle.high() - candle.low();
-
-		let cfg = self;
-		Ok(Self::Instance {
-			ma: method(cfg.method, cfg.p, candle.tr(&candle))?,
-
-			highest1: Highest::new(cfg.p, candle.high())?,
-			lowest1: Lowest::new(cfg.p, candle.low())?,
-
-			highest2: Highest::new(cfg.q, candle.high() - cfg.x * tr)?,
-			lowest2: Lowest::new(cfg.q, cfg.x.mul_add(tr, candle.low()))?,
-
-			prev_candle: candle,
-			prev_stop_short: candle.high() - cfg.x * tr,
-			prev_stop_long: cfg.x.mul_add(tr, candle.low()),
-			cross_above: CrossAbove::new(
-				(),
-				(cfg.x.mul_add(tr, candle.low()), candle.high() - cfg.x * tr),
-			)?,
-			cfg,
-		})
-	}
-}
-
 impl Default for ChandeKrollStop {
 	fn default() -> Self {
 		Self {
@@ -145,7 +140,7 @@ impl Default for ChandeKrollStop {
 
 /// Chande Kroll Stop state structure
 #[derive(Debug)]
-pub struct ChandeKrollStopInstance<T: OHLC> {
+pub struct ChandeKrollStopInstance {
 	cfg: ChandeKrollStop,
 
 	ma: RegularMethod,
@@ -153,13 +148,13 @@ pub struct ChandeKrollStopInstance<T: OHLC> {
 	lowest1: Lowest,
 	highest2: Highest,
 	lowest2: Lowest,
-	prev_candle: T,
+	prev_close: ValueType,
 	prev_stop_short: ValueType,
 	prev_stop_long: ValueType,
 	cross_above: CrossAbove,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for ChandeKrollStopInstance<T> {
+impl IndicatorInstance for ChandeKrollStopInstance {
 	type Config = ChandeKrollStop;
 
 	fn config(&self) -> &Self::Config {
@@ -167,9 +162,9 @@ impl<T: OHLC> IndicatorInstance<T> for ChandeKrollStopInstance<T> {
 	}
 
 	#[allow(clippy::similar_names)]
-	fn next(&mut self, candle: T) -> IndicatorResult {
-		let tr = candle.tr(&self.prev_candle);
-		self.prev_candle = candle;
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
+		let tr = candle.tr_close(self.prev_close);
+		self.prev_close = candle.close();
 
 		let atr = self.ma.next(tr);
 

@@ -147,6 +147,12 @@ pub trait OHLCV {
 	/// ```
 	#[inline]
 	fn tr(&self, prev_candle: &dyn OHLCV) -> ValueType {
+		self.tr_close(prev_candle.close())
+	}
+
+	/// Calculates [True Range](https://en.wikipedia.org/wiki/Average_true_range) over last two candles using `close` price from the previous candle.
+	#[inline]
+	fn tr_close(&self, prev_close: ValueType) -> ValueType {
 		// Original formula
 
 		// let (a, b, c) = (
@@ -160,7 +166,7 @@ pub trait OHLCV {
 		// -----------------------
 		// more performance
 		// only 1 subtract operation instead of 3
-		self.high().max(prev_candle.close()) - self.low().min(prev_candle.close())
+		self.high().max(prev_close) - self.low().min(prev_close)
 	}
 
 	/// Validates candle attributes

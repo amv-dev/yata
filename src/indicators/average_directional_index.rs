@@ -1,9 +1,10 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, PeriodType, ValueType, Window, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, PeriodType, ValueType, Window, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
+use super::HLC;
 
 /// Average Directional Index
 ///
@@ -60,7 +61,28 @@ pub struct AverageDirectionalIndex {
 }
 
 impl IndicatorConfig for AverageDirectionalIndex {
+	type Instance = AverageDirectionalIndexInstance;
+
 	const NAME: &'static str = "AverageDirectionalIndex";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let tr = candle.tr(candle);
+
+		Ok(Self::Instance {
+			window: Window::new(cfg.period1, HLC::from(candle)),
+			prev_close: candle.close(),
+			tr_ma: method(cfg.method1, cfg.di_length, tr)?,
+			plus_di: method(cfg.method1, cfg.di_length, 0.0)?,
+			minus_di: method(cfg.method1, cfg.di_length, 0.0)?,
+			ma2: method(cfg.method2, cfg.adx_smoothing, 0.0)?,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.di_length >= 1
@@ -116,30 +138,6 @@ impl IndicatorConfig for AverageDirectionalIndex {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for AverageDirectionalIndex {
-	type Instance = AverageDirectionalIndexInstance<T>;
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let tr = candle.tr(&candle);
-
-		Ok(Self::Instance {
-			window: Window::new(cfg.period1, candle),
-			tr_ma: method(cfg.method1, cfg.di_length, tr)?,
-			plus_di: method(cfg.method1, cfg.di_length, 0.0)?,
-			minus_di: method(cfg.method1, cfg.di_length, 0.0)?,
-			ma2: method(cfg.method2, cfg.adx_smoothing, 0.0)?,
-			cfg,
-		})
-	}
-}
-
 impl Default for AverageDirectionalIndex {
 	fn default() -> Self {
 		Self {
@@ -154,20 +152,22 @@ impl Default for AverageDirectionalIndex {
 }
 
 #[derive(Debug)]
-pub struct AverageDirectionalIndexInstance<T: OHLC> {
+pub struct AverageDirectionalIndexInstance {
 	cfg: AverageDirectionalIndex,
 
-	window: Window<T>,
+	window: Window<HLC>,
+	prev_close: ValueType,
 	tr_ma: RegularMethod,
 	plus_di: RegularMethod,
 	minus_di: RegularMethod,
 	ma2: RegularMethod,
 }
 
-impl<T: OHLC> AverageDirectionalIndexInstance<T> {
-	fn dir_mov(&mut self, candle: T) -> (ValueType, ValueType) {
+impl AverageDirectionalIndexInstance {
+	fn dir_mov(&mut self, candle: HLC) -> (ValueType, ValueType) {
 		let prev_candle = self.window.push(candle);
-		let true_range = self.tr_ma.next(candle.tr(&prev_candle));
+		let true_range = self.tr_ma.next(candle.tr_close(self.prev_close));
+		self.prev_close = candle.close();
 
 		let (du, dd) = (
 			candle.high() - prev_candle.high(),
@@ -195,15 +195,15 @@ impl<T: OHLC> AverageDirectionalIndexInstance<T> {
 	}
 }
 
-impl<T: OHLC> IndicatorInstance<T> for AverageDirectionalIndexInstance<T> {
+impl IndicatorInstance for AverageDirectionalIndexInstance {
 	type Config = AverageDirectionalIndex;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
-		let (plus, minus) = self.dir_mov(candle);
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
+		let (plus, minus) = self.dir_mov(HLC::from(candle));
 		let adx = self.adx(plus, minus);
 
 		let signal1 = (adx > self.cfg.zone) as i8 * ((plus > minus) as i8 - (plus < minus) as i8);

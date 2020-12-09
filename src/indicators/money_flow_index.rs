@@ -2,8 +2,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, PeriodType, ValueType, Window, OHLCV};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::Cross;
+use crate::core::Candle;
 
 /// Money Flow Index
 ///
@@ -49,7 +50,28 @@ pub struct MoneyFlowIndex {
 }
 
 impl IndicatorConfig for MoneyFlowIndex {
+	type Instance = MoneyFlowIndexInstance;
+
 	const NAME: &'static str = "MoneyFlowIndex";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let static_candle = Candle::from(candle);
+		let cfg = self;
+		Ok(Self::Instance {
+			window: Window::new(cfg.period, static_candle),
+			prev_candle: static_candle,
+			last_prev_candle: static_candle,
+			pmf: 0.,
+			nmf: 0.,
+			cross_lower: Cross::default(),
+			cross_upper: Cross::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.zone >= 0. && self.zone <= 0.5
@@ -74,37 +96,8 @@ impl IndicatorConfig for MoneyFlowIndex {
 		Ok(())
 	}
 
-	fn is_volume_based(&self) -> bool {
-		true
-	}
-
 	fn size(&self) -> (u8, u8) {
 		(3, 2)
-	}
-}
-
-impl<T: OHLCV> IndicatorInitializer<T> for MoneyFlowIndex {
-	type Instance = MoneyFlowIndexInstance<T>;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		Ok(Self::Instance {
-			window: Window::new(cfg.period, candle),
-			prev_candle: candle,
-			last_prev_candle: candle,
-			pmf: 0.,
-			nmf: 0.,
-			cross_lower: Cross::default(),
-			cross_upper: Cross::default(),
-			cfg,
-		})
 	}
 }
 
@@ -117,13 +110,13 @@ impl Default for MoneyFlowIndex {
 	}
 }
 
-#[derive(Debug)]
-pub struct MoneyFlowIndexInstance<T: OHLCV> {
+#[derive(Debug, Clone)]
+pub struct MoneyFlowIndexInstance {
 	cfg: MoneyFlowIndex,
 
-	window: Window<T>,
-	prev_candle: T,
-	last_prev_candle: T,
+	window: Window<Candle>,
+	prev_candle: Candle,
+	last_prev_candle: Candle,
 	pmf: ValueType,
 	nmf: ValueType,
 	cross_lower: Cross,
@@ -131,7 +124,7 @@ pub struct MoneyFlowIndexInstance<T: OHLCV> {
 }
 
 #[inline]
-fn tfunc<T: OHLCV>(candle: &T, last_candle: &T) -> (ValueType, ValueType) {
+fn tfunc(candle: &Candle, last_candle: &Candle) -> (ValueType, ValueType) {
 	let tp1 = candle.tp();
 	let tp2 = last_candle.tp();
 
@@ -141,21 +134,21 @@ fn tfunc<T: OHLCV>(candle: &T, last_candle: &T) -> (ValueType, ValueType) {
 	)
 }
 
-impl<T: OHLCV> IndicatorInstance<T> for MoneyFlowIndexInstance<T> {
+impl IndicatorInstance for MoneyFlowIndexInstance {
 	type Config = MoneyFlowIndex;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
-		let (pos, neg) = tfunc(&candle, &self.prev_candle);
-
-		let last_candle = self.window.push(candle);
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
+		let static_candle = Candle::from(candle);
+		let (pos, neg) = tfunc(&static_candle, &self.prev_candle);
+		let last_candle = self.window.push(static_candle);
 		let (left_pos, left_neg) = tfunc(&last_candle, &self.last_prev_candle);
 
 		self.last_prev_candle = last_candle;
-		self.prev_candle = candle;
+		self.prev_candle = static_candle;
 
 		self.pmf += pos - left_pos;
 		self.nmf += neg - left_neg;

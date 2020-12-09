@@ -1,9 +1,11 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, ValueType, Window, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, ValueType, Window, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{LowerReversalSignal, UpperReversalSignal};
+
+use super::HLC;
 
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -13,7 +15,25 @@ pub struct PivotReversalStrategy {
 }
 
 impl IndicatorConfig for PivotReversalStrategy {
+	type Instance = PivotReversalStrategyInstance;
+
 	const NAME: &'static str = "PivotReversalStrategy";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		Ok(Self::Instance {
+			ph: UpperReversalSignal::new(cfg.left, cfg.right, candle.high())?,
+			pl: LowerReversalSignal::new(cfg.left, cfg.right, candle.low())?,
+			window: Window::new(cfg.right, HLC::from(candle)),
+			hprice: 0.,
+			lprice: 0.,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.left >= 1 && self.right >= 1 && self.left.saturating_add(self.right) < PeriodType::MAX
@@ -43,47 +63,24 @@ impl IndicatorConfig for PivotReversalStrategy {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for PivotReversalStrategy {
-	type Instance = PivotReversalStrategyInstance<T>;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		Ok(Self::Instance {
-			ph: UpperReversalSignal::new(cfg.left, cfg.right, candle.high())?,
-			pl: LowerReversalSignal::new(cfg.left, cfg.right, candle.low())?,
-			window: Window::new(cfg.right, candle),
-			hprice: 0.,
-			lprice: 0.,
-			cfg,
-		})
-	}
-}
-
 impl Default for PivotReversalStrategy {
 	fn default() -> Self {
 		Self { left: 4, right: 2 }
 	}
 }
 
-#[derive(Debug)]
-pub struct PivotReversalStrategyInstance<T: OHLC> {
+#[derive(Debug, Clone)]
+pub struct PivotReversalStrategyInstance {
 	cfg: PivotReversalStrategy,
 
 	ph: UpperReversalSignal,
 	pl: LowerReversalSignal,
-	window: Window<T>,
+	window: Window<HLC>,
 	hprice: ValueType,
 	lprice: ValueType,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for PivotReversalStrategyInstance<T> {
+impl IndicatorInstance for PivotReversalStrategyInstance {
 	type Config = PivotReversalStrategy;
 
 	fn config(&self) -> &Self::Config {
@@ -91,9 +88,9 @@ impl<T: OHLC> IndicatorInstance<T> for PivotReversalStrategyInstance<T> {
 	}
 
 	#[allow(clippy::similar_names)]
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let (high, low) = (candle.high(), candle.low());
-		let past_candle = self.window.push(candle);
+		let past_candle = self.window.push(HLC::from(candle));
 
 		let swh = self.ph.next(high);
 		let swl = self.pl.next(low);

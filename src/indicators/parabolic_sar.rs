@@ -1,9 +1,11 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use std::cmp::Ordering;
+
+use super::HLC;
 
 /// Parabolic Stop And Reverse
 ///
@@ -33,7 +35,27 @@ pub struct ParabolicSAR {
 }
 
 impl IndicatorConfig for ParabolicSAR {
+	type Instance = ParabolicSARInstance;
+
 	const NAME: &'static str = "ParabolicSAR";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		Ok(Self::Instance {
+			trend: 1,
+			trend_inc: 1,
+			low: candle.low(),
+			high: candle.high(),
+			sar: candle.low(),
+			prev_candle: HLC::from(candle),
+			prev_trend: 0,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.af_step < self.af_max
@@ -63,31 +85,6 @@ impl IndicatorConfig for ParabolicSAR {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for ParabolicSAR {
-	type Instance = ParabolicSARInstance<T>;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		Ok(Self::Instance {
-			trend: 1,
-			trend_inc: 1,
-			low: candle.low(),
-			high: candle.high(),
-			sar: candle.low(),
-			prev_candle: candle,
-			prev_trend: 0,
-			cfg,
-		})
-	}
-}
-
 impl Default for ParabolicSAR {
 	fn default() -> Self {
 		Self {
@@ -97,8 +94,8 @@ impl Default for ParabolicSAR {
 	}
 }
 
-#[derive(Debug)]
-pub struct ParabolicSARInstance<T: OHLC> {
+#[derive(Debug, Clone, Copy)]
+pub struct ParabolicSARInstance {
 	cfg: ParabolicSAR,
 
 	trend: i8,
@@ -106,21 +103,21 @@ pub struct ParabolicSARInstance<T: OHLC> {
 	low: ValueType,
 	high: ValueType,
 	sar: ValueType,
-	prev_candle: T,
+	prev_candle: HLC,
 	prev_trend: i8,
 }
 
 /// Just an alias for `ParabolicSAR`
 pub type ParabolicStopAndReverse = ParabolicSAR;
 
-impl<T: OHLC> IndicatorInstance<T> for ParabolicSARInstance<T> {
+impl IndicatorInstance for ParabolicSARInstance {
 	type Config = ParabolicSAR;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		match self.trend.cmp(&0) {
 			Ordering::Greater => {
 				if self.high < candle.high() {
@@ -170,7 +167,7 @@ impl<T: OHLC> IndicatorInstance<T> for ParabolicSARInstance<T> {
 			Ordering::Equal => {}
 		}
 
-		self.prev_candle = candle;
+		self.prev_candle = HLC::from(candle);
 
 		let signal = (self.prev_trend != trend) as i8 * trend;
 

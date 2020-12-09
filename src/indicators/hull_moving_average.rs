@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, Method, PeriodType, Source, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{ReversalSignal, HMA};
 
 /// Hull Moving Average indicator
@@ -45,7 +45,24 @@ pub struct HullMovingAverage {
 }
 
 impl IndicatorConfig for HullMovingAverage {
+	type Instance = HullMovingAverageInstance;
+
 	const NAME: &'static str = "HullMovingAverage";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = candle.source(cfg.source);
+
+		Ok(Self::Instance {
+			hma: HMA::new(cfg.period, src)?,
+			pivot: ReversalSignal::new(cfg.left, cfg.right, src)?,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period > 2
@@ -86,28 +103,6 @@ impl IndicatorConfig for HullMovingAverage {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for HullMovingAverage {
-	type Instance = HullMovingAverageInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = candle.source(cfg.source);
-
-		Ok(Self::Instance {
-			hma: HMA::new(cfg.period, src)?,
-			pivot: ReversalSignal::new(cfg.left, cfg.right, src)?,
-			cfg,
-		})
-	}
-}
-
 impl Default for HullMovingAverage {
 	fn default() -> Self {
 		Self {
@@ -119,7 +114,7 @@ impl Default for HullMovingAverage {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct HullMovingAverageInstance {
 	cfg: HullMovingAverage,
 
@@ -127,14 +122,14 @@ pub struct HullMovingAverageInstance {
 	pivot: ReversalSignal,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for HullMovingAverageInstance {
+impl IndicatorInstance for HullMovingAverageInstance {
 	type Config = HullMovingAverage;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let value = self.hma.next(candle.source(self.cfg.source));
 		let signal = self.pivot.next(value);
 

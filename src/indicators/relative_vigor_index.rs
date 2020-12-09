@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, SMA, SWMA};
 
@@ -17,7 +17,31 @@ pub struct RelativeVigorIndex {
 }
 
 impl IndicatorConfig for RelativeVigorIndex {
+	type Instance = RelativeVigorIndexInstance;
+
 	const NAME: &'static str = "RelativeVigorIndex";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let d_close = candle.close() - candle.open();
+		let d_hl = candle.high() - candle.low();
+		let rvi = if d_hl == 0. { 0. } else { d_close / d_hl };
+
+		Ok(Self::Instance {
+			prev_close: candle.open(),
+			swma1: SWMA::new(cfg.period2, d_close)?,
+			sma1: SMA::new(cfg.period1, d_close)?,
+			swma2: SWMA::new(cfg.period2, d_hl)?,
+			sma2: SMA::new(cfg.period1, d_hl)?,
+			ma: method(cfg.method, cfg.period3, rvi)?,
+			cross: Cross::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 >= 2 && self.zone >= 0. && self.zone <= 1. && self.period3 > 1
@@ -59,35 +83,6 @@ impl IndicatorConfig for RelativeVigorIndex {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for RelativeVigorIndex {
-	type Instance = RelativeVigorIndexInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let d_close = candle.close() - candle.open();
-		let d_hl = candle.high() - candle.low();
-		let rvi = if d_hl == 0. { 0. } else { d_close / d_hl };
-
-		Ok(Self::Instance {
-			prev_close: candle.open(),
-			swma1: SWMA::new(cfg.period2, d_close)?,
-			sma1: SMA::new(cfg.period1, d_close)?,
-			swma2: SWMA::new(cfg.period2, d_hl)?,
-			sma2: SMA::new(cfg.period1, d_hl)?,
-			ma: method(cfg.method, cfg.period3, rvi)?,
-			cross: Cross::default(),
-			cfg,
-		})
-	}
-}
-
 impl Default for RelativeVigorIndex {
 	fn default() -> Self {
 		Self {
@@ -113,7 +108,7 @@ pub struct RelativeVigorIndexInstance {
 	cross: Cross,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for RelativeVigorIndexInstance {
+impl IndicatorInstance for RelativeVigorIndexInstance {
 	type Config = RelativeVigorIndex;
 
 	#[inline]
@@ -122,7 +117,7 @@ impl<T: OHLC> IndicatorInstance<T> for RelativeVigorIndexInstance {
 	}
 
 	#[allow(clippy::similar_names)]
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let close_open = candle.close() - self.prev_close;
 		let high_low = candle.high() - candle.low();
 
@@ -135,8 +130,6 @@ impl<T: OHLC> IndicatorInstance<T> for RelativeVigorIndexInstance {
 
 		let rvi = if sma2 == 0. { 0. } else { sma1 / sma2 };
 		let sig: ValueType = self.ma.next(rvi);
-
-		// let s2;
 
 		let s1 = self.cross.next((rvi, sig));
 

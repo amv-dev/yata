@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, RateOfChange};
 
@@ -65,7 +65,32 @@ pub struct KnowSureThing {
 }
 
 impl IndicatorConfig for KnowSureThing {
+	type Instance = KnowSureThingInstance;
+
 	const NAME: &'static str = "KnowSureThing";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let close = candle.close();
+
+		Ok(Self::Instance {
+			roc1v: RateOfChange::new(cfg.period1, close)?,
+			roc2v: RateOfChange::new(cfg.period2, close)?,
+			roc3v: RateOfChange::new(cfg.period3, close)?,
+			roc4v: RateOfChange::new(cfg.period4, close)?,
+			ma1: method(cfg.method1, cfg.sma1, 0.)?,
+			ma2: method(cfg.method1, cfg.sma2, 0.)?,
+			ma3: method(cfg.method1, cfg.sma3, 0.)?,
+			ma4: method(cfg.method1, cfg.sma4, 0.)?,
+			ma5: method(cfg.method2, cfg.sma5, 0.)?,
+			cross: Cross::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 < self.period2 && self.period2 < self.period3 && self.period3 < self.period4
@@ -131,35 +156,6 @@ impl IndicatorConfig for KnowSureThing {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for KnowSureThing {
-	type Instance = KnowSureThingInstance;
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let close = candle.close();
-
-		Ok(Self::Instance {
-			roc1v: RateOfChange::new(cfg.period1, close)?,
-			roc2v: RateOfChange::new(cfg.period2, close)?,
-			roc3v: RateOfChange::new(cfg.period3, close)?,
-			roc4v: RateOfChange::new(cfg.period4, close)?,
-			ma1: method(cfg.method1, cfg.sma1, 0.)?,
-			ma2: method(cfg.method1, cfg.sma2, 0.)?,
-			ma3: method(cfg.method1, cfg.sma3, 0.)?,
-			ma4: method(cfg.method1, cfg.sma4, 0.)?,
-			ma5: method(cfg.method2, cfg.sma5, 0.)?,
-			cross: Cross::default(),
-			cfg,
-		})
-	}
-}
-
 impl Default for KnowSureThing {
 	fn default() -> Self {
 		Self {
@@ -194,14 +190,14 @@ pub struct KnowSureThingInstance {
 	cross: Cross,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for KnowSureThingInstance {
+impl IndicatorInstance for KnowSureThingInstance {
 	type Config = KnowSureThing;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let close = candle.close();
 
 		let roc1: ValueType = self.roc1v.next(close);

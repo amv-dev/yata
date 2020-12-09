@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 
 use super::commodity_channel_index::CommodityChannelIndexInstance;
 use super::CommodityChannelIndex;
-use crate::core::{Action, Error, Method, PeriodType, ValueType, Window, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, ValueType, Window, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::signi;
 use crate::methods::{Cross, CrossAbove, CrossUnder, SMA};
 
@@ -19,7 +19,41 @@ pub struct WoodiesCCI {
 }
 
 impl IndicatorConfig for WoodiesCCI {
+	type Instance = WoodiesCCIInstance;
+
 	const NAME: &'static str = "WoodiesCCI";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+
+		let cci1 = CommodityChannelIndex {
+			period: cfg.period1,
+			..CommodityChannelIndex::default()
+		};
+		let cci2 = CommodityChannelIndex {
+			period: cfg.period2,
+			..CommodityChannelIndex::default()
+		};
+
+		Ok(Self::Instance {
+			cci1: cci1.init(candle)?,
+			cci2: cci2.init(candle)?,
+			sma: SMA::new(cfg.signal1_period, 0.)?,
+			cross1: Cross::default(),
+			cross2: Cross::default(),
+			s2_sum: 0,
+			s3_sum: 0.,
+			s3_count: 0,
+			window: Window::new(cfg.signal2_bars_count, 0),
+			cross_above: CrossAbove::default(),
+			cross_under: CrossUnder::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 > self.period2
@@ -61,45 +95,6 @@ impl IndicatorConfig for WoodiesCCI {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for WoodiesCCI {
-	type Instance = WoodiesCCIInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-
-		let cci1 = CommodityChannelIndex {
-			period: cfg.period1,
-			..CommodityChannelIndex::default()
-		};
-		let cci2 = CommodityChannelIndex {
-			period: cfg.period2,
-			..CommodityChannelIndex::default()
-		};
-
-		Ok(Self::Instance {
-			cci1: cci1.init(candle)?,
-			cci2: cci2.init(candle)?,
-			sma: SMA::new(cfg.signal1_period, 0.)?,
-			cross1: Cross::default(),
-			cross2: Cross::default(),
-			s2_sum: 0,
-			s3_sum: 0.,
-			s3_count: 0,
-			window: Window::new(cfg.signal2_bars_count, 0),
-			cross_above: CrossAbove::default(),
-			cross_under: CrossUnder::default(),
-			cfg,
-		})
-	}
-}
-
 impl Default for WoodiesCCI {
 	fn default() -> Self {
 		Self {
@@ -112,7 +107,7 @@ impl Default for WoodiesCCI {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WoodiesCCIInstance {
 	cfg: WoodiesCCI,
 
@@ -129,14 +124,14 @@ pub struct WoodiesCCIInstance {
 	cross_under: CrossUnder,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for WoodiesCCIInstance {
+impl IndicatorInstance for WoodiesCCIInstance {
 	type Config = WoodiesCCI;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let cci1 = self.cci1.next(candle).value(0);
 		let cci2 = self.cci2.next(candle).value(0);
 

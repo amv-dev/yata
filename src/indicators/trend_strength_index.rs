@@ -2,8 +2,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{CrossAbove, CrossUnder, ReversalSignal, WMA};
 
 /// Trend Strength Index
@@ -48,7 +48,45 @@ pub struct TrendStrengthIndex {
 }
 
 impl IndicatorConfig for TrendStrengthIndex {
+	type Instance = TrendStrengthIndexInstance;
+
 	const NAME: &'static str = "TrendStrengthIndex";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if self.validate() {
+			let cfg = self;
+
+			let inverted_period = (cfg.period as ValueType).recip();
+			let src = candle.source(cfg.source);
+
+			let period = cfg.period as usize;
+			let sx = (period + 1) * period / 2;
+			let sx2 = (sx * (2 * period + 1)) as ValueType / 3.0;
+
+			let inv_sx = ((period + 1) * sx) as ValueType * 0.5;
+			let k = sx2 - inv_sx;
+			let sy = src * cfg.period as ValueType;
+			let sy2 = src * src * cfg.period as ValueType;
+
+			Ok(Self::Instance {
+				window: Window::new(cfg.period, src),
+				period: period as ValueType,
+				inverted_period,
+				sx: sx as ValueType,
+				sy2,
+				k,
+				wma: WMA::new(cfg.period, src)?,
+				cross_under: CrossUnder::new((), (0.0, cfg.zone))?,
+				cross_above: CrossAbove::new((), (0.0, -cfg.zone))?,
+				reverse: ReversalSignal::new(1, 2, 0.0)?,
+				sy,
+
+				cfg,
+			})
+		} else {
+			Err(Error::WrongConfig)
+		}
+	}
 
 	fn validate(&self) -> bool {
 		self.period > 1
@@ -89,49 +127,6 @@ impl IndicatorConfig for TrendStrengthIndex {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for TrendStrengthIndex {
-	type Instance = TrendStrengthIndexInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if self.validate() {
-			let cfg = self;
-
-			let inverted_period = (cfg.period as ValueType).recip();
-			let src = candle.source(cfg.source);
-
-			let period = cfg.period as usize;
-			let sx = (period + 1) * period / 2;
-			let sx2 = (sx * (2 * period + 1)) as ValueType / 3.0;
-
-			let inv_sx = ((period + 1) * sx) as ValueType * 0.5;
-			let k = sx2 - inv_sx;
-			let sy = src * cfg.period as ValueType;
-			let sy2 = src * src * cfg.period as ValueType;
-
-			Ok(Self::Instance {
-				window: Window::new(cfg.period, src),
-				period: period as ValueType,
-				inverted_period,
-				sx: sx as ValueType,
-				sy2,
-				k,
-				wma: WMA::new(cfg.period, src)?,
-				cross_under: CrossUnder::new((), (0.0, cfg.zone))?,
-				cross_above: CrossAbove::new((), (0.0, -cfg.zone))?,
-				reverse: ReversalSignal::new(1, 2, 0.0)?,
-				sy,
-
-				cfg,
-			})
-		} else {
-			Err(Error::WrongConfig)
-		}
-	}
-}
-
 impl Default for TrendStrengthIndex {
 	fn default() -> Self {
 		Self {
@@ -143,7 +138,7 @@ impl Default for TrendStrengthIndex {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TrendStrengthIndexInstance {
 	cfg: TrendStrengthIndex,
 	period: ValueType,
@@ -159,21 +154,15 @@ pub struct TrendStrengthIndexInstance {
 	window: Window<ValueType>,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for TrendStrengthIndexInstance {
+impl IndicatorInstance for TrendStrengthIndexInstance {
 	type Config = TrendStrengthIndex;
 
-	fn config(&self) -> &Self::Config
-	where
-		Self: Sized,
-	{
+	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
 	#[inline]
-	fn next(&mut self, candle: T) -> IndicatorResult
-	where
-		Self: Sized,
-	{
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 		let past_src = self.window.push(src);
 

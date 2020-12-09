@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{StDev, SMA};
 
 /// Bollinger Bands
@@ -43,7 +43,23 @@ pub struct BollingerBands {
 }
 
 impl IndicatorConfig for BollingerBands {
+	type Instance = BollingerBandsInstance;
+
 	const NAME: &'static str = "BollingerBands";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = T::source(candle, cfg.source);
+		Ok(Self::Instance {
+			ma: SMA::new(cfg.avg_size, src)?,
+			st_dev: StDev::new(cfg.avg_size, src)?,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.sigma > 0.0 && self.avg_size > 2 && self.avg_size < PeriodType::MAX
@@ -77,27 +93,6 @@ impl IndicatorConfig for BollingerBands {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for BollingerBands {
-	type Instance = BollingerBandsInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = T::source(&candle, cfg.source);
-		Ok(Self::Instance {
-			ma: SMA::new(cfg.avg_size, src)?,
-			st_dev: StDev::new(cfg.avg_size, src)?,
-			cfg,
-		})
-	}
-}
-
 impl Default for BollingerBands {
 	fn default() -> Self {
 		Self {
@@ -108,7 +103,7 @@ impl Default for BollingerBands {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BollingerBandsInstance {
 	cfg: BollingerBands,
 
@@ -116,7 +111,7 @@ pub struct BollingerBandsInstance {
 	st_dev: StDev,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for BollingerBandsInstance {
+impl IndicatorInstance for BollingerBandsInstance {
 	type Config = BollingerBands;
 
 	#[inline]
@@ -124,7 +119,7 @@ impl<T: OHLC> IndicatorInstance<T> for BollingerBandsInstance {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let source = candle.source(self.cfg.source);
 		let middle = self.ma.next(source);
 		let sq_error = self.st_dev.next(source);

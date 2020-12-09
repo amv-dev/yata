@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{Change, CrossAbove, CrossUnder};
 
 /// Chande Momentum Oscillator
@@ -38,7 +38,27 @@ pub struct ChandeMomentumOscillator {
 }
 
 impl IndicatorConfig for ChandeMomentumOscillator {
+	type Instance = ChandeMomentumOscillatorInstance;
+
 	const NAME: &'static str = "ChandeMomentumOscillator";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+
+		Ok(Self::Instance {
+			pos_sum: 0.,
+			neg_sum: 0.,
+			change: Change::new(1, candle.source(cfg.source))?,
+			window: Window::new(cfg.period, 0.),
+			cross_under: CrossUnder::default(),
+			cross_above: CrossAbove::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.zone >= 0. && self.zone <= 1.0 && self.period > 1
@@ -72,31 +92,6 @@ impl IndicatorConfig for ChandeMomentumOscillator {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for ChandeMomentumOscillator {
-	type Instance = ChandeMomentumOscillatorInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-
-		Ok(Self::Instance {
-			pos_sum: 0.,
-			neg_sum: 0.,
-			change: Change::new(1, candle.source(cfg.source))?,
-			window: Window::new(cfg.period, 0.),
-			cross_under: CrossUnder::default(),
-			cross_above: CrossAbove::default(),
-			cfg,
-		})
-	}
-}
-
 impl Default for ChandeMomentumOscillator {
 	fn default() -> Self {
 		Self {
@@ -107,7 +102,7 @@ impl Default for ChandeMomentumOscillator {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ChandeMomentumOscillatorInstance {
 	cfg: ChandeMomentumOscillator,
 
@@ -129,14 +124,14 @@ fn change(change: ValueType) -> (ValueType, ValueType) {
 	(pos, neg)
 }
 
-impl<T: OHLC> IndicatorInstance<T> for ChandeMomentumOscillatorInstance {
+impl IndicatorInstance for ChandeMomentumOscillatorInstance {
 	type Config = ChandeMomentumOscillator;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let ch = self.change.next(candle.source(self.cfg.source));
 
 		let left_value = self.window.push(ch);

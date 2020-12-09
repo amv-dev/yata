@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, CrossAbove, CrossUnder, Highest, Lowest};
 
@@ -17,7 +17,38 @@ pub struct StochasticOscillator {
 }
 
 impl IndicatorConfig for StochasticOscillator {
+	type Instance = StochasticOscillatorInstance;
+
 	const NAME: &'static str = "StochasticOscillator";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		// we need to check division by zero, so we can really just check if `high` is equal to `low` without using any kind of round error checks
+		#[allow(clippy::float_cmp)]
+		let k_rows = if candle.high() == candle.low() {
+			0.
+		} else {
+			(candle.close() - candle.low()) / (candle.high() - candle.low())
+		};
+
+		Ok(Self::Instance {
+			upper_zone: 1. - cfg.zone,
+			highest: Highest::new(cfg.period, candle.high())?,
+			lowest: Lowest::new(cfg.period, candle.low())?,
+			ma1: method(cfg.method, cfg.smooth_k, k_rows)?,
+			ma2: method(cfg.method, cfg.smooth_d, k_rows)?,
+			cross_over: Cross::default(),
+			cross_above1: CrossAbove::default(),
+			cross_under1: CrossUnder::default(),
+			cross_above2: CrossAbove::default(),
+			cross_under2: CrossUnder::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period > 1
@@ -59,42 +90,6 @@ impl IndicatorConfig for StochasticOscillator {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for StochasticOscillator {
-	type Instance = StochasticOscillatorInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		// we need to check division by zero, so we can really just check if `high` is equal to `low` without using any kind of round error checks
-		#[allow(clippy::float_cmp)]
-		let k_rows = if candle.high() == candle.low() {
-			0.
-		} else {
-			(candle.close() - candle.low()) / (candle.high() - candle.low())
-		};
-
-		Ok(Self::Instance {
-			upper_zone: 1. - cfg.zone,
-			highest: Highest::new(cfg.period, candle.high())?,
-			lowest: Lowest::new(cfg.period, candle.low())?,
-			ma1: method(cfg.method, cfg.smooth_k, k_rows)?,
-			ma2: method(cfg.method, cfg.smooth_d, k_rows)?,
-			cross_over: Cross::default(),
-			cross_above1: CrossAbove::default(),
-			cross_under1: CrossUnder::default(),
-			cross_above2: CrossAbove::default(),
-			cross_under2: CrossUnder::default(),
-			cfg,
-		})
-	}
-}
-
 impl Default for StochasticOscillator {
 	fn default() -> Self {
 		Self {
@@ -123,14 +118,14 @@ pub struct StochasticOscillatorInstance {
 	cross_under2: CrossUnder,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for StochasticOscillatorInstance {
+impl IndicatorInstance for StochasticOscillatorInstance {
 	type Config = StochasticOscillator;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let (close, high, low) = (candle.close(), candle.high(), candle.low());
 
 		let highest = self.highest.next(high);

@@ -1,12 +1,12 @@
 use super::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::core::{Error, OHLCV};
 
-/// Dynamically dispatchable [`IndicatorConfig`](crate::core::indicator::IndicatorConfig)
+/// Dynamically dispatchable [`IndicatorConfig`](crate::core::IndicatorConfig)
 pub trait IndicatorConfigDyn<T: OHLCV> {
 	/// Dynamically initializes the **State** based on the current **Configuration**
 	fn init(&self, initial_value: &T) -> Result<Box<dyn IndicatorInstanceDyn<T>>, Error>;
 
-	/// Evaluates dynamically dispatched [`IndicatorConfig`](crate::core::indicator::IndicatorConfig)  over series of OHLC and returns series of `IndicatorResult`s
+	/// Evaluates dynamically dispatched [`IndicatorConfig`](crate::core::IndicatorConfig)  over series of OHLC and returns series of `IndicatorResult`s
 	/// ```
 	/// use yata::prelude::dd::*;
 	/// use yata::helpers::{RandomCandles};
@@ -65,7 +65,7 @@ where
 	}
 }
 
-/// Dynamically dispatchable [`IndicatorInstance`](crate::core::indicator::IndicatorInstance)
+/// Dynamically dispatchable [`IndicatorInstance`](crate::core::IndicatorInstance)
 pub trait IndicatorInstanceDyn<T: OHLCV> {
 	/// Evaluates given candle and returns [`IndicatorResult`](crate::core::IndicatorResult)
 	fn next(&mut self, candle: &T) -> IndicatorResult;

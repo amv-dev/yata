@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, sign, RegularMethod, RegularMethods};
 use crate::methods::Cross;
 
@@ -52,7 +52,26 @@ pub struct KlingerVolumeOscillator {
 }
 
 impl IndicatorConfig for KlingerVolumeOscillator {
+	type Instance = KlingerVolumeOscillatorInstance;
+
 	const NAME: &'static str = "KlingerVolumeOscillator";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		Ok(Self::Instance {
+			ma1: method(cfg.method1, cfg.period1, 0.)?,
+			ma2: method(cfg.method1, cfg.period2, 0.)?,
+			ma3: method(cfg.method2, cfg.period3, 0.)?,
+			cross1: Cross::default(),
+			cross2: Cross::default(),
+			last_tp: candle.tp(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period1 > 1 && self.period3 > 1 && self.period1 < self.period2
@@ -89,36 +108,8 @@ impl IndicatorConfig for KlingerVolumeOscillator {
 		Ok(())
 	}
 
-	fn is_volume_based(&self) -> bool {
-		true
-	}
-
 	fn size(&self) -> (u8, u8) {
 		(2, 2)
-	}
-}
-
-impl<T: OHLCV> IndicatorInitializer<T> for KlingerVolumeOscillator {
-	type Instance = KlingerVolumeOscillatorInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		Ok(Self::Instance {
-			ma1: method(cfg.method1, cfg.period1, 0.)?,
-			ma2: method(cfg.method1, cfg.period2, 0.)?,
-			ma3: method(cfg.method2, cfg.period3, 0.)?,
-			cross1: Cross::default(),
-			cross2: Cross::default(),
-			last_tp: candle.tp(),
-			cfg,
-		})
 	}
 }
 
@@ -146,14 +137,14 @@ pub struct KlingerVolumeOscillatorInstance {
 	last_tp: ValueType,
 }
 
-impl<T: OHLCV> IndicatorInstance<T> for KlingerVolumeOscillatorInstance {
+impl IndicatorInstance for KlingerVolumeOscillatorInstance {
 	type Config = KlingerVolumeOscillator;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let tp = candle.tp();
 
 		let d = tp - self.last_tp;

@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, PeriodType, Source, ValueType, Window, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, PeriodType, Source, ValueType, Window, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 
 // The Formula for the Detrended Price Oscillator (DPO) is
@@ -41,7 +41,23 @@ pub struct DetrendedPriceOscillator {
 }
 
 impl IndicatorConfig for DetrendedPriceOscillator {
+	type Instance = DetrendedPriceOscillatorInstance;
+
 	const NAME: &'static str = "DetrendedPriceOscillator";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = candle.source(cfg.source);
+		Ok(Self::Instance {
+			sma: method(cfg.method, cfg.period, src)?,
+			window: Window::new(cfg.period / 2 + 1, src),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period > 1 && self.period < PeriodType::MAX
@@ -75,27 +91,6 @@ impl IndicatorConfig for DetrendedPriceOscillator {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for DetrendedPriceOscillator {
-	type Instance = DetrendedPriceOscillatorInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = candle.source(cfg.source);
-		Ok(Self::Instance {
-			sma: method(cfg.method, cfg.period, src)?,
-			window: Window::new(cfg.period / 2 + 1, src),
-			cfg,
-		})
-	}
-}
-
 impl Default for DetrendedPriceOscillator {
 	fn default() -> Self {
 		Self {
@@ -114,14 +109,14 @@ pub struct DetrendedPriceOscillatorInstance {
 	window: Window<ValueType>,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for DetrendedPriceOscillatorInstance {
+impl IndicatorInstance for DetrendedPriceOscillatorInstance {
 	type Config = DetrendedPriceOscillator;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
 		let sma = self.sma.next(src);

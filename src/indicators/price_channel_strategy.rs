@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Action, Error, Method, PeriodType, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{Highest, Lowest};
 
 #[derive(Debug, Clone, Copy)]
@@ -13,7 +13,22 @@ pub struct PriceChannelStrategy {
 }
 
 impl IndicatorConfig for PriceChannelStrategy {
+	type Instance = PriceChannelStrategyInstance;
+
 	const NAME: &'static str = "PriceChannelStrategy";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		Ok(Self::Instance {
+			highest: Highest::new(cfg.period, candle.high())?,
+			lowest: Lowest::new(cfg.period, candle.low())?,
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period > 1 && self.sigma > 0.
@@ -43,25 +58,6 @@ impl IndicatorConfig for PriceChannelStrategy {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for PriceChannelStrategy {
-	type Instance = PriceChannelStrategyInstance;
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		Ok(Self::Instance {
-			highest: Highest::new(cfg.period, candle.high())?,
-			lowest: Lowest::new(cfg.period, candle.low())?,
-			cfg,
-		})
-	}
-}
-
 impl Default for PriceChannelStrategy {
 	fn default() -> Self {
 		Self {
@@ -71,7 +67,7 @@ impl Default for PriceChannelStrategy {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PriceChannelStrategyInstance {
 	cfg: PriceChannelStrategy,
 
@@ -79,14 +75,14 @@ pub struct PriceChannelStrategyInstance {
 	lowest: Lowest,
 }
 
-impl<T: OHLC> IndicatorInstance<T> for PriceChannelStrategyInstance {
+impl IndicatorInstance for PriceChannelStrategyInstance {
 	type Config = PriceChannelStrategy;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let (high, low) = (candle.high(), candle.low());
 		let highest = self.highest.next(high);
 		let lowest = self.lowest.next(low);

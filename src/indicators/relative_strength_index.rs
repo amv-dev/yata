@@ -1,8 +1,8 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLC};
-use crate::core::{IndicatorConfig, IndicatorInitializer, IndicatorInstance, IndicatorResult};
+use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Change, CrossAbove, CrossUnder};
 
@@ -16,7 +16,27 @@ pub struct RelativeStrengthIndex {
 }
 
 impl IndicatorConfig for RelativeStrengthIndex {
+	type Instance = RelativeStrengthIndexInstance;
+
 	const NAME: &'static str = "RelativeStrengthIndex";
+
+	fn init<T: OHLCV>(self, candle: &T) -> Result<Self::Instance, Error> {
+		if !self.validate() {
+			return Err(Error::WrongConfig);
+		}
+
+		let cfg = self;
+		let src = candle.source(cfg.source);
+
+		Ok(Self::Instance {
+			change: Change::new(1, src)?,
+			posma: method(cfg.method, cfg.period, 0.)?,
+			negma: method(cfg.method, cfg.period, 0.)?,
+			cross_above: CrossAbove::default(),
+			cross_under: CrossUnder::default(),
+			cfg,
+		})
+	}
 
 	fn validate(&self) -> bool {
 		self.period > 2 && self.zone > 0. && self.zone <= 0.5
@@ -54,31 +74,6 @@ impl IndicatorConfig for RelativeStrengthIndex {
 	}
 }
 
-impl<T: OHLC> IndicatorInitializer<T> for RelativeStrengthIndex {
-	type Instance = RelativeStrengthIndexInstance;
-
-	fn init(self, candle: T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized,
-	{
-		if !self.validate() {
-			return Err(Error::WrongConfig);
-		}
-
-		let cfg = self;
-		let src = candle.source(cfg.source);
-
-		Ok(Self::Instance {
-			change: Change::new(1, src)?,
-			posma: method(cfg.method, cfg.period, 0.)?,
-			negma: method(cfg.method, cfg.period, 0.)?,
-			cross_above: CrossAbove::default(),
-			cross_under: CrossUnder::default(),
-			cfg,
-		})
-	}
-}
-
 impl Default for RelativeStrengthIndex {
 	fn default() -> Self {
 		Self {
@@ -104,14 +99,14 @@ pub struct RelativeStrengthIndexInstance {
 /// Just an alias for `RelativeStrengthIndex`
 pub type RSI = RelativeStrengthIndex;
 
-impl<T: OHLC> IndicatorInstance<T> for RelativeStrengthIndexInstance {
+impl IndicatorInstance for RelativeStrengthIndexInstance {
 	type Config = RelativeStrengthIndex;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
-	fn next(&mut self, candle: T) -> IndicatorResult {
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
 		let change = self.change.next(src);
