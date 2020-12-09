@@ -4,14 +4,50 @@ use serde::{Deserialize, Serialize};
 use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
-use crate::methods::{Change, CrossAbove, CrossUnder};
+use crate::methods::{Change, Cross};
 
+/// Relative Strength Index
+///
+/// ## Links:
+///
+/// * <https://en.wikipedia.org/wiki/Relative_strength_index>
+///
+/// # 1 values
+///
+/// * `main` value
+///
+/// Range in \[`0.0`; `1.0`\]
+///
+/// # 2 signals
+///
+/// * Signal #1 on enters over-zone.
+///
+/// When main value crosses upper zone upwards, returns full sell signal.
+/// When main value crosses lower zone downwards, returns full buy signal.
+/// Otherwise returns no signal.
+///
+/// * Signal #2 on leaves over-zone.
+///
+/// When main value crosses upper zone downwards, returns full sell signal.
+/// When main value crosses lower zone upwards, returns full buy signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RelativeStrengthIndex {
+	/// Main period type. Default is `14`.
+	///
+	/// Range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
+
+	/// Overbought/oversell relative zone. Default is `0.3`.
+	///
+	/// Range in \(`0.0`; `0.5`\]
 	pub zone: ValueType,
+
+	/// Source type of values. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
+
+	/// Moving average method. Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
 }
 
@@ -32,8 +68,8 @@ impl IndicatorConfig for RelativeStrengthIndex {
 			change: Change::new(1, src)?,
 			posma: method(cfg.method, cfg.period, 0.)?,
 			negma: method(cfg.method, cfg.period, 0.)?,
-			cross_above: CrossAbove::default(),
-			cross_under: CrossUnder::default(),
+			cross_upper: Cross::new((), (0.5, 1.0 - cfg.zone))?,
+			cross_lower: Cross::new((), (0.5, cfg.zone))?,
 			cfg,
 		})
 	}
@@ -70,7 +106,7 @@ impl IndicatorConfig for RelativeStrengthIndex {
 	}
 
 	fn size(&self) -> (u8, u8) {
-		(1, 1)
+		(1, 2)
 	}
 }
 
@@ -79,7 +115,7 @@ impl Default for RelativeStrengthIndex {
 		Self {
 			period: 14,
 			zone: 0.3,
-			method: RegularMethods::RMA,
+			method: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}
@@ -92,8 +128,8 @@ pub struct RelativeStrengthIndexInstance {
 	change: Change,
 	posma: RegularMethod,
 	negma: RegularMethod,
-	cross_above: CrossAbove,
-	cross_under: CrossUnder,
+	cross_upper: Cross,
+	cross_lower: Cross,
 }
 
 /// Just an alias for `RelativeStrengthIndex`
@@ -113,18 +149,19 @@ impl IndicatorInstance for RelativeStrengthIndexInstance {
 		let pos: ValueType = self.posma.next(change.max(0.));
 		let neg: ValueType = self.negma.next(change.min(0.)) * -1.;
 
-		let value;
-		if pos != 0. || neg != 0. {
+		let value = if pos != 0. || neg != 0. {
 			debug_assert!(pos + neg != 0.);
-			value = pos / (pos + neg)
+			pos / (pos + neg)
 		} else {
-			value = 0.;
-		}
+			0.
+		};
 
-		let oversold = self.cross_under.next((value, self.cfg.zone));
-		let overbought = self.cross_above.next((value, 1. - self.cfg.zone));
-		let signal = oversold - overbought;
+		let oversold = self.cross_lower.next((value, self.cfg.zone)).analog();
+		let overbought = self.cross_upper.next((value, 1. - self.cfg.zone)).analog();
 
-		IndicatorResult::new(&[value], &[signal])
+		let signal1 = (oversold < 0) as i8 - (overbought > 0) as i8;
+		let signal2 = (oversold > 0) as i8 - (overbought < 0) as i8;
+
+		IndicatorResult::new(&[value], &[signal1.into(), signal2.into()])
 	}
 }
