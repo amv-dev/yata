@@ -16,7 +16,7 @@ It also provides you an interface to create your own indicators.
 
 ```yaml
 [dependencies]
-yata = "0.3"
+yata = "0.4"
 ```
 
 ## Available **moving averages**:
