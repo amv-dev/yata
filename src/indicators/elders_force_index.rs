@@ -1,10 +1,10 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::Candle;
 use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
-use crate::core::Candle;
 use crate::methods::Cross;
 
 /// Elders Force Index

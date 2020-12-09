@@ -138,14 +138,12 @@ pub struct TRIXInstance {
 impl IndicatorInstance for TRIXInstance {
 	type Config = Trix;
 
-	fn config(&self) -> &Self::Config
-	{
+	fn config(&self) -> &Self::Config {
 		&self.cfg
 	}
 
 	#[inline]
-	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult
-	{
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 		let tma = self.tma.next(src);
 		let value = self.change.next(tma);

@@ -8,7 +8,7 @@ use crate::methods::{LowerReversalSignal, UpperReversalSignal};
 use super::HLC;
 
 /// Pivot Reversal Strategy
-/// 
+///
 /// Simply seaches for pivot points and returns signal.
 ///
 /// ## Links
@@ -18,9 +18,9 @@ use super::HLC;
 /// # No values
 ///
 /// # 1 signal
-/// 
+///
 /// * `main` pivot signal
-/// 
+///
 /// When low pivot happens, returns full buy signal.
 /// When high pivot happens, returns full sell signal.
 /// Otherwise returns no signal.
@@ -29,12 +29,12 @@ use super::HLC;
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PivotReversalStrategy {
 	/// How many periods should left before pivot point.
-	/// 
+	///
 	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)-`right`\).
 	pub left: PeriodType,
 
 	/// How many periods should appear after pivot point.
-	/// 
+	///
 	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)-`left`\).
 	pub right: PeriodType,
 }

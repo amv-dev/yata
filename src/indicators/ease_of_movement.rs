@@ -1,11 +1,11 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use super::HLC;
 use crate::core::{Error, Method, PeriodType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::Cross;
-use super::HLC;
 
 /// Ease Of Movement
 ///

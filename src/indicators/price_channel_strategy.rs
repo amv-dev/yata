@@ -6,7 +6,7 @@ use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{Highest, Lowest};
 
 /// Price Channel Strategy
-/// 
+///
 /// Calculates price channel by highes high and lowest low for last `period` candles.
 ///
 /// ## Links
@@ -28,17 +28,17 @@ use crate::methods::{Highest, Lowest};
 /// When current `high` price touches `upper bound`, returns full buy signal.
 /// When current `low` price touches `lower bound`, returns full sell signal.
 /// When both touches occure, or no toucher, then returns no signal.
-/// 
+///
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PriceChannelStrategy {
 	/// Main period length. Default is `20`.
-	/// 
+	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
 
 	/// Relative channel size. Default is `1.0`.
-	/// 
+	///
 	/// Range in \(`0.0`; `1.0`\]
 	pub sigma: ValueType,
 }

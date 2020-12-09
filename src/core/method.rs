@@ -23,7 +23,7 @@ type BoxedFnMethod<'a, M> = Box<dyn FnMut(<M as Method<'a>>::Input) -> <M as Met
 /// ```
 ///
 /// ### Get a whole new vector over the input vector
-/// 
+///
 /// You can call method `over` any `Sequence`:
 /// ```
 /// use yata::methods::SMA;
@@ -35,7 +35,7 @@ type BoxedFnMethod<'a, M> = Box<dyn FnMut(<M as Method<'a>>::Input) -> <M as Met
 /// let result = ma.over(s);
 /// assert_eq!(result.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);
 /// ```
-/// 
+///
 /// Or you can provide `Method` to `Sequence`:
 /// ```
 /// use yata::methods::SMA;
@@ -47,7 +47,7 @@ type BoxedFnMethod<'a, M> = Box<dyn FnMut(<M as Method<'a>>::Input) -> <M as Met
 /// let result = s.call(ma);
 /// assert_eq!(result.as_slice(), &[1., 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]);
 /// ```
-/// 
+///
 /// Or you can even change `Sequence` values in-place:
 /// ```
 /// use yata::methods::SMA;

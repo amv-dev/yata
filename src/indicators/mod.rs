@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use crate::core::{OHLCV, ValueType};
+use crate::core::{ValueType, OHLCV};
 
 pub mod example;
 
@@ -8,7 +8,7 @@ pub mod example;
 struct HLC {
 	high: ValueType,
 	low: ValueType,
-	close: ValueType
+	close: ValueType,
 }
 
 impl HLC {
@@ -22,18 +22,28 @@ impl HLC {
 }
 
 impl OHLCV for HLC {
-	fn open(&self) -> ValueType { ValueType::NAN }
+	fn open(&self) -> ValueType {
+		ValueType::NAN
+	}
 
 	#[inline]
-	fn high(&self) -> ValueType { self.high }
+	fn high(&self) -> ValueType {
+		self.high
+	}
 
 	#[inline]
-	fn low(&self) -> ValueType { self.low }
+	fn low(&self) -> ValueType {
+		self.low
+	}
 
 	#[inline]
-	fn close(&self) -> ValueType { self.close }
+	fn close(&self) -> ValueType {
+		self.close
+	}
 
-	fn volume(&self) -> ValueType { ValueType::NAN }
+	fn volume(&self) -> ValueType {
+		ValueType::NAN
+	}
 }
 
 mod aroon;

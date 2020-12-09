@@ -1,10 +1,10 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use super::HLC;
 use crate::core::{Error, PeriodType, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
-use super::HLC;
 
 /// Average Directional Index
 ///

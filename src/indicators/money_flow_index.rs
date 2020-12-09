@@ -1,10 +1,10 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use crate::core::Candle;
 use crate::core::{Error, Method, PeriodType, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::Cross;
-use crate::core::Candle;
 
 /// Money Flow Index
 ///

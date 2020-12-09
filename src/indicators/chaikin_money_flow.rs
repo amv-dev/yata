@@ -76,9 +76,7 @@ impl IndicatorConfig for ChaikinMoneyFlow {
 
 impl Default for ChaikinMoneyFlow {
 	fn default() -> Self {
-		Self {
-			size: 20,
-		}
+		Self { size: 20 }
 	}
 }
 
