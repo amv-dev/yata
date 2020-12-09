@@ -258,8 +258,7 @@ mod tests {
 				3 => assert_eq!(Source::Close, r),
 				4 => assert_eq!(Source::Volume, r),
 				5 => assert_eq!(Source::VolumedPrice, r),
-				6 => assert_eq!(Source::TP, r),
-				7 => assert_eq!(Source::TP, r),
+				6 | 7 => assert_eq!(Source::TP, r),
 				8 => assert_eq!(Source::HL2, r),
 				_ => panic!("Wow. You cannot be here."),
 			}

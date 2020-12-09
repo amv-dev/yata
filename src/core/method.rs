@@ -1,5 +1,4 @@
 use super::{Error, Sequence};
-// use super::Error;
 
 use std::fmt;
 

@@ -333,6 +333,5 @@ impl<T: OHLCV> OHLCV for &T {
 	#[inline]
 	fn volume(&self) -> ValueType {
 		(**self).volume()
-
 	}
 }
