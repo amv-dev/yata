@@ -29,9 +29,7 @@ pub trait IndicatorConfig: Clone {
 	fn size(&self) -> (u8, u8);
 
 	/// Initializes the **State** based on current **Configuration**
-	fn init<T: OHLCV>(self, initial_value: &T) -> Result<Self::Instance, Error>
-	where
-		Self: Sized;
+	fn init<T: OHLCV>(self, initial_value: &T) -> Result<Self::Instance, Error>;
 
 	/// Creates an `IndicatorInstance` function from this `IndicatorConfig`.
 	fn init_fn<'a, T: OHLCV>(
@@ -39,7 +37,7 @@ pub trait IndicatorConfig: Clone {
 		initial_value: &'a T,
 	) -> Result<Box<dyn FnMut(&'a T) -> IndicatorResult>, Error>
 	where
-		Self: Sized + 'static,
+		Self: 'static,
 	{
 		let instance = self.init(initial_value)?;
 

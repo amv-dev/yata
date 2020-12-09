@@ -2,7 +2,7 @@ use super::{IndicatorConfig, IndicatorResult};
 use crate::core::OHLCV;
 
 /// Base trait for implementing indicators **State**
-pub trait IndicatorInstance {
+pub trait IndicatorInstance: Sized {
 	/// Type of Indicator **Configuration**
 	type Config: IndicatorConfig; // <Instance = Self>;
 
@@ -10,9 +10,7 @@ pub trait IndicatorInstance {
 	fn config(&self) -> &Self::Config;
 
 	/// Evaluates given candle and returns [`IndicatorResult`](crate::core::IndicatorResult)
-	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult
-	where
-		Self: Sized;
+	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult;
 
 	/// Evaluates the **State** over the given sequence of candles and returns sequence of `IndicatorResult`s.
 	/// ```
@@ -32,7 +30,6 @@ pub trait IndicatorInstance {
 	where
 		T: OHLCV,
 		S: AsRef<[T]>,
-		Self: Sized,
 	{
 		let inputs_ref = inputs.as_ref();
 		inputs_ref.iter().map(|x| self.next(x)).collect()
@@ -54,7 +51,7 @@ pub trait IndicatorInstance {
 	fn into_fn<'a, T>(mut self) -> Box<dyn FnMut(&'a T) -> IndicatorResult>
 	where
 		T: OHLCV,
-		Self: Sized + 'static,
+		Self: 'static,
 	{
 		let f = move |x| self.next(x);
 
