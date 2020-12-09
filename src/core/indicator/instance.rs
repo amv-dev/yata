@@ -4,7 +4,7 @@ use crate::core::OHLCV;
 /// Base trait for implementing indicators **State**
 pub trait IndicatorInstance {
 	/// Type of Indicator **Configuration**
-	type Config: IndicatorConfig<Instance = Self>;
+	type Config: IndicatorConfig; // <Instance = Self>;
 
 	/// Returns a reference to the indicator **Configuration**
 	fn config(&self) -> &Self::Config;

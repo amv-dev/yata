@@ -11,7 +11,8 @@ pub trait Sequence<T>: AsRef<[T]> {
 	fn apply<'a, M>(&'a mut self, method: M)
 	where
 		M: Method<'a, Input = T, Output = T> + BorrowMut<M> + 'a,
-		Self: AsMut<[T]>;
+		Self: AsMut<[T]>,
+		T: Copy;
 
 	/// Calls [`Method`](crate::core::Method) over the slice and returns `Vec` of result values.
 	fn call<'a, M>(&self, method: M) -> Vec<M::Output>
@@ -61,10 +62,11 @@ impl<T: OHLCV + Clone, Q: AsRef<[T]>> Sequence<T> for Q {
 	where
 		M: Method<'a, Input = T, Output = T> + BorrowMut<M> + 'a,
 		Self: AsMut<[T]>,
+		T: Copy,
 	{
 		self.as_mut()
 			.iter_mut()
-			.for_each(|x| *x = method.next(x.clone()));
+			.for_each(|x| *x = method.next(*x));
 	}
 
 	fn call<'a, M>(&self, mut method: M) -> Vec<M::Output>

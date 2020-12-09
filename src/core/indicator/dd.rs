@@ -36,7 +36,7 @@ pub trait IndicatorConfigDyn<T: OHLCV> {
 impl<T, I, C> IndicatorConfigDyn<T> for C
 where
 	T: OHLCV,
-	I: IndicatorInstanceDyn<T> + 'static,
+	I: IndicatorInstanceDyn<T> + IndicatorInstance<Config = Self> + 'static,
 	C: IndicatorConfig<Instance = I> + Clone + 'static,
 {
 	fn init(&self, initial_value: &T) -> Result<Box<dyn IndicatorInstanceDyn<T>>, Error> {
@@ -98,7 +98,11 @@ pub trait IndicatorInstanceDyn<T: OHLCV> {
 	fn name(&self) -> &'static str;
 }
 
-impl<T: OHLCV, I: IndicatorInstance + 'static> IndicatorInstanceDyn<T> for I {
+impl<T, I> IndicatorInstanceDyn<T> for I
+where
+	T: OHLCV,
+	I: IndicatorInstance + 'static,
+{
 	fn next(&mut self, candle: &T) -> IndicatorResult {
 		IndicatorInstance::next(self, candle)
 	}

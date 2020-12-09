@@ -132,6 +132,7 @@ pub trait Method<'a>: fmt::Debug {
 	where
 		S: Sequence<T> + AsMut<[T]>,
 		Self: Method<'a, Input = T, Output = T> + Sized,
+		T: Copy,
 	{
 		sequence.apply(self);
 	}
@@ -159,7 +160,7 @@ pub trait Method<'a>: fmt::Debug {
 	/// Creates new `Method` instance and applies it to the `sequence`.
 	fn new_apply<T, S>(parameters: Self::Params, sequence: &'a mut S) -> Result<(), Error>
 	where
-		T: Clone,
+		T: Copy,
 		S: Sequence<T> + AsMut<[T]>,
 		Self: Method<'a, Input = T, Output = T> + Sized + 'a,
 	{
@@ -170,7 +171,7 @@ pub trait Method<'a>: fmt::Debug {
 			let seq = &*sequence;
 
 			match seq.get_initial_value() {
-				Some(v) => v.clone(),
+				Some(&v) => v,
 				None => return Ok(()),
 			}
 		};
