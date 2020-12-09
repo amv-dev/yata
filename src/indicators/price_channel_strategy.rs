@@ -1,14 +1,45 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, ValueType, OHLCV};
+use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{Highest, Lowest};
 
+/// Price Channel Strategy
+/// 
+/// Calculates price channel by highes high and lowest low for last `period` candles.
+///
+/// ## Links
+///
+/// * <https://www.investopedia.com/terms/p/price-channel.asp>
+///
+/// # 2 values
+///
+/// * `Upper bound` value
+///
+/// Range of values is the same as the range of the source values.
+///
+/// * `Lower bound` value
+///
+/// Range of values is the same as the range of the source values.
+///
+/// # 1 signal
+///
+/// When current `high` price touches `upper bound`, returns full buy signal.
+/// When current `low` price touches `lower bound`, returns full sell signal.
+/// When both touches occure, or no toucher, then returns no signal.
+/// 
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PriceChannelStrategy {
+	/// Main period length. Default is `20`.
+	/// 
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
+
+	/// Relative channel size. Default is `1.0`.
+	/// 
+	/// Range in \(`0.0`; `1.0`\]
 	pub sigma: ValueType,
 }
 
@@ -31,7 +62,7 @@ impl IndicatorConfig for PriceChannelStrategy {
 	}
 
 	fn validate(&self) -> bool {
-		self.period > 1 && self.sigma > 0.
+		self.period > 1 && self.sigma > 0. && self.sigma <= 1.0
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -93,13 +124,11 @@ impl IndicatorInstance for PriceChannelStrategyInstance {
 		let upper = delta.mul_add(self.cfg.sigma, middle);
 		let lower = middle - delta * self.cfg.sigma;
 
-		// let signal_up = if candle.high() >= upper { 1 } else { 0 };
-		// let signal_down = if candle.low() <= lower { 1 } else { 0 };
 		let signal_up = (candle.high() >= upper) as i8;
 		let signal_down = (candle.low() <= lower) as i8;
 
 		let signal = signal_up - signal_down;
 
-		IndicatorResult::new(&[upper, lower], &[Action::from(signal)])
+		IndicatorResult::new(&[upper, lower], &[signal.into()])
 	}
 }

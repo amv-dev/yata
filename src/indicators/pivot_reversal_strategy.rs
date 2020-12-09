@@ -21,7 +21,7 @@ use super::HLC;
 /// 
 /// * `main` pivot signal
 /// 
-///	When low pivot happens, returns full buy signal.
+/// When low pivot happens, returns full buy signal.
 /// When high pivot happens, returns full sell signal.
 /// Otherwise returns no signal.
 ///
