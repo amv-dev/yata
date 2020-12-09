@@ -153,12 +153,12 @@ where
 	/// w.push(4);
 	/// w.push(5);
 	///
-	/// let p: Vec<_> = w.rev_iter().collect();
+	/// let p: Vec<_> = w.iter_rev().collect();
 	/// assert_eq!(p, [3, 4, 5]);
 	/// ```
 	#[inline]
 	#[must_use]
-	pub fn rev_iter(&self) -> ReversedWindowIterator<T> {
+	pub fn iter_rev(&self) -> ReversedWindowIterator<T> {
 		ReversedWindowIterator::new(self)
 	}
 
@@ -185,9 +185,7 @@ where
 	#[inline]
 	#[must_use]
 	pub fn newest(&self) -> T {
-		let is_zero = self.index == 0;
-		let index = !is_zero as PeriodType * self.index.saturating_sub(1)
-			+ is_zero as PeriodType * self.s_1;
+		let index = self.index.checked_sub(1).unwrap_or(self.s_1);
 
 		*unsafe { self.buf.get_unchecked(index as usize) }
 	}
@@ -311,6 +309,7 @@ where
 {
 	type Item = T;
 
+	#[inline]
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.size == 0 {
 			return None;
@@ -319,7 +318,7 @@ where
 		self.size -= 1;
 
 		let at_start = (self.index == 0) as PeriodType;
-		self.index = self.index.saturating_sub(1) * (1 - at_start) + at_start * self.window.s_1;
+		self.index = self.index.saturating_sub(1) + at_start * self.window.s_1;
 
 		let value = if cfg!(feature = "unsafe_performance") {
 			*unsafe { self.window.buf.get_unchecked(self.index as usize) }
@@ -376,6 +375,7 @@ where
 {
 	type Item = T;
 
+	#[inline]
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.size == 0 {
 			return None;
@@ -507,7 +507,7 @@ mod tests {
 				w.push(c);
 
 				if i >= length as usize {
-					let iterated: Vec<_> = w.rev_iter().collect();
+					let iterated: Vec<_> = w.iter_rev().collect();
 
 					let original_slice = {
 						let from = i.saturating_sub((length - 1) as usize);
@@ -517,7 +517,7 @@ mod tests {
 					assert_eq!(iterated.as_slice(), original_slice);
 				}
 
-				// assert_eq!(data[i.saturating_sub((length - 1) as usize)], w.rev_iter().last().unwrap());
+				// assert_eq!(data[i.saturating_sub((length - 1) as usize)], w.iter_rev().last().unwrap());
 			});
 
 			assert_eq!(
@@ -537,6 +537,7 @@ mod tests {
 
 			data.iter().enumerate().for_each(|(i, &c)| {
 				w.push(c);
+				assert_eq!(w[0], c);
 
 				if i >= length as usize {
 					let from = i.saturating_sub((length - 1) as usize);
