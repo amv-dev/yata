@@ -184,7 +184,7 @@ impl Method<'_> for UpperReversalSignal {
 			let mut max_value = self.window.oldest();
 
 			self.window
-				.rev_iter()
+				.iter_rev()
 				.zip(first_index..)
 				.skip(1)
 				.for_each(|(x, i)| {
@@ -315,7 +315,7 @@ impl Method<'_> for LowerReversalSignal {
 			let mut min_value = self.window.oldest();
 
 			self.window
-				.rev_iter()
+				.iter_rev()
 				.zip(first_index..)
 				.skip(1)
 				.for_each(|(x, i)| {
