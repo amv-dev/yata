@@ -57,6 +57,7 @@ limitations under the License.
 //! - [Wilder’s Smoothing Average (WSMA)](crate::methods::WSMA);
 //! - [Kaufman Adaptive Moving Average (KAMA)](crate::indicators::Kaufman);
 //! - [Convolution Moving Average](crate::methods::Conv);
+//! - [Variable Index Dynamic Average (Vidya)](crate::methods::Vidya);
 //!
 //! [See all](crate::methods#structs)
 //!

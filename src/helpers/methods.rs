@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use crate::core::{Error, Method, PeriodType, ValueType};
 use crate::methods::{
 	Derivative, Highest, HighestLowestDelta, Integral, LinReg, Lowest, MeanAbsDev, MedianAbsDev,
-	Momentum, Past, RateOfChange, StDev, CCI, DEMA, DMA, EMA, HMA, RMA, SMA, SMM, SWMA, TEMA, TMA,
-	TRIMA, WMA, WSMA,
+	Momentum, Past, RateOfChange, StDev, Vidya, CCI, DEMA, DMA, EMA, HMA, RMA, SMA, SMM, SWMA,
+	TEMA, TMA, TRIMA, WMA, WSMA,
 };
 
 use std::convert::TryFrom;
@@ -70,6 +70,9 @@ pub enum RegularMethods {
 	/// [Linear regression](crate::methods::LinReg)
 	#[cfg_attr(feature = "serde", serde(rename = "lin_reg"))]
 	LinReg,
+
+	/// [Variable Index Dynamic Average](crate::methods::Vidya)
+	Vidya,
 
 	/// [Past](crate::methods::Past) moves timeseries forward
 	Past,
@@ -143,6 +146,7 @@ impl FromStr for RegularMethods {
 			"swma" => Ok(Self::SWMA),
 			"trima" => Ok(Self::TRIMA),
 			"lin_reg" | "linreg" => Ok(Self::LinReg),
+			"vidya" => Ok(Self::Vidya),
 
 			"past" | "move" => Ok(Self::Past),
 			"derivative" => Ok(Self::Derivative),
@@ -195,6 +199,7 @@ impl TryFrom<String> for RegularMethods {
 /// * `smm` - [simple moving median](SMM)
 /// * `swma` - [symmetrically weighted moving average](SWMA)
 /// * `lin_reg` - [linear regression moving average](LinReg)
+/// * `vidya` - [variable index dynamic average](Vidya)
 /// * `trima` - [triangular moving average](TRIMA)
 /// * `past`, `move` - [moves timeseries forward](Past)
 /// * `derivative` - [derivative](Derivative)
@@ -244,6 +249,7 @@ pub fn method(
 		RegularMethods::SWMA => Ok(Box::new(SWMA::new(length, initial_value)?)),
 		RegularMethods::LinReg => Ok(Box::new(LinReg::new(length, initial_value)?)),
 		RegularMethods::TRIMA => Ok(Box::new(TRIMA::new(length, initial_value)?)),
+		RegularMethods::Vidya => Ok(Box::new(Vidya::new(length, initial_value)?)),
 
 		RegularMethods::Past | RegularMethods::Move => {
 			Ok(Box::new(Past::new(length, initial_value)?))

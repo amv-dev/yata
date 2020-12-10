@@ -36,6 +36,7 @@ yata = "0.4"
 - [Wilder’s Smoothing Average (WSMA)](https://docs.rs/yata/latest/yata/methods/struct.WSMA.html);
 - [Kaufman Adaptive Moving Average (KAMA)](https://docs.rs/yata/latest/yata/indicators/struct.Kaufman.html);
 - [Convolution Moving Average](https://docs.rs/yata/latest/yata/methods/struct.Conv.html);
+- [Variable Index Dynamic Average (Vidya)](https://docs.rs/yata/latest/yata/methods/struct.Vidya.html);
 
 [See all](https://docs.rs/yata/latest/yata/methods/index.html#structs)
 
