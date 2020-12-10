@@ -1,18 +1,64 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, Method, PeriodType, ValueType, OHLCV};
+use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, SMA, SWMA};
 
+/// Relative Vigor Index
+///
+/// ## Links:
+///
+/// * <https://www.investopedia.com/terms/r/relative_vigor_index.asp>
+///
+/// # 2 values
+///
+/// * `main` value
+///
+/// Range in \[`-0.5`; `0.5`\]
+/// 
+/// * `signal line` value
+/// 
+/// Range in \[`-0.5`; `0.5`\]
+/// 
+/// # 2 signals
+///
+/// * Signal #1 on `main` value crosses `signal line` value.
+///
+/// When main value crosses signal line upwards, returns full buy signal.
+/// When main value crosses signal line downwards, returns full sell signal.
+/// Otherwise returns no signal.
+///
+/// * Signal #2 on `main` value crosses `signal line` value outside safe zone.
+///
+/// When main value is below `-zone` and crosses signal line upwards, returns full buy signal.
+/// When main value is above `+zone` and crosses signal line downwards, returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RelativeVigorIndex {
+	/// Summarize period. Default is `10`.
+	/// 
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
+
+	/// SWMA period. Default is `4`.
+	/// 
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
+
+	/// Signal line MA period. Default is `4`.
+	/// 
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period3: PeriodType,
+
+	/// Signal line MA method. Default is [`SWMA`](crate::methods::SWMA).
 	pub method: RegularMethods,
+
+	/// Signal zone filter. Default is `0.25`.
+	/// 
+	/// Range in \[`0.0`; `0.5`\)
 	pub zone: ValueType,
 }
 
@@ -27,9 +73,9 @@ impl IndicatorConfig for RelativeVigorIndex {
 		}
 
 		let cfg = self;
-		let d_close = candle.close() - candle.open();
+		let d_close = 0.0; // candle.close() - candle.open();
 		let d_hl = candle.high() - candle.low();
-		let rvi = if d_hl == 0. { 0. } else { d_close / d_hl };
+		let rvi = 0.0; // if d_hl == 0. { 0. } else { d_close / d_hl };
 
 		Ok(Self::Instance {
 			prev_close: candle.open(),
@@ -44,7 +90,7 @@ impl IndicatorConfig for RelativeVigorIndex {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 >= 2 && self.zone >= 0. && self.zone <= 1. && self.period3 > 1
+		self.period1 >= 2 && self.zone >= 0. && self.zone < 0.5 && self.period2 > 1 && self.period3 > 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -131,7 +177,7 @@ impl IndicatorInstance for RelativeVigorIndexInstance {
 		let rvi = if sma2 == 0. { 0. } else { sma1 / sma2 };
 		let sig: ValueType = self.ma.next(rvi);
 
-		let s1 = self.cross.next((rvi, sig));
+		let s1 = self.cross.next((rvi, sig)).analog();
 
 		// if s1.sign().unwrap_or_default() < 0 && rvi > self.cfg.zone && sig > self.cfg.zone {
 		// 	s2 = 1;
@@ -142,11 +188,11 @@ impl IndicatorInstance for RelativeVigorIndexInstance {
 		// 	s2 = 0;
 		// }
 
-		let s2 = (s1.sign().unwrap_or_default() < 0 && rvi > self.cfg.zone && sig > self.cfg.zone)
-			as i8 - (s1.sign().unwrap_or_default() > 0
+		let s2 = (s1 < 0 && rvi > self.cfg.zone && sig > self.cfg.zone)
+			as i8 - (s1 > 0
 			&& rvi < -self.cfg.zone
 			&& sig < -self.cfg.zone) as i8;
 
-		IndicatorResult::new(&[rvi, sig], &[s1, Action::from(s2)])
+		IndicatorResult::new(&[rvi, sig], &[s1.into(), s2.into()])
 	}
 }
