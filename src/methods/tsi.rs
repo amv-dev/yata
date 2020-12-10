@@ -6,13 +6,13 @@ use crate::methods::EMA;
 use serde::{Deserialize, Serialize};
 
 /// [True Strength Index](https://en.wikipedia.org/wiki/True_strength_index) of specified `short period` and `long period` for timeseries of type [`ValueType`]
-/// 
+///
 /// ```txt
 ///          EMA(EMA(momentum_1, long_period), short_period)
 /// TSI = ------------------------------------------------------
 ///        EMA(EMA(ABS(momentum_1), long_period), short_period)
 /// ```
-/// 
+///
 /// # Parameters
 ///
 /// Tuple of \(`short_length`, `long_length`\) \([`PeriodType`], [`PeriodType`]\)
@@ -24,7 +24,7 @@ use serde::{Deserialize, Serialize};
 /// # Output type
 ///
 /// Output type is [`ValueType`]
-/// 
+///
 /// # Examples
 ///
 /// ```
@@ -42,7 +42,7 @@ use serde::{Deserialize, Serialize};
 /// ```
 ///
 /// # Performance
-/// 
+///
 /// O\(1\)
 ///
 /// [`ValueType`]: crate::core::ValueType
@@ -63,7 +63,11 @@ pub struct TSI {
 
 impl TSI {
 	/// Creates new instance of `TSI`
-	pub fn new(short_period: PeriodType, long_period: PeriodType, value: ValueType) -> Result<Self, Error> {
+	pub fn new(
+		short_period: PeriodType,
+		long_period: PeriodType,
+		value: ValueType,
+	) -> Result<Self, Error> {
 		Method::new((short_period, long_period), value)
 	}
 }
@@ -76,7 +80,7 @@ impl Method<'_> for TSI {
 	fn new(params: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		let (short_period, long_period) = params;
 
-		let m =Self {
+		let m = Self {
 			last_value: value,
 			ema11: EMA::new(long_period, 0.0)?,
 			ema12: EMA::new(short_period, 0.0)?,
@@ -94,8 +98,11 @@ impl Method<'_> for TSI {
 
 		let numerator = self.ema12.next(self.ema11.next(momentum));
 		let denominator = self.ema22.next(self.ema21.next(momentum.abs()));
-		
-		
-		if denominator > 0.0 { numerator / denominator } else { 0.0 }
+
+		if denominator > 0.0 {
+			numerator / denominator
+		} else {
+			0.0
+		}
 	}
 }

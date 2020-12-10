@@ -5,36 +5,35 @@ use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::methods::{Cross, CrossAbove, CrossUnder, EMA, TSI};
 
-
 /// True Strength Index
-/// 
+///
 /// ## Links
-/// 
+///
 /// * <https://en.wikipedia.org/wiki/True_strength_index>
-/// 
+///
 /// # 2 values
-/// 
+///
 /// * `main` value
-/// 
+///
 /// Range in \[`-1.0`; `1.0`\]
-/// 
+///
 /// * `signal line` value
-/// 
+///
 /// Range in \[`-1.0`; `1.0`\]
-/// 
+///
 /// # 3 signals
-/// 
+///
 /// * Signal #1.
-/// 
+///
 /// When `main` value crosses upper `zone` upwards , returns full sell signal.
 /// When `main` value crosses lower `-zone` downwards, returns full buy signal.
 /// Otherwise returns no signal.
-/// 
+///
 /// * Signal #2.
 /// When `main` value crosses zero line upwards, returns full buy signal.
 /// When `main` value crosses zero line downwards, returns full sell signal.
 /// Otherwise returns no signal.
-/// 
+///
 /// * Signal #3.
 /// When `main` value crosses `signal line` upwards, returns full buy signal.
 /// When `main` value crosses `signal line` downwards, returns full sell signal.
@@ -43,22 +42,22 @@ use crate::methods::{Cross, CrossAbove, CrossUnder, EMA, TSI};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TrueStrengthIndex {
 	/// Long TSI period. Default is `25`.
-	/// 
+	///
 	/// Range in \[`period2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
 
 	/// Short TSI period. Default is `13`.
-	/// 
+	///
 	/// Range in \(`2`, `period1`\].
 	pub period2: PeriodType,
 
 	/// Signal line MA period. Default is `13`.
-	/// 
+	///
 	/// Range in \[`2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period3: PeriodType,
 
 	/// Signal zone size. Default is `0.25`.
-	/// 
+	///
 	/// Range in \[`0.0`; `1.0`]
 	pub zone: ValueType,
 
@@ -91,12 +90,13 @@ impl IndicatorConfig for TrueStrengthIndex {
 	}
 
 	fn validate(&self) -> bool {
-		self.period2 > 1 && 
-		self.period2 <= self.period1 &&
-		self.period1 < PeriodType::MAX &&
-		self.period3 > 1 &&
-		self.period3 < PeriodType::MAX && 
-		self.zone >= 0. && self.zone <= 1.
+		self.period2 > 1
+			&& self.period2 <= self.period1
+			&& self.period1 < PeriodType::MAX
+			&& self.period3 > 1
+			&& self.period3 < PeriodType::MAX
+			&& self.zone >= 0.
+			&& self.zone <= 1.
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -168,7 +168,7 @@ impl IndicatorInstance for TrueStrengthIndexInstance {
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
-		
+
 		let tsi = self.tsi.next(src);
 
 		let sig = self.ema.next(tsi);

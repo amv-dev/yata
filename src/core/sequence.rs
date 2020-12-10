@@ -64,9 +64,7 @@ impl<T: OHLCV + Clone, Q: AsRef<[T]>> Sequence<T> for Q {
 		Self: AsMut<[T]>,
 		T: Copy,
 	{
-		self.as_mut()
-			.iter_mut()
-			.for_each(|x| *x = method.next(*x));
+		self.as_mut().iter_mut().for_each(|x| *x = method.next(*x));
 	}
 
 	fn call<'a, M>(&self, mut method: M) -> Vec<M::Output>

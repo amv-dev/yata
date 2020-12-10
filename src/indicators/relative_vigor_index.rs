@@ -17,11 +17,11 @@ use crate::methods::{Cross, SMA, SWMA};
 /// * `main` value
 ///
 /// Range in \[`-0.5`; `0.5`\]
-/// 
+///
 /// * `signal line` value
-/// 
+///
 /// Range in \[`-0.5`; `0.5`\]
-/// 
+///
 /// # 2 signals
 ///
 /// * Signal #1 on `main` value crosses `signal line` value.
@@ -39,17 +39,17 @@ use crate::methods::{Cross, SMA, SWMA};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RelativeVigorIndex {
 	/// Summarize period. Default is `10`.
-	/// 
+	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
 
 	/// SWMA period. Default is `4`.
-	/// 
+	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
 
 	/// Signal line MA period. Default is `4`.
-	/// 
+	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period3: PeriodType,
 
@@ -57,7 +57,7 @@ pub struct RelativeVigorIndex {
 	pub method: RegularMethods,
 
 	/// Signal zone filter. Default is `0.25`.
-	/// 
+	///
 	/// Range in \[`0.0`; `0.5`\)
 	pub zone: ValueType,
 }
@@ -90,7 +90,11 @@ impl IndicatorConfig for RelativeVigorIndex {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 >= 2 && self.zone >= 0. && self.zone < 0.5 && self.period2 > 1 && self.period3 > 1
+		self.period1 >= 2
+			&& self.zone >= 0.
+			&& self.zone < 0.5
+			&& self.period2 > 1
+			&& self.period3 > 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -188,10 +192,8 @@ impl IndicatorInstance for RelativeVigorIndexInstance {
 		// 	s2 = 0;
 		// }
 
-		let s2 = (s1 < 0 && rvi > self.cfg.zone && sig > self.cfg.zone)
-			as i8 - (s1 > 0
-			&& rvi < -self.cfg.zone
-			&& sig < -self.cfg.zone) as i8;
+		let s2 = (s1 < 0 && rvi > self.cfg.zone && sig > self.cfg.zone) as i8
+			- (s1 > 0 && rvi < -self.cfg.zone && sig < -self.cfg.zone) as i8;
 
 		IndicatorResult::new(&[rvi, sig], &[s1.into(), s2.into()])
 	}

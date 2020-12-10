@@ -177,7 +177,10 @@ impl Method<'_> for UpperReversalSignal {
 	fn next(&mut self, value: Self::Input) -> Self::Output {
 		self.window.push(value);
 
-		let first_index = self.index.saturating_add(1).saturating_sub(self.window.len());
+		let first_index = self
+			.index
+			.saturating_add(1)
+			.saturating_sub(self.window.len());
 
 		if self.max_index < first_index {
 			let mut max_index = first_index;
@@ -308,7 +311,10 @@ impl Method<'_> for LowerReversalSignal {
 	fn next(&mut self, value: Self::Input) -> Self::Output {
 		self.window.push(value);
 
-		let first_index = self.index.saturating_add(1).saturating_sub(self.window.len());
+		let first_index = self
+			.index
+			.saturating_add(1)
+			.saturating_sub(self.window.len());
 
 		if self.min_index < first_index {
 			let mut min_index = first_index;
