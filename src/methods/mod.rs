@@ -64,6 +64,8 @@ mod momentum;
 pub use momentum::*;
 mod rate_of_change;
 pub use rate_of_change::*;
+mod tsi;
+pub use tsi::*;
 mod st_dev;
 pub use st_dev::*;
 mod volatility;

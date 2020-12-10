@@ -832,3 +832,26 @@ fn bench_cci_w100(b: &mut test::Bencher) {
 	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
+
+// True Strength Index  -----------------------------------------------------------------------------------
+#[bench]
+fn bench_tsi_w10(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = TSI::new((10, 10), candles[0]).unwrap();
+	for _ in 0..10 {
+		method.next(iter.next().unwrap());
+	}
+	b.iter(|| method.next(iter.next().unwrap()))
+}
+
+#[bench]
+fn bench_tsi_w100(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = TSI::new((100, 100), candles[0]).unwrap();
+	for _ in 0..100 {
+		method.next(iter.next().unwrap());
+	}
+	b.iter(|| method.next(iter.next().unwrap()))
+}

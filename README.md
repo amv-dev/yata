@@ -55,6 +55,7 @@ yata = "0.4"
 - [Rate Of Change](https://docs.rs/yata/latest/yata/methods/struct.RateOfChange.html) (ROC);
 - [Reversal points](https://docs.rs/yata/latest/yata/methods/struct.ReversalSignal.html);
 - [Standart Deviation](https://docs.rs/yata/latest/yata/methods/struct.StDev.html);
+- [True Strength Index](https://docs.rs/yata/latest/yata/methods/struct.TSI.html);
 - [Volatility](https://docs.rs/yata/latest/yata/methods/struct.LinearVolatility.html);
 
 [See all](https://docs.rs/yata/latest/yata/methods/index.html#structs)
