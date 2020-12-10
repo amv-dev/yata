@@ -104,13 +104,12 @@ assert_eq!(ema.next(12.0), 9.375);
 use yata::helpers::{RandomCandles, RegularMethods};
 use yata::indicators::MACD;
 use yata::prelude::*;
-use std::convert::TryInto;
 
 let mut candles = RandomCandles::new();
 let mut macd = MACD::default();
 macd.period3 = 4; // setting signal period MA to 4
 
-macd.method1 = "sma".try_into().unwrap(); // one way of defining methods inside indicators
+macd.method1 = "sma".parse().unwrap(); // one way of defining methods inside indicators
 
 macd.method3 = RegularMethods::TEMA; // another way of defining methods inside indicators
 

@@ -12,7 +12,7 @@ use crate::methods::{Change, Cross};
 ///
 /// * <https://en.wikipedia.org/wiki/Relative_strength_index>
 ///
-/// # 1 values
+/// # 1 value
 ///
 /// * `main` value
 ///
