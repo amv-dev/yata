@@ -6,14 +6,71 @@ use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, CrossAbove, CrossUnder, Highest, Lowest};
 
+/// Stochastic Oscillator
+/// 
+/// ## Links
+/// 
+/// * <https://en.wikipedia.org/wiki/Stochastic_oscillator>
+/// 
+/// # 2 values
+/// 
+/// * `main` value
+/// 
+/// Range in \[`0.0`; `1.0`\].
+/// 
+/// * `signal line` value
+/// 
+/// Range in \[`0.0`; `1.0`\].
+/// 
+/// # 3 signals
+/// 
+/// * Signal #1
+/// 
+/// When `main` value crosses lower bound upwards, returns full buy signal.
+/// When `main` value crosses upper bound downwards, returns full sell signal.
+/// Otherwise returns no signal.
+/// 
+/// * Signal #2
+/// 
+/// When `signal line` value crosses lower bound upwards, returns full buy signal.
+/// When `signal line` value crosses upper bound downwards, returns full sell signal.
+/// Otherwise returns no signal.
+/// 
+/// * Signal #3
+/// 
+/// When `main` value crosses `signal line` upwards, returns full buy signal.
+/// When `main` value crosses `signal line` downwards, returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct StochasticOscillator {
+	/// Period for searching highest high and lowest low. Default is `14`.
+	/// 
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
+
+	/// Period for smoothing `main` value. Default is `14`.
+	/// 
+	/// Usually it is equal to `period`.
+	/// 
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub smooth_k: PeriodType,
+
+	/// MA method for smoothing `main` value. Default is [`SMA`](crate::methods::SMA).
+	pub method_k: RegularMethods,
+
+	/// Period for smoothing `signal line` value. Default is `3`.
+	/// 
+	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub smooth_d: PeriodType,
+
+	/// MA method for smoothing `signal line` value. Default is [`SMA`](crate::methods::SMA).
+	pub method_d: RegularMethods,
+
+	/// Zone size for #1 and #2 signals.
+	/// 
+	/// Range in \[`0.0`; `0.5`\].
 	pub zone: ValueType,
-	pub method: RegularMethods,
 }
 
 impl IndicatorConfig for StochasticOscillator {
@@ -30,7 +87,7 @@ impl IndicatorConfig for StochasticOscillator {
 		// we need to check division by zero, so we can really just check if `high` is equal to `low` without using any kind of round error checks
 		#[allow(clippy::float_cmp)]
 		let k_rows = if candle.high() == candle.low() {
-			0.
+			0.5
 		} else {
 			(candle.close() - candle.low()) / (candle.high() - candle.low())
 		};
@@ -39,8 +96,8 @@ impl IndicatorConfig for StochasticOscillator {
 			upper_zone: 1. - cfg.zone,
 			highest: Highest::new(cfg.period, candle.high())?,
 			lowest: Lowest::new(cfg.period, candle.low())?,
-			ma1: method(cfg.method, cfg.smooth_k, k_rows)?,
-			ma2: method(cfg.method, cfg.smooth_d, k_rows)?,
+			ma1: method(cfg.method_k, cfg.smooth_k, k_rows)?,
+			ma2: method(cfg.method_d, cfg.smooth_d, k_rows)?,
 			cross_over: Cross::default(),
 			cross_above1: CrossAbove::default(),
 			cross_under1: CrossUnder::default(),
@@ -51,7 +108,7 @@ impl IndicatorConfig for StochasticOscillator {
 	}
 
 	fn validate(&self) -> bool {
-		self.period > 1
+		self.period > 1 && self.zone >= 0.0 && self.zone <= 0.5
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -72,11 +129,14 @@ impl IndicatorConfig for StochasticOscillator {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.zone = value,
 			},
-			"method" => match value.parse() {
+			"method_k" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method = value,
+				Ok(value) => self.method_k = value,
 			},
-
+			"method_d" => match value.parse() {
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method_d = value,
+			},
 			_ => {
 				return Err(Error::ParameterParse(name.to_string(), value));
 			}
@@ -94,9 +154,10 @@ impl Default for StochasticOscillator {
 	fn default() -> Self {
 		Self {
 			period: 14,
-			smooth_k: 1,
+			smooth_k: 14,
 			smooth_d: 3,
-			method: RegularMethods::SMA,
+			method_k: RegularMethods::SMA,
+			method_d: RegularMethods::SMA,
 			zone: 0.2,
 		}
 	}
@@ -134,7 +195,7 @@ impl IndicatorInstance for StochasticOscillatorInstance {
 		// we need to check division by zero, so we can really just check if `highest` is equal to `lowest` without using any kind of round error checks
 		#[allow(clippy::float_cmp)]
 		let k_rows = if highest == lowest {
-			0.
+			0.5
 		} else {
 			(close - lowest) / (highest - lowest)
 		};
