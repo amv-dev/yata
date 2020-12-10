@@ -4,15 +4,62 @@ use serde::{Deserialize, Serialize};
 use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
-use crate::methods::{Change, Cross, EMA};
+use crate::methods::{Cross, TSI};
 
+///
+/// ## Links
+///
+/// * <http://www.motivewave.com/studies/smi_ergodic_indicator.htm>
+/// * <https://en.wikipedia.org/wiki/Ergodic_theory>
+///
+/// # 3 value
+///
+/// * `SMI` main value
+///
+/// Range in \[`-1.0`; `1.0`\]
+///
+/// * `Signal line` value
+///
+/// Range in \[`-1.0`; `1.0`\]
+///
+/// * `Oscillator` value
+///
+/// Range in \[`-2.0`; `2.0`\]
+///
+/// # 1 signals
+///
+/// * Signal #1 on `SMI` crosses `Signal`
+///
+/// When `Signal line` value is below `-zone` and `SMI` value crosses `Signal line` upwards, returns full buy signal.
+/// When `Signal line` value is above `+zone` and `SMI` value crosses `Signal line` downwards, returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SMIErgodicIndicator {
+	/// Long TSI period. Default is `25`.
+	///
+	/// Range in \[`period2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
+
+	/// Short TSI period. Default is `13`.
+	///
+	/// Range in \(`2`, `period1`\].
 	pub period2: PeriodType,
+
+	/// Signal line MA period. Default is `13`.
+	///
+	/// Range in \[`2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period3: PeriodType,
+
+	/// Signal line MA method. Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
+
+	/// Signal zone size. Default is `0.2`.
+	///
+	/// Range in \[`0.0`; `1.0`]
+	pub zone: ValueType,
+
+	/// Source type of values. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
@@ -30,11 +77,7 @@ impl IndicatorConfig for SMIErgodicIndicator {
 		let src = candle.source(cfg.source);
 
 		Ok(Self::Instance {
-			change: Change::new(1, src)?,
-			ema11: EMA::new(cfg.period1, 0.)?,
-			ema12: EMA::new(cfg.period2, 0.)?,
-			ema21: EMA::new(cfg.period1, 0.)?,
-			ema22: EMA::new(cfg.period2, 0.)?,
+			tsi: TSI::new(cfg.period2, cfg.period1, src)?,
 			ma: method(cfg.method, cfg.period3, 0.)?,
 			cross: Cross::default(),
 			cfg,
@@ -42,7 +85,13 @@ impl IndicatorConfig for SMIErgodicIndicator {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 > 1 && self.period2 > 1 && self.period3 > 1
+		self.period2 > 1
+			&& self.period2 <= self.period1
+			&& self.period1 < PeriodType::MAX
+			&& self.period3 > 1
+			&& self.period3 < PeriodType::MAX
+			&& self.zone >= 0.
+			&& self.zone <= 1.
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -77,7 +126,7 @@ impl IndicatorConfig for SMIErgodicIndicator {
 	}
 
 	fn size(&self) -> (u8, u8) {
-		(2, 1)
+		(3, 1)
 	}
 }
 
@@ -88,6 +137,7 @@ impl Default for SMIErgodicIndicator {
 			period2: 20,
 			period3: 5,
 			method: RegularMethods::EMA,
+			zone: 0.2,
 			source: Source::Close,
 		}
 	}
@@ -97,11 +147,7 @@ impl Default for SMIErgodicIndicator {
 pub struct SMIErgodicIndicatorInstance {
 	cfg: SMIErgodicIndicator,
 
-	change: Change,
-	ema11: EMA,
-	ema12: EMA,
-	ema21: EMA,
-	ema22: EMA,
+	tsi: TSI,
 	ma: RegularMethod,
 	cross: Cross,
 }
@@ -115,21 +161,14 @@ impl IndicatorInstance for SMIErgodicIndicatorInstance {
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
-		let change = self.change.next(src);
+		let tsi = self.tsi.next(src);
 
-		let temp_change = self.ema12.next(self.ema11.next(change));
+		let sig: ValueType = self.ma.next(tsi);
 
-		let temp_abs_change = self.ema22.next(self.ema21.next(change.abs()));
+		let cross = self.cross.next((tsi, sig)).analog();
+		let s1 =
+			(cross > 0 && sig < -self.cfg.zone) as i8 - (cross < 0 && sig > self.cfg.zone) as i8;
 
-		let smi = if temp_abs_change > 0. {
-			temp_change / temp_abs_change
-		} else {
-			0.
-		};
-		let sig: ValueType = self.ma.next(smi);
-
-		let signal = self.cross.next((smi, sig));
-
-		IndicatorResult::new(&[smi, sig], &[signal])
+		IndicatorResult::new(&[tsi, sig, tsi - sig], &[s1.into()])
 	}
 }
