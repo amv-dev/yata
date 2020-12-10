@@ -27,7 +27,7 @@ yata = "0.4"
   [DMA](https://docs.rs/yata/latest/yata/methods/struct.DMA.html), [TMA](https://docs.rs/yata/latest/yata/methods/struct.TMA.html),
   [DEMA](https://docs.rs/yata/latest/yata/methods/struct.DEMA.html), [TEMA](https://docs.rs/yata/latest/yata/methods/struct.TEMA.html);
 - [Simple moving median (SMM)](https://docs.rs/yata/latest/yata/methods/struct.SMM.html);
-- [Linear regression moving average](https://docs.rs/yata/latest/yata/methods/struct.LinReg.html);
+- [Linear regression moving average (LSMA)](https://docs.rs/yata/latest/yata/methods/struct.LinReg.html);
 - [Volume weighted moving average (VWMA)](https://docs.rs/yata/latest/yata/methods/struct.VWMA.html);
 - [Symmetrically weighted moving average (SWMA)](https://docs.rs/yata/latest/yata/methods/struct.SWMA.html);
 - [Hull moving average (HMA)](https://docs.rs/yata/latest/yata/methods/struct.HMA.html);

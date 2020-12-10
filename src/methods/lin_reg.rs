@@ -28,6 +28,7 @@ use serde::{Deserialize, Serialize};
 /// [`PeriodType`]: crate::core::PeriodType
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[doc(alias = "LSMA")]
 pub struct LinReg {
 	length: PeriodType,
 	s_xy: ValueType,
@@ -37,6 +38,27 @@ pub struct LinReg {
 	length_invert: ValueType,
 	divider: ValueType,
 	window: Window<ValueType>,
+}
+
+/// Just an alias for `LinReg`.
+pub type LSMA = LinReg;
+
+impl LinReg {
+	/// Returns tangent of the current state line
+	#[inline]
+	#[must_use]
+	pub fn tan(&self) -> ValueType {
+		// y = kx + b, x=0
+		self.s_xy.mul_add(self.float_length, self.s_x * self.s_y) * self.divider
+	}
+
+	/// Returns current value
+	#[inline]
+	#[must_use]
+	pub fn b(&self) -> ValueType {
+		// y = kx + b, x=0
+		self.s_x.mul_add(self.tan(), self.s_y) * self.length_invert
+	}
 }
 
 impl Method<'_> for LinReg {
@@ -80,9 +102,7 @@ impl Method<'_> for LinReg {
 		self.s_xy += past_value.mul_add(self.float_length, self.s_y);
 		self.s_y += past_value - value;
 
-		// y = kx + b, x=0
-		let k = self.s_xy.mul_add(self.float_length, self.s_x * self.s_y) * self.divider;
-		self.s_x.mul_add(k, self.s_y) * self.length_invert
+		self.b()
 	}
 }
 
