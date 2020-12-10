@@ -199,7 +199,6 @@ pub trait OHLCV {
 	/// assert!(!candle1.validate());
 	/// assert!(!candle2.validate());
 	/// ```
-	#[inline]
 	fn validate(&self) -> bool {
 		!(self.close() > self.high() || self.close() < self.low() || self.high() < self.low())
 			&& self.close() > 0.
