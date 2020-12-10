@@ -148,8 +148,5 @@ pub use trend_strength_index::TrendStrengthIndex;
 mod true_strength_index;
 pub use true_strength_index::TrueStrengthIndex;
 
-mod vidya;
-pub use vidya::Vidya;
-
 mod woodies_cci;
 pub use woodies_cci::WoodiesCCI;
