@@ -3,16 +3,66 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::methods::{Change, Cross, CrossAbove, CrossUnder, EMA};
+use crate::methods::{Cross, CrossAbove, CrossUnder, EMA, TSI};
 
-// https://en.wikipedia.org/wiki/Trix_(technical_analysis)
+
+/// True Strength Index
+/// 
+/// ## Links
+/// 
+/// * <https://en.wikipedia.org/wiki/True_strength_index>
+/// 
+/// # 2 values
+/// 
+/// * `main` value
+/// 
+/// Range in \[`-1.0`; `1.0`\]
+/// 
+/// * `signal line` value
+/// 
+/// Range in \[`-1.0`; `1.0`\]
+/// 
+/// # 3 signals
+/// 
+/// * Signal #1.
+/// 
+/// When `main` value crosses upper `zone` upwards , returns full sell signal.
+/// When `main` value crosses lower `-zone` downwards, returns full buy signal.
+/// Otherwise returns no signal.
+/// 
+/// * Signal #2.
+/// When `main` value crosses zero line upwards, returns full buy signal.
+/// When `main` value crosses zero line downwards, returns full sell signal.
+/// Otherwise returns no signal.
+/// 
+/// * Signal #3.
+/// When `main` value crosses `signal line` upwards, returns full buy signal.
+/// When `main` value crosses `signal line` downwards, returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TrueStrengthIndex {
+	/// Long TSI period. Default is `25`.
+	/// 
+	/// Range in \[`period2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
+
+	/// Short TSI period. Default is `13`.
+	/// 
+	/// Range in \(`2`, `period1`\].
 	pub period2: PeriodType,
+
+	/// Signal line MA period. Default is `13`.
+	/// 
+	/// Range in \[`2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period3: PeriodType,
+
+	/// Signal zone size. Default is `0.25`.
+	/// 
+	/// Range in \[`0.0`; `1.0`]
 	pub zone: ValueType,
+
+	/// Source type of values. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
@@ -30,11 +80,7 @@ impl IndicatorConfig for TrueStrengthIndex {
 		let src = candle.source(cfg.source);
 
 		Ok(Self::Instance {
-			change: Change::new(1, src)?,
-			ema11: EMA::new(cfg.period1, 0.)?,
-			ema12: EMA::new(cfg.period2, 0.)?,
-			ema21: EMA::new(cfg.period1, 0.)?,
-			ema22: EMA::new(cfg.period2, 0.)?,
+			tsi: TSI::new(cfg.period2, cfg.period1, src)?,
 			ema: EMA::new(cfg.period3, 0.)?,
 			cross_under: CrossUnder::default(),
 			cross_above: CrossAbove::default(),
@@ -45,7 +91,12 @@ impl IndicatorConfig for TrueStrengthIndex {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 > 2 && self.zone >= 0. && self.zone <= 1.
+		self.period2 > 1 && 
+		self.period2 <= self.period1 &&
+		self.period1 < PeriodType::MAX &&
+		self.period3 > 1 &&
+		self.period3 < PeriodType::MAX && 
+		self.zone >= 0. && self.zone <= 1.
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -96,15 +147,11 @@ impl Default for TrueStrengthIndex {
 	}
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct TrueStrengthIndexInstance {
 	cfg: TrueStrengthIndex,
 
-	change: Change,
-	ema11: EMA,
-	ema12: EMA,
-	ema21: EMA,
-	ema22: EMA,
+	tsi: TSI,
 	ema: EMA,
 	cross_under: CrossUnder,
 	cross_above: CrossAbove,
@@ -121,22 +168,16 @@ impl IndicatorInstance for TrueStrengthIndexInstance {
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
-		let m1 = self.change.next(src);
-		let m2 = m1.abs();
-		let ema11 = self.ema11.next(m1);
-		let ema12 = self.ema12.next(ema11);
-		let ema21 = self.ema21.next(m2);
-		let ema22 = self.ema22.next(ema21);
+		
+		let tsi = self.tsi.next(src);
 
-		let value = if ema22 == 0. { 0. } else { ema12 / ema22 };
+		let sig = self.ema.next(tsi);
 
-		let sig = self.ema.next(value);
+		let s1 = self.cross_under.next((tsi, -self.cfg.zone))
+			- self.cross_above.next((tsi, self.cfg.zone));
+		let s2 = self.cross_over1.next((tsi, 0.));
+		let s3 = self.cross_over2.next((tsi, sig));
 
-		let s1 = self.cross_under.next((value, -self.cfg.zone))
-			- self.cross_above.next((value, self.cfg.zone));
-		let s2 = self.cross_over1.next((value, 0.));
-		let s3 = self.cross_over2.next((value, sig));
-
-		IndicatorResult::new(&[value, sig], &[s1, s2, s3])
+		IndicatorResult::new(&[tsi, sig], &[s1, s2, s3])
 	}
 }
