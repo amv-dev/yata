@@ -148,7 +148,9 @@ limitations under the License.
 //!
 //! ## Current usafe status
 //!
-//! Currently there is no `unsafe` code in the crate.
+//! By default, there is no `unsafe` code in the crate. But you can optionally enable `unsafe_performance` feature throw you `Cargo.toml` or by `--feature` flag in your CLI.
+//!
+//! `usafe_performance` enables some unsafe code blocks, most of them are unsafe access to a vector's elements. For some methods it may increase performance by ~5-10%.
 //!
 //! ## Suggestions
 //!
