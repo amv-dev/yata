@@ -7,7 +7,7 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, TSI};
 
 /// SMI Ergodic Indicator
-/// 
+///
 /// ## Links
 ///
 /// * <http://www.motivewave.com/studies/smi_ergodic_indicator.htm>

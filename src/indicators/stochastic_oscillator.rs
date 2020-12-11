@@ -7,37 +7,37 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, CrossAbove, CrossUnder, Highest, Lowest};
 
 /// Stochastic Oscillator
-/// 
+///
 /// ## Links
-/// 
+///
 /// * <https://en.wikipedia.org/wiki/Stochastic_oscillator>
-/// 
+///
 /// # 2 values
-/// 
+///
 /// * `main` value
-/// 
+///
 /// Range in \[`0.0`; `1.0`\].
-/// 
+///
 /// * `signal line` value
-/// 
+///
 /// Range in \[`0.0`; `1.0`\].
-/// 
+///
 /// # 3 signals
-/// 
+///
 /// * Signal #1
-/// 
+///
 /// When `main` value crosses lower bound upwards, returns full buy signal.
 /// When `main` value crosses upper bound downwards, returns full sell signal.
 /// Otherwise returns no signal.
-/// 
+///
 /// * Signal #2
-/// 
+///
 /// When `signal line` value crosses lower bound upwards, returns full buy signal.
 /// When `signal line` value crosses upper bound downwards, returns full sell signal.
 /// Otherwise returns no signal.
-/// 
+///
 /// * Signal #3
-/// 
+///
 /// When `main` value crosses `signal line` upwards, returns full buy signal.
 /// When `main` value crosses `signal line` downwards, returns full sell signal.
 /// Otherwise returns no signal.
@@ -45,14 +45,14 @@ use crate::methods::{Cross, CrossAbove, CrossUnder, Highest, Lowest};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct StochasticOscillator {
 	/// Period for searching highest high and lowest low. Default is `14`.
-	/// 
+	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
 
 	/// Period for smoothing `main` value. Default is `14`.
-	/// 
+	///
 	/// Usually it is equal to `period`.
-	/// 
+	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub smooth_k: PeriodType,
 
@@ -60,7 +60,7 @@ pub struct StochasticOscillator {
 	pub method_k: RegularMethods,
 
 	/// Period for smoothing `signal line` value. Default is `3`.
-	/// 
+	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub smooth_d: PeriodType,
 
@@ -68,7 +68,7 @@ pub struct StochasticOscillator {
 	pub method_d: RegularMethods,
 
 	/// Zone size for #1 and #2 signals.
-	/// 
+	///
 	/// Range in \[`0.0`; `0.5`\].
 	pub zone: ValueType,
 }

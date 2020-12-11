@@ -1,21 +1,44 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use super::commodity_channel_index::CommodityChannelIndexInstance;
-use super::CommodityChannelIndex;
-use crate::core::{Action, Error, Method, PeriodType, ValueType, Window, OHLCV};
+use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::signi;
-use crate::methods::{Cross, CrossAbove, CrossUnder, SMA};
+use crate::methods::{Cross, CCI};
 
+const SCALE: ValueType = 1.0 / 1.5;
+
+/// Woodies Commodity Channel Index
+///
+/// ## Links
+///
+/// * <https://tlc.thinkorswim.com/center/reference/Tech-Indicators/studies-library/V-Z/WoodiesCCI.html>
+/// * <https://ftmo.com/en/woodies-cci-system/>
+///
+/// # 2 values
+///
+/// * `Turbo CCI`  value
+///
+/// Range in \(`-inf`; `+inf`\)
+///
+/// * `Trend CCI` value
+///
+/// Range in \(`-inf`; `+inf`\)
+///
+/// # 1 signals
+///
+/// * When `Trend CCI` stays above zero line for `s1_lag` bars, returns full buy signal.
+/// When `Trend CCI` stays below zero line for `s1_lag` bars, returns full sell signal.
+/// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WoodiesCCI {
+	/// `Turbo` CCI period
 	pub period1: PeriodType,
+	/// `Trend` CCI period
 	pub period2: PeriodType,
-	pub signal1_period: PeriodType,
-	pub signal2_bars_count: PeriodType,
-	pub signal3_zone: ValueType,
+	pub s1_lag: PeriodType,
+	pub source: Source,
 }
 
 impl IndicatorConfig for WoodiesCCI {
@@ -29,34 +52,19 @@ impl IndicatorConfig for WoodiesCCI {
 		}
 
 		let cfg = self;
-
-		let cci1 = CommodityChannelIndex {
-			period: cfg.period1,
-			..CommodityChannelIndex::default()
-		};
-		let cci2 = CommodityChannelIndex {
-			period: cfg.period2,
-			..CommodityChannelIndex::default()
-		};
+		let src = candle.source(cfg.source);
 
 		Ok(Self::Instance {
-			cci1: cci1.init(candle)?,
-			cci2: cci2.init(candle)?,
-			sma: SMA::new(cfg.signal1_period, 0.)?,
-			cross1: Cross::default(),
-			cross2: Cross::default(),
-			s2_sum: 0,
-			s3_sum: 0.,
-			s3_count: 0,
-			window: Window::new(cfg.signal2_bars_count, 0),
-			cross_above: CrossAbove::default(),
-			cross_under: CrossUnder::default(),
+			turbo: CCI::new(cfg.period1, src)?,
+			trend: CCI::new(cfg.period2, src)?,
+			s1_count: 0,
+			s1_cross: Cross::default(),
 			cfg,
 		})
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 > self.period2
+		self.period1 < self.period2 && self.s1_lag > 0
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -69,17 +77,13 @@ impl IndicatorConfig for WoodiesCCI {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period2 = value,
 			},
-			"signal1_period" => match value.parse() {
+			"s1_lag" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.signal1_period = value,
+				Ok(value) => self.s1_lag = value,
 			},
-			"signal1_bars_count" => match value.parse() {
+			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.signal2_bars_count = value,
-			},
-			"signal3_zone" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.signal3_zone = value,
+				Ok(value) => self.source = value,
 			},
 
 			_ => {
@@ -91,7 +95,7 @@ impl IndicatorConfig for WoodiesCCI {
 	}
 
 	fn size(&self) -> (u8, u8) {
-		(2, 3)
+		(2, 1)
 	}
 }
 
@@ -100,9 +104,8 @@ impl Default for WoodiesCCI {
 		Self {
 			period1: 14,
 			period2: 6,
-			signal1_period: 9,
-			signal2_bars_count: 6,
-			signal3_zone: 0.2,
+			s1_lag: 6,
+			source: Source::Close,
 		}
 	}
 }
@@ -111,17 +114,10 @@ impl Default for WoodiesCCI {
 pub struct WoodiesCCIInstance {
 	cfg: WoodiesCCI,
 
-	cci1: CommodityChannelIndexInstance,
-	cci2: CommodityChannelIndexInstance,
-	sma: SMA,
-	cross1: Cross,
-	cross2: Cross,
-	s2_sum: isize,
-	s3_sum: ValueType,
-	s3_count: PeriodType,
-	window: Window<i8>,
-	cross_above: CrossAbove,
-	cross_under: CrossUnder,
+	turbo: CCI,
+	trend: CCI,
+	s1_count: isize,
+	s1_cross: Cross,
 }
 
 impl IndicatorInstance for WoodiesCCIInstance {
@@ -132,44 +128,22 @@ impl IndicatorInstance for WoodiesCCIInstance {
 	}
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let cci1 = self.cci1.next(candle).value(0);
-		let cci2 = self.cci2.next(candle).value(0);
+		let src = candle.source(self.cfg.source);
 
-		let cci1_sign = signi(cci1);
-		let d_cci = cci1 - cci2;
-		let sma = self.sma.next(d_cci);
-		let s1 = self.cross1.next((sma, 0.));
+		let turbo = self.turbo.next(src) * SCALE;
+		let trend = self.trend.next(src) * SCALE;
 
-		let s0 = self.cross2.next((cci1, 0.));
-		self.s2_sum += (cci1_sign - self.window.push(cci1_sign)) as isize;
+		let s1_cross = self.s1_cross.next((trend, 0.0)).analog();
 
-		// let s2;
-		// if self.s2_sum >= self.cfg.signal2_bars_count {
-		// 	s2 = 1;
-		// } else if self.s2_sum <= -self.cfg.signal2_bars_count {
-		// 	s2 = -1;
-		// } else {
-		// 	s2 = 0;
-		// }
-		let s2 = (self.s2_sum >= isize::from(self.cfg.signal2_bars_count)) as i8
-			- (self.s2_sum <= -isize::from(self.cfg.signal2_bars_count)) as i8;
+		if s1_cross == 0 {
+			self.s1_count += signi(trend) as isize;
+		} else {
+			self.s1_count = s1_cross as isize;
+		}
 
-		// if s0.is_some() {
-		// 	self.s3_sum = 0.;
-		// 	self.s3_count = 0;
-		// }
+		#[allow(clippy::cast_possible_wrap)]
+		let s1 = (self.s1_count.abs() == self.cfg.s1_lag as isize) as i8 * s1_cross;
 
-		let is_none = s0.is_none();
-		self.s3_sum *= is_none as i8 as ValueType;
-		self.s3_count *= is_none as PeriodType;
-
-		self.s3_sum += cci1;
-		self.s3_count += 1;
-
-		let s3v = self.s3_sum / self.s3_count as ValueType;
-		let s3 = self.cross_above.next((s3v, self.cfg.signal3_zone))
-			- self.cross_under.next((s3v, -self.cfg.signal3_zone));
-
-		IndicatorResult::new(&[cci1, cci2], &[s1, Action::from(s2), s3])
+		IndicatorResult::new(&[turbo, trend], &[s1.into()])
 	}
 }
