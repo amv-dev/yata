@@ -23,17 +23,17 @@ fn bench_indicator_aroon(b: &mut test::Bencher) {
 	bench_indicator::<Aroon>(b);
 }
 
-// #[bench]
-// fn bench_indicator_average_directional_index(b: &mut test::Bencher) {
-// 	bench_indicator::<AverageDirectionalIndex>(b);
-// }
+#[bench]
+fn bench_indicator_average_directional_index(b: &mut test::Bencher) {
+	bench_indicator::<AverageDirectionalIndex>(b);
+}
 
-// #[bench]
-// fn bench_detrended_price_oscillator(b: &mut test::Bencher) {
-// 	bench_indicator::<DetrendedPriceOscillator>(b);
-// }
+#[bench]
+fn bench_detrended_price_oscillator(b: &mut test::Bencher) {
+	bench_indicator::<DetrendedPriceOscillator>(b);
+}
 
-// #[bench]
-// fn bench_awesome_oscillator(b: &mut test::Bencher) {
-// 	bench_indicator::<AwesomeOscillator>(b);
-// }
+#[bench]
+fn bench_awesome_oscillator(b: &mut test::Bencher) {
+	bench_indicator::<AwesomeOscillator>(b);
+}
