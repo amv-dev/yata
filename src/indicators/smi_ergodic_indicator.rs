@@ -37,17 +37,17 @@ use crate::methods::{Cross, TSI};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SMIErgodicIndicator {
-	/// Long TSI period. Default is `25`.
+	/// Long TSI period. Default is `20`.
 	///
 	/// Range in \[`period2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
 
-	/// Short TSI period. Default is `13`.
+	/// Short TSI period. Default is `5`.
 	///
 	/// Range in \(`2`, `period1`\].
 	pub period2: PeriodType,
 
-	/// Signal line MA period. Default is `13`.
+	/// Signal line MA period. Default is `5`.
 	///
 	/// Range in \[`2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period3: PeriodType,
@@ -134,8 +134,8 @@ impl IndicatorConfig for SMIErgodicIndicator {
 impl Default for SMIErgodicIndicator {
 	fn default() -> Self {
 		Self {
-			period1: 5,
-			period2: 20,
+			period1: 20,
+			period2: 5,
 			period3: 5,
 			method: RegularMethods::EMA,
 			zone: 0.2,
