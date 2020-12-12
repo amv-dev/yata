@@ -37,7 +37,11 @@ pub struct WoodiesCCI {
 	pub period1: PeriodType,
 	/// `Trend` CCI period
 	pub period2: PeriodType,
+
+	/// Signal #1 bars count to occur
 	pub s1_lag: PeriodType,
+
+	/// Source type of values. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
@@ -64,7 +68,7 @@ impl IndicatorConfig for WoodiesCCI {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 < self.period2 && self.s1_lag > 0
+		self.period1 < self.period2 && self.s1_lag > 0 && self.period2 < PeriodType::MAX && self.s1_lag < PeriodType
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -102,8 +106,8 @@ impl IndicatorConfig for WoodiesCCI {
 impl Default for WoodiesCCI {
 	fn default() -> Self {
 		Self {
-			period1: 14,
-			period2: 6,
+			period1: 6,
+			period2: 14,
 			s1_lag: 6,
 			source: Source::Close,
 		}
