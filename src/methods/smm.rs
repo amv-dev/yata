@@ -1,9 +1,50 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
-use std::cmp::Ordering;
+use std::{cmp::Ordering, slice::SliceIndex};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!! USE WITH CAUTION !!!!!!
+//
+// When `unsafe_performance` feature is enabled, this function may produce UB,
+// when tying to get slice item outside it's bounds.
+//
+// !!!!!! USE WITH CAUTION !!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#[inline]
+fn get<T>(slice: &[ValueType], index: T) -> &T::Output
+where
+	T: SliceIndex<[ValueType]>,
+{
+	if cfg!(feature = "unsafe_performance") {
+		#[allow(unsafe_code)]
+		unsafe { slice.get_unchecked(index) }
+	} else {
+		&slice[index]
+	}
+}
+
+#[inline]
+fn next_half(
+	value: ValueType,
+	slice: &[ValueType],
+	padding: usize,
+	f: fn(value: ValueType, slice: &[ValueType], padding: usize) -> usize,
+) -> usize {
+	let half = slice.len() / 2;
+
+	// It's not a mistake. We really need a bit-to-bit comparison of float values here
+	// Also it is not a good idea to use `match value.partial_cmp(slice[half]): it is slower.
+	if value.to_bits() == get(slice, half).to_bits() {
+		padding + half
+	} else if &value > get(slice, half) {
+		f(value, get(slice, (half + 1)..), padding + half + 1)
+	} else {
+		f(value, get(slice, ..half), padding)
+	}
+}
 
 // find current value index
 #[inline]
@@ -12,17 +53,7 @@ fn find_index(value: ValueType, slice: &[ValueType], padding: usize) -> usize {
 		return padding + 1 - slice.len();
 	}
 
-	let half = slice.len() / 2;
-
-	// It's not a mistake. We really need a bit-to-bit comparison of float values here
-	// Also it is not a good idea to use `match value.partial_cmp(slice[half]): it is slower.
-	if value.to_bits() == slice[half].to_bits() {
-		padding + half
-	} else if value > slice[half] {
-		find_index(value, &slice[(half + 1)..], padding + half + 1)
-	} else {
-		find_index(value, &slice[..half], padding)
-	}
+	next_half(value, slice, padding, find_index)
 }
 
 // find new value insert index at
@@ -32,18 +63,9 @@ fn find_insert_index(value: ValueType, slice: &[ValueType], padding: usize) -> u
 		return padding;
 	}
 
-	let half = slice.len() / 2;
-
-	// It's not a mistake. We really need a bit-to-bit comparison of float values here
-	// Also it is not a good idea to use `match value.partial_cmp(slice[half]): it is slower.
-	if value.to_bits() == slice[half].to_bits() {
-		padding + half
-	} else if value > slice[half] {
-		find_insert_index(value, &slice[(half + 1)..], padding + half + 1)
-	} else {
-		find_insert_index(value, &slice[..half], padding)
-	}
+	next_half(value, slice, padding, find_insert_index)
 }
+
 ///
 /// [Simple Moving Median](https://en.wikipedia.org/wiki/Moving_average#Moving_median) of specified `length` for timeseries of type [`ValueType`]
 ///
@@ -103,19 +125,10 @@ impl SMM {
 	}
 
 	/// Returns last result value. Useful for implementing in other methods and indicators.
-	#[allow(unsafe_code)]
 	#[inline]
 	#[must_use]
 	pub fn get_last_value(&self) -> ValueType {
-		if cfg!(feature = "unsafe_performance") {
-			unsafe {
-				(self.slice.get_unchecked(self.half as usize)
-					+ self.slice.get_unchecked(self.half_m1 as usize))
-					* 0.5
-			}
-		} else {
-			(self.slice[self.half as usize] + self.slice[self.half_m1 as usize]) * 0.5
-		}
+		(get(&self.slice, self.half as usize) + get(&self.slice, self.half_m1 as usize)) * 0.5
 	}
 }
 
@@ -159,7 +172,7 @@ impl Method<'_> for SMM {
 
 		// if the old index is before current, then we should offset current value by 1 back
 		let index = index - (old_index < index) as usize;
-		#[allow(unsafe_code)]
+
 		if cfg!(feature = "unsafe_performance") {
 			if index != old_index {
 				let is_after = (index > old_index) as usize;
@@ -169,6 +182,7 @@ impl Method<'_> for SMM {
 				let count = index.saturating_sub(old_index) * is_after
 					+ old_index.saturating_sub(index) * (1 - is_after);
 
+				#[allow(unsafe_code)]
 				unsafe {
 					std::ptr::copy(
 						self.slice.as_ptr().add(start),
@@ -178,6 +192,7 @@ impl Method<'_> for SMM {
 				}
 			}
 
+			#[allow(unsafe_code)]
 			unsafe {
 				let q = self.slice.get_unchecked_mut(index);
 				*q = value;
