@@ -6,14 +6,16 @@ use std::cmp::Ordering;
 use serde::{Deserialize, Serialize};
 
 // find current value index
+#[inline]
 fn find_index(value: ValueType, slice: &[ValueType], padding: usize) -> usize {
-	if slice.len() == 1 {
-		return padding;
+	if slice.len() < 2 {
+		return padding + 1 - slice.len();
 	}
 
 	let half = slice.len() / 2;
 
 	// It's not a mistake. We really need a bit-to-bit comparison of float values here
+	// Also it is not a good idea to use `match value.partial_cmp(slice[half]): it is slower.
 	if value.to_bits() == slice[half].to_bits() {
 		padding + half
 	} else if value > slice[half] {
@@ -24,6 +26,7 @@ fn find_index(value: ValueType, slice: &[ValueType], padding: usize) -> usize {
 }
 
 // find new value insert index at
+#[inline]
 fn find_insert_index(value: ValueType, slice: &[ValueType], padding: usize) -> usize {
 	if slice.is_empty() {
 		return padding;
@@ -32,6 +35,7 @@ fn find_insert_index(value: ValueType, slice: &[ValueType], padding: usize) -> u
 	let half = slice.len() / 2;
 
 	// It's not a mistake. We really need a bit-to-bit comparison of float values here
+	// Also it is not a good idea to use `match value.partial_cmp(slice[half]): it is slower.
 	if value.to_bits() == slice[half].to_bits() {
 		padding + half
 	} else if value > slice[half] {
@@ -227,35 +231,37 @@ mod tests {
 	fn test_smm0() {
 		let candles = RandomCandles::default();
 
-		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
+		let src: Vec<ValueType> = candles.take(3000).map(|x| x.close).collect();
 
-		(1..255).for_each(|ma_length| {
-			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
-			let ma_length = ma_length as usize;
+		[1, 2, 3, 5, 11, 23, 51, 100, 150, 203, 254]
+			.iter()
+			.for_each(|&ma_length| {
+				let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
+				let ma_length = ma_length as usize;
 
-			src.iter().enumerate().for_each(|(i, &x)| {
-				let value = ma.next(x);
-				let slice_from = i.saturating_sub(ma_length - 1);
-				let slice_to = i;
-				let mut slice = Vec::with_capacity(ma_length);
+				src.iter().enumerate().for_each(|(i, &x)| {
+					let value = ma.next(x);
+					let slice_from = i.saturating_sub(ma_length - 1);
+					let slice_to = i;
+					let mut slice = Vec::with_capacity(ma_length);
 
-				src.iter()
-					.skip(slice_from)
-					.take(slice_to - slice_from + 1)
-					.for_each(|&x| slice.push(x));
-				while slice.len() < ma_length {
-					slice.push(src[0]);
-				}
+					src.iter()
+						.skip(slice_from)
+						.take(slice_to - slice_from + 1)
+						.for_each(|&x| slice.push(x));
+					while slice.len() < ma_length {
+						slice.push(src[0]);
+					}
 
-				slice.sort_by(|a, b| a.partial_cmp(b).unwrap());
+					slice.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
-				let value2 = if ma_length % 2 == 0 {
-					(slice[ma_length / 2] + slice[ma_length / 2 - 1]) / 2.0
-				} else {
-					slice[ma_length / 2]
-				};
-				assert_eq_float(value2, value);
+					let value2 = if ma_length % 2 == 0 {
+						(slice[ma_length / 2] + slice[ma_length / 2 - 1]) / 2.0
+					} else {
+						slice[ma_length / 2]
+					};
+					assert_eq_float(value2, value);
+				});
 			});
-		});
 	}
 }
