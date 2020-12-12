@@ -68,7 +68,7 @@ impl IndicatorConfig for WoodiesCCI {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 < self.period2 && self.s1_lag > 0 && self.period2 < PeriodType::MAX && self.s1_lag < PeriodType
+		self.period1 < self.period2 && self.s1_lag > 0 && self.period2 < PeriodType::MAX && self.s1_lag < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
