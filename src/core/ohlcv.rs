@@ -76,6 +76,28 @@ pub trait OHLCV {
 		(self.high() + self.low()) * 0.5
 	}
 
+	/// Calculates arithmetic average of `high`, `low`, `open` and `close` values of the candle
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use yata::prelude::*;
+	/// use yata::core::Candle;
+	///
+	/// let candle = Candle {
+	///     high: 10.0,
+	///     low: 5.0,
+	///     open: 2.0,
+	///     close: 3.0,
+	///     ..Candle::default()
+	/// };
+	///
+	/// assert_eq!(candle.ohlc4(), 5.0);
+	/// ```
+	fn ohlc4(&self) -> ValueType {
+		(self.high() + self.low() + self.close() + self.open()) * 0.25
+	}
+
 	/// CLV = \[\(close - low\) - \(high - close\)\] / \(high - low\)
 	///
 	/// # Examples
@@ -248,6 +270,42 @@ pub trait OHLCV {
 	/// Same as [`OHLCV::tp()`] * [`OHLCV::volume()`]
 	fn volumed_price(&self) -> ValueType {
 		self.tp() * self.volume()
+	}
+
+	/// Returns [Heikin Ashi](https://en.wikipedia.org/wiki/Candlestick_chart#Heikin-Ashi_candlesticks) `open` value
+	fn ha_open<T>(&self, prev: &T) -> ValueType
+	where
+		T: OHLCV,
+		Self: Sized,
+	{
+		(prev.open() + prev.close()) * 0.5
+	}
+
+	/// Returns [Heikin Ashi](https://en.wikipedia.org/wiki/Candlestick_chart#Heikin-Ashi_candlesticks) `high` value
+	fn ha_high<T>(&self, prev: &T) -> ValueType
+	where
+		T: OHLCV,
+		Self: Sized,
+	{
+		self.high().max(self.ha_open(prev)).max(self.ha_close(prev))
+	}
+
+	/// Returns [Heikin Ashi](https://en.wikipedia.org/wiki/Candlestick_chart#Heikin-Ashi_candlesticks) `low` value
+	fn ha_low<T>(&self, prev: &T) -> ValueType
+	where
+		T: OHLCV,
+		Self: Sized,
+	{
+		self.low().min(self.ha_open(prev)).max(self.ha_close(prev))
+	}
+
+	/// Returns [Heikin Ashi](https://en.wikipedia.org/wiki/Candlestick_chart#Heikin-Ashi_candlesticks) `close` value
+	fn ha_close<T>(&self, _prev: &T) -> ValueType
+	where
+		T: OHLCV,
+		Self: Sized,
+	{
+		self.ohlc4()
 	}
 }
 

@@ -20,7 +20,9 @@ where
 {
 	if cfg!(feature = "unsafe_performance") {
 		#[allow(unsafe_code)]
-		unsafe { slice.get_unchecked(index) }
+		unsafe {
+			slice.get_unchecked(index)
+		}
 	} else {
 		&slice[index]
 	}
