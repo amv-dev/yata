@@ -91,6 +91,8 @@ pub use adi::*;
 pub use highest_lowest_index::*;
 mod past;
 pub use past::*;
+mod heikin_ashi;
+pub use heikin_ashi::HeikinAshi;
 
 #[cfg(test)]
 mod tests {

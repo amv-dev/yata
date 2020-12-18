@@ -21,41 +21,6 @@ pub trait Sequence<T>: AsRef<[T]> {
 
 	/// Returns a reference to the first value in the sequence or `None` if it's empty.
 	fn get_initial_value(&self) -> Option<&T>;
-
-	/// Clones current `Sequence` of `OHLCV`s into [Heikin Ashi](https://en.wikipedia.org/wiki/Candlestick_chart#Heikin-Ashi_candlesticks) `OHLCV`s
-	fn clone_to_heiken_ashi(&self) -> Vec<(ValueType, ValueType, ValueType, ValueType, ValueType)>
-	where
-		T: OHLCV,
-	{
-		let last = self
-			.as_ref()
-			.windows(2)
-			.map(|x| (&x[0], &x[1]))
-			.map(|(prev, current)| {
-				let open = current.ha_open(prev);
-				let close = current.ha_close(prev);
-
-				(
-					open,
-					current.high().max(open).max(close),
-					current.low().min(open).max(close),
-					close,
-					current.volume(),
-				)
-			});
-
-		let first = self.as_ref().iter().take(1).map(|x| {
-			(
-				(x.open() + x.close()) * 0.5,
-				x.high(),
-				x.low(),
-				x.ohlc4(),
-				x.volume(),
-			)
-		});
-
-		first.chain(last).collect()
-	}
 }
 
 impl<Q: AsRef<[ValueType]>> Sequence<ValueType> for Q {

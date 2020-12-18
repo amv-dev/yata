@@ -271,42 +271,6 @@ pub trait OHLCV {
 	fn volumed_price(&self) -> ValueType {
 		self.tp() * self.volume()
 	}
-
-	/// Returns [Heikin Ashi](https://en.wikipedia.org/wiki/Candlestick_chart#Heikin-Ashi_candlesticks) `open` value
-	fn ha_open<T>(&self, prev: &T) -> ValueType
-	where
-		T: OHLCV,
-		Self: Sized,
-	{
-		(prev.open() + prev.close()) * 0.5
-	}
-
-	/// Returns [Heikin Ashi](https://en.wikipedia.org/wiki/Candlestick_chart#Heikin-Ashi_candlesticks) `high` value
-	fn ha_high<T>(&self, prev: &T) -> ValueType
-	where
-		T: OHLCV,
-		Self: Sized,
-	{
-		self.high().max(self.ha_open(prev)).max(self.ha_close(prev))
-	}
-
-	/// Returns [Heikin Ashi](https://en.wikipedia.org/wiki/Candlestick_chart#Heikin-Ashi_candlesticks) `low` value
-	fn ha_low<T>(&self, prev: &T) -> ValueType
-	where
-		T: OHLCV,
-		Self: Sized,
-	{
-		self.low().min(self.ha_open(prev)).max(self.ha_close(prev))
-	}
-
-	/// Returns [Heikin Ashi](https://en.wikipedia.org/wiki/Candlestick_chart#Heikin-Ashi_candlesticks) `close` value
-	fn ha_close<T>(&self, _prev: &T) -> ValueType
-	where
-		T: OHLCV,
-		Self: Sized,
-	{
-		self.ohlc4()
-	}
 }
 
 // impl<T: OHLCV + Copy> Sequence<T> {
