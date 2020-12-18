@@ -1,6 +1,7 @@
 use crate::core::Method;
 use crate::core::{ValueType, OHLCV};
 use std::borrow::BorrowMut;
+use crate::prelude::Candle;
 
 /// Implements some methods for sequence manipulations.
 pub trait Sequence<T>: AsRef<[T]> {
@@ -25,6 +26,42 @@ pub trait Sequence<T>: AsRef<[T]> {
 	/// Returns a reference to the first value in the sequence or `None` if it's empty.
 	fn get_initial_value(&self) -> Option<&T> {
 		self.as_ref().first()
+	}
+
+	/// Converts timeframe of the series
+	fn collapse_timeframe(&self, size: usize, continuous: bool) -> Vec<Candle> 
+	where
+		T: OHLCV
+	{
+		fn fold<T: OHLCV>(folded: Candle, next: &T) -> Candle {
+			Candle {
+				high: folded.high.max(next.high()),
+				low: folded.low.min(next.low()),
+				close: next.close(),
+				volume: folded.volume + next.volume(),
+				..folded
+			}
+		}
+
+		fn window<T: OHLCV>(window: &[T]) -> Candle {
+			let first = window.first().unwrap();
+			let initial = Candle {
+				open: first.open(),
+				high: first.high(),
+				low: first.low(),
+				close: first.close(),
+				volume: first.volume(),
+			};
+
+			window.iter().skip(1).fold(initial, fold)
+		}
+
+		self
+			.as_ref()
+			.windows(size)
+			.step_by(if continuous { 1 } else { size })
+			.map(window)
+			.collect()
 	}
 }
 
