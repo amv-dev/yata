@@ -67,6 +67,8 @@ impl Method<'_> for LinReg {
 	type Output = Self::Input;
 
 	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+		#![allow(clippy::all)]
+		
 		match length {
 			0 | 1 => Err(Error::WrongMethodParameters),
 			length => {
@@ -128,12 +130,13 @@ mod tests {
 	#[test]
 	fn test_lin_reg() {
 		#![allow(clippy::similar_names)]
+		#![allow(clippy::all)]
 
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		(2..255).for_each(|length| {
+		[2, 3, 4, 5, 6, 7, 10, 11, 13, 17, 20, 21, 22, 25, 70, 77, 100, 125, 128, 173, 254].iter().for_each(|&length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
@@ -141,15 +144,21 @@ mod tests {
 			let s_x: usize = (0..length).sum();
 			let s_x2: usize = (0..length).map(|x| x * x).sum();
 
-			let s_x = s_x as ValueType;
+			let s_x = -(s_x as ValueType);
 			let s_x2 = s_x2 as ValueType;
 
 			src.iter().enumerate().for_each(|(i, &x)| {
 				let ma_value = ma.next(x);
 
-				let s_xy =
-					(0..length).fold(0.0, |s, j| s + j as ValueType * src[i.saturating_sub(j)]);
-				let s_y: ValueType = (0..length).map(|j| src[i.saturating_sub(j)]).sum();
+				let s_xy: ValueType =
+					(0..length)
+						.map(|j| -(j as ValueType) * src[i.saturating_sub(j)])
+						.sum()
+					;
+				let s_y: ValueType = (0..length)
+					.map(|j| i.saturating_sub(j))
+					.map(|k| src[k])
+					.sum();
 
 				let a = (n * s_xy - s_x * s_y) / (n * s_x2 - s_x * s_x);
 				let b = (s_y - a * s_x) / n;
