@@ -135,7 +135,7 @@ pub struct Candle {
 
 impl Candle {
 	/// Creates `Candle` from any another `OHLCV`-object.
-	pub fn from<T: OHLCV>(src: &T) -> Self {
+	pub fn from<T: OHLCV + ?Sized>(src: &T) -> Self {
 		Self {
 			open: src.open(),
 			high: src.high(),
