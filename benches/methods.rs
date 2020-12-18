@@ -878,3 +878,11 @@ fn bench_vidya_w100(b: &mut test::Bencher) {
 	}
 	b.iter(|| method.next(iter.next().unwrap()))
 }
+
+#[bench]
+fn bench_heikin_ashi(b: &mut test::Bencher) {
+	let candles: Vec<_> = RandomCandles::new().take(1000).collect();
+	let mut iter = candles.iter().cycle().copied();
+	let mut method = HeikinAshi::new((), &candles[0]).unwrap();
+	b.iter(|| method.next(&iter.next().unwrap()))
+}
