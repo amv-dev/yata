@@ -54,24 +54,3 @@ impl<'a> Method<'a> for AverageTrueRange {
     }
 }
 
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::core::{Method, Candle};
-    use crate::core::ValueType;
-    use crate::helpers::RandomCandles;
-    use crate::methods::tests::test_const;
-
-
-    #[test]
-    fn test_average_true_range_const() {
-        use super::AverageTrueRange as TestingMethod;
-        for i in 1..255 {
-            let input = RandomCandles::new();
-            let mut method = TestingMethod::new(i, &input).unwrap();
-            let output = method.next(&input);
-            test_const(&mut method, input, output);
-        }
-    }
-}
