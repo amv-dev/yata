@@ -94,6 +94,9 @@ pub use past::*;
 mod heikin_ashi;
 pub use heikin_ashi::HeikinAshi;
 
+mod average_true_range;
+pub use average_true_range::AverageTrueRange;
+
 #[cfg(test)]
 mod tests {
 	use crate::core::{Method, ValueType};
