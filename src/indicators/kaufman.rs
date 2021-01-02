@@ -25,7 +25,7 @@ use crate::methods::{Change, Cross, LinearVolatility, StDev};
 /// When `source` crosses `KAMA` downwards, returns full sell signal.
 /// Otherwise returns no signal.
 ///
-/// * if `filter_period` is greater than `1`, it uses same cross between `source` and `KAMA`, but with additional filtering using standart deviation.
+/// * if `filter_period` is greater than `1`, it uses same cross between `source` and `KAMA`, but with additional filtering using standard deviation.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Kaufman {
@@ -52,7 +52,7 @@ pub struct Kaufman {
 	/// Apply double smoothing. Default is `true`.
 	pub square_smooth: bool,
 
-	/// Standart deviation multiplier. Default is `0.3`.
+	/// Standard deviation multiplier. Default is `0.3`.
 	///
 	/// Range in \(`0.0`; `+inf`\)
 	pub k: ValueType,

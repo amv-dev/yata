@@ -34,7 +34,7 @@ pub struct BollingerBands {
 	///
 	/// Range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub avg_size: PeriodType,
-	/// Standart deviation multiplier for bounds. Default is `2.0`
+	/// Standard deviation multiplier for bounds. Default is `2.0`
 	///
 	/// Range in \(`0.0`; `+inf`\)
 	pub sigma: ValueType,
