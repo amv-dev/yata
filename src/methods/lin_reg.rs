@@ -68,7 +68,7 @@ impl Method<'_> for LinReg {
 
 	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		#![allow(clippy::all)]
-		
+
 		match length {
 			0 | 1 => Err(Error::WrongMethodParameters),
 			length => {
@@ -136,7 +136,11 @@ mod tests {
 
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		[2, 3, 4, 5, 6, 7, 10, 11, 13, 17, 20, 21, 22, 25, 70, 77, 100, 125, 128, 173, 254].iter().for_each(|&length| {
+		[
+			2, 3, 4, 5, 6, 7, 10, 11, 13, 17, 20, 21, 22, 25, 70, 77, 100, 125, 128, 173, 254,
+		]
+		.iter()
+		.for_each(|&length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
@@ -150,11 +154,9 @@ mod tests {
 			src.iter().enumerate().for_each(|(i, &x)| {
 				let ma_value = ma.next(x);
 
-				let s_xy: ValueType =
-					(0..length)
-						.map(|j| -(j as ValueType) * src[i.saturating_sub(j)])
-						.sum()
-					;
+				let s_xy: ValueType = (0..length)
+					.map(|j| -(j as ValueType) * src[i.saturating_sub(j)])
+					.sum();
 				let s_y: ValueType = (0..length)
 					.map(|j| i.saturating_sub(j))
 					.map(|k| src[k])

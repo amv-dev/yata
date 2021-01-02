@@ -1,4 +1,4 @@
-use crate::core::{Method, Candle, OHLCV, Error};
+use crate::core::{Candle, Error, Method, OHLCV};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -38,9 +38,9 @@ impl<'a> Method<'a> for HeikinAshi {
 
 #[cfg(test)]
 mod tests {
+	use super::{HeikinAshi, OHLCV};
+	use crate::core::{Candle, Method};
 	use crate::helpers::{assert_eq_float, RandomCandles};
-	use super::{OHLCV, HeikinAshi};
-	use crate::core::{Method, Candle};
 
 	#[test]
 	fn test_heikin_ashi() {
@@ -54,8 +54,8 @@ mod tests {
 		candles
 			.take(100)
 			.map(|candle| {
-				let open = (prev.open() + prev.close())/2.0;
-				let close = (candle.open() + candle.high() + candle.low() + candle.close())/4.0;
+				let open = (prev.open() + prev.close()) / 2.0;
+				let close = (candle.open() + candle.high() + candle.low() + candle.close()) / 4.0;
 
 				let tested = Candle {
 					open,
@@ -66,7 +66,6 @@ mod tests {
 				};
 
 				(tested, heikin_ashi.next(&candle))
-
 			})
 			.inspect(|(original, ha)| assert_eq_float(original.close(), ha.close()))
 			.inspect(|(original, ha)| assert_eq_float(original.high(), ha.high()))

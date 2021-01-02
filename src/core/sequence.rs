@@ -1,7 +1,7 @@
 use crate::core::Method;
 use crate::core::{ValueType, OHLCV};
-use std::borrow::BorrowMut;
 use crate::prelude::Candle;
+use std::borrow::BorrowMut;
 
 /// Implements some methods for sequence manipulations.
 pub trait Sequence<T>: AsRef<[T]> {
@@ -13,7 +13,7 @@ pub trait Sequence<T>: AsRef<[T]> {
 	where
 		M: Method<'a, Input = T, Output = T> + BorrowMut<M> + 'a,
 		Self: AsMut<[T]>,
-		T: Copy
+		T: Copy,
 	{
 		self.as_mut().iter_mut().for_each(|x| *x = method.next(*x));
 	}
@@ -29,9 +29,9 @@ pub trait Sequence<T>: AsRef<[T]> {
 	}
 
 	/// Converts timeframe of the series
-	fn collapse_timeframe(&self, size: usize, continuous: bool) -> Vec<Candle> 
+	fn collapse_timeframe(&self, size: usize, continuous: bool) -> Vec<Candle>
 	where
-		T: OHLCV
+		T: OHLCV,
 	{
 		fn fold<T: OHLCV>(folded: Candle, next: &T) -> Candle {
 			Candle {
@@ -56,8 +56,7 @@ pub trait Sequence<T>: AsRef<[T]> {
 			window.iter().skip(1).fold(initial, fold)
 		}
 
-		self
-			.as_ref()
+		self.as_ref()
 			.windows(size)
 			.step_by(if continuous { 1 } else { size })
 			.map(window)
