@@ -63,24 +63,24 @@ yata = "0.4"
 
 ## Some commonly used **indicators**:
 
-- Average Directional Index;
-- Awesome Oscillator;
-- Bollinger Bands;
-- Commodity Channel Index;
-- Detrended Price Oscillator;
-- Ease Of Movement;
-- Elders Force Index;
-- Envelopes;
-- Fisher Transform;
-- Ichimoku Cloud;
-- Keltner Channels;
-- Moving Average Convergence Divergence (MACD);
-- Money Flow Index;
-- Price Channel Strategy;
-- Relative Strength Index (RSI);
-- Stochastic Oscillator;
-- Trix;
-- Woodies CCI;
+- [Average Directional Index](https://docs.rs/yata/latest/yata/indicators/struct.AverageDirectionalIndex.html);
+- [Awesome Oscillator](https://docs.rs/yata/latest/yata/indicators/struct.AwesomeOscillator.html);
+- [Bollinger Bands](https://docs.rs/yata/latest/yata/indicators/struct.BollingerBands.html);
+- [Commodity Channel Index](https://docs.rs/yata/latest/yata/indicators/struct.CommodityChannelIndex.html);
+- [Detrended Price Oscillator](https://docs.rs/yata/latest/yata/indicators/struct.DetrendedPriceOscillator.html);
+- [Ease Of Movement](https://docs.rs/yata/latest/yata/indicators/struct.EaseOfMovement.html);
+- [Elders Force Index](https://docs.rs/yata/latest/yata/indicators/struct.EldersForceIndex.html);
+- [Envelopes](https://docs.rs/yata/latest/yata/indicators/struct.Envelopes.html);
+- [Fisher Transform](https://docs.rs/yata/latest/yata/indicators/struct.FisherTransform.html);
+- [Ichimoku Cloud](https://docs.rs/yata/latest/yata/indicators/struct.IchimokuCloud.html);
+- [Keltner Channels](https://docs.rs/yata/latest/yata/indicators/struct.KeltnerChannel.html);
+- [Moving Average Convergence Divergence (MACD)](https://docs.rs/yata/latest/yata/indicators/struct.MACD.html);
+- [Money Flow Index](https://docs.rs/yata/latest/yata/indicators/struct.MoneyFlowIndex.html);
+- [Price Channel Strategy](https://docs.rs/yata/latest/yata/indicators/struct.PriceChannelStrategy.html);
+- [Relative Strength Index (RSI)](https://docs.rs/yata/latest/yata/indicators/struct.RelativeStrengthIndex.html);
+- [Stochastic Oscillator](https://docs.rs/yata/latest/yata/indicators/struct.StochasticOscillator.html);
+- [Trix](https://docs.rs/yata/latest/yata/indicators/struct.Trix.html);
+- [Woodies CCI](https://docs.rs/yata/latest/yata/indicators/struct.WoodiesCCI.html);
 
 And many others. [See all](https://docs.rs/yata/latest/yata/indicators/index.html#structs)
 
