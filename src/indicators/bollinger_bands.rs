@@ -130,10 +130,10 @@ impl IndicatorInstance for BollingerBandsInstance {
 		let values = [upper, middle, lower];
 
 		let range = upper - lower;
-		let relative = if range != 0.0 {
-			(source - lower) / range
-		} else {
+		let relative = if range == 0.0 {
 			0.5
+		} else {
+			(source - lower) / range
 		};
 
 		let signals = [Action::from(relative * 2.0 - 1.0)];
