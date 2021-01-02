@@ -14,7 +14,7 @@ and [indicators](https://docs.rs/yata/latest/yata/indicators/index.html#structs)
 
 It also provides you an interface to create your own indicators.
 
-```yaml
+```toml
 [dependencies]
 yata = "0.4"
 ```
@@ -86,7 +86,7 @@ And many others. [See all](https://docs.rs/yata/latest/yata/indicators/index.htm
 
 ## Method usage example
 
-```
+```rust
 use yata::prelude::*;
 use yata::methods::EMA;
 
@@ -102,7 +102,7 @@ assert_eq!(ema.next(12.0), 9.375);
 
 ## Indicator usage example
 
-```
+```rust
 use yata::helpers::{RandomCandles, RegularMethods};
 use yata::indicators::MACD;
 use yata::prelude::*;
