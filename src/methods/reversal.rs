@@ -30,12 +30,12 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::ReversalSignal;
 ///
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
-/// let r = [ 0,   0,   1,   0,   -1,  0,   1 ];
+/// let r = [ 0,   0,   1,   0,   -1,  0,   0 ];
 ///
 /// let mut pivot = ReversalSignal::new(2, 2, s[0]).unwrap();
 /// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
 ///
-/// assert_eq!(r2, r2);
+/// assert_eq!(r2, r);
 /// ```
 ///
 /// # Performance
@@ -116,7 +116,7 @@ impl Method<'_> for ReversalSignal {
 /// let mut pivot = UpperReversalSignal::new(2, 2, s[0]).unwrap();
 /// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
 ///
-/// assert_eq!(r2, r2);
+/// assert_eq!(r2, r);
 /// ```
 ///
 /// # Performance
@@ -242,12 +242,12 @@ impl Method<'_> for UpperReversalSignal {
 /// use yata::methods::UpperReversalSignal;
 ///
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
-/// let r = [ 0,   0,   1,   0,   0,   0,   1 ];
+/// let r = [ 0,   0,   0,   0,   1,   0,   0 ];
 ///
 /// let mut pivot = UpperReversalSignal::new(2, 2, s[0]).unwrap();
 /// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
 ///
-/// assert_eq!(r2, r2);
+/// assert_eq!(r2, r);
 /// ```
 ///
 /// # Performance

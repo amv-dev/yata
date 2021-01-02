@@ -5,7 +5,7 @@ use crate::methods::SMA;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Moving [Standart Deviation](https://en.wikipedia.org/wiki/Standard_deviation) over the window of size `length` for timeseries of type [`ValueType`]
+/// Moving [Standard Deviation](https://en.wikipedia.org/wiki/Standard_deviation) over the window of size `length` for timeseries of type [`ValueType`]
 ///
 /// # Parameters
 ///

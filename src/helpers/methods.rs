@@ -205,7 +205,7 @@ impl TryFrom<String> for RegularMethods {
 /// * `derivative` - [derivative](Derivative)
 /// * `mean_abs_dev` - [mead absolute deviation](MeanAbsDev)
 /// * `median_abs_dev` - [median absolute deviation](MedianAbsDev)
-/// * `st_dev` - [standart deviation](StDev)
+/// * `st_dev` - [standard deviation](StDev)
 /// * `cci` - [Commodity channel index](CCI)
 /// * `momentum`, `change` - [absolute change of values](Momentum)
 /// * `rate_of_change` - [relative change of values](RateOfChange)
