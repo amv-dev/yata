@@ -17,7 +17,7 @@ use crate::methods::{Cross, Highest, Lowest};
 /// # 3 values
 ///
 /// * Lower bound
-/// 
+///
 /// Range is the same as [`high`] values.
 ///
 /// * Middle value
@@ -57,7 +57,7 @@ impl IndicatorConfig for DonchianChannel {
 		if !self.validate() {
 			return Err(Error::WrongConfig);
 		}
-		
+
 		let cfg = self;
 
 		Ok(Self::Instance {
@@ -92,9 +92,7 @@ impl IndicatorConfig for DonchianChannel {
 
 impl Default for DonchianChannel {
 	fn default() -> Self {
-		Self {
-			period: 20,
-		}
+		Self { period: 20 }
 	}
 }
 

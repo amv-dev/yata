@@ -1,5 +1,4 @@
-use crate::core::{Method, OHLCV};
-use crate::core::{Error, ValueType};
+use crate::core::{Error, Method, ValueType, OHLCV};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -54,7 +53,7 @@ impl<'a> Method<'a> for TR {
 
 	fn new(_: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		Ok(Self {
-			prev_close: value.close()
+			prev_close: value.close(),
 		})
 	}
 
@@ -69,7 +68,7 @@ impl<'a> Method<'a> for TR {
 
 #[cfg(test)]
 mod tests {
-	use super::{Method, TR as TestingMethod, OHLCV};
+	use super::{Method, OHLCV, TR as TestingMethod};
 	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
 
@@ -96,9 +95,7 @@ mod tests {
 		src.iter().for_each(|c| {
 			let value = (c.high - c.low)
 				.max((c.high - prev_close).abs())
-				.max((c.low - prev_close).abs())
-			;
-
+				.max((c.low - prev_close).abs());
 
 			let value2 = tr.next(c);
 			let value3 = c.tr_close(prev_close);
