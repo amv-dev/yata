@@ -93,6 +93,8 @@ mod past;
 pub use past::*;
 mod heikin_ashi;
 pub use heikin_ashi::HeikinAshi;
+mod tr;
+pub use tr::TR;
 
 #[cfg(test)]
 mod tests {

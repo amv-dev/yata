@@ -77,6 +77,7 @@ limitations under the License.
 //! - [Rate Of Change](crate::methods::RateOfChange) (ROC);
 //! - [Reversal points](crate::methods::ReversalSignal);
 //! - [Standard Deviation](crate::methods::StDev);
+//! - [True Range](crate::methods::TR);
 //! - [True Strength Index](crate::methods::TSI);
 //! - [Volatility](crate::methods::LinearVolatility);
 //!
