@@ -79,6 +79,9 @@ pub use coppock_curve::CoppockCurve;
 mod detrended_price_oscillator;
 pub use detrended_price_oscillator::DetrendedPriceOscillator;
 
+mod donchian_channel;
+pub use donchian_channel::DonchianChannel;
+
 mod ease_of_movement;
 pub use ease_of_movement::EaseOfMovement;
 
