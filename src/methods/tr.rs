@@ -41,6 +41,7 @@ pub struct TR {
 impl<'a> TR {
 	/// Creates new TR method instance
 	/// It's a simple shortcut for [`Method::new`](crate::core::Method::new) method.
+	#[allow(clippy::needless_pass_by_value)]
 	pub fn new(value: <Self as Method>::Input) -> Result<Self, Error> {
 		Method::new((), value)
 	}
