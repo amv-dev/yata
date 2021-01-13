@@ -187,7 +187,11 @@ where
 	pub fn newest(&self) -> T {
 		let index = self.index.checked_sub(1).unwrap_or(self.s_1);
 
-		*unsafe { self.buf.get_unchecked(index as usize) }
+		if cfg!(feature = "unsafe_performance") {
+			*unsafe { self.buf.get_unchecked(index as usize) }
+		} else {
+			self.buf[index as usize]
+		}
 	}
 
 	/// Returns an oldest value
