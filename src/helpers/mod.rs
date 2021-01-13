@@ -76,7 +76,7 @@ pub fn assert_eq_float(original: ValueType, calculated: ValueType) {
 	};
 	let diff = original - calculated;
 
-	if original != 0. {
+	if original != 0. && calculated != 0. {
 		assert!(
 			(diff / original).abs() <= SIGMA,
 			"orignial={}, calculated={}, diff={}, relative diff={}",
