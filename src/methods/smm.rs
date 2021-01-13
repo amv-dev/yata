@@ -115,7 +115,7 @@ pub struct SMM {
 	half: PeriodType,
 	half_m1: PeriodType,
 	window: Window<ValueType>,
-	slice: Vec<ValueType>,
+	slice: Box<[ValueType]>,
 }
 
 impl SMM {
@@ -154,7 +154,7 @@ impl Method<'_> for SMM {
 					half,
 					half_m1: half.saturating_sub(is_even as PeriodType),
 					window: Window::new(length, value),
-					slice: vec![value; length as usize],
+					slice: vec![value; length as usize].into(),
 				})
 			}
 		}
