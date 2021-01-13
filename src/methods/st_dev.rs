@@ -1,6 +1,5 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
-use crate::methods::SMA;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -46,11 +45,12 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct StDev {
+	mean: ValueType,
 	val_sum: ValueType,
 	sq_val_sum: ValueType,
+	divider: ValueType,
 	k: ValueType,
 	window: Window<ValueType>,
-	ma: SMA,
 }
 
 impl Method<'_> for StDev {
@@ -65,13 +65,16 @@ impl Method<'_> for StDev {
 				let k = ((length - 1) as ValueType).recip();
 
 				let float_length = length as ValueType;
-				let val_sum = value * float_length;
+				let mean = -value;
+				let divider = -float_length.recip();
+
 				Ok(Self {
-					val_sum,
-					sq_val_sum: value * val_sum,
+					mean,
+					val_sum: value * float_length,
+					sq_val_sum: value * value * float_length,
+					divider,
 					k,
 					window: Window::new(length, value),
-					ma: SMA::new(length, value)?,
 				})
 			}
 		}
@@ -80,14 +83,18 @@ impl Method<'_> for StDev {
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
 		let prev_value = self.window.push(value);
-		self.sq_val_sum += value * value - prev_value * prev_value;
-		self.val_sum += value - prev_value;
-		let ma_value = self.ma.next(value);
+		let diff = value - prev_value;
 
-		// let sum = self.sq_val_sum - ma_value * self.val_sum;
-		let sum = self.val_sum.mul_add(-ma_value, self.sq_val_sum);
+		// same as `value * value - prev_value * prev_value`
+		self.sq_val_sum += diff * (value + prev_value);
 
-		(sum.abs() * self.k).sqrt()
+		self.val_sum += diff;
+		self.mean += diff * self.divider;
+
+		// self.sq_val_sum - self.val_sum * self.mean;
+		let sum = self.val_sum.mul_add(self.mean, self.sq_val_sum);
+
+		(sum * self.k).sqrt()
 	}
 }
 
@@ -131,12 +138,18 @@ mod tests {
 
 				let mut diff_sq_sum = 0.;
 				for j in 0..ma_length {
-					diff_sq_sum += (src[i.saturating_sub(j)] - avg).powi(2);
+					diff_sq_sum +=
+						(src[i.saturating_sub(j)] - avg).powi(2) / (ma_length - 1) as ValueType;
 				}
 
 				let value = ma.next(x);
-				let value2 = (diff_sq_sum / (ma_length - 1) as ValueType).sqrt();
-				assert_eq_float(value, value2);
+				let value2 = diff_sq_sum.sqrt();
+
+				println!(
+					"{} <=> {} at {} with length {}",
+					value2, value, i, ma_length
+				);
+				assert_eq_float(value2, value);
 			});
 		});
 	}
