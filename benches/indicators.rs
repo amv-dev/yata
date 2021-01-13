@@ -74,6 +74,11 @@ fn bench_detrended_price_oscillator(b: &mut test::Bencher) {
 }
 
 #[bench]
+fn bench_donchian_channel(b: &mut test::Bencher) {
+	bench_indicator::<DonchianChannel>(b);
+}
+
+#[bench]
 fn bench_ease_of_movement(b: &mut test::Bencher) {
 	bench_indicator::<EaseOfMovement>(b);
 }
