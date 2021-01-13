@@ -58,7 +58,7 @@ pub struct Window<T>
 where
 	T: Copy,
 {
-	buf: Vec<T>,
+	buf: Box<[T]>,
 	index: PeriodType,
 	size: PeriodType,
 	s_1: PeriodType,
@@ -72,7 +72,7 @@ where
 	pub fn new(size: PeriodType, value: T) -> Self {
 		debug_assert!(size <= (PeriodType::MAX - 1), "PeriodType overflow");
 		Self {
-			buf: vec![value; size as usize],
+			buf: vec![value; size as usize].into(),
 			index: 0,
 			size,
 			s_1: size.saturating_sub(1),
@@ -83,7 +83,7 @@ where
 	#[must_use]
 	pub fn empty() -> Self {
 		Self {
-			buf: Vec::new(),
+			buf: Vec::new().into(),
 			index: 0,
 			size: 0,
 			s_1: 0,
@@ -211,16 +211,10 @@ where
 		self.buf.is_empty()
 	}
 
-	/// Casts `Window` to a regular vector of `T`
-	#[must_use]
-	pub fn as_vec(&self) -> &Vec<T> {
-		&self.buf
-	}
-
-	/// Casts `Window` as a slice of `T`
+	/// Casts `Window` as a raw slice of `T`
 	#[must_use]
 	pub fn as_slice(&self) -> &[T] {
-		self.buf.as_slice()
+		&self.buf
 	}
 
 	/// Returns the length (elements count) of the `Window`
