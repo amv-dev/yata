@@ -67,7 +67,6 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Momentum {
 	window: Window<ValueType>,
-	last_value: ValueType,
 }
 
 /// Just an alias for [Momentum] method
@@ -86,7 +85,6 @@ impl Method<'_> for Momentum {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
 				window: Window::new(length, value),
-				last_value: value,
 			}),
 		}
 	}
