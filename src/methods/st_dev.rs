@@ -94,7 +94,9 @@ impl Method<'_> for StDev {
 		// self.sq_val_sum - self.val_sum * self.mean;
 		let sum = self.val_sum.mul_add(self.mean, self.sq_val_sum);
 
-		(sum * self.k).sqrt()
+		(sum * self.k)
+			.abs() // sometimes float values may produce negative values, when sum is really near to zero value
+			.sqrt()
 	}
 }
 
