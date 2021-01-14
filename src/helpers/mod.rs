@@ -75,7 +75,11 @@ pub fn assert_eq_float(original: ValueType, calculated: ValueType) {
 		1e-10
 	};
 
-	assert!(calculated.is_finite(), "Calculated value is not a regular number: {}", calculated);
+	assert!(
+		calculated.is_finite(),
+		"Calculated value is not a regular number: {}",
+		calculated
+	);
 
 	let diff = original - calculated;
 	let mid = (original.abs() + calculated.abs()) / 2.0;
