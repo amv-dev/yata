@@ -65,7 +65,8 @@ impl Method<'_> for MedianAbsDev {
 			.get_window()
 			.as_slice()
 			.iter()
-			.map(|x| (x - smm).abs())
+			.map(|x| x - smm)
+			.map(ValueType::abs)
 			.sum::<ValueType>()
 			* self.divider
 	}

@@ -53,13 +53,14 @@ impl Method<'_> for MeanAbsDev {
 
 	#[inline]
 	fn next(&mut self, value: Self::Input) -> Self::Output {
-		let sma = self.0.next(value);
+		let mean = self.0.next(value);
 
 		self.0
 			.get_window()
 			.as_slice()
 			.iter()
-			.map(|x| (x - sma).abs())
+			.map(|x| x - mean)
+			.map(ValueType::abs)
 			.sum::<ValueType>()
 			* self.0.get_divider()
 	}
