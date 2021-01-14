@@ -69,13 +69,14 @@ pub fn signi(value: ValueType) -> i8 {
 
 #[cfg(test)]
 pub fn assert_eq_float(original: ValueType, calculated: ValueType) {
-	assert!(calculated.is_finite(), "Calculated value is not a regular number: {}", calculated);
-
 	const SIGMA: ValueType = if cfg!(feature = "value_type_f32") {
 		4e-3
 	} else {
 		1e-10
 	};
+
+	assert!(calculated.is_finite(), "Calculated value is not a regular number: {}", calculated);
+
 	let diff = original - calculated;
 	let mid = (original.abs() + calculated.abs()) / 2.0;
 
