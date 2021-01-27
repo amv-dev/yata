@@ -95,6 +95,12 @@ mod heikin_ashi;
 pub use heikin_ashi::HeikinAshi;
 mod tr;
 pub use tr::TR;
+/// Renko implementation entities
+///
+/// For more information see [`Renko`](crate::methods::Renko)
+pub mod renko;
+#[doc(inline)]
+pub use renko::Renko;
 
 #[cfg(test)]
 mod tests {
