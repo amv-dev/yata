@@ -9,6 +9,19 @@ name = "yata"
 readme = "README.md"
 repository = "https://github.com/amv-dev/yata"
 version = "0.4.2"
+include = [
+    "/benches",
+    "/src/*.rs",
+    "/src/core",
+    "/src/helpers",
+    "/src/indicators",
+    "/src/methods",
+    "/README.md",
+    "/LICENSE",
+    "/rustfmt.toml",
+    "/.gitignore",
+    "/.editorconfig"
+]
 
 [dependencies]
 serde = {version = "1.0", features = ["derive"], optional = true}
