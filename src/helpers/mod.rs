@@ -6,7 +6,7 @@ mod methods;
 use crate::core::{Candle, ValueType};
 pub use methods::*;
 
-/// sign is like [f64.signum](https://doc.rust-lang.org/std/primitive.f64.html#method.signum)
+/// sign is like [`f64::signum`]
 /// except when value == 0.0, then sign returns 0.0
 ///
 /// See also [signi]
@@ -35,7 +35,7 @@ pub fn sign(value: ValueType) -> ValueType {
 	((value > 0.) as i8 - (value < 0.) as i8) as ValueType
 }
 
-/// signi is like [f64.signum](https://doc.rust-lang.org/std/primitive.f64.html#method.signum), except 2 things
+/// signi is like [`f64::signum`], except 2 things
 /// - when value == 0.0, then signi returns 0
 /// - signi always returns i8
 ///

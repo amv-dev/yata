@@ -49,9 +49,9 @@ use serde::{Deserialize, Serialize};
 ///
 /// # See also
 ///
-/// [Past](crate::methods::Past)
+/// [`Past`](crate::methods::Past)
 ///
-/// [windows](https://doc.rust-lang.org/std/primitive.slice.html#method.windows)
+/// [`Windows`](std::slice::Windows)
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Window<T>
