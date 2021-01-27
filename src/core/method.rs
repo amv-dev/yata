@@ -68,7 +68,7 @@ pub trait Method<'a>: fmt::Debug {
 	/// Input value type
 	type Input;
 	/// Output value type
-	type Output: Copy;
+	type Output;
 
 	/// Static method for creating an instance of the method with given `parameters` and initial `value` (simply first input value)
 	fn new(parameters: Self::Params, initial_value: Self::Input) -> Result<Self, Error>
