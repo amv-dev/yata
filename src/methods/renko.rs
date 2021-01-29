@@ -1,4 +1,4 @@
-use crate::core::{Error, Method, ValueType};
+use crate::core::{Error, Method, Source, ValueType, OHLCV};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -9,15 +9,16 @@ use serde::{Deserialize, Serialize};
 /// That's why it needs to be implement throw three different structures:
 ///
 /// * [`Renko`] method itself.
-/// 
+///
 /// When call [`Method::next`] on `Renko`, it always returns `RenkoOutput`.
+///
 /// * [`RenkoOutput`] which is `Renko`'s method output type.
-/// 
+///
 /// It implements an [`Iterator`](std::iter::Iterator) trait for generating [`RenkoBlock`]s after each step of calling [`Method::next`] on [`Renko`].
 /// `RenkoOutput` may produce any amount of `RenkoBlock`s or may not produce it at all.
-/// 
+///
 /// * [`RenkoBlock`] is final entity of Renko chart.
-/// 
+///
 /// It has `open` and `close` values which are similar to corresponding [`OHLCV`](crate::core::OHLCV)'s values.
 ///
 /// So the final workflow is like that:
@@ -34,9 +35,10 @@ use serde::{Deserialize, Serialize};
 ///
 /// ```
 /// use yata::prelude::*;
+/// use yata::core::Source;
 /// use yata::methods::Renko;
-/// let first_timeseries_value = 123.456;
-/// let renko = Renko::new(0.01, first_timeseries_value); // creates a Renko method with relative block size of 1%.
+/// let first_timeseries_value = Candle { close: 123.456, ..Candle::default() };
+/// let renko = Renko::new((0.01, Source::Close), &first_timeseries_value); // creates a Renko method with relative block size of 1%.
 /// ```
 ///
 /// # Input type
@@ -51,20 +53,28 @@ use serde::{Deserialize, Serialize};
 ///
 /// ```
 /// use yata::prelude::*;
+/// use yata::core::Source;
 /// use yata::methods::Renko;
 ///
-/// let inputs = [100.0, 100.5, 101.506, 105.0, 102.0, 101.4, 100.0];
-/// let mut renko = Renko::new(0.01, inputs[0]).unwrap(); // renko with relative block size of 1%
+/// // Here we just creating `Vec` of `OHLCV`s with only `close` value inside  
+/// let inputs = (&[100.0, 100.5, 101.506, 105.0, 102.0, 101.4, 100.0])
+///     .iter()
+///     .map(|&v| Candle {
+///         close: v,
+///         ..Candle::default()
+///     })
+///     .collect::<Vec<_>>();
+/// let mut renko = Renko::new((0.01, Source::Close), &inputs[0]).unwrap(); // renko with relative block size of 1%
 ///
-/// assert!(renko.next(inputs[0]).is_empty());
-/// assert!(renko.next(inputs[1]).is_empty());
-/// assert_eq!(renko.next(inputs[2]).len(), 1);
-/// let blocks = renko.next(inputs[3]);
+/// assert!(renko.next(&inputs[0]).is_empty());
+/// assert!(renko.next(&inputs[1]).is_empty());
+/// assert_eq!(renko.next(&inputs[2]).len(), 1);
+/// let blocks = renko.next(&inputs[3]);
 /// assert_eq!(blocks.len(), 3);
 /// blocks.for_each(|block| { println!("{:?}", &block); });
-/// assert_eq!(renko.next(inputs[4]).len(), 1);
-/// assert_eq!(renko.next(inputs[5]).len(), 1);
-/// assert_eq!(renko.next(inputs[6]).len(), 1);
+/// assert_eq!(renko.next(&inputs[4]).len(), 1);
+/// assert_eq!(renko.next(&inputs[5]).len(), 1);
+/// assert_eq!(renko.next(&inputs[6]).len(), 1);
 /// ```
 ///
 /// # Performance
@@ -85,6 +95,8 @@ pub struct Renko {
 	next_block_upper: ValueType,
 	next_block_lower: ValueType,
 	brick_size: ValueType,
+	src: Source,
+	volume: ValueType,
 }
 
 /// Single unit for [`Renko`] charts
@@ -97,6 +109,9 @@ pub struct RenkoBlock {
 
 	/// Current block's close value
 	pub close: ValueType,
+
+	/// Average block's volume value
+	pub volume: ValueType,
 }
 
 impl RenkoBlock {
@@ -119,6 +134,32 @@ impl RenkoBlock {
 	}
 }
 
+impl OHLCV for RenkoBlock {
+	#[inline]
+	fn open(&self) -> ValueType {
+		self.open
+	}
+
+	#[inline]
+	fn close(&self) -> ValueType {
+		self.close
+	}
+
+	#[inline]
+	fn high(&self) -> ValueType {
+		self.open.max(self.close)
+	}
+
+	#[inline]
+	fn low(&self) -> ValueType {
+		self.open.min(self.close)
+	}
+
+	#[inline]
+	fn volume(&self) -> ValueType {
+		self.volume
+	}
+}
 /// [`Renko`]'s method [output type](crate::core::Method::Output)
 ///
 /// Implements [`Iterator`](std::iter::Iterator) trait for generating [`RenkoBlock`]s.
@@ -129,6 +170,7 @@ pub struct RenkoOutput {
 	pos: usize,
 	brick_size: ValueType,
 	base_line: ValueType,
+	block_volume: ValueType,
 }
 
 impl RenkoOutput {
@@ -139,6 +181,62 @@ impl RenkoOutput {
 	#[must_use]
 	pub const fn is_empty(&self) -> bool {
 		self.len == 0
+	}
+
+	/// Returns `true` if Renko has at least one rising block at this step
+	#[must_use]
+	#[inline]
+	#[allow(clippy::missing_const_for_fn)]
+	pub fn is_rising(&self) -> bool {
+		self.len > 0 && self.brick_size.is_sign_positive()
+	}
+
+	/// Returns `true` if Renko has at least one falling block at this step
+	#[must_use]
+	#[inline]
+	#[allow(clippy::missing_const_for_fn)]
+	pub fn is_falling(&self) -> bool {
+		self.len > 0 && self.brick_size.is_sign_negative()
+	}
+
+	/// Returns the size of all the blocks at this step
+	#[must_use]
+	#[inline]
+	pub fn gap(&self) -> ValueType {
+		self.brick_size * self.len as ValueType
+	}
+
+	/// Returns sign of the Renko's blocks
+	#[must_use]
+	pub fn sign(&self) -> i8 {
+		self.is_rising() as i8 - self.is_falling() as i8
+	}
+}
+
+impl OHLCV for RenkoOutput {
+	#[inline]
+	fn open(&self) -> ValueType {
+		self.base_line
+	}
+
+	#[inline]
+	fn close(&self) -> ValueType {
+		self.base_line + self.gap()
+	}
+
+	#[inline]
+	fn high(&self) -> ValueType {
+		self.open().max(self.close())
+	}
+
+	#[inline]
+	fn low(&self) -> ValueType {
+		self.open().min(self.close())
+	}
+
+	#[inline]
+	fn volume(&self) -> ValueType {
+		self.block_volume * self.len as ValueType
 	}
 }
 
@@ -155,6 +253,8 @@ impl Iterator for RenkoOutput {
 			open: self.brick_size.mul_add(self.pos as ValueType, 1.) * self.base_line,
 			// close: (1. + (self.pos + 1) as ValueType * self.brick_size) * self.base_line,
 			close: self.brick_size.mul_add((self.pos + 1) as ValueType, 1.) * self.base_line,
+
+			volume: self.block_volume,
 		};
 
 		self.pos += 1;
@@ -199,12 +299,14 @@ impl ExactSizeIterator for RenkoOutput {
 
 impl std::iter::FusedIterator for RenkoOutput {}
 
-impl Method<'_> for Renko {
-	type Params = ValueType;
-	type Input = ValueType;
+impl<'a> Method<'a> for Renko {
+	type Params = (ValueType, Source);
+	type Input = &'a dyn OHLCV;
 	type Output = RenkoOutput;
 
-	fn new(brick_size: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new((brick_size, src): Self::Params, candle: Self::Input) -> Result<Self, Error> {
+		let value = candle.source(src);
+
 		if (ValueType::EPSILON..1.0).contains(&brick_size) {
 			let half_size = value * brick_size * 0.5;
 			Ok(Self {
@@ -213,6 +315,8 @@ impl Method<'_> for Renko {
 				last_block_lower: value - half_size,
 				next_block_upper: (value + half_size) * (1. + brick_size),
 				next_block_lower: (value - half_size) * (1. - brick_size),
+				src,
+				volume: 0.0,
 			})
 		} else {
 			Err(Error::WrongMethodParameters)
@@ -224,7 +328,10 @@ impl Method<'_> for Renko {
 	#[allow(clippy::cast_sign_loss)]
 	#[allow(clippy::suboptimal_flops)]
 	#[allow(clippy::assign_op_pattern)]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, candle: Self::Input) -> Self::Output {
+		let value = candle.source(self.src);
+		self.volume += candle.volume();
+
 		if value >= self.next_block_upper {
 			let len = ((value - self.last_block_upper) / self.last_block_upper / self.brick_size)
 				as usize;
@@ -236,11 +343,14 @@ impl Method<'_> for Renko {
 			self.next_block_upper = self.last_block_upper * (1. + self.brick_size);
 			self.next_block_lower = self.last_block_lower * (1. - self.brick_size);
 
+			let volume = self.volume;
+			self.volume = 0.0;
 			RenkoOutput {
 				len,
 				pos: 0,
 				brick_size: self.brick_size,
 				base_line,
+				block_volume: volume / len as ValueType,
 			}
 		} else if value <= self.next_block_lower {
 			let len = ((self.last_block_lower - value) / self.last_block_lower / self.brick_size)
@@ -253,11 +363,14 @@ impl Method<'_> for Renko {
 			self.next_block_upper = self.last_block_upper * (1. + self.brick_size);
 			self.next_block_lower = self.last_block_lower * (1. - self.brick_size);
 
+			let volume = self.volume;
+			self.volume = 0.0;
 			RenkoOutput {
 				len,
 				pos: 0,
 				brick_size: -self.brick_size,
 				base_line,
+				block_volume: volume / len as ValueType,
 			}
 		} else {
 			RenkoOutput {
@@ -265,65 +378,17 @@ impl Method<'_> for Renko {
 				pos: 0,
 				brick_size: ValueType::NAN,
 				base_line: ValueType::NAN,
+				block_volume: ValueType::NAN,
 			}
 		}
-
-		// if value >= self.next_block_upper {
-		// 	let blocks_count = ((value - self.last_block_upper) / self.last_block_upper / self.brick_size) as usize;
-
-		// 	let mut blocks = Vec::with_capacity(blocks_count);
-
-		// 	let base_line = self.last_block_upper;
-		// 	for i in 0..blocks_count {
-		// 		let block = RenkoBlock {
-		// 			// lower_bound: base_line * (1. + self.brick_size * (i-1) as ValueType),
-		// 			open: base_line * self.brick_size.mul_add(i as ValueType, 1.0),
-		// 			// upper_bound: base_line * (1. + self.brick_size * i as ValueType),
-		// 			close: base_line * self.brick_size.mul_add((i + 1) as ValueType, 1.0),
-		// 		};
-
-		// 		self.last_block_upper = block.close;
-		// 		self.last_block_lower = block.open;
-		// 		self.next_block_upper =
-		// 			block.close * (1. + self.brick_size);
-		// 		self.next_block_lower =
-		// 			block.open * (1. - self.brick_size);
-
-		// 		blocks.push(block);
-		// 	}
-
-		// 	blocks
-		// } else if value <= self.next_block_lower {
-		// 	let blocks_count = ((self.last_block_lower - value) / self.last_block_lower / self.brick_size) as usize;
-
-		// 	let mut blocks = Vec::with_capacity(blocks_count);
-
-		// 	let base_line = self.last_block_lower;
-		// 	for i in 0..blocks_count {
-		// 		let block = RenkoBlock {
-		// 			close: base_line * (1. - self.brick_size * (i+1) as ValueType),
-		// 			open: base_line * (1. - self.brick_size * i as ValueType),
-		// 		};
-
-		// 		self.last_block_upper = block.open;
-		// 		self.last_block_lower = block.close;
-		// 		self.next_block_upper =
-		// 			block.open * (1. + self.brick_size);
-		// 		self.next_block_lower =
-		// 			block.close * (1. - self.brick_size);
-
-		// 		blocks.push(block);
-		// 	}
-
-		// 	blocks
-		// } else {
-		// 	Vec::new()
-		// }
 	}
 }
 
 #[cfg(test)]
 mod tests {
+	use crate::core::Source;
+	use crate::prelude::Candle;
+
 	use super::{Method, Renko};
 
 	#[test]
@@ -331,12 +396,17 @@ mod tests {
 	#[allow(clippy::clone_on_copy)]
 	fn test_renko() {
 		//						0	   1	   2	   3	  4	     5	    6
-		let inputs = [100.0, 100.5, 101.506, 105.0, 102.0, 101.4, 100.0];
+		let inputs = (&[100.0, 100.5, 101.506, 105.0, 102.0, 101.4, 100.0])
+			.iter()
+			.map(|&v| Candle {
+				close: v,
+				..Candle::default()
+			})
+			.collect::<Vec<_>>();
 
-		let mut renko = Renko::new(0.01, inputs[0]).unwrap();
+		let mut renko = Renko::new((0.01, Source::Close), &inputs[0]).unwrap();
 		inputs
 			.iter()
-			.copied()
 			.map(|x| (renko.clone(), renko.next(x), renko.clone()))
 			.enumerate()
 			.for_each(|(i, (r1, x, r2))| match i {
