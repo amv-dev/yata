@@ -176,6 +176,12 @@ impl OHLCV for Candle {
 	}
 }
 
+impl From<&dyn OHLCV> for Candle {
+	fn from(src: &dyn OHLCV) -> Self {
+		Self::from(src)
+	}
+}
+
 impl From<(ValueType, ValueType, ValueType, ValueType)> for Candle {
 	fn from(value: (ValueType, ValueType, ValueType, ValueType)) -> Self {
 		Self {
