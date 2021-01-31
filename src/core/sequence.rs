@@ -29,6 +29,8 @@ pub trait Sequence<T>: AsRef<[T]> {
 	}
 
 	/// Converts timeframe of the series
+	///
+	/// See also [`TimeframeCollapse`](crate::methods::TimeframeCollapse) method.
 	fn collapse_timeframe(&self, size: usize, continuous: bool) -> Vec<Candle>
 	where
 		T: OHLCV,

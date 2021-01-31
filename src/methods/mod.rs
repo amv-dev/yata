@@ -101,6 +101,8 @@ pub use tr::TR;
 pub mod renko;
 #[doc(inline)]
 pub use renko::Renko;
+mod collapse_timeframe;
+pub use collapse_timeframe::CollapseTimeframe;
 
 #[cfg(test)]
 mod tests {
