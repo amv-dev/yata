@@ -40,6 +40,12 @@ yata = "0.4"
 
 [See all](https://docs.rs/yata/latest/yata/methods/index.html#structs)
 
+## Timeseries conversion
+
+- [Timeframe Collapsing](https://docs.rs/yata/latest/yata/indicators/struct.CollapseTimeframe.html);
+- [Heikin Ashi](https://docs.rs/yata/latest/yata/indicators/struct.HeikinAshi.html);
+- [Renko](https://docs.rs/yata/latest/yata/indicators/struct.Renko.html);
+
 ## Some commonly used **methods**:
 
 - [Accumulation-distribution index](https://docs.rs/yata/latest/yata/methods/struct.ADI.html);

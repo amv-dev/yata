@@ -61,6 +61,12 @@ limitations under the License.
 //!
 //! [See all](crate::methods#structs)
 //!
+//! ## Timeseries conversion
+//!
+//! - [Timeframe Collapsing](crate::methods::CollapseTimeframe);
+//! - [Heikin Ashi](crate::methods::HeikinAshi);
+//! - [Renko](crate::methods::Renko);
+//!
 //! ## Some commonly used **methods**:
 //!
 //! - [Accumulation-distribution index](crate::methods::ADI);

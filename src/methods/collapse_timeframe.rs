@@ -24,6 +24,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::CollapseTimeframe;
 ///
 /// let timeframe = [
+/// //   open  high  low  close volume
 ///     (10.0, 15.0, 5.0, 12.0, 1000.0),
 ///     (12.1, 17.0, 6.0, 13.0, 2000.0),
 /// ];
