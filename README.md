@@ -42,9 +42,9 @@ yata = "0.4"
 
 ## Timeseries conversion
 
-- [Timeframe Collapsing](https://docs.rs/yata/latest/yata/indicators/struct.CollapseTimeframe.html);
-- [Heikin Ashi](https://docs.rs/yata/latest/yata/indicators/struct.HeikinAshi.html);
-- [Renko](https://docs.rs/yata/latest/yata/indicators/struct.Renko.html);
+- [Timeframe Collapsing](https://docs.rs/yata/latest/yata/methods/struct.CollapseTimeframe.html);
+- [Heikin Ashi](https://docs.rs/yata/latest/yata/methods/struct.HeikinAshi.html);
+- [Renko](https://docs.rs/yata/latest/yata/methods/struct.Renko.html);
 
 ## Some commonly used **methods**:
 
