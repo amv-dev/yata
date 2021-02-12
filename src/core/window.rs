@@ -224,6 +224,12 @@ where
 	}
 }
 
+impl<T: Copy> AsRef<[T]> for Window<T> {
+	fn as_ref(&self) -> &[T] {
+		&self.buf
+	}
+}
+
 impl<T> Default for Window<T>
 where
 	T: Copy,
