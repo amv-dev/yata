@@ -69,7 +69,6 @@ pub fn signi(value: ValueType) -> i8 {
 
 /// Checks for two `ValueType`s equality
 /// Must be used only in tests
-#[cfg(test)]
 pub fn assert_eq_float(original: ValueType, calculated: ValueType) {
 	const SIGMA: ValueType = if cfg!(feature = "value_type_f32") {
 		4e-3
@@ -100,7 +99,6 @@ pub fn assert_eq_float(original: ValueType, calculated: ValueType) {
 
 /// Checks for two `ValueType`s inequality
 /// Must be used only in tests
-#[cfg(test)]
 pub fn assert_neq_float(value1: ValueType, value2: ValueType) {
 	const SIGMA: ValueType = if cfg!(feature = "value_type_f32") {
 		1e-10
