@@ -20,16 +20,16 @@ pub trait IndicatorConfig: Clone {
 	/// Dynamically sets **Configuration** parameters
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error>;
 
-	/// Returns a name of the indicator
-	fn name(&self) -> &'static str {
-		Self::NAME
-	}
-
 	/// Returns an [`IndicatorResult`](crate::core::IndicatorResult) size processing by the indicator `(count of raw values, count of signals)`
 	fn size(&self) -> (u8, u8);
 
 	/// Initializes the **State** based on current **Configuration**
 	fn init<T: OHLCV>(self, initial_value: &T) -> Result<Self::Instance, Error>;
+
+	/// Returns a name of the indicator
+	fn name(&self) -> &'static str {
+		Self::NAME
+	}
 
 	/// Creates an `IndicatorInstance` function from this `IndicatorConfig`.
 	fn init_fn<'a, T: OHLCV>(
