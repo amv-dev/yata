@@ -271,6 +271,16 @@ pub trait OHLCV {
 	fn volumed_price(&self) -> ValueType {
 		self.tp() * self.volume()
 	}
+
+	/// Checks if candle is "rising": it's close value greater than open value
+	fn is_rising(&self) -> bool {
+		self.close() > self.open()
+	}
+
+	/// Checks if candle is "falling": it's close value smaller than open value
+	fn is_falling(&self) -> bool {
+		self.close() < self.open()
+	}
 }
 
 // impl<T: OHLCV + Copy> Sequence<T> {
