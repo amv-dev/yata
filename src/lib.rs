@@ -33,6 +33,7 @@ limitations under the License.
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::unsafe_derive_deserialize)]
 #![allow(clippy::cast_precision_loss)]
+#![allow(clippy::unknown_clippy_lints)] // workaround clippy unknown lints when rust stable. May be removed in the future
 #![allow(clippy::upper_case_acronyms)]
 #![deny(clippy::nursery)]
 
