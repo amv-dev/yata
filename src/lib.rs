@@ -33,6 +33,7 @@ limitations under the License.
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::unsafe_derive_deserialize)]
 #![allow(clippy::cast_precision_loss)]
+#![allow(clippy::upper_case_acronyms)]
 #![deny(clippy::nursery)]
 
 //! Yet Another Technical Analysis library

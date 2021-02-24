@@ -53,18 +53,26 @@ impl IndicatorResult {
 	}
 
 	/// Returns a raw value at given index
+	///
+	/// # Panics
+	///
+	/// If index is greater than last signal index, then panics
 	#[inline]
 	#[must_use]
 	pub fn value(&self, index: usize) -> ValueType {
-		debug_assert!(index < self.length.0 as usize);
+		assert!(index < self.length.0 as usize);
 		self.values[index]
 	}
 
 	/// Returns a signal at given index
+	///
+	/// # Panics
+	///
+	/// If index is greater than last signal index, then panics
 	#[inline]
 	#[must_use]
 	pub fn signal(&self, index: usize) -> Action {
-		debug_assert!(index < self.length.1 as usize);
+		assert!(index < self.length.1 as usize);
 		self.signals[index]
 	}
 

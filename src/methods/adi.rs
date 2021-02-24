@@ -32,7 +32,7 @@ use serde::{Deserialize, Serialize};
 /// When `length > 0`, `ADI` will be calculated over the last `length` values.
 ///
 /// # Input type
-/// Input type is [`OHLCV`]
+/// Input type is reference to [`OHLCV`]
 ///
 /// # Output type
 /// Output type is [`ValueType`]
@@ -66,7 +66,6 @@ use serde::{Deserialize, Serialize};
 ///
 /// [ADI]
 ///
-/// [`OHLC`]: crate::core::OHLC
 /// [`OHLCV`]: crate::core::OHLCV
 /// [`volume`]: crate::core::OHLCV::volume
 /// [`ValueType`]: crate::core::ValueType

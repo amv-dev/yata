@@ -69,6 +69,12 @@ where
 	T: Copy,
 {
 	/// Creates new Window object of size `size` with filled values `value`
+	///
+	/// # Panics
+	///
+	/// When in development mode, this method may panic if `size` is equal to [`PeriodType::MAX`]
+	///
+	/// [`PeriodType::MAX`]: crate::core::PeriodType
 	pub fn new(size: PeriodType, value: T) -> Self {
 		debug_assert!(size <= (PeriodType::MAX - 1), "PeriodType overflow");
 		Self {
@@ -93,6 +99,10 @@ where
 	/// Pushes the `value` into the `Window`.
 	///
 	/// Returns an oldest pushed value.
+	///
+	/// # Panics
+	///
+	/// This method panics if try to push into empty `Window` (when `size` = `0`).
 	#[inline]
 	pub fn push(&mut self, value: T) -> T {
 		debug_assert!(!self.is_empty(), "Trying to use an empty window");

@@ -69,6 +69,10 @@ pub fn signi(value: ValueType) -> i8 {
 
 /// Checks for two `ValueType`s equality
 /// Must be used only in tests
+///
+/// # Panics
+///
+/// Panics if `original` is not seems to be equal to `calculated`
 pub fn assert_eq_float(original: ValueType, calculated: ValueType) {
 	const SIGMA: ValueType = if cfg!(feature = "value_type_f32") {
 		4e-3
@@ -99,6 +103,9 @@ pub fn assert_eq_float(original: ValueType, calculated: ValueType) {
 
 /// Checks for two `ValueType`s inequality
 /// Must be used only in tests
+/// # Panics
+///
+/// Panics if `original` is seems to be equal to `calculated`
 pub fn assert_neq_float(value1: ValueType, value2: ValueType) {
 	const SIGMA: ValueType = if cfg!(feature = "value_type_f32") {
 		1e-10
@@ -133,6 +140,7 @@ impl RandomCandles {
 	}
 
 	/// Returns very first candle in the sequence
+	#[allow(clippy::missing_panics_doc)]
 	pub fn first(&mut self) -> Candle {
 		let position = self.0;
 		self.0 = 0;

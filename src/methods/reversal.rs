@@ -220,7 +220,7 @@ impl Method<'_> for UpperReversalSignal {
 ///
 /// # Parameters
 ///
-/// Has a tuple of 2 parameters (`left`: [`PeriodType`], `right`: [`PeriodType`])
+/// Has a tuple of 2 parameters \(`left`: [`PeriodType`], `right`: [`PeriodType`]\)
 ///
 /// `left` should be > 0 and `right` should be > 0
 ///

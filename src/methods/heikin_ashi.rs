@@ -43,6 +43,7 @@ mod tests {
 	use crate::helpers::{assert_eq_float, RandomCandles};
 
 	#[test]
+	#[allow(clippy::inspect_for_each)]
 	fn test_heikin_ashi() {
 		let mut candles = RandomCandles::default();
 

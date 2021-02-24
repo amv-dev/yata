@@ -29,9 +29,13 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Parameters
 ///
-/// Has a single parameter `size`: [`ValueType`]. It represents relative block size.
+/// Has a tuple of 2 parameters \(`size`: [`ValueType`], `source`: [`Source`]\)
 ///
-/// `size` must be in range (`0.0`; `1.0`)
+/// * `size`: [`ValueType`]. Represents relative block size.
+///
+/// `size` must be in range \(`0.0`; `1.0`\)
+///
+/// * `source`: [`Source`]. Represents which value of input's OHLCV it will use.
 ///
 /// ```
 /// use yata::prelude::*;
@@ -43,7 +47,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Input type
 ///
-/// Input type is [`ValueType`]
+/// Input type is reference to [`OHLCV`]
 ///
 /// # Output type
 ///
@@ -86,6 +90,8 @@ use serde::{Deserialize, Serialize};
 /// * [`HeikinAshi`](crate::methods::HeikinAshi)
 ///
 /// [`ValueType`]: crate::core::ValueType
+/// [`Source`']: crate::core::Source
+/// [`OHLCV`]: crate::core::OHLCV
 
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
