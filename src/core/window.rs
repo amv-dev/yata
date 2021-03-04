@@ -216,18 +216,21 @@ where
 
 	/// Checks if `Window` is empty (`length` == 0). Returns `true` if `Window` is empty or false otherwise.
 	#[must_use]
+	#[inline]
 	pub fn is_empty(&self) -> bool {
 		self.buf.is_empty()
 	}
 
 	/// Casts `Window` as a raw slice of `T`
 	#[must_use]
+	#[inline]
 	pub fn as_slice(&self) -> &[T] {
 		&self.buf
 	}
 
 	/// Returns the length (elements count) of the `Window`
 	#[must_use]
+	#[inline]
 	pub fn len(&self) -> PeriodType {
 		self.size
 	}
