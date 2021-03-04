@@ -4,7 +4,7 @@ use std::mem;
 use std::vec;
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 /// Some kind of a stack or a buffer of fixed size for remembering timeseries values
 ///
@@ -53,7 +53,6 @@ use serde::{Deserialize, Serialize};
 ///
 /// [`Windows`](std::slice::Windows)
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Window<T>
 where
 	T: Copy,
@@ -425,6 +424,75 @@ where
 
 impl<'a, T> ExactSizeIterator for ReversedWindowIterator<'a, T> where T: Copy {}
 impl<'a, T> std::iter::FusedIterator for ReversedWindowIterator<'a, T> where T: Copy {}
+
+#[derive(Deserialize)]
+#[cfg(feature = "serde")]
+struct SerializableWindow<T: Copy> {
+	buf: Box<[T]>,
+	index: PeriodType,
+}
+
+#[cfg(feature = "serde")]
+impl<T> Serialize for Window<T>
+where
+	T: Copy + Serialize,
+{
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		S: Serializer,
+	{
+		let mut s = serializer.serialize_struct("Window", 2)?;
+		s.serialize_field("buf", &self.buf)?;
+		s.serialize_field("index", &self.index)?;
+		s.end()
+	}
+}
+
+#[cfg(feature = "serde")]
+use serde::de::Error as SerdeError;
+
+#[cfg(feature = "serde")]
+impl<'de, T> Deserialize<'de> for Window<T>
+where
+	T: Copy + Deserialize<'de>,
+{
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: Deserializer<'de>,
+	{
+		let w = SerializableWindow::deserialize(deserializer)?;
+
+		let buf = w.buf;
+		let index = w.index;
+
+		if buf.len() > PeriodType::MAX as usize - 1 {
+			let max_length = PeriodType::MAX as usize - 1;
+			let error = SerdeError::custom(format!(
+				"Length of window's buffer cannot be more than {}.",
+				max_length
+			));
+			return Err(error);
+		}
+
+		if (buf.len() as PeriodType) <= index {
+			let error =
+				SerdeError::custom(format!("Index {} is out of window's buffer bounds.", index));
+			return Err(error);
+		}
+
+		let size = buf.len() as PeriodType;
+		let s_1 = size - 1;
+
+		let result = Self {
+			buf,
+			index,
+			size,
+			s_1,
+		};
+
+		Ok(result)
+	}
+}
 
 #[cfg(test)]
 mod tests {

@@ -31,7 +31,6 @@ limitations under the License.
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::cast_lossless)]
 #![allow(clippy::missing_errors_doc)]
-#![allow(clippy::unsafe_derive_deserialize)]
 #![allow(clippy::cast_precision_loss)]
 #![allow(renamed_and_removed_lints)] // workaround clippy unknown lints when rust stable 1.50. May be removed in the future
 #![allow(clippy::unknown_clippy_lints)] // workaround clippy unknown lints when rust stable 1.50. May be removed in the future
