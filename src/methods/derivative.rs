@@ -54,7 +54,6 @@ use serde::{Deserialize, Serialize};
 pub struct Derivative {
 	divider: ValueType,
 	window: Window<ValueType>,
-	initialized: bool,
 }
 
 /// Just an alias for Derivative
@@ -71,7 +70,6 @@ impl Method<'_> for Derivative {
 			length => Ok(Self {
 				divider: (length as ValueType).recip(),
 				window: Window::new(length, value),
-				initialized: false,
 			}),
 		}
 	}
