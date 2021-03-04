@@ -3,7 +3,7 @@ use crate::core::{Error, PeriodType, ValueType, Window};
 use std::{cmp::Ordering, slice::SliceIndex};
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!! USE WITH CAUTION !!!!!!
@@ -110,7 +110,6 @@ fn find_insert_index(value: ValueType, slice: &[ValueType], padding: usize) -> u
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SMM {
 	half: PeriodType,
 	half_m1: PeriodType,
@@ -212,6 +211,60 @@ impl Method<'_> for SMM {
 		}
 
 		self.get_last_value()
+	}
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SMM {
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		S: Serializer,
+	{
+		let mut s = serializer.serialize_struct("SMM", 2)?;
+		s.serialize_field("window", &self.window)?;
+		s.serialize_field("slice", &self.slice)?;
+		s.end()
+	}
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SMM {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: Deserializer<'de>,
+	{
+		#[derive(Deserialize)]
+		struct DeserializedSMM {
+			window: Window<ValueType>,
+			slice: Box<[ValueType]>,
+		}
+
+		let de = DeserializedSMM::deserialize(deserializer)?;
+
+		let window = de.window;
+		let slice = de.slice;
+
+		if window.len() as usize != slice.len() {
+			return Err(serde::de::Error::custom(
+				"Window's and slice's lengths must be equal.",
+			));
+		}
+
+		if window.is_empty() {
+			return Err(serde::de::Error::custom("SMM must have non-zero length."));
+		}
+
+		let half = window.len() / 2;
+		let is_even = window.len() % 2 == 0;
+
+		let smm = Self {
+			half,
+			half_m1: half.saturating_sub(is_even as PeriodType),
+			window,
+			slice,
+		};
+
+		Ok(smm)
 	}
 }
 
