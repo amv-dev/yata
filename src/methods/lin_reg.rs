@@ -30,7 +30,6 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[doc(alias = "LSMA")]
 pub struct LinReg {
-	length: PeriodType,
 	s_xy: ValueType,
 	s_y: ValueType,
 	s_x: ValueType,
@@ -84,7 +83,6 @@ impl Method<'_> for LinReg {
 
 				let s_x = -(s_x as ValueType);
 				Ok(Self {
-					length,
 					float_length,
 					length_invert,
 					divider,

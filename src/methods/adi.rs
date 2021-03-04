@@ -74,7 +74,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ADI {
-	length: PeriodType,
 	cmf_sum: ValueType,
 	window: Window<ValueType>,
 }
@@ -102,12 +101,7 @@ impl<'a> Method<'a> for ADI {
 			Window::empty()
 		};
 
-		Ok(Self {
-			length,
-
-			cmf_sum,
-			window,
-		})
+		Ok(Self { cmf_sum, window })
 	}
 
 	#[inline]
@@ -115,7 +109,7 @@ impl<'a> Method<'a> for ADI {
 		let clvv = candle.clv() * candle.volume();
 		self.cmf_sum += clvv;
 
-		if self.length > 0 {
+		if !self.window.is_empty() {
 			self.cmf_sum -= self.window.push(clvv);
 		}
 
