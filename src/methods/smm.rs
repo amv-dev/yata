@@ -302,7 +302,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_smm0() {
+	fn test_smm() {
 		let candles = RandomCandles::default();
 
 		let src: Vec<ValueType> = candles.take(3000).map(|x| x.close).collect();
@@ -323,11 +323,19 @@ mod tests {
 						.skip(slice_from)
 						.take(slice_to - slice_from + 1)
 						.for_each(|&x| slice.push(x));
+
 					while slice.len() < ma_length {
 						slice.push(src[0]);
 					}
 
 					slice.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+					assert_eq!(slice.len(), ma.slice.len());
+
+					slice
+						.iter()
+						.zip(ma.slice.iter())
+						.for_each(|(&a, &b)| assert_eq!(a.to_bits(), b.to_bits()));
 
 					let value2 = if ma_length % 2 == 0 {
 						(slice[ma_length / 2] + slice[ma_length / 2 - 1]) / 2.0
