@@ -14,18 +14,22 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 // !!!!!! USE WITH CAUTION !!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #[inline]
+#[cfg(feature = "unsafe_performance")]
+#[allow(unsafe_code)]
 fn get<T>(slice: &[ValueType], index: T) -> &T::Output
 where
 	T: SliceIndex<[ValueType]>,
 {
-	if cfg!(feature = "unsafe_performance") {
-		#[allow(unsafe_code)]
-		unsafe {
-			slice.get_unchecked(index)
-		}
-	} else {
-		&slice[index]
-	}
+	unsafe { slice.get_unchecked(index) }
+}
+
+#[inline]
+#[cfg(not(feature = "unsafe_performance"))]
+fn get<T>(slice: &[ValueType], index: T) -> &T::Output
+where
+	T: SliceIndex<[ValueType]>,
+{
+	&slice[index]
 }
 
 #[inline]
