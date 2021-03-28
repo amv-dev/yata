@@ -257,10 +257,10 @@ where
 {
 	type Output = T;
 
-	fn index(&self, mut index: PeriodType) -> &Self::Output {
+	fn index(&self, index: PeriodType) -> &Self::Output {
 		debug_assert!(index < self.size, "Window index {:} is out of range", index);
 
-		index = self.size - index - 1;
+		let index = self.s_1 - index;
 		let saturated = self.index.saturating_add(index);
 		let overflow = (saturated >= self.size) as PeriodType;
 		let s = self.size - self.index;
