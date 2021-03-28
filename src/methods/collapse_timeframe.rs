@@ -109,7 +109,7 @@ mod tests {
 		for length in 2..10 {
 			let mut method = TestingMethod::new(length, &candles[0]).unwrap();
 
-			let converted = candles.iter().map(|x| method.next(x)).filter_map(|x| x);
+			let converted = candles.iter().flat_map(|x| method.next(x));
 
 			candles
 				.windows(length)

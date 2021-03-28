@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 /// `Indicator` may return up to 4 signals and 4 raw values at each step
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[allow(clippy::use_self)]
 pub struct IndicatorResult {
 	signals: [Action; IndicatorResult::SIZE],
 	values: [ValueType; IndicatorResult::SIZE],
@@ -93,8 +94,8 @@ impl IndicatorResult {
 		let length = (values_length as u8, signals_length as u8);
 
 		Self {
-			values,
 			signals,
+			values,
 			length,
 		}
 	}

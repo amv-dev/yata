@@ -235,7 +235,7 @@ impl From<Action> for Option<ValueType> {
 	}
 }
 
-impl<T: Into<Action> + Copy> From<&T> for Action {
+impl<T: Into<Self> + Copy> From<&T> for Action {
 	fn from(value: &T) -> Self {
 		(*value).into()
 	}
