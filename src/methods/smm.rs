@@ -224,9 +224,8 @@ impl Serialize for SMM {
 	where
 		S: Serializer,
 	{
-		let mut s = serializer.serialize_struct("SMM", 2)?;
+		let mut s = serializer.serialize_struct("SMM", 1)?;
 		s.serialize_field("window", &self.window)?;
-		s.serialize_field("slice", &self.slice)?;
 		s.end()
 	}
 }
@@ -240,22 +239,31 @@ impl<'de> Deserialize<'de> for SMM {
 		#[derive(Deserialize)]
 		struct DeserializedSMM {
 			window: Window<ValueType>,
-			slice: Box<[ValueType]>,
 		}
 
 		let de = DeserializedSMM::deserialize(deserializer)?;
 
 		let window = de.window;
-		let slice = de.slice;
-
-		if window.len() as usize != slice.len() {
-			return Err(serde::de::Error::custom(
-				"Window's and slice's lengths must be equal.",
-			));
-		}
 
 		if window.is_empty() {
 			return Err(serde::de::Error::custom("SMM must have non-zero length."));
+		}
+
+		let mut slice = window
+			.as_slice()
+			.to_owned()
+			.into_boxed_slice()
+		;
+
+		let mut sort_error = false;
+
+		slice.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap_or_else(|| {
+			sort_error = true;
+			Ordering::Equal
+		}));
+
+		if sort_error {
+			return Err(serde::de::Error::custom("SMM may not operate NaN values"));
 		}
 
 		let half = window.len() / 2;
