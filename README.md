@@ -260,7 +260,7 @@ test bench_woodies_cci                         ... bench:          68 ns/iter (+
 
 By default, there is no `unsafe` code in the crate. But you can optionally enable `unsafe_performance` feature throw you `Cargo.toml` or by `--feature` flag in your CLI.
 
-`usafe_performance` enables some unsafe code blocks, most of them are unsafe access to a vector's elements. For some methods it may increase performance by ~5-10%.
+`unsafe_performance` enables some unsafe code blocks, most of them are unsafe access to a vector's elements. For some methods it may increase performance by ~5-10%.
 
 # Features
 
