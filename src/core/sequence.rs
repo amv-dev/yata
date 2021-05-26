@@ -8,6 +8,11 @@ pub trait Sequence<T>: AsRef<[T]> {
 	/// Validates the sequence.
 	fn validate(&self) -> bool;
 
+	/// Calls [`Method`](crate::core::Method) over the slice and returns `Vec` of result values.
+	fn call<'a, M>(&self, method: M) -> Vec<M::Output>
+	where
+		M: Method<'a, Input = T> + BorrowMut<M> + 'a;
+
 	/// Applies [`Method`](crate::core::Method) on the slice in-place.
 	fn apply<'a, M>(&'a mut self, mut method: M)
 	where
@@ -17,11 +22,6 @@ pub trait Sequence<T>: AsRef<[T]> {
 	{
 		self.as_mut().iter_mut().for_each(|x| *x = method.next(*x));
 	}
-
-	/// Calls [`Method`](crate::core::Method) over the slice and returns `Vec` of result values.
-	fn call<'a, M>(&self, method: M) -> Vec<M::Output>
-	where
-		M: Method<'a, Input = T> + BorrowMut<M> + 'a;
 
 	/// Returns a reference to the first value in the sequence or `None` if it's empty.
 	fn get_initial_value(&self) -> Option<&T> {
