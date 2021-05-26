@@ -249,21 +249,19 @@ impl<'de> Deserialize<'de> for SMM {
 			return Err(serde::de::Error::custom("SMM must have non-zero length."));
 		}
 
-		let mut slice = window
-			.as_slice()
-			.to_owned()
-			.into_boxed_slice()
-		;
+		let mut slice = window.as_slice().to_owned().into_boxed_slice();
 
 		let mut sort_error = false;
 
-		slice.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap_or_else(|| {
-			sort_error = true;
-			Ordering::Equal
-		}));
+		slice.sort_unstable_by(|a, b| {
+			a.partial_cmp(b).unwrap_or_else(|| {
+				sort_error = true;
+				Ordering::Equal
+			})
+		});
 
 		if sort_error {
-			return Err(serde::de::Error::custom("SMM may not operate NaN values"));
+			return Err(serde::de::Error::custom("SMM cannot operate NaN values"));
 		}
 
 		let half = window.len() / 2;
