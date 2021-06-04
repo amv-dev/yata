@@ -1,5 +1,6 @@
 /// Crate errors enum
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub enum Error {
 	/// Error parsing string to [`Source`](crate::core::Source)
 	SourceParse(String),

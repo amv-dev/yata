@@ -10,6 +10,7 @@ use crate::core::{Error, ValueType, OHLCV};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "lowercase"))]
+#[non_exhaustive]
 pub enum Source {
 	/// *Close* part of a candle
 	Close,
