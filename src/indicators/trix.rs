@@ -95,6 +95,10 @@ impl IndicatorConfig for Trix {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period2 = value,
 			},
+			"method2" => match value.parse() {
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.method2 = value,
+			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.source = value,
