@@ -187,6 +187,9 @@ impl IndicatorInstance for ChandeKrollStopInstance {
 		let cross: i8 = self.cross_above.next((stop_long, stop_short)).into(); // also s2 should appear only when `STOP LONG` actually crossing `STOP SHORT` upwards
 		let s2 = cross * is_s2 * signi(s2_diff);
 
+		self.prev_stop_short = stop_short;
+		self.prev_stop_long = stop_long;	
+
 		IndicatorResult::new(
 			&[stop_long, src, stop_short],
 			&[Action::from(value), Action::from(s2)],
