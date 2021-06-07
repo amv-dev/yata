@@ -153,7 +153,7 @@ impl IndicatorInstance for RelativeStrengthIndexInstance {
 			debug_assert!(pos + neg != 0.);
 			pos / (pos + neg)
 		} else {
-			0.
+			0.5
 		};
 
 		let oversold = self.cross_lower.next((value, self.cfg.zone)).analog();
