@@ -188,7 +188,7 @@ impl IndicatorInstance for ChandeKrollStopInstance {
 		let s2 = cross * is_s2 * signi(s2_diff);
 
 		self.prev_stop_short = stop_short;
-		self.prev_stop_long = stop_long;	
+		self.prev_stop_long = stop_long;
 
 		IndicatorResult::new(
 			&[stop_long, src, stop_short],

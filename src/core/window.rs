@@ -6,7 +6,7 @@ use std::vec;
 #[cfg(feature = "serde")]
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
-/// Window is a [circular buffer](https://en.wikipedia.org/wiki/Circular_buffer) where both 
+/// Window is a [circular buffer](https://en.wikipedia.org/wiki/Circular_buffer) where both
 /// `start` and `end` pointers always point to a single element.
 ///
 /// When push new value into it, it remembers that value and returns the oldest pushed value.
@@ -223,7 +223,7 @@ where
 	}
 
 	/// Casts `Window` as a raw slice of `T`
-	/// 
+	///
 	/// ## Important!
 	///
 	/// The sequence of elements are not preserved.
