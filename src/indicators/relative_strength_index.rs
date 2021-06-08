@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{method, RegularMethod, RegularMethods};
-use crate::methods::{Change, Cross};
+use crate::methods::Cross;
+use std::mem::replace;
 
 /// Relative Strength Index
 ///
@@ -65,7 +66,7 @@ impl IndicatorConfig for RelativeStrengthIndex {
 		let src = candle.source(cfg.source);
 
 		Ok(Self::Instance {
-			change: Change::new(1, src)?,
+			previous_input: src,
 			posma: method(cfg.method, cfg.period, 0.)?,
 			negma: method(cfg.method, cfg.period, 0.)?,
 			cross_upper: Cross::new((), (0.5, 1.0 - cfg.zone))?,
@@ -125,7 +126,7 @@ impl Default for RelativeStrengthIndex {
 pub struct RelativeStrengthIndexInstance {
 	cfg: RelativeStrengthIndex,
 
-	change: Change,
+	previous_input: ValueType,
 	posma: RegularMethod,
 	negma: RegularMethod,
 	cross_upper: Cross,
@@ -145,7 +146,8 @@ impl IndicatorInstance for RelativeStrengthIndexInstance {
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
-		let change = self.change.next(src);
+		let change = src - replace(&mut self.previous_input, src);
+
 		let pos: ValueType = self.posma.next(change.max(0.));
 		let neg: ValueType = self.negma.next(change.min(0.)) * -1.;
 
