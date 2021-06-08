@@ -6,9 +6,10 @@ use std::vec;
 #[cfg(feature = "serde")]
 use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 
-/// Some kind of a stack or a buffer of fixed size for remembering timeseries values
+/// Window is a [circular buffer](https://en.wikipedia.org/wiki/Circular_buffer) where both 
+/// `start` and `end` pointers always point to a single element.
 ///
-/// When push new value into it, it remembers that value and returns the oldest value
+/// When push new value into it, it remembers that value and returns the oldest pushed value.
 ///
 /// Also you can [iterate](Window::iter) over remembered values inside the `Window`
 ///
@@ -222,6 +223,10 @@ where
 	}
 
 	/// Casts `Window` as a raw slice of `T`
+	/// 
+	/// ## Important!
+	///
+	/// The sequence of elements are not preserved.
 	#[must_use]
 	#[inline]
 	pub fn as_slice(&self) -> &[T] {
