@@ -132,7 +132,7 @@ pub trait Method<'a>: fmt::Debug {
 	where
 		S: Sequence<T> + AsMut<[T]>,
 		Self: Method<'a, Input = T, Output = T> + Sized,
-		T: Copy,
+		T: Clone,
 	{
 		sequence.apply(self);
 	}
@@ -146,7 +146,7 @@ pub trait Method<'a>: fmt::Debug {
 	where
 		S: Sequence<Self::Input>,
 		Self::Input: Clone,
-		Self: Sized + 'a,
+		Self: Sized,
 	{
 		match inputs.get_initial_value() {
 			Some(v) => {
@@ -160,9 +160,9 @@ pub trait Method<'a>: fmt::Debug {
 	/// Creates new `Method` instance and applies it to the `sequence`.
 	fn new_apply<T, S>(parameters: Self::Params, sequence: &'a mut S) -> Result<(), Error>
 	where
-		T: Copy,
+		T: Clone,
 		S: Sequence<T> + AsMut<[T]>,
-		Self: Method<'a, Input = T, Output = T> + Sized + 'a,
+		Self: Method<'a, Input = T, Output = T> + Sized,
 	{
 		let initial_value = {
 			// Why do we need to get immutable reference to get initial value?
@@ -171,7 +171,7 @@ pub trait Method<'a>: fmt::Debug {
 			let seq = &*sequence;
 
 			match seq.get_initial_value() {
-				Some(&v) => v,
+				Some(v) => v.clone(),
 				None => return Ok(()),
 			}
 		};
@@ -207,16 +207,13 @@ pub trait Method<'a>: fmt::Debug {
 
 impl<'a, M: Method<'a>> Method<'a> for &'a mut M {
 	type Params = M::Params;
-	/// Input value type
 	type Input = M::Input;
-	/// Output value type
 	type Output = M::Output;
 
 	fn new(_parameters: Self::Params, _initial_value: Self::Input) -> Result<Self, Error> {
 		unimplemented!();
 	}
 
-	/// Generates next output value based on the given input `value`
 	fn next(&mut self, value: Self::Input) -> Self::Output {
 		(**self).next(value)
 	}
