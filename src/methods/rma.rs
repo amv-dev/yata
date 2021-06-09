@@ -130,13 +130,14 @@ mod tests {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let mut value2 = src[0];
-			src.iter().for_each(|&x| {
+
+			for &x in &src {
 				let value = ma.next(x);
 
 				value2 = (x + (length - 1) as ValueType * value2) / (length as ValueType);
 
 				assert_eq_float(value2, value);
-			});
+			}
 		});
 	}
 }

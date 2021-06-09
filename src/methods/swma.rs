@@ -161,7 +161,7 @@ mod tests {
 			],
 		];
 
-		weights.iter().for_each(|weights| {
+		for weights in &weights {
 			let wsum: ValueType = weights.iter().sum();
 			let length = weights.len();
 
@@ -182,6 +182,6 @@ mod tests {
 				assert_eq_float(value2, value);
 				assert_eq_float(value3, value);
 			});
-		});
+		}
 	}
 }

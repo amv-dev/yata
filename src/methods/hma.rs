@@ -119,11 +119,11 @@ mod tests {
 
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
-			src.iter().for_each(|&x| {
+			for &x in &src {
 				let value1 = ma.next(x);
 				let value2 = wma3.next(2. * wma2.next(x) - wma1.next(x));
 				assert_eq_float(value2, value1);
-			});
+			}
 		});
 	}
 }

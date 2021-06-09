@@ -236,7 +236,7 @@ mod tests {
 			Source::HL2,
 		];
 
-		values.iter().for_each(|&v| {
+		for &v in &values {
 			let r1: String = v.into();
 			let r2: &str = v.into();
 
@@ -252,7 +252,7 @@ mod tests {
 				Source::TP => assert_eq!("tp", r1),
 				Source::HL2 => assert_eq!("hl2", r1),
 			}
-		});
+		}
 	}
 
 	#[test]

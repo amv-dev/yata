@@ -313,43 +313,41 @@ mod tests {
 
 		let src: Vec<ValueType> = candles.take(3000).map(|x| x.close).collect();
 
-		[1, 2, 3, 5, 11, 23, 51, 100, 150, 203, 254]
-			.iter()
-			.for_each(|&ma_length| {
-				let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
-				let ma_length = ma_length as usize;
+		for &ma_length in &[1, 2, 3, 5, 11, 23, 51, 100, 150, 203, 254] {
+			let mut ma = TestingMethod::new(ma_length, src[0]).unwrap();
+			let ma_length = ma_length as usize;
 
-				src.iter().enumerate().for_each(|(i, &x)| {
-					let value = ma.next(x);
-					let slice_from = i.saturating_sub(ma_length - 1);
-					let slice_to = i;
-					let mut slice = Vec::with_capacity(ma_length);
+			src.iter().enumerate().for_each(|(i, &x)| {
+				let value = ma.next(x);
+				let slice_from = i.saturating_sub(ma_length - 1);
+				let slice_to = i;
+				let mut slice = Vec::with_capacity(ma_length);
 
-					src.iter()
-						.skip(slice_from)
-						.take(slice_to - slice_from + 1)
-						.for_each(|&x| slice.push(x));
+				src.iter()
+					.skip(slice_from)
+					.take(slice_to - slice_from + 1)
+					.for_each(|&x| slice.push(x));
 
-					while slice.len() < ma_length {
-						slice.push(src[0]);
-					}
+				while slice.len() < ma_length {
+					slice.push(src[0]);
+				}
 
-					slice.sort_by(|a, b| a.partial_cmp(b).unwrap());
+				slice.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
-					assert_eq!(slice.len(), ma.slice.len());
+				assert_eq!(slice.len(), ma.slice.len());
 
-					slice
-						.iter()
-						.zip(ma.slice.iter())
-						.for_each(|(&a, &b)| assert_eq!(a.to_bits(), b.to_bits()));
+				slice
+					.iter()
+					.zip(ma.slice.iter())
+					.for_each(|(&a, &b)| assert_eq!(a.to_bits(), b.to_bits()));
 
-					let value2 = if ma_length % 2 == 0 {
-						(slice[ma_length / 2] + slice[ma_length / 2 - 1]) / 2.0
-					} else {
-						slice[ma_length / 2]
-					};
-					assert_eq_float(value2, value);
-				});
+				let value2 = if ma_length % 2 == 0 {
+					(slice[ma_length / 2] + slice[ma_length / 2 - 1]) / 2.0
+				} else {
+					slice[ma_length / 2]
+				};
+				assert_eq_float(value2, value);
 			});
+		}
 	}
 }

@@ -108,7 +108,8 @@ mod tests {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 
 			let mut prev_value = src[0];
-			src.iter().for_each(|&x| {
+
+			for &x in &src {
 				let value = ma.next(x);
 
 				let value2 = prev_value + (x - prev_value) / length as ValueType;
@@ -116,7 +117,7 @@ mod tests {
 				prev_value = value2;
 
 				assert_eq_float(value2, value);
-			});
+			}
 		});
 	}
 }

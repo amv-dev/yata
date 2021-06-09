@@ -92,7 +92,7 @@ mod tests {
 		let mut tr = TestingMethod::new(&src[0]).unwrap();
 		let mut prev_close = src[0].close;
 
-		src.iter().for_each(|c| {
+		for c in &src {
 			let value = (c.high - c.low)
 				.max((c.high - prev_close).abs())
 				.max((c.low - prev_close).abs());
@@ -103,6 +103,6 @@ mod tests {
 			prev_close = c.close;
 			assert_eq_float(value, value2);
 			assert_eq_float(value, value3);
-		});
+		}
 	}
 }

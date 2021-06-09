@@ -337,7 +337,7 @@ mod tests {
 			let alpha = 2. / (length + 1) as ValueType;
 
 			let mut prev_value = src[0];
-			src.iter().for_each(|&x| {
+			for &x in &src {
 				let value = ma.next(x);
 
 				let value2 = alpha * x + (1. - alpha) * prev_value;
@@ -345,7 +345,7 @@ mod tests {
 				prev_value = value2;
 
 				assert_eq_float(value2, value);
-			});
+			}
 		});
 	}
 
@@ -386,7 +386,8 @@ mod tests {
 
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
-			src.iter().for_each(|&x| {
+
+			for &x in &src {
 				let value = ma.next(x);
 
 				let ema1 = alpha * x + (1. - alpha) * prev_value1;
@@ -398,7 +399,7 @@ mod tests {
 				let value2 = ema2;
 
 				assert_eq_float(value2, value);
-			});
+			}
 		});
 	}
 
@@ -439,7 +440,8 @@ mod tests {
 
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
-			src.iter().for_each(|&x| {
+
+			for &x in &src {
 				let value = ma.next(x);
 
 				let ema1 = alpha * x + (1. - alpha) * prev_value1;
@@ -451,7 +453,7 @@ mod tests {
 				let value2 = 2. * ema1 - ema2;
 
 				assert_eq_float(value2, value);
-			});
+			}
 		});
 	}
 
@@ -493,7 +495,8 @@ mod tests {
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
 			let mut prev_value3 = src[0];
-			src.iter().for_each(|&x| {
+
+			for &x in &src {
 				let value = ma.next(x);
 
 				let ema1 = alpha * x + (1. - alpha) * prev_value1;
@@ -507,7 +510,7 @@ mod tests {
 				let value2 = ema3;
 
 				assert_eq_float(value2, value);
-			});
+			}
 		});
 	}
 
@@ -549,7 +552,8 @@ mod tests {
 			let mut prev_value1 = src[0];
 			let mut prev_value2 = src[0];
 			let mut prev_value3 = src[0];
-			src.iter().for_each(|&x| {
+
+			for &x in &src {
 				let value = ma.next(x);
 
 				let e_ma = alpha * x + (1. - alpha) * prev_value1;
@@ -563,7 +567,7 @@ mod tests {
 				let value2 = 3. * e_ma - 3. * d_ma + t_ma;
 
 				assert_eq_float(value2, value);
-			});
+			}
 		});
 	}
 }

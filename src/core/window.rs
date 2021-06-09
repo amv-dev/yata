@@ -543,10 +543,10 @@ mod tests {
 		for length in 1..255 {
 			let mut w = Window::new(length, data[0]);
 
-			data.iter().for_each(|&c| {
+			for &c in &data {
 				w.push(c);
 				assert_eq!(c, w.newest());
-			});
+			}
 		}
 	}
 

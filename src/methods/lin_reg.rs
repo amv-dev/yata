@@ -134,11 +134,9 @@ mod tests {
 
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
-		[
-			2, 3, 4, 5, 6, 7, 10, 11, 13, 17, 20, 21, 22, 25, 70, 77, 100, 125, 128, 173, 254,
-		]
-		.iter()
-		.for_each(|&length| {
+		for &length in &[
+			2, 3, 4, 5, 7, 10, 11, 13, 17, 20, 21, 25, 70, 77, 100, 125, 128, 173, 254,
+		] {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			let length = length as usize;
 
@@ -165,6 +163,6 @@ mod tests {
 
 				assert_eq_float(b, ma_value);
 			});
-		});
+		}
 	}
 }
