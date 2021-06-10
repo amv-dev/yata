@@ -184,13 +184,13 @@ impl Method<'_> for UpperReversalSignal {
 
 		if self.max_index < first_index {
 			let mut max_index = first_index;
-			let mut max_value = self.window.oldest();
+			let mut max_value = *self.window.oldest();
 
 			self.window
 				.iter_rev()
 				.zip(first_index..)
 				.skip(1)
-				.for_each(|(x, i)| {
+				.for_each(|(&x, i)| {
 					if x >= max_value {
 						max_value = x;
 						max_index = i;
@@ -318,13 +318,13 @@ impl Method<'_> for LowerReversalSignal {
 
 		if self.min_index < first_index {
 			let mut min_index = first_index;
-			let mut min_value = self.window.oldest();
+			let mut min_value = *self.window.oldest();
 
 			self.window
 				.iter_rev()
 				.zip(first_index..)
 				.skip(1)
-				.for_each(|(x, i)| {
+				.for_each(|(&x, i)| {
 					if x <= min_value {
 						min_value = x;
 						min_index = i;

@@ -109,7 +109,7 @@ impl Method<'_> for HighestLowestDelta {
 			let (min, max) = self
 				.window
 				.iter()
-				.fold((value, value), |(min, max), v| (min.min(v), max.max(v)));
+				.fold((value, value), |(min, max), &v| (min.min(v), max.max(v)));
 			self.highest = max;
 			self.lowest = min;
 		}
@@ -204,7 +204,7 @@ impl Method<'_> for Highest {
 			self.value = value;
 		// It's not a mistake. We really need a bit-to-bit comparison of float values here
 		} else if left_value.to_bits() == self.value.to_bits() {
-			self.value = self.window.iter().fold(value, |a, b| a.max(b));
+			self.value = self.window.iter().fold(value, |a, &b| a.max(b));
 		}
 
 		self.value
@@ -297,7 +297,7 @@ impl Method<'_> for Lowest {
 			self.value = value;
 		// It's not a mistake. We really need a bit-to-bit comparison of float values here
 		} else if left_value.to_bits() == self.value.to_bits() {
-			self.value = self.window.iter().fold(value, |a, b| a.min(b));
+			self.value = self.window.iter().fold(value, |a, &b| a.min(b));
 		}
 
 		self.value
