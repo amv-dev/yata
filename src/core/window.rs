@@ -54,32 +54,52 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 ///
 /// [`Windows`](std::slice::Windows)
 #[derive(Debug, Clone)]
-pub struct Window<T>
-where
-	T: Copy,
-{
+pub struct Window<T> {
 	buf: Box<[T]>,
 	index: PeriodType,
 	size: PeriodType,
 	s_1: PeriodType,
 }
 
-impl<T> Window<T>
-where
-	T: Copy,
-{
-	/// Creates new Window object of size `size` with filled values `value`
+impl<T> Window<T> {
+	/// Creates new `Window` object of size `size` with filled values `value`
 	///
 	/// # Panics
 	///
 	/// When in development mode, this method may panic if `size` is equal to [`PeriodType::MAX`]
 	///
 	/// [`PeriodType::MAX`]: crate::core::PeriodType
-	pub fn new(size: PeriodType, value: T) -> Self {
+	#[must_use]
+	pub fn new(size: PeriodType, value: T) -> Self 
+	where T: Clone
+	{
 		debug_assert!(size <= (PeriodType::MAX - 1), "PeriodType overflow");
 		Self {
 			buf: vec![value; size as usize].into(),
 			index: 0,
+			size,
+			s_1: size.saturating_sub(1),
+		}
+	}
+
+	/// Creates new `Window` object from raw slice and index of the oldest inserted element in that slice.
+	///
+	/// # Panics
+	///
+	/// This method will panic if length of the slice is greater or equal to [`PeriodType::MAX`].
+	/// This method will also panic if provided `index` is greater or equal to slice's length.
+	///
+	/// [`PeriodType::MAX`]: crate::core::PeriodType
+	#[must_use]
+	pub fn from_parts(slice: Box<[T]>, index: PeriodType) -> Self {
+		let size = slice.len() as PeriodType;
+
+		assert!(slice.len() < PeriodType::MAX as usize, "The length of the slice is too large");
+		assert!(slice.len() > index as usize, "Index is out of slice's range");
+
+		Self {
+			buf: slice,
+			index,
 			size,
 			s_1: size.saturating_sub(1),
 		}
@@ -140,12 +160,12 @@ where
 	/// w.push(4);
 	/// w.push(5);
 	///
-	/// let p: Vec<_> = w.iter().collect();
+	/// let p: Vec<_> = w.iter().copied().collect();
 	/// assert_eq!(p, [5, 4, 3]);
 	/// ```
 	#[inline]
 	#[must_use]
-	pub fn iter(&self) -> WindowIterator<T> {
+	pub const fn iter(&self) -> WindowIterator<T> {
 		WindowIterator::new(self)
 	}
 
@@ -163,12 +183,12 @@ where
 	/// w.push(4);
 	/// w.push(5);
 	///
-	/// let p: Vec<_> = w.iter_rev().collect();
+	/// let p: Vec<_> = w.iter_rev().copied().collect();
 	/// assert_eq!(p, [3, 4, 5]);
 	/// ```
 	#[inline]
 	#[must_use]
-	pub fn iter_rev(&self) -> ReversedWindowIterator<T> {
+	pub const fn iter_rev(&self) -> ReversedWindowIterator<T> {
 		ReversedWindowIterator::new(self)
 	}
 
@@ -180,45 +200,45 @@ where
 	/// use yata::core::Window;
 	/// let mut w = Window::new(3, 1);
 	///
-	/// assert_eq!(w.newest(), 1);
+	/// assert_eq!(w.newest(), &1);
 	/// w.push(2);
-	/// assert_eq!(w.newest(), 2);
+	/// assert_eq!(w.newest(), &2);
 	/// w.push(3);
-	/// assert_eq!(w.newest(), 3);
+	/// assert_eq!(w.newest(), &3);
 	/// w.push(4);
-	/// assert_eq!(w.newest(), 4);
+	/// assert_eq!(w.newest(), &4);
 	/// w.push(5);
-	/// assert_eq!(w.newest(), 5);
+	/// assert_eq!(w.newest(), &5);
 	/// w.push(6);
-	/// assert_eq!(w.newest(), 6);
+	/// assert_eq!(w.newest(), &6);
 	/// ```
 	#[inline]
 	#[must_use]
-	pub fn newest(&self) -> T {
+	pub fn newest(&self) -> &T {
 		let index = self.index.checked_sub(1).unwrap_or(self.s_1);
 
 		if cfg!(feature = "unsafe_performance") {
-			*unsafe { self.buf.get_unchecked(index as usize) }
+			unsafe { self.buf.get_unchecked(index as usize) }
 		} else {
-			self.buf[index as usize]
+			&self.buf[index as usize]
 		}
 	}
 
 	/// Returns an oldest value
 	#[inline]
 	#[must_use]
-	pub fn oldest(&self) -> T {
+	pub fn oldest(&self) -> &T {
 		if cfg!(feature = "unsafe_performance") {
-			*unsafe { self.buf.get_unchecked(self.index as usize) }
+			unsafe { self.buf.get_unchecked(self.index as usize) }
 		} else {
-			self.buf[self.index as usize]
+			&self.buf[self.index as usize]
 		}
 	}
 
 	/// Checks if `Window` is empty (`length` == 0). Returns `true` if `Window` is empty or false otherwise.
 	#[must_use]
 	#[inline]
-	pub fn is_empty(&self) -> bool {
+	pub const fn is_empty(&self) -> bool {
 		self.buf.is_empty()
 	}
 
@@ -229,37 +249,31 @@ where
 	/// The sequence of elements is not preserved.
 	#[must_use]
 	#[inline]
-	pub fn as_slice(&self) -> &[T] {
+	pub const fn as_slice(&self) -> &[T] {
 		&self.buf
 	}
 
 	/// Returns the length (elements count) of the `Window`
 	#[must_use]
 	#[inline]
-	pub fn len(&self) -> PeriodType {
+	pub const fn len(&self) -> PeriodType {
 		self.size
 	}
 }
 
-impl<T: Copy> AsRef<[T]> for Window<T> {
+impl<T> AsRef<[T]> for Window<T> {
 	fn as_ref(&self) -> &[T] {
 		&self.buf
 	}
 }
 
-impl<T> Default for Window<T>
-where
-	T: Copy,
-{
+impl<T> Default for Window<T> {
 	fn default() -> Self {
 		Self::empty()
 	}
 }
 
-impl<T> std::ops::Index<PeriodType> for Window<T>
-where
-	T: Copy,
-{
+impl<T> std::ops::Index<PeriodType> for Window<T> {
 	type Output = T;
 
 	fn index(&self, index: PeriodType) -> &Self::Output {
@@ -279,11 +293,8 @@ where
 	}
 }
 
-impl<'a, T> IntoIterator for &'a Window<T>
-where
-	T: Copy,
-{
-	type Item = T;
+impl<'a, T> IntoIterator for &'a Window<T> {
+	type Item = &'a T;
 	type IntoIter = WindowIterator<'a, T>;
 
 	fn into_iter(self) -> Self::IntoIter {
@@ -302,20 +313,14 @@ where
 // }
 
 #[derive(Debug)]
-pub struct WindowIterator<'a, T>
-where
-	T: Copy,
-{
+pub struct WindowIterator<'a, T> {
 	window: &'a Window<T>,
 	index: PeriodType,
 	size: PeriodType,
 }
 
-impl<'a, T> WindowIterator<'a, T>
-where
-	T: Copy,
-{
-	pub fn new(window: &'a Window<T>) -> Self {
+impl<'a, T> WindowIterator<'a, T> {
+	pub const fn new(window: &'a Window<T>) -> Self {
 		Self {
 			window,
 			index: window.index,
@@ -324,11 +329,8 @@ where
 	}
 }
 
-impl<'a, T> Iterator for WindowIterator<'a, T>
-where
-	T: Copy,
-{
-	type Item = T;
+impl<'a, T> Iterator for WindowIterator<'a, T> {
+	type Item = &'a T;
 
 	#[inline]
 	fn next(&mut self) -> Option<Self::Item> {
@@ -342,9 +344,9 @@ where
 		self.index = self.index.saturating_sub(1) + at_start * self.window.s_1;
 
 		let value = if cfg!(feature = "unsafe_performance") {
-			*unsafe { self.window.buf.get_unchecked(self.index as usize) }
+			unsafe { self.window.buf.get_unchecked(self.index as usize) }
 		} else {
-			self.window.buf[self.index as usize]
+			&self.window.buf[self.index as usize]
 		};
 
 		Some(value)
@@ -364,24 +366,18 @@ where
 	}
 }
 
-impl<'a, T> ExactSizeIterator for WindowIterator<'a, T> where T: Copy {}
-impl<'a, T> std::iter::FusedIterator for WindowIterator<'a, T> where T: Copy {}
+impl<'a, T> ExactSizeIterator for WindowIterator<'a, T> {}
+impl<'a, T> std::iter::FusedIterator for WindowIterator<'a, T> {}
 
 #[derive(Debug)]
-pub struct ReversedWindowIterator<'a, T>
-where
-	T: Copy,
-{
+pub struct ReversedWindowIterator<'a, T> {
 	window: &'a Window<T>,
 	index: PeriodType,
 	size: PeriodType,
 }
 
-impl<'a, T> ReversedWindowIterator<'a, T>
-where
-	T: Copy,
-{
-	pub fn new(window: &'a Window<T>) -> Self {
+impl<'a, T> ReversedWindowIterator<'a, T> {
+	pub const fn new(window: &'a Window<T>) -> Self {
 		Self {
 			window,
 			index: window.index,
@@ -390,11 +386,8 @@ where
 	}
 }
 
-impl<'a, T> Iterator for ReversedWindowIterator<'a, T>
-where
-	T: Copy,
-{
-	type Item = T;
+impl<'a, T> Iterator for ReversedWindowIterator<'a, T> {
+	type Item = &'a T;
 
 	#[inline]
 	fn next(&mut self) -> Option<Self::Item> {
@@ -403,9 +396,9 @@ where
 		}
 
 		let value = if cfg!(feature = "unsafe_performance") {
-			*unsafe { self.window.buf.get_unchecked(self.index as usize) }
+			unsafe { self.window.buf.get_unchecked(self.index as usize) }
 		} else {
-			self.window.buf[self.index as usize]
+			&self.window.buf[self.index as usize]
 		};
 
 		self.size -= 1;
@@ -430,12 +423,12 @@ where
 	}
 }
 
-impl<'a, T> ExactSizeIterator for ReversedWindowIterator<'a, T> where T: Copy {}
-impl<'a, T> std::iter::FusedIterator for ReversedWindowIterator<'a, T> where T: Copy {}
+impl<'a, T> ExactSizeIterator for ReversedWindowIterator<'a, T> {}
+impl<'a, T> std::iter::FusedIterator for ReversedWindowIterator<'a, T> {}
 
 #[derive(Deserialize)]
 #[cfg(feature = "serde")]
-struct SerializableWindow<T: Copy> {
+struct SerializableWindow<T> {
 	buf: Box<[T]>,
 	index: PeriodType,
 }
@@ -443,7 +436,7 @@ struct SerializableWindow<T: Copy> {
 #[cfg(feature = "serde")]
 impl<T> Serialize for Window<T>
 where
-	T: Copy + Serialize,
+	T: Serialize,
 {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 	where
@@ -462,7 +455,7 @@ use serde::de::Error as SerdeError;
 #[cfg(feature = "serde")]
 impl<'de, T> Deserialize<'de> for Window<T>
 where
-	T: Copy + Deserialize<'de>,
+	T: Deserialize<'de>,
 {
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
 	where
@@ -488,17 +481,7 @@ where
 			return Err(error);
 		}
 
-		let size = buf.len() as PeriodType;
-		let s_1 = size - 1;
-
-		let result = Self {
-			buf,
-			index,
-			size,
-			s_1,
-		};
-
-		Ok(result)
+		Ok(Self::from_parts(buf, index))
 	}
 }
 
@@ -531,7 +514,7 @@ mod tests {
 			data.iter().enumerate().for_each(|(i, &c)| {
 				let first = data[i.saturating_sub(length.saturating_sub(1) as usize)];
 				w.push(c);
-				assert_eq!(first, w.oldest());
+				assert_eq!(first, *w.oldest());
 			});
 		}
 	}
@@ -545,7 +528,7 @@ mod tests {
 
 			for &c in &data {
 				w.push(c);
-				assert_eq!(c, w.newest());
+				assert_eq!(c, *w.newest());
 			}
 		}
 	}
@@ -561,7 +544,7 @@ mod tests {
 				w.push(c);
 
 				if i >= length as usize {
-					let iterated: Vec<_> = w.iter().collect();
+					let iterated: Vec<_> = w.iter().copied().collect();
 
 					let original_slice: Vec<_> = {
 						let from = i.saturating_sub((length - 1) as usize);
@@ -574,7 +557,7 @@ mod tests {
 
 				assert_eq!(
 					data[i.saturating_sub((length - 1) as usize)],
-					w.iter().last().unwrap()
+					w.iter().last().copied().unwrap()
 				);
 			});
 
@@ -597,7 +580,7 @@ mod tests {
 				w.push(c);
 
 				if i >= length as usize {
-					let iterated: Vec<_> = w.iter_rev().collect();
+					let iterated: Vec<_> = w.iter_rev().copied().collect();
 
 					let original_slice = {
 						let from = i.saturating_sub((length - 1) as usize);

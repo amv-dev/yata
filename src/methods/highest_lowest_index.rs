@@ -98,7 +98,7 @@ impl Method<'_> for HighestIndex {
 			self.index = 0;
 		} else if self.index == self.window.len() {
 			let (index, value) =
-				self.window.iter().enumerate().fold(
+				self.window.iter().copied().enumerate().fold(
 					(0, value),
 					|a, b| {
 						if b.1 > a.1 {
@@ -211,7 +211,7 @@ impl Method<'_> for LowestIndex {
 			self.index = 0;
 		} else if self.index == self.window.len() {
 			let (index, value) =
-				self.window.iter().enumerate().fold(
+				self.window.iter().copied().enumerate().fold(
 					(0, value),
 					|a, b| {
 						if b.1 < a.1 {
