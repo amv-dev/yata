@@ -67,7 +67,7 @@ impl Method<'_> for LinReg {
 
 	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
 		#![allow(clippy::all)]
-
+		#[allow(clippy::suspicious_operation_groupings)] // s_x * s_x looks suspicious, but it's not
 		match length {
 			0 | 1 => Err(Error::WrongMethodParameters),
 			length => {
@@ -158,6 +158,8 @@ mod tests {
 					.map(|k| src[k])
 					.sum();
 
+				#[allow(clippy::suspicious_operation_groupings)]
+				// s_x * s_x looks suspicious, but it's not
 				let a = (n * s_xy - s_x * s_y) / (n * s_x2 - s_x * s_x);
 				let b = (s_y - a * s_x) / n;
 
