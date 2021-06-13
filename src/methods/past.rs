@@ -123,7 +123,7 @@ mod tests {
 		(1..255).for_each(|length| {
 			let mut ma = TestingMethod::new(length, src[0]).unwrap();
 			src.iter().enumerate().for_each(|(i, &x)| {
-				assert_eq_float(src[i.saturating_sub(length as usize)], ma.next(x))
+				assert_eq_float(src[i.saturating_sub(length as usize)], ma.next(x));
 			});
 		});
 	}

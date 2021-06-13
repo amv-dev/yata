@@ -72,6 +72,6 @@ mod tests {
 			.inspect(|(original, ha)| assert_eq_float(original.high(), ha.high()))
 			.inspect(|(original, ha)| assert_eq_float(original.low(), ha.low()))
 			.inspect(|(original, ha)| assert_eq_float(original.close(), ha.close()))
-			.for_each(|(original, ha)| assert_eq_float(original.volume(), ha.volume()))
+			.for_each(|(original, ha)| assert_eq_float(original.volume(), ha.volume()));
 	}
 }
