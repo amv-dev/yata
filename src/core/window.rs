@@ -246,7 +246,7 @@ impl<T> Window<T> {
 	///
 	/// ## Important!
 	///
-	/// The sequence of elements are not preserved.
+	/// The sequence of elements is not preserved.
 	#[must_use]
 	#[inline]
 	pub const fn as_slice(&self) -> &[T] {
