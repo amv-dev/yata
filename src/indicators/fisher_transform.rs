@@ -63,7 +63,7 @@ impl IndicatorConfig for FisherTransform {
 		}
 
 		let cfg = self;
-		let src = candle.source(cfg.source);
+		let src = &candle.source(cfg.source);
 
 		Ok(Self::Instance {
 			ma1: method(cfg.method, cfg.period2, 0.)?,
@@ -157,7 +157,7 @@ impl IndicatorInstance for FisherTransformInstance {
 	}
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let src = candle.source(self.cfg.source);
+		let src = &candle.source(self.cfg.source);
 
 		// first we need to find MAX and MIN values for last `period1` prices
 		let highest = self.highest.next(src);
@@ -185,7 +185,7 @@ impl IndicatorInstance for FisherTransformInstance {
 
 		// 	Fisher Transform must be positive (i.e., price perceived to be excessively bullish)
 		// 	Taken after a reversal in the direction of the Fisher Transform
-		let reverse = self.cross.next((cumulative, self.prev_value)).analog();
+		let reverse = self.cross.next(&(cumulative, self.prev_value)).analog();
 
 		let s1 = cumulative / self.cfg.zone
 			* ((cumulative < 0.0 && reverse > 0) || (cumulative > 0.0 && reverse < 0)) as i8
@@ -195,8 +195,8 @@ impl IndicatorInstance for FisherTransformInstance {
 		// so it moves slightly slower than the Fisher Transform line. When the Fisher Transform crosses the trigger line it is used
 		// by some traders as a trade signal. For example, when the Fisher Transform drops below the signal line after hitting an
 		// extreme high, that could be used as a signal to sell a current long position.
-		let signal_line = self.ma1.next(cumulative);
-		let crossed_ma = self.cross_ma.next((cumulative, signal_line)).analog();
+		let signal_line = self.ma1.next(&cumulative);
+		let crossed_ma = self.cross_ma.next(&(cumulative, signal_line)).analog();
 
 		let is_reversed = (reverse != 0) as i8;
 		self.last_reverse = (1 - is_reversed) * self.last_reverse + is_reversed * reverse;

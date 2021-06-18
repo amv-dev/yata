@@ -73,8 +73,8 @@ impl IndicatorConfig for RelativeVigorIndex {
 		}
 
 		let cfg = self;
-		let d_close = 0.0; // candle.close() - candle.open();
-		let d_hl = candle.high() - candle.low();
+		let d_close = &0.0; // candle.close() - candle.open();
+		let d_hl = &(candle.high() - candle.low());
 		let rvi = 0.0; // if d_hl == 0. { 0. } else { d_close / d_hl };
 
 		Ok(Self::Instance {
@@ -173,15 +173,15 @@ impl IndicatorInstance for RelativeVigorIndexInstance {
 
 		self.prev_close = candle.close();
 
-		let swma1 = self.swma1.next(close_open);
-		let sma1 = self.sma1.next(swma1);
-		let swma2 = self.swma2.next(high_low);
-		let sma2 = self.sma2.next(swma2);
+		let swma1 = self.swma1.next(&close_open);
+		let sma1 = self.sma1.next(&swma1);
+		let swma2 = self.swma2.next(&high_low);
+		let sma2 = self.sma2.next(&swma2);
 
 		let rvi = if sma2 == 0. { 0. } else { sma1 / sma2 };
-		let sig: ValueType = self.ma.next(rvi);
+		let sig: ValueType = self.ma.next(&rvi);
 
-		let s1 = self.cross.next((rvi, sig)).analog();
+		let s1 = self.cross.next(&(rvi, sig)).analog();
 
 		// if s1.sign().unwrap_or_default() < 0 && rvi > self.cfg.zone && sig > self.cfg.zone {
 		// 	s2 = 1;

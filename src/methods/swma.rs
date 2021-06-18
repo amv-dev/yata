@@ -49,12 +49,12 @@ pub struct SWMA {
 	numerator: ValueType,
 }
 
-impl Method<'_> for SWMA {
+impl Method for SWMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => {
@@ -88,7 +88,7 @@ impl Method<'_> for SWMA {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, &value: &Self::Input) -> Self::Output {
 		if self.right_window.is_empty() {
 			return value;
 		}
@@ -119,10 +119,10 @@ mod tests {
 	fn test_swma_const() {
 		for i in 2..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input).unwrap();
+			let mut method = TestingMethod::new(i, &input).unwrap();
 
-			let output = method.next(input);
-			test_const(&mut method, input, output);
+			let output = method.next(&input);
+			test_const(&mut method, &input, &output);
 		}
 	}
 
@@ -130,10 +130,10 @@ mod tests {
 	fn test_swma1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq_float(x.close, ma.next(x.close));
+			assert_eq_float(x.close, ma.next(&x.close));
 		});
 	}
 
@@ -166,10 +166,10 @@ mod tests {
 			let length = weights.len();
 
 			#[allow(clippy::cast_possible_truncation)]
-			let mut ma = TestingMethod::new(length as PeriodType, src[0]).unwrap();
-			let mut conv = Conv::new(weights.clone(), src[0]).unwrap();
+			let mut ma = TestingMethod::new(length as PeriodType, &src[0]).unwrap();
+			let mut conv = Conv::new(weights.clone(), &src[0]).unwrap();
 
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().enumerate().for_each(|(i, x)| {
 				let wcv = weights
 					.iter()
 					.enumerate()

@@ -71,20 +71,20 @@ impl IndicatorConfig for ChandeKrollStop {
 
 		let cfg = self;
 		Ok(Self::Instance {
-			ma: method(cfg.method, cfg.p, candle.tr(&candle))?,
+			ma: method(cfg.method, cfg.p, candle.tr(candle))?,
 
-			highest1: Highest::new(cfg.p, candle.high())?,
-			lowest1: Lowest::new(cfg.p, candle.low())?,
+			highest1: Highest::new(cfg.p, &candle.high())?,
+			lowest1: Lowest::new(cfg.p, &candle.low())?,
 
-			highest2: Highest::new(cfg.q, candle.high() - cfg.x * tr)?,
-			lowest2: Lowest::new(cfg.q, cfg.x.mul_add(tr, candle.low()))?,
+			highest2: Highest::new(cfg.q, &(candle.high() - cfg.x * tr))?,
+			lowest2: Lowest::new(cfg.q, &cfg.x.mul_add(tr, candle.low()))?,
 
 			prev_close: candle.close(),
 			prev_stop_short: candle.high() - cfg.x * tr,
 			prev_stop_long: cfg.x.mul_add(tr, candle.low()),
 			cross_above: CrossAbove::new(
 				(),
-				(cfg.x.mul_add(tr, candle.low()), candle.high() - cfg.x * tr),
+				&(cfg.x.mul_add(tr, candle.low()), candle.high() - cfg.x * tr),
 			)?,
 			cfg,
 		})
@@ -166,13 +166,13 @@ impl IndicatorInstance for ChandeKrollStopInstance {
 		let tr = candle.tr_close(self.prev_close);
 		self.prev_close = candle.close();
 
-		let atr = self.ma.next(tr);
+		let atr = self.ma.next(&tr);
 
-		let phs = self.highest1.next(candle.high()) - atr * self.cfg.x;
-		let pls = atr.mul_add(self.cfg.x, self.lowest1.next(candle.low()));
+		let phs = self.highest1.next(&candle.high()) - atr * self.cfg.x;
+		let pls = atr.mul_add(self.cfg.x, self.lowest1.next(&candle.low()));
 
-		let stop_short = self.highest2.next(phs);
-		let stop_long = self.lowest2.next(pls);
+		let stop_short = self.highest2.next(&phs);
+		let stop_long = self.lowest2.next(&pls);
 
 		let src = candle.source(self.cfg.source);
 
@@ -184,7 +184,7 @@ impl IndicatorInstance for ChandeKrollStopInstance {
 		#[allow(unused_parens)]
 		let s2_diff = (stop_short - self.prev_stop_short) + (stop_long - self.prev_stop_long);
 		let is_s2 = (stop_short < stop_long) as i8; // s2 should appear only when `STOP LONG` is above `STOP SHORT`
-		let cross: i8 = self.cross_above.next((stop_long, stop_short)).into(); // also s2 should appear only when `STOP LONG` actually crossing `STOP SHORT` upwards
+		let cross: i8 = self.cross_above.next(&(stop_long, stop_short)).into(); // also s2 should appear only when `STOP LONG` actually crossing `STOP SHORT` upwards
 		let s2 = cross * is_s2 * signi(s2_diff);
 
 		self.prev_stop_short = stop_short;

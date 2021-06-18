@@ -162,11 +162,11 @@ impl IndicatorInstance for SMIErgodicIndicatorInstance {
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
-		let tsi = self.tsi.next(src);
+		let tsi = self.tsi.next(&src);
 
-		let sig: ValueType = self.ma.next(tsi);
+		let sig: ValueType = self.ma.next(&tsi);
 
-		let cross = self.cross.next((tsi, sig)).analog();
+		let cross = self.cross.next(&(tsi, sig)).analog();
 		let s1 =
 			(cross > 0 && sig < -self.cfg.zone) as i8 - (cross < 0 && sig > self.cfg.zone) as i8;
 

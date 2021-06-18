@@ -70,7 +70,7 @@ impl IndicatorConfig for AwesomeOscillator {
 			ma1: method(cfg.method, cfg.period1, src)?,
 			ma2: method(cfg.method, cfg.period2, src)?,
 			cross_over: Cross::default(),
-			reverse: Method::new((cfg.left, cfg.right), 0.0)?,
+			reverse: Method::new((cfg.left, cfg.right), &0.0)?,
 			low_peaks: 0,
 			high_peaks: 0,
 			cfg,
@@ -166,16 +166,16 @@ impl IndicatorInstance for AwesomeOscillatorInstance {
 
 		let ma1 = &mut self.ma1;
 		let ma2 = &mut self.ma2;
-		let value = ma2.next(src) - ma1.next(src);
+		let value = ma2.next(&src) - ma1.next(&src);
 
-		let reverse: i8 = self.reverse.next(value).into();
+		let reverse: i8 = self.reverse.next(&value).into();
 
 		self.high_peaks = self.high_peaks.saturating_add((reverse > 0) as u8);
 		self.low_peaks = self.low_peaks.saturating_add((reverse < 0) as u8);
 
 		let s1 = (reverse < 0 && self.low_peaks >= self.cfg.conseq_peaks) as i8
 			- (reverse > 0 && self.high_peaks >= self.cfg.conseq_peaks) as i8;
-		let s2 = self.cross_over.next((value, 0.));
+		let s2 = self.cross_over.next(&(value, 0.));
 
 		// need to reset high/low peaks counter if value got lower/higher 0.0
 		// should do it after actual signals calculating

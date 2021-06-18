@@ -56,7 +56,7 @@ impl IndicatorConfig for WoodiesCCI {
 		}
 
 		let cfg = self;
-		let src = candle.source(cfg.source);
+		let src = &candle.source(cfg.source);
 
 		Ok(Self::Instance {
 			turbo: CCI::new(cfg.period1, src)?,
@@ -135,12 +135,12 @@ impl IndicatorInstance for WoodiesCCIInstance {
 	}
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let src = candle.source(self.cfg.source);
+		let src = &candle.source(self.cfg.source);
 
 		let turbo = self.turbo.next(src) * SCALE;
 		let trend = self.trend.next(src) * SCALE;
 
-		let s1_cross = self.s1_cross.next((trend, 0.0)).analog();
+		let s1_cross = self.s1_cross.next(&(trend, 0.0)).analog();
 
 		if s1_cross == 0 {
 			self.s1_count += signi(trend) as isize;

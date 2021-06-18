@@ -41,12 +41,12 @@ pub struct Conv {
 	wsum_invert: ValueType,
 }
 
-impl Method<'_> for Conv {
+impl Method for Conv {
 	type Params = Vec<ValueType>;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(weights: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(weights: Self::Params, value: &Self::Input) -> Result<Self, Error> {
 		const MAX_WEIGHTS_LEN: usize = PeriodType::MAX as usize;
 
 		match weights.len() {
@@ -55,7 +55,7 @@ impl Method<'_> for Conv {
 
 				#[allow(clippy::cast_possible_truncation)]
 				Ok(Self {
-					window: Window::new(weights.len() as PeriodType, value),
+					window: Window::new(weights.len() as PeriodType, *value),
 					weights,
 					wsum_invert,
 				})
@@ -65,8 +65,8 @@ impl Method<'_> for Conv {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
-		self.window.push(value);
+	fn next(&mut self, value: &Self::Input) -> Self::Output {
+		self.window.push(*value);
 		self.window
 			.iter()
 			.zip(self.weights.iter().rev())
@@ -101,10 +101,10 @@ mod tests {
 		for i in 1..255 {
 			let weights = get_weights(i);
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(weights, input).unwrap();
+			let mut method = TestingMethod::new(weights, &input).unwrap();
 
-			let output = method.next(input);
-			test_const_float(&mut method, input, output);
+			let output = method.next(&input);
+			test_const_float(&mut method, &input, output);
 		}
 	}
 
@@ -113,11 +113,11 @@ mod tests {
 		let mut candles = RandomCandles::default();
 
 		let weights = get_weights(1);
-		let mut ma = TestingMethod::new(weights, candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(weights, &candles.first().close).unwrap();
 
 		candles
 			.take(100)
-			.for_each(|x| assert_eq_float(x.close, ma.next(x.close)));
+			.for_each(|x| assert_eq_float(x.close, ma.next(&x.close)));
 	}
 
 	#[test]
@@ -130,10 +130,10 @@ mod tests {
 			let mut weights = get_weights(weights_count);
 			let wsum: ValueType = weights.iter().sum();
 
-			let mut ma = TestingMethod::new(weights.clone(), src[0]).unwrap();
+			let mut ma = TestingMethod::new(weights.clone(), &src[0]).unwrap();
 			weights.reverse();
 
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().enumerate().for_each(|(i, x)| {
 				let wcv = weights
 					.iter()
 					.enumerate()

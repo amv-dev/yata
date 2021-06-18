@@ -59,12 +59,12 @@ pub struct CollapseTimeframe {
 	period: usize,
 }
 
-impl<'a> Method<'a> for CollapseTimeframe {
+impl Method for CollapseTimeframe {
 	type Params = usize;
-	type Input = &'a dyn OHLCV;
+	type Input = dyn OHLCV;
 	type Output = Option<Candle>;
 
-	fn new(period: Self::Params, _candle: Self::Input) -> Result<Self, Error> {
+	fn new(period: Self::Params, _candle: &Self::Input) -> Result<Self, Error> {
 		if period == 0 {
 			return Err(Error::WrongMethodParameters);
 		}
@@ -75,7 +75,7 @@ impl<'a> Method<'a> for CollapseTimeframe {
 		})
 	}
 
-	fn next(&mut self, candle: Self::Input) -> Self::Output {
+	fn next(&mut self, candle: &Self::Input) -> Self::Output {
 		let current = self.current.map_or(candle.into(), |c2| Candle {
 			high: c2.high.max(candle.high()),
 			low: c2.low.min(candle.low()),

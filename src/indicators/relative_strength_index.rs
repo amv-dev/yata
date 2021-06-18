@@ -69,8 +69,8 @@ impl IndicatorConfig for RelativeStrengthIndex {
 			previous_input: src,
 			posma: method(cfg.method, cfg.period, 0.)?,
 			negma: method(cfg.method, cfg.period, 0.)?,
-			cross_upper: Cross::new((), (0.5, 1.0 - cfg.zone))?,
-			cross_lower: Cross::new((), (0.5, cfg.zone))?,
+			cross_upper: Cross::new((), &(0.5, 1.0 - cfg.zone))?,
+			cross_lower: Cross::new((), &(0.5, cfg.zone))?,
 			cfg,
 		})
 	}
@@ -148,8 +148,8 @@ impl IndicatorInstance for RelativeStrengthIndexInstance {
 
 		let change = src - replace(&mut self.previous_input, src);
 
-		let pos: ValueType = self.posma.next(change.max(0.));
-		let neg: ValueType = self.negma.next(change.min(0.)) * -1.;
+		let pos: ValueType = self.posma.next(&change.max(0.));
+		let neg: ValueType = self.negma.next(&change.min(0.)) * -1.;
 
 		let value = if pos != 0. || neg != 0. {
 			debug_assert!(pos + neg != 0.);
@@ -158,8 +158,8 @@ impl IndicatorInstance for RelativeStrengthIndexInstance {
 			0.5
 		};
 
-		let oversold = self.cross_lower.next((value, self.cfg.zone)).analog();
-		let overbought = self.cross_upper.next((value, 1. - self.cfg.zone)).analog();
+		let oversold = self.cross_lower.next(&(value, self.cfg.zone)).analog();
+		let overbought = self.cross_upper.next(&(value, 1. - self.cfg.zone)).analog();
 
 		let signal1 = (oversold < 0) as i8 - (overbought > 0) as i8;
 		let signal2 = (oversold > 0) as i8 - (overbought < 0) as i8;

@@ -138,7 +138,7 @@ impl IndicatorInstance for EnvelopesInstance {
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
-		let v = self.ma.next(src);
+		let v = self.ma.next(&src);
 
 		let (value1, value2) = (v * self.k_high, v * self.k_low);
 

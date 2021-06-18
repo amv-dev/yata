@@ -50,7 +50,7 @@ impl IndicatorConfig for MomentumIndex {
 		}
 
 		let cfg = self;
-		let src = candle.source(cfg.source);
+		let src = &candle.source(cfg.source);
 
 		Ok(Self::Instance {
 			momentum1: Momentum::new(cfg.period1, src)?,
@@ -117,7 +117,7 @@ impl IndicatorInstance for MomentumIndexInstance {
 	}
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let src = candle.source(self.cfg.source);
+		let src = &candle.source(self.cfg.source);
 
 		let v = self.momentum1.next(src);
 		let s = self.momentum2.next(src);

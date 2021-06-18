@@ -80,7 +80,7 @@ impl IndicatorConfig for TrueStrengthIndex {
 
 		Ok(Self::Instance {
 			tsi: TSI::new(cfg.period2, cfg.period1, src)?,
-			ema: EMA::new(cfg.period3, 0.)?,
+			ema: EMA::new(cfg.period3, &0.)?,
 			cross_under: CrossUnder::default(),
 			cross_above: CrossAbove::default(),
 			cross_over1: Cross::default(),
@@ -169,14 +169,14 @@ impl IndicatorInstance for TrueStrengthIndexInstance {
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
-		let tsi = self.tsi.next(src);
+		let tsi = self.tsi.next(&src);
 
-		let sig = self.ema.next(tsi);
+		let sig = self.ema.next(&tsi);
 
-		let s1 = self.cross_under.next((tsi, -self.cfg.zone))
-			- self.cross_above.next((tsi, self.cfg.zone));
-		let s2 = self.cross_over1.next((tsi, 0.));
-		let s3 = self.cross_over2.next((tsi, sig));
+		let s1 = self.cross_under.next(&(tsi, -self.cfg.zone))
+			- self.cross_above.next(&(tsi, self.cfg.zone));
+		let s2 = self.cross_over1.next(&(tsi, 0.));
+		let s3 = self.cross_over2.next(&(tsi, sig));
 
 		IndicatorResult::new(&[tsi, sig], &[s1, s2, s3])
 	}

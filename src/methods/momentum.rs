@@ -75,12 +75,12 @@ pub type Change = Momentum;
 /// Just an alias for [Momentum] method
 pub type MTM = Momentum;
 
-impl Method<'_> for Momentum {
+impl Method for Momentum {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
@@ -90,7 +90,7 @@ impl Method<'_> for Momentum {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, &value: &Self::Input) -> Self::Output {
 		value - self.window.push(value)
 	}
 }
@@ -106,10 +106,10 @@ mod tests {
 	fn test_momentum_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input).unwrap();
+			let mut method = TestingMethod::new(i, &input).unwrap();
 
-			let output = method.next(input);
-			test_const(&mut method, input, output);
+			let output = method.next(&input);
+			test_const(&mut method, &input, &output);
 		}
 	}
 
@@ -117,11 +117,11 @@ mod tests {
 	fn test_momentum1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
 
 		let mut prev = None;
 		candles.take(100).map(|x| x.close).for_each(|x| {
-			let q = ma.next(x);
+			let q = ma.next(&x);
 			let p = prev.unwrap_or(x);
 			// assert_eq!(q, x - p);
 			assert_eq_float(x - p, q);
@@ -136,8 +136,8 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]).unwrap();
-			src.iter().enumerate().for_each(|(i, &x)| {
+			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
+			src.iter().enumerate().for_each(|(i, x)| {
 				assert_eq_float(x - src[i.saturating_sub(length as usize)], ma.next(x));
 			});
 		});

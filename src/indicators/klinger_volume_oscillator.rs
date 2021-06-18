@@ -160,14 +160,14 @@ impl IndicatorInstance for KlingerVolumeOscillatorInstance {
 
 		let vol = sign(d) * candle.volume();
 
-		let ma1: ValueType = self.ma1.next(vol);
-		let ma2: ValueType = self.ma2.next(vol);
+		let ma1: ValueType = self.ma1.next(&vol);
+		let ma2: ValueType = self.ma2.next(&vol);
 		let ko = ma1 - ma2;
 
-		let ma3: ValueType = self.ma3.next(ko);
+		let ma3: ValueType = self.ma3.next(&ko);
 
-		let s1 = self.cross1.next((ko, 0.));
-		let s2 = self.cross2.next((ko, ma3));
+		let s1 = self.cross1.next(&(ko, 0.));
+		let s2 = self.cross2.next(&(ko, ma3));
 
 		IndicatorResult::new(&[ko, ma3], &[s1, s2])
 	}

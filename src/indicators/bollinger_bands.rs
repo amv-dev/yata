@@ -55,8 +55,8 @@ impl IndicatorConfig for BollingerBands {
 		let cfg = self;
 		let src = T::source(candle, cfg.source);
 		Ok(Self::Instance {
-			ma: SMA::new(cfg.avg_size, src)?,
-			st_dev: StDev::new(cfg.avg_size, src)?,
+			ma: SMA::new(cfg.avg_size, &src)?,
+			st_dev: StDev::new(cfg.avg_size, &src)?,
 			cfg,
 		})
 	}
@@ -121,8 +121,8 @@ impl IndicatorInstance for BollingerBandsInstance {
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let source = candle.source(self.cfg.source);
-		let middle = self.ma.next(source);
-		let sq_error = self.st_dev.next(source);
+		let middle = self.ma.next(&source);
+		let sq_error = self.st_dev.next(&source);
 
 		let upper = sq_error.mul_add(self.cfg.sigma, middle);
 		let lower = middle - sq_error * self.cfg.sigma;

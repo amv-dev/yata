@@ -63,7 +63,7 @@ impl IndicatorConfig for KeltnerChannel {
 		Ok(Self::Instance {
 			prev_close: candle.close(),
 			ma: method(cfg.method, cfg.period, src)?,
-			sma: SMA::new(cfg.period, candle.high() - candle.low())?,
+			sma: SMA::new(cfg.period, &(candle.high() - candle.low()))?,
 			cross_above: CrossAbove::default(),
 			cross_under: CrossUnder::default(),
 			cfg,
@@ -140,14 +140,14 @@ impl IndicatorInstance for KeltnerChannelInstance {
 		let tr = candle.tr_close(self.prev_close);
 		self.prev_close = candle.close();
 
-		let ma: ValueType = self.ma.next(source);
-		let atr = self.sma.next(tr);
+		let ma: ValueType = self.ma.next(&source);
+		let atr = self.sma.next(&tr);
 
 		let upper = atr.mul_add(self.cfg.sigma, ma);
 		let lower = ma - atr * self.cfg.sigma;
 
 		let signal =
-			self.cross_under.next((source, lower)) - self.cross_above.next((source, upper));
+			self.cross_under.next(&(source, lower)) - self.cross_above.next(&(source, upper));
 
 		IndicatorResult::new(&[source, upper, lower], &[signal])
 	}

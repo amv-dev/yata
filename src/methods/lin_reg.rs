@@ -60,12 +60,12 @@ impl LinReg {
 	}
 }
 
-impl Method<'_> for LinReg {
+impl Method for LinReg {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
 		#![allow(clippy::all)]
 		#[allow(clippy::suspicious_operation_groupings)] // s_x * s_x looks suspicious, but it's not
 		match length {
@@ -96,7 +96,7 @@ impl Method<'_> for LinReg {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, &value: &Self::Input) -> Self::Output {
 		let past_value = self.window.push(value);
 
 		self.s_xy += past_value.mul_add(self.float_length, self.s_y);
@@ -118,10 +118,10 @@ mod tests {
 	fn test_lin_reg_const() {
 		for i in 2..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input).unwrap();
+			let mut method = TestingMethod::new(i, &input).unwrap();
 
-			let output = method.next(input);
-			test_const_float(&mut method, input, output);
+			let output = method.next(&input);
+			test_const_float(&mut method, &input, output);
 		}
 	}
 
@@ -137,7 +137,7 @@ mod tests {
 		for &length in &[
 			2, 3, 4, 5, 7, 10, 11, 13, 17, 20, 21, 25, 70, 77, 100, 125, 128, 173, 254,
 		] {
-			let mut ma = TestingMethod::new(length, src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
 			let length = length as usize;
 
 			let n = length as ValueType;
@@ -147,7 +147,7 @@ mod tests {
 			let s_x = -(s_x as ValueType);
 			let s_x2 = s_x2 as ValueType;
 
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().enumerate().for_each(|(i, x)| {
 				let ma_value = ma.next(x);
 
 				let s_xy: ValueType = (0..length)

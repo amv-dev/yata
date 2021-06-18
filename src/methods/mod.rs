@@ -110,23 +110,23 @@ mod tests {
 	use crate::helpers::assert_eq_float;
 	use std::fmt::Debug;
 
-	pub(super) fn test_const<P, I: Copy, O: Copy + Debug + PartialEq>(
+	pub(super) fn test_const<P, I: ?Sized, O: Debug + PartialEq>(
 		method: &mut dyn Method<Params = P, Input = I, Output = O>,
-		input: I,
-		output: O,
+		input: &I,
+		output: &O,
 	) {
 		for _ in 0..100 {
-			assert_eq!(method.next(input), output);
+			assert_eq!(&method.next(input), output);
 		}
 	}
 
-	pub(super) fn test_const_float<P, I: Copy>(
+	pub(super) fn test_const_float<P, I: ?Sized>(
 		method: &mut dyn Method<Params = P, Input = I, Output = ValueType>,
-		input: I,
+		input: &I,
 		output: ValueType,
 	) {
 		for _ in 0..100 {
-			// assert!((method.next(input) - output).abs() < SIGMA);
+			// assert!((method.next(&input) - output).abs() < SIGMA);
 			assert_eq_float(output, method.next(input));
 		}
 	}

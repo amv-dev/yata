@@ -75,7 +75,7 @@ impl IndicatorConfig for KnowSureThing {
 		}
 
 		let cfg = self;
-		let close = candle.close();
+		let close = &candle.close();
 
 		Ok(Self::Instance {
 			roc1v: RateOfChange::new(cfg.period1, close)?,
@@ -198,22 +198,22 @@ impl IndicatorInstance for KnowSureThingInstance {
 	}
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let close = candle.close();
+		let close = &candle.close();
 
 		let roc1: ValueType = self.roc1v.next(close);
 		let roc2: ValueType = self.roc2v.next(close);
 		let roc3: ValueType = self.roc3v.next(close);
 		let roc4: ValueType = self.roc4v.next(close);
 
-		let rcma1: ValueType = self.ma1.next(roc1);
-		let rcma2: ValueType = self.ma2.next(roc2);
-		let rcma3: ValueType = self.ma3.next(roc3);
-		let rcma4: ValueType = self.ma4.next(roc4);
+		let rcma1: ValueType = self.ma1.next(&roc1);
+		let rcma2: ValueType = self.ma2.next(&roc2);
+		let rcma3: ValueType = self.ma3.next(&roc3);
+		let rcma4: ValueType = self.ma4.next(&roc4);
 
 		let kst = rcma2.mul_add(2., rcma1) + rcma3.mul_add(3., rcma4 * 4.);
-		let sl: ValueType = self.ma5.next(kst);
+		let sl: ValueType = self.ma5.next(&kst);
 
-		let signal = self.cross.next((kst, sl));
+		let signal = self.cross.next(&(kst, sl));
 
 		IndicatorResult::new(&[kst, sl], &[signal])
 	}

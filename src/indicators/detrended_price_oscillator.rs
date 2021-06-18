@@ -119,7 +119,7 @@ impl IndicatorInstance for DetrendedPriceOscillatorInstance {
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 
-		let sma = self.sma.next(src);
+		let sma = self.sma.next(&src);
 		let left_src = self.window.push(src);
 
 		let dpo = left_src - sma;

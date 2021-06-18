@@ -75,9 +75,9 @@ impl IndicatorConfig for TrendStrengthIndex {
 				sx: sx as ValueType,
 				sy2,
 				k,
-				wma: WMA::new(cfg.period, src)?,
-				cross_under: CrossUnder::new((), (0.0, cfg.zone))?,
-				cross_above: CrossAbove::new((), (0.0, -cfg.zone))?,
+				wma: WMA::new(cfg.period, &src)?,
+				cross_under: CrossUnder::new((), &(0.0, cfg.zone))?,
+				cross_above: CrossAbove::new((), &(0.0, -cfg.zone))?,
 				reverse: ReversalSignal::new(1, 2, 0.0)?,
 				sy,
 
@@ -171,16 +171,16 @@ impl IndicatorInstance for TrendStrengthIndexInstance {
 		self.sy2 += src * src - past_src * past_src;
 
 		let sma = self.inverted_period * self.sy;
-		let p = (self.wma.next(src) - sma) * self.sx;
+		let p = (self.wma.next(&src) - sma) * self.sx;
 
 		// sy2 is always greater than sma * sy, so q is always positive
 		let q = self.k * (self.sy2 - sma * self.sy);
 
 		let value = p / q.sqrt();
 
-		let cross_signal = self.cross_under.next((value, self.cfg.zone))
-			- self.cross_above.next((value, -self.cfg.zone));
-		let reverse = self.reverse.next(value).analog();
+		let cross_signal = self.cross_under.next(&(value, self.cfg.zone))
+			- self.cross_above.next(&(value, -self.cfg.zone));
+		let reverse = self.reverse.next(&value).analog();
 
 		let is_upper_signal = reverse < 0 && self.window[self.cfg.reverse_offset] >= self.cfg.zone;
 		let is_lower_signal = reverse > 0 && self.window[self.cfg.reverse_offset] <= -self.cfg.zone;

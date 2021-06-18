@@ -130,12 +130,12 @@ impl IndicatorInstance for EldersForceIndexInstance {
 		let left_candle = self.window.push(Candle::from(candle));
 
 		self.vol_sum += candle.volume() - left_candle.volume();
-		let r = (OHLCV::source(&candle, self.cfg.source)
+		let r = (OHLCV::source(candle, self.cfg.source)
 			- OHLCV::source(&left_candle, self.cfg.source))
 			* self.vol_sum;
 
-		let value = self.ma.next(r);
-		let signal = self.cross_over.next((value, 0.));
+		let value = self.ma.next(&r);
+		let signal = self.cross_over.next(&(value, 0.));
 
 		IndicatorResult::new(&[value], &[signal])
 	}

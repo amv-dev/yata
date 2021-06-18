@@ -56,7 +56,7 @@ impl IndicatorConfig for CommodityChannelIndex {
 		Ok(Self::Instance {
 			last_cci: 0.,
 			last_signal: 0,
-			cci: CCI::new(cfg.period, value)?,
+			cci: CCI::new(cfg.period, &value)?,
 
 			cfg,
 		})
@@ -123,7 +123,7 @@ impl IndicatorInstance for CommodityChannelIndexInstance {
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let value = candle.source(self.cfg.source);
 
-		let cci = self.cci.next(value) * SCALE;
+		let cci = self.cci.next(&value) * SCALE;
 
 		// let mut t_signal = 0;
 		// let mut signal = 0;

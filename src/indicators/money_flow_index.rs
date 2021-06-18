@@ -164,8 +164,8 @@ impl IndicatorInstance for MoneyFlowIndexInstance {
 		let upper = 1. - self.cfg.zone;
 		let lower = self.cfg.zone;
 
-		let cross_upper: i8 = self.cross_upper.next((value, upper)).into();
-		let cross_lower: i8 = self.cross_lower.next((value, lower)).into();
+		let cross_upper: i8 = self.cross_upper.next(&(value, upper)).into();
+		let cross_lower: i8 = self.cross_lower.next(&(value, lower)).into();
 
 		let enters_zone = (cross_lower < 0) as i8 - (cross_upper > 0) as i8;
 		let leaves_zone = (cross_lower > 0) as i8 - (cross_upper < 0) as i8;

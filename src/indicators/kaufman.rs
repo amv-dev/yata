@@ -74,7 +74,7 @@ impl IndicatorConfig for Kaufman {
 		}
 
 		let cfg = self;
-		let src = candle.source(cfg.source);
+		let src = &candle.source(cfg.source);
 
 		Ok(Self::Instance {
 			volatility: LinearVolatility::new(cfg.period1, src)?,
@@ -84,8 +84,8 @@ impl IndicatorConfig for Kaufman {
 			st_dev: StDev::new(cfg.filter_period, src)?,
 			cross: Cross::default(),
 			last_signal: Action::None,
-			last_signal_value: src,
-			prev_value: src,
+			last_signal_value: *src,
+			prev_value: *src,
 			cfg,
 		})
 	}
@@ -177,7 +177,7 @@ impl IndicatorInstance for KaufmanInstance {
 	}
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let src = candle.source(self.cfg.source);
+		let src = &candle.source(self.cfg.source);
 
 		let direction = self.change.next(src).abs();
 		let volatility = self.volatility.next(src);
@@ -196,11 +196,11 @@ impl IndicatorInstance for KaufmanInstance {
 		let value = smooth.mul_add(src - self.prev_value, self.prev_value);
 		self.prev_value = value;
 
-		let cross = self.cross.next((src, value));
+		let cross = self.cross.next(&(*src, value));
 
 		let signal;
 		if self.cfg.filter_period > 1 {
-			let st_dev = self.st_dev.next(value);
+			let st_dev = self.st_dev.next(&value);
 			let filter = st_dev * self.cfg.k;
 
 			if cross.is_some() {

@@ -55,8 +55,8 @@ impl IndicatorConfig for PriceChannelStrategy {
 
 		let cfg = self;
 		Ok(Self::Instance {
-			highest: Highest::new(cfg.period, candle.high())?,
-			lowest: Lowest::new(cfg.period, candle.low())?,
+			highest: Highest::new(cfg.period, &candle.high())?,
+			lowest: Lowest::new(cfg.period, &candle.low())?,
 			cfg,
 		})
 	}
@@ -115,8 +115,8 @@ impl IndicatorInstance for PriceChannelStrategyInstance {
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let (high, low) = (candle.high(), candle.low());
-		let highest = self.highest.next(high);
-		let lowest = self.lowest.next(low);
+		let highest = self.highest.next(&high);
+		let lowest = self.lowest.next(&low);
 
 		let middle = (highest + lowest) * 0.5;
 		let delta = highest - middle;
