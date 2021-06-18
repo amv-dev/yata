@@ -56,7 +56,7 @@ impl IndicatorConfig for EaseOfMovement {
 		Ok(Self::Instance {
 			m1: method(cfg.method, cfg.period1, 0.)?,
 			w: Window::new(cfg.period2, HLC::from(candle)),
-			cross: Cross::new((), (0.0, 0.0))?,
+			cross: Cross::new((), &(0.0, 0.0))?,
 
 			cfg,
 		})
@@ -131,7 +131,7 @@ impl IndicatorInstance for EaseOfMovementInstance {
 		let v = d * (candle.high() - candle.low()) / candle.volume();
 		debug_assert!(v.is_finite() && !v.is_nan());
 
-		let value = self.m1.next(v);
+		let value = self.m1.next(&v);
 
 		// let signal = if value > 0. {
 		// 	1
@@ -140,7 +140,7 @@ impl IndicatorInstance for EaseOfMovementInstance {
 		// } else {
 		// 	0
 		// };
-		let signal = self.cross.next((value, 0.0));
+		let signal = self.cross.next(&(value, 0.0));
 
 		IndicatorResult::new(&[value], &[signal])
 	}

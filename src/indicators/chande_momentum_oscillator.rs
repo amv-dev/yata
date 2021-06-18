@@ -52,7 +52,7 @@ impl IndicatorConfig for ChandeMomentumOscillator {
 		Ok(Self::Instance {
 			pos_sum: 0.,
 			neg_sum: 0.,
-			change: Change::new(1, candle.source(cfg.source))?,
+			change: Change::new(1, &candle.source(cfg.source))?,
 			window: Window::new(cfg.period, 0.),
 			cross_under: CrossUnder::default(),
 			cross_above: CrossAbove::default(),
@@ -132,7 +132,7 @@ impl IndicatorInstance for ChandeMomentumOscillatorInstance {
 	}
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let ch = self.change.next(candle.source(self.cfg.source));
+		let ch = self.change.next(&candle.source(self.cfg.source));
 
 		let left_value = self.window.push(ch);
 
@@ -147,8 +147,8 @@ impl IndicatorInstance for ChandeMomentumOscillatorInstance {
 		} else {
 			0.
 		};
-		let signal = self.cross_under.next((value, -self.cfg.zone))
-			- self.cross_above.next((value, self.cfg.zone));
+		let signal = self.cross_under.next(&(value, -self.cfg.zone))
+			- self.cross_above.next(&(value, self.cfg.zone));
 
 		IndicatorResult::new(&[value], &[signal])
 	}

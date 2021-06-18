@@ -68,36 +68,36 @@ impl TSI {
 		long_period: PeriodType,
 		value: ValueType,
 	) -> Result<Self, Error> {
-		Method::new((short_period, long_period), value)
+		Method::new((short_period, long_period), &value)
 	}
 }
 
-impl Method<'_> for TSI {
+impl Method for TSI {
 	type Params = (PeriodType, PeriodType);
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(params: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(params: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
 		let (short_period, long_period) = params;
 
 		let m = Self {
 			last_value: value,
-			ema11: EMA::new(long_period, 0.0)?,
-			ema12: EMA::new(short_period, 0.0)?,
-			ema21: EMA::new(long_period, 0.0)?,
-			ema22: EMA::new(short_period, 0.0)?,
+			ema11: EMA::new(long_period, &0.0)?,
+			ema12: EMA::new(short_period, &0.0)?,
+			ema21: EMA::new(long_period, &0.0)?,
+			ema22: EMA::new(short_period, &0.0)?,
 		};
 
 		Ok(m)
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, &value: &Self::Input) -> Self::Output {
 		let momentum = value - self.last_value;
 		self.last_value = value;
 
-		let numerator = self.ema12.next(self.ema11.next(momentum));
-		let denominator = self.ema22.next(self.ema21.next(momentum.abs()));
+		let numerator = self.ema12.next(&self.ema11.next(&momentum));
+		let denominator = self.ema22.next(&self.ema21.next(&momentum.abs()));
 
 		if denominator > 0.0 {
 			numerator / denominator

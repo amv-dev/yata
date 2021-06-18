@@ -70,12 +70,12 @@ impl IndicatorConfig for IchimokuCloud {
 
 		let cfg = self;
 		Ok(Self::Instance {
-			highest1: Highest::new(cfg.l1, candle.high())?,
-			highest2: Highest::new(cfg.l2, candle.high())?,
-			highest3: Highest::new(cfg.l3, candle.high())?,
-			lowest1: Lowest::new(cfg.l1, candle.low())?,
-			lowest2: Lowest::new(cfg.l2, candle.low())?,
-			lowest3: Lowest::new(cfg.l3, candle.low())?,
+			highest1: Highest::new(cfg.l1, &candle.high())?,
+			highest2: Highest::new(cfg.l2, &candle.high())?,
+			highest3: Highest::new(cfg.l3, &candle.high())?,
+			lowest1: Lowest::new(cfg.l1, &candle.low())?,
+			lowest2: Lowest::new(cfg.l2, &candle.low())?,
+			lowest3: Lowest::new(cfg.l3, &candle.low())?,
 			window1: Window::new(cfg.m, candle.hl2()),
 			window2: Window::new(cfg.m, candle.hl2()),
 			cross1: Cross::default(),
@@ -162,9 +162,9 @@ impl IndicatorInstance for IchimokuCloudInstance {
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let src = candle.source(self.cfg.source);
 		let (high, low) = (candle.high(), candle.low());
-		let (highest1, lowest1) = (self.highest1.next(high), self.lowest1.next(low));
-		let (highest2, lowest2) = (self.highest2.next(high), self.lowest2.next(low));
-		let (highest3, lowest3) = (self.highest3.next(high), self.lowest3.next(low));
+		let (highest1, lowest1) = (self.highest1.next(&high), self.lowest1.next(&low));
+		let (highest2, lowest2) = (self.highest2.next(&high), self.lowest2.next(&low));
+		let (highest3, lowest3) = (self.highest3.next(&high), self.lowest3.next(&low));
 
 		let tenkan_sen = (highest1 + lowest1) * 0.5;
 		let kijun_sen = (highest2 + lowest2) * 0.5;
@@ -172,8 +172,8 @@ impl IndicatorInstance for IchimokuCloudInstance {
 		let senkou_span_a = self.window1.push((tenkan_sen + kijun_sen) * 0.5);
 		let senkou_span_b = self.window2.push((highest3 + lowest3) * 0.5);
 
-		let s1_cross = self.cross1.next((tenkan_sen, kijun_sen));
-		let s2_cross = self.cross2.next((src, kijun_sen));
+		let s1_cross = self.cross1.next(&(tenkan_sen, kijun_sen));
+		let s2_cross = self.cross2.next(&(src, kijun_sen));
 
 		let green: bool = senkou_span_a > senkou_span_b;
 		let red: bool = senkou_span_a < senkou_span_b;

@@ -37,28 +37,28 @@ pub struct TR {
 	prev_close: ValueType,
 }
 
-impl<'a> TR {
+impl TR {
 	/// Creates new TR method instance
 	/// It's a simple shortcut for [`Method::new`](crate::core::Method::new) method.
 	#[allow(clippy::needless_pass_by_value)]
-	pub fn new(value: <Self as Method>::Input) -> Result<Self, Error> {
+	pub fn new(value: &<Self as Method>::Input) -> Result<Self, Error> {
 		Method::new((), value)
 	}
 }
 
-impl<'a> Method<'a> for TR {
+impl Method for TR {
 	type Params = ();
-	type Input = &'a dyn OHLCV;
+	type Input = dyn OHLCV;
 	type Output = ValueType;
 
-	fn new(_: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(_: Self::Params, value: &Self::Input) -> Result<Self, Error> {
 		Ok(Self {
 			prev_close: value.close(),
 		})
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, value: &Self::Input) -> Self::Output {
 		let result = value.tr_close(self.prev_close);
 		self.prev_close = value.close();
 
@@ -79,7 +79,7 @@ mod tests {
 			let mut method = TestingMethod::new(&input).unwrap();
 
 			let output = method.next(&input);
-			test_const(&mut method, &input, output);
+			test_const(&mut method, &input, &output);
 		}
 	}
 

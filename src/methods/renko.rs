@@ -305,12 +305,12 @@ impl ExactSizeIterator for RenkoOutput {
 
 impl std::iter::FusedIterator for RenkoOutput {}
 
-impl<'a> Method<'a> for Renko {
+impl Method for Renko {
 	type Params = (ValueType, Source);
-	type Input = &'a dyn OHLCV;
+	type Input = dyn OHLCV;
 	type Output = RenkoOutput;
 
-	fn new((brick_size, src): Self::Params, candle: Self::Input) -> Result<Self, Error> {
+	fn new((brick_size, src): Self::Params, candle: &Self::Input) -> Result<Self, Error> {
 		let value = candle.source(src);
 
 		if (ValueType::EPSILON..1.0).contains(&brick_size) {
@@ -334,7 +334,7 @@ impl<'a> Method<'a> for Renko {
 	#[allow(clippy::cast_sign_loss)]
 	#[allow(clippy::suboptimal_flops)]
 	#[allow(clippy::assign_op_pattern)]
-	fn next(&mut self, candle: Self::Input) -> Self::Output {
+	fn next(&mut self, candle: &Self::Input) -> Self::Output {
 		let value = candle.source(self.src);
 		self.volume += candle.volume();
 

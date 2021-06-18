@@ -166,7 +166,7 @@ pub struct AverageDirectionalIndexInstance {
 impl AverageDirectionalIndexInstance {
 	fn dir_mov(&mut self, candle: HLC) -> (ValueType, ValueType) {
 		let prev_candle = self.window.push(candle);
-		let true_range = self.tr_ma.next(candle.tr_close(self.prev_close));
+		let true_range = self.tr_ma.next(&candle.tr_close(self.prev_close));
 		self.prev_close = candle.close();
 
 		let (du, dd) = (
@@ -177,8 +177,8 @@ impl AverageDirectionalIndexInstance {
 		let plus_dm = du * (du > dd && du > 0.) as u8 as ValueType; // +DM
 		let minus_dm = dd * (dd > du && dd > 0.) as u8 as ValueType; // -DM
 
-		let plus_di_value = self.plus_di.next(plus_dm); // +DI
-		let minus_di_value = self.minus_di.next(minus_dm); // -DI
+		let plus_di_value = self.plus_di.next(&plus_dm); // +DI
+		let minus_di_value = self.minus_di.next(&minus_dm); // -DI
 
 		(plus_di_value / true_range, minus_di_value / true_range)
 	}
@@ -187,11 +187,11 @@ impl AverageDirectionalIndexInstance {
 		let s = plus + minus;
 
 		if s == 0. {
-			return self.ma2.next(0.);
+			return self.ma2.next(&0.);
 		}
 
 		let t = (plus - minus).abs() / s;
-		self.ma2.next(t)
+		self.ma2.next(&t)
 	}
 }
 

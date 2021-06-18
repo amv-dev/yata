@@ -59,24 +59,24 @@ pub struct Derivative {
 /// Just an alias for Derivative
 pub type Differential = Derivative;
 
-impl Method<'_> for Derivative {
+impl Method for Derivative {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: &Self::Input) -> Result<Self, Error> {
 		match length {
 			0 => Err(Error::WrongMethodParameters),
 			length => Ok(Self {
 				divider: (length as ValueType).recip(),
-				window: Window::new(length, value),
+				window: Window::new(length, *value),
 			}),
 		}
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
-		let prev_value = self.window.push(value);
+	fn next(&mut self, value: &Self::Input) -> Self::Output {
+		let prev_value = self.window.push(*value);
 		(value - prev_value) * self.divider
 	}
 }
@@ -93,9 +93,9 @@ mod tests {
 	fn test_derivative_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input).unwrap();
+			let mut method = TestingMethod::new(i, &input).unwrap();
 
-			test_const(&mut method, input, 0.0);
+			test_const(&mut method, &input, &0.0);
 		}
 	}
 
@@ -103,11 +103,11 @@ mod tests {
 	fn test_derivative1() {
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
 		let mut prev = None;
 
 		candles.take(100).map(|x| x.close).for_each(|x| {
-			assert_eq_float(x - prev.unwrap_or(x), ma.next(x));
+			assert_eq_float(x - prev.unwrap_or(x), ma.next(&x));
 			prev = Some(x);
 		});
 	}
@@ -119,13 +119,13 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
 
 			let mut value2 = src[0];
-			src.iter().enumerate().for_each(|(i, &x)| {
+			src.iter().enumerate().for_each(|(i, x)| {
 				let value = ma.next(x);
 
-				value2 = (x - src[i.saturating_sub(length as usize)]) / (length as ValueType);
+				value2 = (*x - src[i.saturating_sub(length as usize)]) / (length as ValueType);
 
 				assert_eq_float(value2, value);
 			});

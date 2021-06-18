@@ -113,7 +113,7 @@ impl IndicatorInstance for ExampleInstance {
 
 	/// Calculates next value by giving [`OHLCV`](crate::core::OHLCV)-object
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let new_signal = self.cross.next((candle.close(), self.cfg.price));
+		let new_signal = self.cross.next(&(candle.close(), self.cfg.price));
 
 		let signal = match new_signal {
 			Action::None => {

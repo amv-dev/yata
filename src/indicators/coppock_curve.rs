@@ -81,7 +81,7 @@ impl IndicatorConfig for CoppockCurve {
 		}
 
 		let cfg = self;
-		let src = candle.source(cfg.source);
+		let src = &candle.source(cfg.source);
 		Ok(Self::Instance {
 			roc1: RateOfChange::new(cfg.period2, src)?,
 			roc2: RateOfChange::new(cfg.period3, src)?,
@@ -196,15 +196,15 @@ impl IndicatorInstance for CoppockCurveInstance {
 	}
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let src = candle.source(self.cfg.source);
+		let src = &candle.source(self.cfg.source);
 		let roc1 = self.roc1.next(src);
 		let roc2 = self.roc2.next(src);
-		let value1 = self.ma1.next(roc1 + roc2);
-		let value2 = self.ma2.next(value1);
+		let value1 = self.ma1.next(&(roc1 + roc2));
+		let value2 = self.ma2.next(&value1);
 
-		let signal1 = self.cross_over1.next((value1, 0.));
-		let signal2 = self.pivot.next(value1);
-		let signal3 = self.cross_over2.next((value1, value2));
+		let signal1 = self.cross_over1.next(&(value1, 0.));
+		let signal2 = self.pivot.next(&value1);
+		let signal3 = self.cross_over2.next(&(value1, value2));
 
 		IndicatorResult::new(&[value1, value2], &[signal1, signal2, signal3])
 	}

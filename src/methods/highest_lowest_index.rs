@@ -62,12 +62,12 @@ pub struct HighestIndex {
 	window: Window<ValueType>,
 }
 
-impl Method<'_> for HighestIndex {
+impl Method for HighestIndex {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = PeriodType;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
 		if !value.is_finite() {
 			return Err(Error::InvalidCandles);
 		}
@@ -83,7 +83,7 @@ impl Method<'_> for HighestIndex {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, &value: &Self::Input) -> Self::Output {
 		assert!(
 			value.is_finite(),
 			"HighestIndex method cannot operate with NAN values"
@@ -175,12 +175,12 @@ pub struct LowestIndex {
 	window: Window<ValueType>,
 }
 
-impl Method<'_> for LowestIndex {
+impl Method for LowestIndex {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = PeriodType;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, &value: &Self::Input) -> Result<Self, Error> {
 		if !value.is_finite() {
 			return Err(Error::InvalidCandles);
 		}
@@ -196,7 +196,7 @@ impl Method<'_> for LowestIndex {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, &value: &Self::Input) -> Self::Output {
 		assert!(
 			value.is_finite(),
 			"LowestIndex method cannot operate with NAN values"
@@ -242,10 +242,10 @@ mod tests {
 	fn test_highest_index_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = HighestIndex::new(i, input).unwrap();
+			let mut method = HighestIndex::new(i, &input).unwrap();
 
-			let output = method.next(input);
-			test_const(&mut method, input, output);
+			let output = method.next(&input);
+			test_const(&mut method, &input, &output);
 		}
 	}
 
@@ -255,10 +255,10 @@ mod tests {
 
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq!(0, ma.next(x.close));
+			assert_eq!(0, ma.next(&x.close));
 		});
 	}
 
@@ -271,7 +271,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
 			let length = length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {
@@ -289,7 +289,7 @@ mod tests {
 
 				assert_eq!(
 					max_index,
-					ma.next(x) as usize,
+					ma.next(&x) as usize,
 					"{}, {:?}, {:?}",
 					length,
 					&src[i.saturating_sub(length)..=i],
@@ -303,10 +303,10 @@ mod tests {
 	fn test_lowest_index_const() {
 		for i in 1..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = LowestIndex::new(i, input).unwrap();
+			let mut method = LowestIndex::new(i, &input).unwrap();
 
-			let output = method.next(input);
-			test_const(&mut method, input, output);
+			let output = method.next(&input);
+			test_const(&mut method, &input, &output);
 		}
 	}
 
@@ -316,10 +316,10 @@ mod tests {
 
 		let mut candles = RandomCandles::default();
 
-		let mut ma = TestingMethod::new(1, candles.first().close).unwrap();
+		let mut ma = TestingMethod::new(1, &candles.first().close).unwrap();
 
 		candles.take(100).for_each(|x| {
-			assert_eq!(0, ma.next(x.close));
+			assert_eq!(0, ma.next(&x.close));
 		});
 	}
 
@@ -332,7 +332,7 @@ mod tests {
 		let src: Vec<ValueType> = candles.take(300).map(|x| x.close).collect();
 
 		(1..255).for_each(|length| {
-			let mut ma = TestingMethod::new(length, src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
 			let length = length as usize;
 
 			src.iter().enumerate().for_each(|(i, &x)| {
@@ -350,7 +350,7 @@ mod tests {
 
 				assert_eq!(
 					max_index,
-					ma.next(x) as usize,
+					ma.next(&x) as usize,
 					"{}, {:?}, {:?}",
 					length,
 					&src[i.saturating_sub(length)..=i],

@@ -117,8 +117,8 @@ impl IndicatorInstance for PivotReversalStrategyInstance {
 		let (high, low) = (candle.high(), candle.low());
 		let past_candle = self.window.push(HLC::from(candle));
 
-		let swh = self.ph.next(high);
-		let swl = self.pl.next(low);
+		let swh = self.ph.next(&high);
+		let swl = self.pl.next(&low);
 
 		let mut le = 0;
 		let mut se = 0;

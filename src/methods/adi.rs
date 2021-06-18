@@ -86,12 +86,12 @@ impl ADI {
 	}
 }
 
-impl<'a> Method<'a> for ADI {
+impl Method for ADI {
 	type Params = PeriodType;
-	type Input = &'a dyn OHLCV;
+	type Input = dyn OHLCV;
 	type Output = ValueType;
 
-	fn new(length: Self::Params, candle: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, candle: &Self::Input) -> Result<Self, Error> {
 		let mut cmf_sum = 0.0;
 		let window = if length > 0 {
 			let clvv = candle.clv() * candle.volume();
@@ -105,7 +105,7 @@ impl<'a> Method<'a> for ADI {
 	}
 
 	#[inline]
-	fn next(&mut self, candle: Self::Input) -> Self::Output {
+	fn next(&mut self, candle: &Self::Input) -> Self::Output {
 		let clvv = candle.clv() * candle.volume();
 		self.cmf_sum += clvv;
 
@@ -141,7 +141,7 @@ mod tests {
 			let mut adi = ADI::new(i, &candle).unwrap();
 			let output = adi.next(&candle);
 
-			test_const(&mut adi, &candle, output);
+			test_const(&mut adi, &candle, &output);
 		}
 	}
 
@@ -159,7 +159,7 @@ mod tests {
 		let mut adi = ADI::new(0, &candle).unwrap();
 		let output = adi.next(&candle);
 
-		test_const(&mut adi, &candle, output);
+		test_const(&mut adi, &candle, &output);
 	}
 
 	#[test]

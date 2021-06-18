@@ -1,8 +1,7 @@
 use super::{Error, Sequence};
-
 use std::fmt;
 
-type BoxedFnMethod<'a, M> = Box<dyn FnMut(<M as Method<'a>>::Input) -> <M as Method<'a>>::Output>;
+type BoxedFnMethod<'a, M> = Box<dyn FnMut(&'a <M as Method>::Input) -> <M as Method>::Output>;
 
 /// Trait for creating methods for timeseries
 ///
@@ -62,21 +61,21 @@ type BoxedFnMethod<'a, M> = Box<dyn FnMut(<M as Method<'a>>::Input) -> <M as Met
 ///
 /// # Be advised
 /// There is no `reset` method on the trait. If you need reset a state of the `Method` instance, you should just create a new one.
-pub trait Method<'a>: fmt::Debug {
+pub trait Method: fmt::Debug {
 	/// Method parameters
 	type Params;
 	/// Input value type
-	type Input;
+	type Input: ?Sized;
 	/// Output value type
 	type Output;
 
 	/// Static method for creating an instance of the method with given `parameters` and initial `value` (simply first input value)
-	fn new(parameters: Self::Params, initial_value: Self::Input) -> Result<Self, Error>
+	fn new(parameters: Self::Params, initial_value: &Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized;
 
 	/// Generates next output value based on the given input `value`
-	fn next(&mut self, value: Self::Input) -> Self::Output;
+	fn next(&mut self, value: &Self::Input) -> Self::Output;
 
 	/// Returns a name of the method
 	fn name(&self) -> &str {
@@ -119,20 +118,20 @@ pub trait Method<'a>: fmt::Debug {
 	/// assert_eq!(result.len(), s.len());
 	/// ```
 	#[inline]
-	fn over<S>(&'a mut self, inputs: S) -> Vec<Self::Output>
+	fn over<S>(&mut self, inputs: S) -> Vec<Self::Output>
 	where
 		S: Sequence<Self::Input>,
+		Self::Input: Sized,
 		Self: Sized,
 	{
 		inputs.call(self)
 	}
 
 	/// Applies method to the sequence in-place.
-	fn apply<'b: 'a, T, S>(&'a mut self, sequence: &'b mut S)
+	fn apply<T, S>(&mut self, sequence: &mut S)
 	where
 		S: Sequence<T> + AsMut<[T]>,
-		Self: Method<'a, Input = T, Output = T> + Sized,
-		T: Clone,
+		Self: Method<Input = T, Output = T> + Sized,
 	{
 		sequence.apply(self);
 	}
@@ -145,12 +144,12 @@ pub trait Method<'a>: fmt::Debug {
 	fn new_over<S>(parameters: Self::Params, inputs: S) -> Result<Vec<Self::Output>, Error>
 	where
 		S: Sequence<Self::Input>,
-		Self::Input: Clone,
+		Self::Input: Sized,
 		Self: Sized,
 	{
 		match inputs.get_initial_value() {
 			Some(v) => {
-				let method = Self::new(parameters, v.clone())?;
+				let method = Self::new(parameters, v)?;
 				Ok(inputs.call(method))
 			}
 			None => Ok(Vec::new()),
@@ -158,11 +157,10 @@ pub trait Method<'a>: fmt::Debug {
 	}
 
 	/// Creates new `Method` instance and applies it to the `sequence`.
-	fn new_apply<T, S>(parameters: Self::Params, sequence: &'a mut S) -> Result<(), Error>
+	fn new_apply<T, S>(parameters: Self::Params, sequence: &mut S) -> Result<(), Error>
 	where
-		T: Clone,
 		S: Sequence<T> + AsMut<[T]>,
-		Self: Method<'a, Input = T, Output = T> + Sized,
+		Self: Method<Input = T, Output = T> + Sized,
 	{
 		let initial_value = {
 			// Why do we need to get immutable reference to get initial value?
@@ -171,7 +169,7 @@ pub trait Method<'a>: fmt::Debug {
 			let seq = &*sequence;
 
 			match seq.get_initial_value() {
-				Some(v) => v.clone(),
+				Some(v) => v,
 				None => return Ok(()),
 			}
 		};
@@ -182,20 +180,20 @@ pub trait Method<'a>: fmt::Debug {
 	}
 
 	/// Creates a function from the `Method` instance
-	fn into_fn(mut self) -> BoxedFnMethod<'a, Self>
+	fn into_fn<'a>(mut self) -> BoxedFnMethod<'a, Self>
 	where
 		Self: Sized + 'static,
+		Self::Input: 'static,
 	{
 		let f = move |x| self.next(x);
-
 		Box::new(f)
 	}
 
 	/// Creates new function based on the method
 	fn new_fn(
 		params: Self::Params,
-		initial_value: Self::Input,
-	) -> Result<BoxedFnMethod<'a, Self>, Error>
+		initial_value: &Self::Input,
+	) -> Result<BoxedFnMethod<Self>, Error>
 	where
 		Self: Sized + 'static,
 	{
@@ -205,16 +203,16 @@ pub trait Method<'a>: fmt::Debug {
 	}
 }
 
-impl<'a, M: Method<'a>> Method<'a> for &'a mut M {
+impl<M: Method> Method for &mut M {
 	type Params = M::Params;
 	type Input = M::Input;
 	type Output = M::Output;
 
-	fn new(_parameters: Self::Params, _initial_value: Self::Input) -> Result<Self, Error> {
+	fn new(_parameters: Self::Params, _initial_value: &Self::Input) -> Result<Self, Error> {
 		unimplemented!();
 	}
 
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, value: &Self::Input) -> Self::Output {
 		(**self).next(value)
 	}
 }

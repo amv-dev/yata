@@ -58,12 +58,12 @@ pub struct HMA {
 	wma3: WMA,
 }
 
-impl Method<'_> for HMA {
+impl Method for HMA {
 	type Params = PeriodType;
 	type Input = ValueType;
 	type Output = Self::Input;
 
-	fn new(length: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(length: Self::Params, value: &Self::Input) -> Result<Self, Error> {
 		#[allow(clippy::cast_possible_truncation)]
 		#[allow(clippy::cast_sign_loss)]
 		match length {
@@ -77,11 +77,11 @@ impl Method<'_> for HMA {
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, value: &Self::Input) -> Self::Output {
 		let w1 = self.wma1.next(value);
 		let w2 = self.wma2.next(value);
 
-		self.wma3.next(w1.mul_add(2., -w2))
+		self.wma3.next(&w1.mul_add(2., -w2))
 	}
 }
 
@@ -97,10 +97,10 @@ mod tests {
 	fn test_hma_const() {
 		for i in 2..255 {
 			let input = (i as ValueType + 56.0) / 16.3251;
-			let mut method = TestingMethod::new(i, input).unwrap();
+			let mut method = TestingMethod::new(i, &input).unwrap();
 
-			let output = method.next(input);
-			test_const_float(&mut method, input, output);
+			let output = method.next(&input);
+			test_const_float(&mut method, &input, output);
 		}
 	}
 
@@ -113,15 +113,15 @@ mod tests {
 		#[allow(clippy::cast_possible_truncation)]
 		#[allow(clippy::cast_sign_loss)]
 		(2..255).for_each(|length| {
-			let mut wma1 = WMA::new(length, src[0]).unwrap();
-			let mut wma2 = WMA::new(length / 2, src[0]).unwrap();
-			let mut wma3 = WMA::new((length as ValueType).sqrt() as PeriodType, src[0]).unwrap();
+			let mut wma1 = WMA::new(length, &src[0]).unwrap();
+			let mut wma2 = WMA::new(length / 2, &src[0]).unwrap();
+			let mut wma3 = WMA::new((length as ValueType).sqrt() as PeriodType, &src[0]).unwrap();
 
-			let mut ma = TestingMethod::new(length, src[0]).unwrap();
+			let mut ma = TestingMethod::new(length, &src[0]).unwrap();
 
-			for &x in &src {
+			for x in &src {
 				let value1 = ma.next(x);
-				let value2 = wma3.next(2. * wma2.next(x) - wma1.next(x));
+				let value2 = wma3.next(&(2. * wma2.next(x) - wma1.next(x)));
 				assert_eq_float(value2, value1);
 			}
 		});

@@ -101,7 +101,7 @@ impl IndicatorInstance for ChaikinMoneyFlowInstance {
 		let adi = self.adi.next(candle);
 		self.vol_sum += candle.volume() - self.window.push(candle.volume());
 		let value = adi / self.vol_sum;
-		let signal = self.cross_over.next((value, 0.));
+		let signal = self.cross_over.next(&(value, 0.));
 
 		IndicatorResult::new(&[value], &[signal])
 	}

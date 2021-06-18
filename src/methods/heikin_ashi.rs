@@ -10,19 +10,19 @@ pub struct HeikinAshi {
 	prev: Candle,
 }
 
-impl<'a> Method<'a> for HeikinAshi {
+impl Method for HeikinAshi {
 	type Params = ();
-	type Input = &'a dyn OHLCV;
+	type Input = dyn OHLCV;
 	type Output = Candle;
 
-	fn new(_: Self::Params, value: Self::Input) -> Result<Self, Error> {
+	fn new(_: Self::Params, value: &Self::Input) -> Result<Self, Error> {
 		Ok(Self {
 			prev: Candle::from(value),
 		})
 	}
 
 	#[inline]
-	fn next(&mut self, value: Self::Input) -> Self::Output {
+	fn next(&mut self, value: &Self::Input) -> Self::Output {
 		let open = (self.prev.open() + self.prev.close()) * 0.5;
 		let close = value.ohlc4();
 
