@@ -1,4 +1,4 @@
-use crate::core::Method;
+use crate::core::{Method, MovingAverage};
 use crate::core::{Error, PeriodType, ValueType};
 use crate::methods::EMA;
 
@@ -68,6 +68,8 @@ impl Method for WSMA {
 		self.0.next(value)
 	}
 }
+
+impl MovingAverage for WSMA {}
 
 #[cfg(test)]
 mod tests {

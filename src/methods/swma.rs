@@ -1,4 +1,4 @@
-use crate::core::{Error, Method, PeriodType, ValueType, Window};
+use crate::core::{Error, Method, MovingAverage, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -105,6 +105,8 @@ impl Method for SWMA {
 		self.numerator * self.invert_sum
 	}
 }
+
+impl MovingAverage for SWMA {}
 
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]

@@ -3,9 +3,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Candle, Error, Method, PeriodType, Source, OHLCV};
+use crate::core::{Candle, DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::Cross;
 
 /// Moving average convergence/divergence (MACD)
@@ -36,7 +36,11 @@ use crate::methods::Cross;
 ///
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct MACD {
+pub struct MACD<M: MovingAverageConstructor = MA> {
+	pub ma1: M,
+	pub ma2: M,
+	pub signal: M,
+	/*
 	/// Fast MA period. Default is `12`.
 	///
 	/// Range in \[`2`; `period2`\)
@@ -60,13 +64,13 @@ pub struct MACD {
 
 	/// Signal line MA type. Default is [`EMA`](crate::methods::EMA).
 	pub method3: RegularMethods,
-
+	*/
 	/// Source value type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
-impl IndicatorConfig for MACD {
-	type Instance = MACDInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for MACD<M> {
+	type Instance = MACDInstance<M>;
 
 	const NAME: &'static str = "MACD";
 
@@ -75,9 +79,9 @@ impl IndicatorConfig for MACD {
 			let cfg = self;
 			let src = candle.source(cfg.source);
 			Ok(Self::Instance {
-				ma1: method(cfg.method1, cfg.period1, src)?,
-				ma2: method(cfg.method2, cfg.period2, src)?,
-				ma3: method(cfg.method3, cfg.period3, src)?,
+				ma1: cfg.ma1.init(src)?, // method(cfg.method1, cfg.period1, src)?,
+				ma2: cfg.ma2.init(src)?, // method(cfg.method2, cfg.period2, src)?,
+				ma3: cfg.signal.init(src)?, // method(cfg.method3, cfg.period3, src)?,
 				cross1: Cross::default(),
 				cross2: Cross::default(),
 				cfg,
@@ -88,34 +92,22 @@ impl IndicatorConfig for MACD {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 < self.period2 && self.period1 > 1 && self.period3 > 1
+		self.ma1.ma_period() < self.ma2.ma_period() && self.ma1.ma_period() > 1 && self.signal.ma_period() > 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
-			"period1" => match value.parse() {
+			"ma1" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period1 = value,
+				Ok(value) => self.ma1 = value,
 			},
-			"period2" => match value.parse() {
+			"ma2" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period2 = value,
+				Ok(value) => self.ma2 = value,
 			},
-			"period3" => match value.parse() {
+			"signal" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period3 = value,
-			},
-			"method1" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method1 = value,
-			},
-			"method2" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method2 = value,
-			},
-			"method3" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method3 = value,
+				Ok(value) => self.signal = value,
 			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -137,33 +129,36 @@ impl IndicatorConfig for MACD {
 impl Default for MACD {
 	fn default() -> Self {
 		Self {
-			period1: 12,
-			period2: 26,
-			period3: 9,
-			method1: RegularMethods::EMA,
-			method2: RegularMethods::EMA,
-			method3: RegularMethods::EMA,
+			ma1: MA::EMA(12),
+			ma2: MA::EMA(26),
+			signal: MA::EMA(9),
+			// period1: 12,
+			// period2: 26,
+			// period3: 9,
+			// method1: RegularMethods::EMA,
+			// method2: RegularMethods::EMA,
+			// method3: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct MACDInstance {
-	cfg: MACD,
+pub struct MACDInstance<M: MovingAverageConstructor> {
+	cfg: MACD<M>,
 
-	ma1: RegularMethod,
-	ma2: RegularMethod,
-	ma3: RegularMethod,
+	ma1: DynMovingAverage,
+	ma2: DynMovingAverage,
+	ma3: DynMovingAverage,
 	cross1: Cross,
 	cross2: Cross,
 }
 
 /// Just an alias for MACD
-pub type MovingAverageConvergenceDivergence = MACD;
+pub type MovingAverageConvergenceDivergence<M = MA> = MACD<M>;
 
-impl IndicatorInstance for MACDInstance {
-	type Config = MACD;
+impl<M: MovingAverageConstructor> IndicatorInstance for MACDInstance<M> {
+	type Config = MACD<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

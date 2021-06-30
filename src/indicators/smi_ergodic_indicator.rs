@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::{Cross, TSI};
 
 /// SMI Ergodic Indicator
@@ -36,7 +36,7 @@ use crate::methods::{Cross, TSI};
 /// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct SMIErgodicIndicator {
+pub struct SMIErgodicIndicator<M: MovingAverageConstructor = MA> {
 	/// Long TSI period. Default is `20`.
 	///
 	/// Range in \[`period2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
@@ -46,7 +46,7 @@ pub struct SMIErgodicIndicator {
 	///
 	/// Range in \(`2`, `period1`\].
 	pub period2: PeriodType,
-
+	/*
 	/// Signal line MA period. Default is `5`.
 	///
 	/// Range in \[`2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
@@ -54,7 +54,8 @@ pub struct SMIErgodicIndicator {
 
 	/// Signal line MA method. Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
-
+	*/
+	pub signal: M,
 	/// Signal zone size. Default is `0.2`.
 	///
 	/// Range in \[`0.0`; `1.0`]
@@ -64,8 +65,8 @@ pub struct SMIErgodicIndicator {
 	pub source: Source,
 }
 
-impl IndicatorConfig for SMIErgodicIndicator {
-	type Instance = SMIErgodicIndicatorInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for SMIErgodicIndicator<M> {
+	type Instance = SMIErgodicIndicatorInstance<M>;
 
 	const NAME: &'static str = "SMIErgodicIndicator";
 
@@ -79,7 +80,7 @@ impl IndicatorConfig for SMIErgodicIndicator {
 
 		Ok(Self::Instance {
 			tsi: TSI::new(cfg.period2, cfg.period1, src)?,
-			ma: method(cfg.method, cfg.period3, 0.)?,
+			ma: cfg.signal.init(0.)?, // method(cfg.method, cfg.period3, 0.)?,
 			cross: Cross::default(),
 			cfg,
 		})
@@ -89,8 +90,8 @@ impl IndicatorConfig for SMIErgodicIndicator {
 		self.period2 > 1
 			&& self.period2 <= self.period1
 			&& self.period1 < PeriodType::MAX
-			&& self.period3 > 1
-			&& self.period3 < PeriodType::MAX
+			&& self.signal.ma_period() > 1
+			&& self.signal.ma_period() < PeriodType::MAX
 			&& self.zone >= 0.
 			&& self.zone <= 1.
 	}
@@ -105,13 +106,9 @@ impl IndicatorConfig for SMIErgodicIndicator {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period2 = value,
 			},
-			"period3" => match value.parse() {
+			"signal" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period3 = value,
-			},
-			"method" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method = value,
+				Ok(value) => self.signal = value,
 			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -136,8 +133,9 @@ impl Default for SMIErgodicIndicator {
 		Self {
 			period1: 20,
 			period2: 5,
-			period3: 5,
-			method: RegularMethods::EMA,
+			signal: MA::EMA(5),
+			// period3: 5,
+			// method: RegularMethods::EMA,
 			zone: 0.2,
 			source: Source::Close,
 		}
@@ -145,16 +143,16 @@ impl Default for SMIErgodicIndicator {
 }
 
 #[derive(Debug)]
-pub struct SMIErgodicIndicatorInstance {
-	cfg: SMIErgodicIndicator,
+pub struct SMIErgodicIndicatorInstance<M: MovingAverageConstructor = MA> {
+	cfg: SMIErgodicIndicator<M>,
 
 	tsi: TSI,
-	ma: RegularMethod,
+	ma: DynMovingAverage,
 	cross: Cross,
 }
 
-impl IndicatorInstance for SMIErgodicIndicatorInstance {
-	type Config = SMIErgodicIndicator;
+impl<M: MovingAverageConstructor> IndicatorInstance for SMIErgodicIndicatorInstance<M> {
+	type Config = SMIErgodicIndicator<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

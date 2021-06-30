@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, OHLCV};
+use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::{Cross, ReversalSignal};
 
 /// Awesome Oscillator
@@ -26,7 +26,10 @@ use crate::methods::{Cross, ReversalSignal};
 /// * Gives signal when `values` crosses zero line
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct AwesomeOscillator {
+pub struct AwesomeOscillator<M: MovingAverageConstructor = MA> {
+	pub ma1: M,
+	pub ma2: M,
+	/*
 	/// Default is `34`.
 	///
 	/// Range in \(`period2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
@@ -37,6 +40,7 @@ pub struct AwesomeOscillator {
 	pub period2: PeriodType,
 	/// Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
+	*/
 	/// Default is [`HL2`](crate::core::Source::HL2).
 	pub source: Source,
 	/// Default is `1`.
@@ -53,8 +57,8 @@ pub struct AwesomeOscillator {
 	pub conseq_peaks: u8,
 }
 
-impl IndicatorConfig for AwesomeOscillator {
-	type Instance = AwesomeOscillatorInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for AwesomeOscillator<M> {
+	type Instance = AwesomeOscillatorInstance<M>;
 
 	const NAME: &'static str = "AwesomeOscillator";
 
@@ -67,8 +71,8 @@ impl IndicatorConfig for AwesomeOscillator {
 		let src = candle.source(cfg.source);
 
 		Ok(Self::Instance {
-			ma1: method(cfg.method, cfg.period1, src)?,
-			ma2: method(cfg.method, cfg.period2, src)?,
+			ma1: cfg.ma1.init(src)?,
+			ma2: cfg.ma2.init(src)?,
 			cross_over: Cross::default(),
 			reverse: Method::new((cfg.left, cfg.right), &0.0)?,
 			low_peaks: 0,
@@ -78,10 +82,11 @@ impl IndicatorConfig for AwesomeOscillator {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 > 2
-			&& self.period1 < PeriodType::MAX
-			&& self.period1 > self.period2
-			&& self.period2 > 1
+		self.ma1.ma_period() > 2
+			&& self.ma1.is_similar_to(&self.ma2)
+			&& self.ma1.ma_period() < PeriodType::MAX
+			&& self.ma1.ma_period() > self.ma2.ma_period()
+			&& self.ma2.ma_period() > 1
 			&& self.left > 0
 			&& self.right > 0
 			&& self.conseq_peaks > 0
@@ -90,17 +95,13 @@ impl IndicatorConfig for AwesomeOscillator {
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
-			"period1" => match value.parse() {
+			"ma1" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period1 = value,
+				Ok(value) => self.ma1 = value,
 			},
-			"period2" => match value.parse() {
+			"ma2" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period2 = value,
-			},
-			"method" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method = value,
+				Ok(value) => self.ma2 = value,
 			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -128,12 +129,11 @@ impl IndicatorConfig for AwesomeOscillator {
 	}
 }
 
-impl Default for AwesomeOscillator {
+impl Default for AwesomeOscillator<MA> {
 	fn default() -> Self {
 		Self {
-			period1: 34,
-			period2: 5,
-			method: RegularMethods::SMA,
+			ma1: MA::SMA(34),
+			ma2: MA::SMA(5),
 			source: Source::HL2,
 			left: 1,
 			right: 1,
@@ -143,19 +143,19 @@ impl Default for AwesomeOscillator {
 }
 
 #[derive(Debug)]
-pub struct AwesomeOscillatorInstance {
-	cfg: AwesomeOscillator,
+pub struct AwesomeOscillatorInstance<M: MovingAverageConstructor = MA> {
+	cfg: AwesomeOscillator<M>,
 
-	ma1: RegularMethod,
-	ma2: RegularMethod,
+	ma1: DynMovingAverage,
+	ma2: DynMovingAverage,
 	cross_over: Cross,
 	reverse: ReversalSignal,
 	low_peaks: u8,
 	high_peaks: u8,
 }
 
-impl IndicatorInstance for AwesomeOscillatorInstance {
-	type Config = AwesomeOscillator;
+impl<M: MovingAverageConstructor> IndicatorInstance for AwesomeOscillatorInstance<M> {
+	type Config = AwesomeOscillator<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

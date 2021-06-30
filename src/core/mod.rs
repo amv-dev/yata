@@ -10,6 +10,7 @@ mod method;
 mod ohlcv;
 mod sequence;
 mod window;
+mod moving_average;
 
 pub use action::Action;
 pub use candles::*;
@@ -19,6 +20,7 @@ pub use method::Method;
 pub use ohlcv::OHLCV;
 pub use sequence::*;
 pub use window::Window;
+pub use moving_average::*;
 
 /// Main value type for calculations
 ///

@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::{Cross, Highest, Lowest};
 
 // FT = 1/2 * ln((1+x)/(1-x)) = arctanh(x)
@@ -33,27 +33,33 @@ use crate::methods::{Cross, Highest, Lowest};
 /// * Signal 2 appears when `main value` crosses `signal line` and after signal 1 appears
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct FisherTransform {
+pub struct FisherTransform<M: MovingAverageConstructor = MA> {
 	/// Main period for max/min values calculation. Default is `9`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
+	/*
 	/// Signal value MA period. Default is `2`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period2: PeriodType,
+	*/
 	/// Zone size for signals. Default is `1.5`.
 	///
 	/// Range in \(`0.0`; `+inf`\)
 	pub zone: ValueType,
+
+	pub signal: M,
+	/*
 	/// Signal value MA type. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
+	*/
 	/// Source type of values. Default is [`TP`](crate::core::Source::TP)
 	pub source: Source,
 }
 
-impl IndicatorConfig for FisherTransform {
-	type Instance = FisherTransformInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for FisherTransform<M> {
+	type Instance = FisherTransformInstance<M>;
 
 	const NAME: &'static str = "FisherTransform";
 
@@ -66,7 +72,7 @@ impl IndicatorConfig for FisherTransform {
 		let src = &candle.source(cfg.source);
 
 		Ok(Self::Instance {
-			ma1: method(cfg.method, cfg.period2, 0.)?,
+			ma1: cfg.signal.init(0.)?, // method(cfg.method, cfg.period2, 0.)?,
 			highest: Highest::new(cfg.period1, src)?,
 			lowest: Lowest::new(cfg.period1, src)?,
 			cross: Cross::default(),
@@ -78,7 +84,7 @@ impl IndicatorConfig for FisherTransform {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 > 1 && self.period2 > 1 && self.zone > 0.
+		self.period1 > 1 && self.signal.ma_period() > 1 && self.zone > 0.
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -87,17 +93,13 @@ impl IndicatorConfig for FisherTransform {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period1 = value,
 			},
-			"period2" => match value.parse() {
+			"signal" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period2 = value,
+				Ok(value) => self.signal = value,
 			},
 			"zone" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.zone = value,
-			},
-			"method" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method = value,
 			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -117,23 +119,24 @@ impl IndicatorConfig for FisherTransform {
 	}
 }
 
-impl Default for FisherTransform {
+impl Default for FisherTransform<MA> {
 	fn default() -> Self {
 		Self {
 			period1: 9,
-			period2: 2,
+			signal: MA::SMA(2),
+			// period2: 2,
 			zone: 1.5,
-			method: RegularMethods::SMA,
+			// method: RegularMethods::SMA,
 			source: Source::TP,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct FisherTransformInstance {
-	cfg: FisherTransform,
+pub struct FisherTransformInstance<M: MovingAverageConstructor = MA> {
+	cfg: FisherTransform<M>,
 
-	ma1: RegularMethod,
+	ma1: DynMovingAverage,
 	highest: Highest,
 	lowest: Lowest,
 	cross: Cross,
@@ -149,8 +152,8 @@ fn bound_value(value: ValueType) -> ValueType {
 	value.min(BOUND).max(-BOUND)
 }
 
-impl IndicatorInstance for FisherTransformInstance {
-	type Config = FisherTransform;
+impl<M: MovingAverageConstructor> IndicatorInstance for FisherTransformInstance<M> {
+	type Config = FisherTransform<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

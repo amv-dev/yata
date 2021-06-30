@@ -1,4 +1,4 @@
-use crate::core::Method;
+use crate::core::{Method, MovingAverage};
 use crate::core::{Error, PeriodType, ValueType};
 use crate::methods::SMA;
 
@@ -68,6 +68,8 @@ impl Method for TRIMA {
 		self.sma2.next(&self.sma1.next(value))
 	}
 }
+
+impl MovingAverage for TRIMA {}
 
 #[cfg(test)]
 mod tests {

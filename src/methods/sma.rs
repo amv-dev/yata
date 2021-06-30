@@ -1,4 +1,4 @@
-use crate::core::Method;
+use crate::core::{Method, MovingAverage};
 use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
@@ -98,6 +98,8 @@ impl Method for SMA {
 		self.value
 	}
 }
+
+impl MovingAverage for SMA {}
 
 #[cfg(test)]
 mod tests {

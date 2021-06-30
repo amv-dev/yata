@@ -1,4 +1,4 @@
-use crate::core::Method;
+use crate::core::{Method, MovingAverage};
 use crate::core::{Error, PeriodType, ValueType};
 
 #[cfg(feature = "serde")]
@@ -75,6 +75,8 @@ impl Method for EMA {
 	}
 }
 
+impl MovingAverage for EMA {}
+
 /// Simple shortcut for [EMA] over [EMA]
 ///
 /// # See also
@@ -108,6 +110,8 @@ impl Method for DMA {
 	}
 }
 
+impl MovingAverage for DMA {}
+
 /// Simple shortcut for [EMA] over [EMA] over [EMA] (or [EMA] over [DMA], or [DMA] over [EMA])
 ///
 /// # See also
@@ -140,6 +144,8 @@ impl Method for TMA {
 		self.tma.next(&self.dma.next(value))
 	}
 }
+
+impl MovingAverage for TMA {}
 
 /// [Double Exponential Moving Average](https://en.wikipedia.org/wiki/Double_exponential_moving_average) of specified `length` for timeseries of type [`ValueType`]
 ///
@@ -214,6 +220,8 @@ impl Method for DEMA {
 		e_ma.mul_add(2., -d_ma)
 	}
 }
+
+impl MovingAverage for DEMA {}
 
 /// [Triple Exponential Moving Average](https://en.wikipedia.org/wiki/Triple_exponential_moving_average) of specified `length` for timeseries of type [`ValueType`]
 ///
@@ -291,6 +299,8 @@ impl Method for TEMA {
 		(e_ma - d_ma).mul_add(3., t_ma)
 	}
 }
+
+impl MovingAverage for TEMA {}
 
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]

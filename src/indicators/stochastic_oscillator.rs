@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
+use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::{Cross, CrossAbove, CrossUnder, Highest, Lowest};
 
 /// Stochastic Oscillator
@@ -43,12 +43,14 @@ use crate::methods::{Cross, CrossAbove, CrossUnder, Highest, Lowest};
 /// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct StochasticOscillator {
+pub struct StochasticOscillator<M: MovingAverageConstructor = MA> {
 	/// Period for searching highest high and lowest low. Default is `14`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
-
+	pub ma: M,
+	pub signal: M,
+	/*
 	/// Period for smoothing `main` value. Default is `14`.
 	///
 	/// Usually it is equal to `period`.
@@ -58,7 +60,7 @@ pub struct StochasticOscillator {
 
 	/// MA method for smoothing `main` value. Default is [`SMA`](crate::methods::SMA).
 	pub method_k: RegularMethods,
-
+	
 	/// Period for smoothing `signal line` value. Default is `3`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
@@ -66,15 +68,15 @@ pub struct StochasticOscillator {
 
 	/// MA method for smoothing `signal line` value. Default is [`SMA`](crate::methods::SMA).
 	pub method_d: RegularMethods,
-
+	*/
 	/// Zone size for #1 and #2 signals.
 	///
 	/// Range in \[`0.0`; `0.5`\].
 	pub zone: ValueType,
 }
 
-impl IndicatorConfig for StochasticOscillator {
-	type Instance = StochasticOscillatorInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for StochasticOscillator<M> {
+	type Instance = StochasticOscillatorInstance<M>;
 
 	const NAME: &'static str = "StochasticOscillator";
 
@@ -96,8 +98,8 @@ impl IndicatorConfig for StochasticOscillator {
 			upper_zone: 1. - cfg.zone,
 			highest: Highest::new(cfg.period, &candle.high())?,
 			lowest: Lowest::new(cfg.period, &candle.low())?,
-			ma1: method(cfg.method_k, cfg.smooth_k, k_rows)?,
-			ma2: method(cfg.method_d, cfg.smooth_d, k_rows)?,
+			ma1: cfg.ma.init(k_rows)?, //method(cfg.method_k, cfg.smooth_k, k_rows)?,
+			ma2: cfg.signal.init(k_rows)?, //method(cfg.method_d, cfg.smooth_d, k_rows)?,
 			cross_over: Cross::default(),
 			cross_above1: CrossAbove::default(),
 			cross_under1: CrossUnder::default(),
@@ -117,25 +119,17 @@ impl IndicatorConfig for StochasticOscillator {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period = value,
 			},
-			"smooth_k" => match value.parse() {
+			"ma" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.smooth_k = value,
+				Ok(value) => self.ma = value,
 			},
-			"smooth_d" => match value.parse() {
+			"signal" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.smooth_d = value,
+				Ok(value) => self.signal = value,
 			},
 			"zone" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.zone = value,
-			},
-			"method_k" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method_k = value,
-			},
-			"method_d" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method_d = value,
 			},
 			_ => {
 				return Err(Error::ParameterParse(name.to_string(), value));
@@ -154,24 +148,26 @@ impl Default for StochasticOscillator {
 	fn default() -> Self {
 		Self {
 			period: 14,
-			smooth_k: 14,
-			smooth_d: 3,
-			method_k: RegularMethods::SMA,
-			method_d: RegularMethods::SMA,
+			ma: MA::SMA(14),
+			signal: MA::SMA(3),
+			// smooth_k: 14,
+			// smooth_d: 3,
+			// method_k: RegularMethods::SMA,
+			// method_d: RegularMethods::SMA,
 			zone: 0.2,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct StochasticOscillatorInstance {
-	cfg: StochasticOscillator,
+pub struct StochasticOscillatorInstance<M: MovingAverageConstructor = MA> {
+	cfg: StochasticOscillator<M>,
 
 	upper_zone: ValueType,
 	highest: Highest,
 	lowest: Lowest,
-	ma1: RegularMethod,
-	ma2: RegularMethod,
+	ma1: DynMovingAverage,
+	ma2: DynMovingAverage,
 	cross_over: Cross,
 	cross_above1: CrossAbove,
 	cross_under1: CrossUnder,
@@ -179,8 +175,8 @@ pub struct StochasticOscillatorInstance {
 	cross_under2: CrossUnder,
 }
 
-impl IndicatorInstance for StochasticOscillatorInstance {
-	type Config = StochasticOscillator;
+impl<M: MovingAverageConstructor> IndicatorInstance for StochasticOscillatorInstance<M> {
+	type Config = StochasticOscillator<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

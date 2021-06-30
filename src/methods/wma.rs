@@ -1,4 +1,4 @@
-use crate::core::Method;
+use crate::core::{Method, MovingAverage};
 use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
@@ -89,6 +89,8 @@ impl Method for WMA {
 		self.numerator * self.invert_sum
 	}
 }
+
+impl MovingAverage for WMA {}
 
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]

@@ -1,5 +1,5 @@
 use super::WMA;
-use crate::core::{Error, Method, PeriodType, ValueType};
+use crate::core::{Error, Method, MovingAverage, PeriodType, ValueType};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -84,6 +84,8 @@ impl Method for HMA {
 		self.wma3.next(&w1.mul_add(2., -w2))
 	}
 }
+
+impl MovingAverage for HMA {}
 
 #[cfg(test)]
 mod tests {

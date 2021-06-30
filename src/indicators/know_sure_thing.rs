@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
+use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::{Cross, RateOfChange};
 
 /// Know Sure Thing
@@ -29,7 +29,7 @@ use crate::methods::{Cross, RateOfChange};
 /// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct KnowSureThing {
+pub struct KnowSureThing<M: MovingAverageConstructor = MA> {
 	/// ROC1 period. Default is `10`.
 	pub period1: PeriodType,
 
@@ -41,7 +41,7 @@ pub struct KnowSureThing {
 
 	/// ROC4 period. Default is `30`.
 	pub period4: PeriodType,
-
+	/*
 	/// ROC1 moving average period. Default is `10`.
 	pub sma1: PeriodType,
 
@@ -53,19 +53,27 @@ pub struct KnowSureThing {
 
 	/// ROC4 moving average period. Default is `15`.
 	pub sma4: PeriodType,
-
+	
 	/// ROCs lines moving average type. Defual is [`SMA`](crate::methods::SMA).
 	pub method1: RegularMethods,
+	*/
+	pub ma1: M,
+	pub ma2: M,
+	pub ma3: M,
+	pub ma4: M,
 
+	/*
 	/// Signal line moving average period. Default is `9`.
 	pub sma5: PeriodType,
 
 	/// Signal line moving average type. Defual is [`SMA`](crate::methods::SMA).
 	pub method2: RegularMethods,
+	*/
+	pub signal: M,
 }
 
-impl IndicatorConfig for KnowSureThing {
-	type Instance = KnowSureThingInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for KnowSureThing<M> {
+	type Instance = KnowSureThingInstance<M>;
 
 	const NAME: &'static str = "KnowSureThing";
 
@@ -82,18 +90,19 @@ impl IndicatorConfig for KnowSureThing {
 			roc2v: RateOfChange::new(cfg.period2, close)?,
 			roc3v: RateOfChange::new(cfg.period3, close)?,
 			roc4v: RateOfChange::new(cfg.period4, close)?,
-			ma1: method(cfg.method1, cfg.sma1, 0.)?,
-			ma2: method(cfg.method1, cfg.sma2, 0.)?,
-			ma3: method(cfg.method1, cfg.sma3, 0.)?,
-			ma4: method(cfg.method1, cfg.sma4, 0.)?,
-			ma5: method(cfg.method2, cfg.sma5, 0.)?,
+			ma1: cfg.ma1.init(0.)?, // method(cfg.method1, cfg.sma1, 0.)?,
+			ma2: cfg.ma2.init(0.)?, // method(cfg.method1, cfg.sma2, 0.)?,
+			ma3: cfg.ma3.init(0.)?, // method(cfg.method1, cfg.sma3, 0.)?,
+			ma4: cfg.ma4.init(0.)?, // method(cfg.method1, cfg.sma4, 0.)?,
+			ma5: cfg.signal.init(0.)?, // method(cfg.method2, cfg.sma5, 0.)?,
 			cross: Cross::default(),
 			cfg,
 		})
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 < self.period2 && self.period2 < self.period3 && self.period3 < self.period4
+		self.ma1.is_similar_to(&self.ma2) && self.ma1.is_similar_to(&self.ma3) && self.ma1.is_similar_to(&self.ma4)
+		&& self.period1 < self.period2 && self.period2 < self.period3 && self.period3 < self.period4
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -114,33 +123,25 @@ impl IndicatorConfig for KnowSureThing {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period4 = value,
 			},
-			"sma1" => match value.parse() {
+			"ma1" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.sma1 = value,
+				Ok(value) => self.ma1 = value,
 			},
-			"sma2" => match value.parse() {
+			"ma2" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.sma2 = value,
+				Ok(value) => self.ma2 = value,
 			},
-			"sma3" => match value.parse() {
+			"ma3" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.sma3 = value,
+				Ok(value) => self.ma3 = value,
 			},
-			"sma4" => match value.parse() {
+			"ma4" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.sma4 = value,
+				Ok(value) => self.ma4 = value,
 			},
-			"sma5" => match value.parse() {
+			"signal" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.sma5 = value,
-			},
-			"method1" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method1 = value,
-			},
-			"method2" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method2 = value,
+				Ok(value) => self.signal = value,
 			},
 
 			_ => {
@@ -163,35 +164,40 @@ impl Default for KnowSureThing {
 			period2: 15,
 			period3: 20,
 			period4: 30,
-			sma1: 10,
-			sma2: 10,
-			sma3: 10,
-			sma4: 15,
-			sma5: 9,
-			method1: RegularMethods::SMA,
-			method2: RegularMethods::SMA,
+			ma1: MA::SMA(10),
+			ma2: MA::SMA(10),
+			ma3: MA::SMA(10),
+			ma4: MA::SMA(15),
+			signal: MA::SMA(9),
+			// sma1: 10,
+			// sma2: 10,
+			// sma3: 10,
+			// sma4: 15,
+			// sma5: 9,
+			// method1: RegularMethods::SMA,
+			// method2: RegularMethods::SMA,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct KnowSureThingInstance {
-	cfg: KnowSureThing,
+pub struct KnowSureThingInstance<M: MovingAverageConstructor = MA> {
+	cfg: KnowSureThing<M>,
 
 	roc1v: RateOfChange,
 	roc2v: RateOfChange,
 	roc3v: RateOfChange,
 	roc4v: RateOfChange,
-	ma1: RegularMethod,
-	ma2: RegularMethod,
-	ma3: RegularMethod,
-	ma4: RegularMethod,
-	ma5: RegularMethod,
+	ma1: DynMovingAverage,
+	ma2: DynMovingAverage,
+	ma3: DynMovingAverage,
+	ma4: DynMovingAverage,
+	ma5: DynMovingAverage,
 	cross: Cross,
 }
 
-impl IndicatorInstance for KnowSureThingInstance {
-	type Config = KnowSureThing;
+impl<M: MovingAverageConstructor> IndicatorInstance for KnowSureThingInstance<M> {
+	type Config = KnowSureThing<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

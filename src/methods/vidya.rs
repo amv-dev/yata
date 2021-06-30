@@ -1,4 +1,4 @@
-use crate::core::{Error, Method, PeriodType, ValueType, Window};
+use crate::core::{Error, Method, MovingAverage, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -108,6 +108,8 @@ impl Method for Vidya {
 		self.last_output
 	}
 }
+
+impl MovingAverage for Vidya {}
 
 #[cfg(test)]
 mod tests {

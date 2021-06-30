@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{Action, DynMovingAverage, Error, MovingAverageConstructor, OHLCV, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 
 /// Envelopes
 ///
@@ -30,25 +30,30 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 /// When `Source2` value crosses `lower bound` downwards, returns full buy signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Envelopes {
+pub struct Envelopes<M: MovingAverageConstructor = MA> {
+	pub ma: M,
+	/*
 	/// MA period length. Default is `20`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period: PeriodType,
+	*/
 	/// Bound relative size. Default is `0.1`.
 	///
 	/// Range in (`0.0`; `+inf`).
 	pub k: ValueType,
+	/*
 	/// MA method. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
+	*/
 	/// Source value type for bounds. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
 	/// Source2 value type for actual price. Default is [`Close`](crate::core::Source::Close).
 	pub source2: Source,
 }
 
-impl IndicatorConfig for Envelopes {
-	type Instance = EnvelopesInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for Envelopes<M> {
+	type Instance = EnvelopesInstance<M>;
 
 	const NAME: &'static str = "Envelopes";
 
@@ -61,7 +66,7 @@ impl IndicatorConfig for Envelopes {
 		let src = candle.source(cfg.source);
 
 		Ok(Self::Instance {
-			ma: method(cfg.method, cfg.period, src)?,
+			ma: cfg.ma.init(src)?, // method(cfg.method, cfg.period, src)?,
 			k_high: 1.0 + cfg.k,
 			k_low: 1.0 - cfg.k,
 			cfg,
@@ -69,22 +74,18 @@ impl IndicatorConfig for Envelopes {
 	}
 
 	fn validate(&self) -> bool {
-		self.k > 0.0 && self.period > 1
+		self.k > 0.0 && self.ma.ma_period() > 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
-			"period" => match value.parse() {
+			"ma" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period = value,
+				Ok(value) => self.ma = value,
 			},
 			"k" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.k = value,
-			},
-			"method" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method = value,
 			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -108,12 +109,13 @@ impl IndicatorConfig for Envelopes {
 	}
 }
 
-impl Default for Envelopes {
+impl Default for Envelopes<MA> {
 	fn default() -> Self {
 		Self {
-			period: 20,
+			ma: MA::SMA(20),
+			// period: 20,
 			k: 0.1,
-			method: RegularMethods::SMA,
+			// method: RegularMethods::SMA,
 			source: Source::Close,
 			source2: Source::Close,
 		}
@@ -121,16 +123,16 @@ impl Default for Envelopes {
 }
 
 #[derive(Debug)]
-pub struct EnvelopesInstance {
-	cfg: Envelopes,
+pub struct EnvelopesInstance<M: MovingAverageConstructor = MA> {
+	cfg: Envelopes<M>,
 
-	ma: RegularMethod,
+	ma: DynMovingAverage,
 	k_high: ValueType,
 	k_low: ValueType,
 }
 
-impl IndicatorInstance for EnvelopesInstance {
-	type Config = Envelopes;
+impl<M: MovingAverageConstructor> IndicatorInstance for EnvelopesInstance<M> {
+	type Config = Envelopes<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

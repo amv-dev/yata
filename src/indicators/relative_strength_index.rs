@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::Cross;
 use std::mem::replace;
 
@@ -34,12 +34,14 @@ use std::mem::replace;
 /// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct RelativeStrengthIndex {
+pub struct RelativeStrengthIndex<M: MovingAverageConstructor = MA> {
+	pub ma: M,
+	/*
 	/// Main period type. Default is `14`.
 	///
 	/// Range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
-
+	*/
 	/// Overbought/oversell relative zone. Default is `0.3`.
 	///
 	/// Range in \(`0.0`; `0.5`\]
@@ -47,13 +49,14 @@ pub struct RelativeStrengthIndex {
 
 	/// Source type of values. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
-
+	/*
 	/// Moving average method. Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
+	*/
 }
 
-impl IndicatorConfig for RelativeStrengthIndex {
-	type Instance = RelativeStrengthIndexInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for RelativeStrengthIndex<M> {
+	type Instance = RelativeStrengthIndexInstance<M>;
 
 	const NAME: &'static str = "RelativeStrengthIndex";
 
@@ -67,8 +70,8 @@ impl IndicatorConfig for RelativeStrengthIndex {
 
 		Ok(Self::Instance {
 			previous_input: src,
-			posma: method(cfg.method, cfg.period, 0.)?,
-			negma: method(cfg.method, cfg.period, 0.)?,
+			posma: cfg.ma.init(0.)?, // method(cfg.method, cfg.period, 0.)?,
+			negma: cfg.ma.init(0.)?, // method(cfg.method, cfg.period, 0.)?,
 			cross_upper: Cross::new((), &(0.5, 1.0 - cfg.zone))?,
 			cross_lower: Cross::new((), &(0.5, cfg.zone))?,
 			cfg,
@@ -76,14 +79,14 @@ impl IndicatorConfig for RelativeStrengthIndex {
 	}
 
 	fn validate(&self) -> bool {
-		self.period > 2 && self.zone > 0. && self.zone <= 0.5
+		self.ma.ma_period() > 2 && self.zone > 0. && self.zone <= 0.5
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
-			"period" => match value.parse() {
+			"ma" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period = value,
+				Ok(value) => self.ma = value,
 			},
 			"zone" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -92,10 +95,6 @@ impl IndicatorConfig for RelativeStrengthIndex {
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.source = value,
-			},
-			"method" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method = value,
 			},
 
 			_ => {
@@ -114,30 +113,31 @@ impl IndicatorConfig for RelativeStrengthIndex {
 impl Default for RelativeStrengthIndex {
 	fn default() -> Self {
 		Self {
-			period: 14,
+			ma: MA::EMA(14),
+			// period: 14,
 			zone: 0.3,
-			method: RegularMethods::EMA,
+			// method: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct RelativeStrengthIndexInstance {
-	cfg: RelativeStrengthIndex,
+pub struct RelativeStrengthIndexInstance<M: MovingAverageConstructor = MA> {
+	cfg: RelativeStrengthIndex<M>,
 
 	previous_input: ValueType,
-	posma: RegularMethod,
-	negma: RegularMethod,
+	posma: DynMovingAverage,
+	negma: DynMovingAverage,
 	cross_upper: Cross,
 	cross_lower: Cross,
 }
 
 /// Just an alias for `RelativeStrengthIndex`
-pub type RSI = RelativeStrengthIndex;
+pub type RSI<M = MA> = RelativeStrengthIndex<M>;
 
-impl IndicatorInstance for RelativeStrengthIndexInstance {
-	type Config = RelativeStrengthIndex;
+impl<M: MovingAverageConstructor> IndicatorInstance for RelativeStrengthIndexInstance<M> {
+	type Config = RelativeStrengthIndex<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

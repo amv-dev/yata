@@ -1,4 +1,4 @@
-use crate::core::Method;
+use crate::core::{Method, MovingAverage};
 use crate::core::{Error, PeriodType, ValueType};
 
 #[cfg(feature = "serde")]
@@ -88,6 +88,8 @@ impl Method for RMA {
 		value
 	}
 }
+
+impl MovingAverage for RMA {}
 
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]

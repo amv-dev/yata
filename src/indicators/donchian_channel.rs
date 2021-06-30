@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{Candle, Error, Method, PeriodType, Source, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
 use crate::methods::{Cross, Highest, Lowest};
 
 /// Donchian Channel

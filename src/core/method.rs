@@ -130,7 +130,7 @@ pub trait Method: fmt::Debug {
 	/// Applies method to the sequence in-place.
 	fn apply<T, S>(&mut self, sequence: &mut S)
 	where
-		S: Sequence<T> + AsMut<[T]>,
+		S: Sequence<T> + AsMut<[T]> + ?Sized,
 		Self: Method<Input = T, Output = T> + Sized,
 	{
 		sequence.apply(self);
@@ -149,8 +149,8 @@ pub trait Method: fmt::Debug {
 	{
 		match inputs.get_initial_value() {
 			Some(v) => {
-				let method = Self::new(parameters, v)?;
-				Ok(inputs.call(method))
+				let mut method = Self::new(parameters, v)?;
+				Ok(inputs.call(&mut method))
 			}
 			None => Ok(Vec::new()),
 		}
@@ -174,8 +174,8 @@ pub trait Method: fmt::Debug {
 			}
 		};
 
-		let m = Self::new(parameters, initial_value)?;
-		sequence.apply(m);
+		let mut m = Self::new(parameters, initial_value)?;
+		sequence.apply(&mut m);
 		Ok(())
 	}
 
@@ -200,19 +200,5 @@ pub trait Method: fmt::Debug {
 		let instance = Self::new(params, initial_value)?;
 
 		Ok(instance.into_fn())
-	}
-}
-
-impl<M: Method> Method for &mut M {
-	type Params = M::Params;
-	type Input = M::Input;
-	type Output = M::Output;
-
-	fn new(_parameters: Self::Params, _initial_value: &Self::Input) -> Result<Self, Error> {
-		unimplemented!();
-	}
-
-	fn next(&mut self, value: &Self::Input) -> Self::Output {
-		(**self).next(value)
 	}
 }

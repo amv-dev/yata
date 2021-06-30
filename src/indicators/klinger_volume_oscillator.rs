@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
+use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, sign, RegularMethod, RegularMethods};
+use crate::helpers::{MA, sign};
 use crate::methods::Cross;
 
 /// Klinger Volume Oscillator
@@ -34,7 +34,11 @@ use crate::methods::Cross;
 /// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct KlingerVolumeOscillator {
+pub struct KlingerVolumeOscillator<M: MovingAverageConstructor = MA> {
+	pub ma1: M,
+	pub ma2: M,
+	pub signal: M,
+	/*
 	/// Fast moving average period. Default is `34`.
 	pub period1: PeriodType,
 
@@ -49,10 +53,11 @@ pub struct KlingerVolumeOscillator {
 
 	/// Signal line moving average method. Default is [`EMA`](crate::methods::EMA).
 	pub method2: RegularMethods,
+	*/
 }
 
-impl IndicatorConfig for KlingerVolumeOscillator {
-	type Instance = KlingerVolumeOscillatorInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for KlingerVolumeOscillator<M> {
+	type Instance = KlingerVolumeOscillatorInstance<M>;
 
 	const NAME: &'static str = "KlingerVolumeOscillator";
 
@@ -63,9 +68,9 @@ impl IndicatorConfig for KlingerVolumeOscillator {
 
 		let cfg = self;
 		Ok(Self::Instance {
-			ma1: method(cfg.method1, cfg.period1, 0.)?,
-			ma2: method(cfg.method1, cfg.period2, 0.)?,
-			ma3: method(cfg.method2, cfg.period3, 0.)?,
+			ma1: cfg.ma1.init(0.)?, // method(cfg.method1, cfg.period1, 0.)?,
+			ma2: cfg.ma2.init(0.)?, // method(cfg.method1, cfg.period2, 0.)?,
+			ma3: cfg.signal.init(0.)?, // method(cfg.method2, cfg.period3, 0.)?,
 			cross1: Cross::default(),
 			cross2: Cross::default(),
 			last_tp: candle.tp(),
@@ -74,30 +79,22 @@ impl IndicatorConfig for KlingerVolumeOscillator {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 > 1 && self.period3 > 1 && self.period1 < self.period2
+		self.ma1.is_similar_to(&self.ma2) && self.ma1.ma_period() > 1 && self.signal.ma_period() > 1 && self.ma1.ma_period() < self.ma2.ma_period()
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
-			"period1" => match value.parse() {
+			"ma1" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period1 = value,
+				Ok(value) => self.ma1 = value,
 			},
-			"period2" => match value.parse() {
+			"ma2" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period2 = value,
+				Ok(value) => self.ma2 = value,
 			},
-			"period3" => match value.parse() {
+			"signal" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period3 = value,
-			},
-			"method1" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method1 = value,
-			},
-			"method2" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method2 = value,
+				Ok(value) => self.signal = value,
 			},
 
 			_ => {
@@ -116,29 +113,32 @@ impl IndicatorConfig for KlingerVolumeOscillator {
 impl Default for KlingerVolumeOscillator {
 	fn default() -> Self {
 		Self {
-			period1: 34,
-			period2: 55,
-			period3: 13,
-			method1: RegularMethods::EMA,
-			method2: RegularMethods::EMA,
+			ma1: MA::EMA(34),
+			ma2: MA::EMA(55),
+			signal: MA::EMA(13),
+			// period1: 34,
+			// period2: 55,
+			// period3: 13,
+			// method1: RegularMethods::EMA,
+			// method2: RegularMethods::EMA,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct KlingerVolumeOscillatorInstance {
-	cfg: KlingerVolumeOscillator,
+pub struct KlingerVolumeOscillatorInstance<M: MovingAverageConstructor = MA> {
+	cfg: KlingerVolumeOscillator<M>,
 
-	ma1: RegularMethod,
-	ma2: RegularMethod,
-	ma3: RegularMethod,
+	ma1: DynMovingAverage,
+	ma2: DynMovingAverage,
+	ma3: DynMovingAverage,
 	cross1: Cross,
 	cross2: Cross,
 	last_tp: ValueType,
 }
 
-impl IndicatorInstance for KlingerVolumeOscillatorInstance {
-	type Config = KlingerVolumeOscillator;
+impl<M: MovingAverageConstructor> IndicatorInstance for KlingerVolumeOscillatorInstance<M> {
+	type Config = KlingerVolumeOscillator<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg
