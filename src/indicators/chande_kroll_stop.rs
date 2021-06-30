@@ -2,9 +2,9 @@
 use serde::{Deserialize, Serialize};
 // use std::str::FromStr;
 
-use crate::core::{Action, Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{Action, DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, signi, RegularMethod, RegularMethods};
+use crate::helpers::{MA, signi};
 use crate::methods::{CrossAbove, Highest, Lowest};
 
 /// Chande Kroll Stop
@@ -38,13 +38,16 @@ use crate::methods::{CrossAbove, Highest, Lowest};
 /// When cumulative move of `stop short` and `stop long` is downwards, then returns full sell.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct ChandeKrollStop {
+pub struct ChandeKrollStop<M: MovingAverageConstructor = MA> {
+	pub ma: M,
+	/*
 	/// ATR period length. Default is `10`.
 	///
 	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\]
 	pub p: PeriodType,
 	/// ATR method. Default is [`SMA`](crate::methods::SMA).
 	pub method: RegularMethods,
+	*/
 	/// ATR multiplier. Default is `1.0`.
 	///
 	/// Range in \[`0`; `+inf`\)
@@ -57,8 +60,8 @@ pub struct ChandeKrollStop {
 	pub source: Source,
 }
 
-impl IndicatorConfig for ChandeKrollStop {
-	type Instance = ChandeKrollStopInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for ChandeKrollStop<M> {
+	type Instance = ChandeKrollStopInstance<M>;
 
 	const NAME: &'static str = "ChandeKrollStop";
 
@@ -71,10 +74,10 @@ impl IndicatorConfig for ChandeKrollStop {
 
 		let cfg = self;
 		Ok(Self::Instance {
-			ma: method(cfg.method, cfg.p, candle.tr(candle))?,
+			ma: cfg.ma.init(candle.tr(candle))?,// method(cfg.method, cfg.p, candle.tr(candle))?,
 
-			highest1: Highest::new(cfg.p, &candle.high())?,
-			lowest1: Lowest::new(cfg.p, &candle.low())?,
+			highest1: Highest::new(cfg.ma.ma_period(), &candle.high())?,
+			lowest1: Lowest::new(cfg.ma.ma_period(), &candle.low())?,
 
 			highest2: Highest::new(cfg.q, &(candle.high() - cfg.x * tr))?,
 			lowest2: Lowest::new(cfg.q, &cfg.x.mul_add(tr, candle.low()))?,
@@ -91,14 +94,14 @@ impl IndicatorConfig for ChandeKrollStop {
 	}
 
 	fn validate(&self) -> bool {
-		self.x >= 0.0 && self.p > 0 && self.q > 0
+		self.x >= 0.0 && self.ma.ma_period() > 0 && self.q > 0
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
-			"p" => match value.parse() {
+			"ma" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.p = value,
+				Ok(value) => self.ma = value,
 			},
 			"x" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -126,11 +129,10 @@ impl IndicatorConfig for ChandeKrollStop {
 	}
 }
 
-impl Default for ChandeKrollStop {
+impl Default for ChandeKrollStop<MA> {
 	fn default() -> Self {
 		Self {
-			p: 10,
-			method: RegularMethods::SMA,
+			ma: MA::SMA(10),
 			x: 1.0,
 			q: 9,
 			source: Source::Close,
@@ -140,10 +142,10 @@ impl Default for ChandeKrollStop {
 
 /// Chande Kroll Stop state structure
 #[derive(Debug)]
-pub struct ChandeKrollStopInstance {
-	cfg: ChandeKrollStop,
+pub struct ChandeKrollStopInstance<M: MovingAverageConstructor = MA> {
+	cfg: ChandeKrollStop<M>,
 
-	ma: RegularMethod,
+	ma: DynMovingAverage,
 	highest1: Highest,
 	lowest1: Lowest,
 	highest2: Highest,
@@ -154,8 +156,8 @@ pub struct ChandeKrollStopInstance {
 	cross_above: CrossAbove,
 }
 
-impl IndicatorInstance for ChandeKrollStopInstance {
-	type Config = ChandeKrollStop;
+impl<M: MovingAverageConstructor> IndicatorInstance for ChandeKrollStopInstance<M> {
+	type Config = ChandeKrollStop<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

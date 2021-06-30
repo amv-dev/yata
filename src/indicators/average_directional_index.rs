@@ -2,9 +2,9 @@
 use serde::{Deserialize, Serialize};
 
 use super::HLC;
-use crate::core::{Error, PeriodType, ValueType, Window, OHLCV};
+use crate::core::{DynMovingAverage, Error, MovingAverageConstructor, OHLCV, PeriodType, ValueType, Window};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 
 /// Average Directional Index
 ///
@@ -35,21 +35,24 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 ///
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct AverageDirectionalIndex {
+pub struct AverageDirectionalIndex<M: MovingAverageConstructor = MA> {
+	pub method1: M,
+	pub method2: M,
+	/*
 	/// Default is [`RMA`](crate::methods::RMA)
 	pub method1: RegularMethods,
 	/// Default is `14`.
 	///
 	/// Range in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub di_length: PeriodType,
-
+	
 	/// Default is [`RMA`](crate::methods::RMA)
 	pub method2: RegularMethods,
 	/// Default is `14`
 	///
 	/// Range in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub adx_smoothing: PeriodType,
-
+	*/
 	/// Default is `1`
 	///
 	/// Range in \[`1`; `min(di_length, adx_smoothing)`\)
@@ -60,8 +63,8 @@ pub struct AverageDirectionalIndex {
 	pub zone: ValueType,
 }
 
-impl IndicatorConfig for AverageDirectionalIndex {
-	type Instance = AverageDirectionalIndexInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for AverageDirectionalIndex<M> {
+	type Instance = AverageDirectionalIndexInstance<M>;
 
 	const NAME: &'static str = "AverageDirectionalIndex";
 
@@ -76,24 +79,24 @@ impl IndicatorConfig for AverageDirectionalIndex {
 		Ok(Self::Instance {
 			window: Window::new(cfg.period1, HLC::from(candle)),
 			prev_close: candle.close(),
-			tr_ma: method(cfg.method1, cfg.di_length, tr)?,
-			plus_di: method(cfg.method1, cfg.di_length, 0.0)?,
-			minus_di: method(cfg.method1, cfg.di_length, 0.0)?,
-			ma2: method(cfg.method2, cfg.adx_smoothing, 0.0)?,
+			tr_ma: cfg.method1.init(tr)?,
+			plus_di: cfg.method1.init(0.0)?,
+			minus_di: cfg.method1.init(0.0)?,
+			ma2: cfg.method2.init(0.0)?,
 			cfg,
 		})
 	}
 
 	fn validate(&self) -> bool {
-		self.di_length >= 1
-			&& self.di_length < PeriodType::MAX
-			&& self.adx_smoothing >= 1
-			&& self.adx_smoothing < PeriodType::MAX
+		self.method1.ma_period() >= 1
+			&& self.method1.ma_period() < PeriodType::MAX
+			&& self.method2.ma_period() >= 1
+			&& self.method2.ma_period() < PeriodType::MAX
 			&& self.zone >= 0.
 			&& self.zone <= 1.
 			&& self.period1 >= 1
-			&& self.period1 < self.di_length
-			&& self.period1 < self.adx_smoothing
+			&& self.period1 < self.method1.ma_period()
+			&& self.period1 < self.method2.ma_period()
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -102,19 +105,19 @@ impl IndicatorConfig for AverageDirectionalIndex {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.method1 = value,
 			},
-			"di_length" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.di_length = value,
-			},
+			// "di_length" => match value.parse() {
+			// 	Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
+			// 	Ok(value) => self.di_length = value,
+			// },
 
 			"method2" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.method2 = value,
 			},
-			"adx_smoothing" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.adx_smoothing = value,
-			},
+			// "adx_smoothing" => match value.parse() {
+			// 	Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
+			// 	Ok(value) => self.adx_smoothing = value,
+			// },
 
 			"period1" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -138,13 +141,11 @@ impl IndicatorConfig for AverageDirectionalIndex {
 	}
 }
 
-impl Default for AverageDirectionalIndex {
+impl Default for AverageDirectionalIndex<MA> {
 	fn default() -> Self {
 		Self {
-			method1: RegularMethods::RMA,
-			di_length: 14,
-			method2: RegularMethods::RMA,
-			adx_smoothing: 14,
+			method1: MA::RMA(14),
+			method2: MA::RMA(14),
 			period1: 1,
 			zone: 0.2,
 		}
@@ -152,18 +153,18 @@ impl Default for AverageDirectionalIndex {
 }
 
 #[derive(Debug)]
-pub struct AverageDirectionalIndexInstance {
-	cfg: AverageDirectionalIndex,
+pub struct AverageDirectionalIndexInstance<M: MovingAverageConstructor = MA> {
+	cfg: AverageDirectionalIndex<M>,
 
 	window: Window<HLC>,
 	prev_close: ValueType,
-	tr_ma: RegularMethod,
-	plus_di: RegularMethod,
-	minus_di: RegularMethod,
-	ma2: RegularMethod,
+	tr_ma: DynMovingAverage,
+	plus_di: DynMovingAverage,
+	minus_di: DynMovingAverage,
+	ma2: DynMovingAverage,
 }
 
-impl AverageDirectionalIndexInstance {
+impl<M: MovingAverageConstructor> AverageDirectionalIndexInstance<M> {
 	fn dir_mov(&mut self, candle: HLC) -> (ValueType, ValueType) {
 		let prev_candle = self.window.push(candle);
 		let true_range = self.tr_ma.next(&candle.tr_close(self.prev_close));
@@ -200,8 +201,8 @@ impl AverageDirectionalIndexInstance {
 	}
 }
 
-impl IndicatorInstance for AverageDirectionalIndexInstance {
-	type Config = AverageDirectionalIndex;
+impl<M: MovingAverageConstructor> IndicatorInstance for AverageDirectionalIndexInstance<M> {
+	type Config = AverageDirectionalIndex<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

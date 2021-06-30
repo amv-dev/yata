@@ -1,7 +1,5 @@
-use crate::core::{
-	Error, IndicatorConfig, IndicatorInstance, IndicatorResult, Method, PeriodType, Source, OHLCV,
-};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::core::{DynMovingAverage, Error, IndicatorConfig, IndicatorInstance, IndicatorResult, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
+use crate::helpers::MA;
 use crate::methods::{Change, Cross, ReversalSignal, TMA};
 
 #[cfg(feature = "serde")]
@@ -38,12 +36,13 @@ use serde::{Deserialize, Serialize};
 /// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Trix {
+pub struct Trix<M: MovingAverageConstructor = MA> {
 	/// TRIX period. Default is `18`.
 	///
 	/// Range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
-
+	pub signal: M,
+	/*
 	/// Signal line period. Default is `6`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
@@ -51,13 +50,13 @@ pub struct Trix {
 
 	/// Signal line moving average method. Default is [`EMA`](crate::methods::EMA).
 	pub method2: RegularMethods,
-
+	*/
 	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
-impl IndicatorConfig for Trix {
-	type Instance = TRIXInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for Trix<M> {
+	type Instance = TRIXInstance<M>;
 
 	const NAME: &'static str = "Trix";
 
@@ -67,7 +66,7 @@ impl IndicatorConfig for Trix {
 
 			Ok(Self::Instance {
 				tma: TMA::new(self.period1, &src)?,
-				sig: method(self.method2, self.period2, src)?,
+				sig: self.signal.init(src)?, // method(self.method2, self.period2, src)?,
 				change: Change::new(1, &src)?,
 				cross1: Cross::new((), &(src, src))?,
 				cross2: Cross::new((), &(src, src))?,
@@ -82,7 +81,7 @@ impl IndicatorConfig for Trix {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 > 2 && self.period2 > 1
+		self.period1 > 2 && self.signal.ma_period() > 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -91,13 +90,9 @@ impl IndicatorConfig for Trix {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period1 = value,
 			},
-			"period2" => match value.parse() {
+			"signal" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period2 = value,
-			},
-			"method2" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method2 = value,
+				Ok(value) => self.signal = value,
 			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -120,27 +115,28 @@ impl Default for Trix {
 	fn default() -> Self {
 		Self {
 			period1: 18,
-			period2: 6, // TODO: find recommended value here
-			method2: RegularMethods::EMA,
+			signal: MA::EMA(6),
+			// period2: 6, // TODO: find recommended value here
+			// method2: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct TRIXInstance {
-	cfg: Trix,
+pub struct TRIXInstance<M: MovingAverageConstructor = MA> {
+	cfg: Trix<M>,
 
 	tma: TMA,
-	sig: RegularMethod,
+	sig: DynMovingAverage,
 	change: Change,
 	cross1: Cross,
 	cross2: Cross,
 	reverse: ReversalSignal,
 }
 
-impl IndicatorInstance for TRIXInstance {
-	type Config = Trix;
+impl<M: MovingAverageConstructor> IndicatorInstance for TRIXInstance<M> {
+	type Config = Trix<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

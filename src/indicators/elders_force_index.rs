@@ -1,10 +1,10 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::Candle;
+use crate::core::{Candle, DynMovingAverage, MovingAverageConstructor};
 use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::Cross;
 
 /// Elders Force Index
@@ -27,23 +27,28 @@ use crate::methods::Cross;
 /// When `main value` crosses zero line downwards, returns full sell signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct EldersForceIndex {
+pub struct EldersForceIndex<M: MovingAverageConstructor = MA> {
+	pub ma: M,
+	/*
 	/// MA period. Default is `13`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
+	*/
 	/// Price change period. Default is `1`.
 	///
 	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period2: PeriodType,
+	/*
 	/// MA method. Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
+	*/
 	/// Price source type of values. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
 }
 
-impl IndicatorConfig for EldersForceIndex {
-	type Instance = EldersForceIndexInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for EldersForceIndex<M> {
+	type Instance = EldersForceIndexInstance<M>;
 
 	const NAME: &'static str = "EldersForceIndex";
 
@@ -54,7 +59,7 @@ impl IndicatorConfig for EldersForceIndex {
 
 		let cfg = self;
 		Ok(Self::Instance {
-			ma: method(cfg.method, cfg.period1, 0.)?,
+			ma: cfg.ma.init(0.)?,// method(cfg.method, cfg.period1, 0.)?,
 			window: Window::new(cfg.period2, Candle::from(candle)),
 			vol_sum: candle.volume() * cfg.period2 as ValueType,
 			cross_over: Cross::default(),
@@ -63,22 +68,18 @@ impl IndicatorConfig for EldersForceIndex {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 > 1 && self.period2 >= 1
+		self.ma.ma_period() > 1 && self.period2 >= 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
-			"period1" => match value.parse() {
+			"ma" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period1 = value,
+				Ok(value) => self.ma = value,
 			},
 			"period2" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period2 = value,
-			},
-			"method" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method = value,
 			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -98,29 +99,30 @@ impl IndicatorConfig for EldersForceIndex {
 	}
 }
 
-impl Default for EldersForceIndex {
+impl Default for EldersForceIndex<MA> {
 	fn default() -> Self {
 		Self {
-			period1: 13,
+			ma: MA::EMA(13),
+			// period1: 13,
 			period2: 1,
-			method: RegularMethods::EMA,
+			// method: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct EldersForceIndexInstance {
-	cfg: EldersForceIndex,
+pub struct EldersForceIndexInstance<M: MovingAverageConstructor = MA> {
+	cfg: EldersForceIndex<M>,
 
-	ma: RegularMethod,
+	ma: DynMovingAverage,
 	window: Window<Candle>,
 	vol_sum: ValueType,
 	cross_over: Cross,
 }
 
-impl IndicatorInstance for EldersForceIndexInstance {
-	type Config = EldersForceIndex;
+impl<M: MovingAverageConstructor> IndicatorInstance for EldersForceIndexInstance<M> {
+	type Config = EldersForceIndex<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

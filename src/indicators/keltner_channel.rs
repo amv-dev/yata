@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, ValueType, OHLCV};
+use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::{CrossAbove, CrossUnder, SMA};
 
 /// Keltner Channel
@@ -30,7 +30,9 @@ use crate::methods::{CrossAbove, CrossUnder, SMA};
 /// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct KeltnerChannel {
+pub struct KeltnerChannel<M: MovingAverageConstructor = MA> {
+	pub ma: M,
+	/*
 	/// Period for the middle moving average. Default is `20`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
@@ -38,7 +40,7 @@ pub struct KeltnerChannel {
 
 	/// Middle moving average type. Default is [`EMA`](crate::methods::EMA).
 	pub method: RegularMethods,
-
+	*/
 	/// True range multiplier. Default is `1.0`.
 	///
 	/// Range in \(`0.0`; `+inf`\)
@@ -48,8 +50,8 @@ pub struct KeltnerChannel {
 	pub source: Source,
 }
 
-impl IndicatorConfig for KeltnerChannel {
-	type Instance = KeltnerChannelInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for KeltnerChannel<M> {
+	type Instance = KeltnerChannelInstance<M>;
 
 	const NAME: &'static str = "KeltnerChannel";
 
@@ -62,8 +64,8 @@ impl IndicatorConfig for KeltnerChannel {
 		let src = candle.source(cfg.source);
 		Ok(Self::Instance {
 			prev_close: candle.close(),
-			ma: method(cfg.method, cfg.period, src)?,
-			sma: SMA::new(cfg.period, &(candle.high() - candle.low()))?,
+			ma: cfg.ma.init(src)?, // method(cfg.method, cfg.period, src)?,
+			sma: SMA::new(cfg.ma.ma_period(), &(candle.high() - candle.low()))?,
 			cross_above: CrossAbove::default(),
 			cross_under: CrossUnder::default(),
 			cfg,
@@ -71,18 +73,14 @@ impl IndicatorConfig for KeltnerChannel {
 	}
 
 	fn validate(&self) -> bool {
-		self.period > 1 && self.sigma > 0.0
+		self.ma.ma_period() > 1 && self.sigma > 0.0
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
-			"period" => match value.parse() {
+			"ma" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period = value,
-			},
-			"method" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method = value,
+				Ok(value) => self.ma = value,
 			},
 			"sigma" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -106,30 +104,31 @@ impl IndicatorConfig for KeltnerChannel {
 	}
 }
 
-impl Default for KeltnerChannel {
+impl Default for KeltnerChannel<MA> {
 	fn default() -> Self {
 		Self {
-			period: 20,
+			ma: MA::EMA(20),
+			// period: 20,
 			sigma: 1.0,
 			source: Source::Close,
-			method: RegularMethods::EMA,
+			// method: RegularMethods::EMA,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct KeltnerChannelInstance {
-	cfg: KeltnerChannel,
+pub struct KeltnerChannelInstance<M: MovingAverageConstructor = MA> {
+	cfg: KeltnerChannel<M>,
 
 	prev_close: ValueType,
-	ma: RegularMethod,
+	ma: DynMovingAverage,
 	sma: SMA,
 	cross_above: CrossAbove,
 	cross_under: CrossUnder,
 }
 
-impl IndicatorInstance for KeltnerChannelInstance {
-	type Config = KeltnerChannel;
+impl<M: MovingAverageConstructor> IndicatorInstance for KeltnerChannelInstance<M> {
+	type Config = KeltnerChannel<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

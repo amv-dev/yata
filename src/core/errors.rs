@@ -8,6 +8,9 @@ pub enum Error {
 	/// Error parsing indicator parameter
 	ParameterParse(String, String),
 
+	/// Error parsing moving average
+	MovingAverageParse,
+
 	/// Invalid parameters for method creation
 	WrongMethodParameters,
 
@@ -32,6 +35,7 @@ impl std::fmt::Display for Error {
 			Self::WrongConfig => write!(f, "Wrong config"),
 			Self::InvalidCandles => write!(f, "Invalid candles"),
 			Self::Other(reason) => write!(f, "{}", reason),
+			Self::MovingAverageParse => write!(f, "Error parsing moving average type and length"),
 		}
 	}
 }

@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, Source, OHLCV};
+use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::{Cross, RateOfChange, ReversalSignal};
 
 /// Coppock curve
@@ -29,12 +29,15 @@ use crate::methods::{Cross, RateOfChange, ReversalSignal};
 /// * Signal 3 appears on `main value` crosses `signal line`. When `main value` crosses `signal line` upwards, returns full buy signal. When `main value` crosses `signal line` downwards, returns full sell signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct CoppockCurve {
+pub struct CoppockCurve<M: MovingAverageConstructor = MA> {
+	pub ma1: M,
+	pub s3_ma: M,
+	/*
 	/// MA period \(using `method1`\). Default is `10`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
-
+	*/
 	/// Long rate of change period. Default is `14`.
 	///
 	/// Range in \(`period3`; [`PeriodType::MAX`](crate::core::PeriodType)\).
@@ -54,24 +57,25 @@ pub struct CoppockCurve {
 	///
 	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)-`s2_left`\).
 	pub s2_right: PeriodType,
-
+	/*
 	/// Signal line period (using `method2`). Default is `5`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub s3_period: PeriodType,
-
+	*/
 	/// Source type. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
-
+	/*
 	/// Main MA type \(using `period1`\). Default is [`WMA`](crate::methods::WMA)
 	pub method1: RegularMethods,
 
 	/// Signal line MA type \(using `s3_period`\). Default is [`EMA`](crate::methods::EMA)
 	pub method2: RegularMethods,
+	*/
 }
 
-impl IndicatorConfig for CoppockCurve {
-	type Instance = CoppockCurveInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for CoppockCurve<M> {
+	type Instance = CoppockCurveInstance<M>;
 
 	const NAME: &'static str = "CoppockCurve";
 
@@ -85,8 +89,8 @@ impl IndicatorConfig for CoppockCurve {
 		Ok(Self::Instance {
 			roc1: RateOfChange::new(cfg.period2, src)?,
 			roc2: RateOfChange::new(cfg.period3, src)?,
-			ma1: method(cfg.method1, cfg.period1, 0.)?,
-			ma2: method(cfg.method2, cfg.s3_period, 0.)?,
+			ma1: cfg.ma1.init(0.)?,// method(cfg.method1, cfg.period1, 0.)?,
+			ma2: cfg.s3_ma.init(0.)?, //method(cfg.method2, cfg.s3_period, 0.)?,
 			cross_over1: Cross::default(),
 			pivot: ReversalSignal::new(cfg.s2_left, cfg.s2_right, 0.)?,
 			cross_over2: Cross::default(),
@@ -96,11 +100,11 @@ impl IndicatorConfig for CoppockCurve {
 	}
 
 	fn validate(&self) -> bool {
-		self.period1 > 1
+		self.ma1.ma_period() > 1
 			&& self.period2 > self.period3
 			&& self.period2 < PeriodType::MAX
 			&& self.period3 > 0
-			&& self.s3_period > 1
+			&& self.s3_ma.ma_period() > 1
 			&& self.s2_left > 0
 			&& self.s2_right > 0
 			&& self.s2_left.saturating_add(self.s2_right) < PeriodType::MAX
@@ -108,9 +112,9 @@ impl IndicatorConfig for CoppockCurve {
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
-			"period1" => match value.parse() {
+			"ma1" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period1 = value,
+				Ok(value) => self.ma1 = value,
 			},
 			"period2" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -128,21 +132,13 @@ impl IndicatorConfig for CoppockCurve {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.s2_right = value,
 			},
-			"s3_period" => match value.parse() {
+			"s3_ma" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.s3_period = value,
+				Ok(value) => self.s3_ma = value,
 			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.source = value,
-			},
-			"method1" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method1 = value,
-			},
-			"method2" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method2 = value,
 			},
 			// "zone"		=> self.zone = value.parse().unwrap(),
 			// "source"	=> self.source = value.parse().unwrap(),
@@ -159,37 +155,39 @@ impl IndicatorConfig for CoppockCurve {
 	}
 }
 
-impl Default for CoppockCurve {
+impl Default for CoppockCurve<MA> {
 	fn default() -> Self {
 		Self {
-			period1: 10,
+			ma1: MA::WMA(10),
+			s3_ma: MA::EMA(5),
+			// period1: 10,
 			period2: 14,
 			period3: 11,
 			s2_left: 4,
 			s2_right: 2,
-			s3_period: 5,
-			method1: RegularMethods::WMA,
-			method2: RegularMethods::EMA,
+			// s3_period: 5,
+			// method1: RegularMethods::WMA,
+			// method2: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct CoppockCurveInstance {
-	cfg: CoppockCurve,
+pub struct CoppockCurveInstance<M: MovingAverageConstructor = MA> {
+	cfg: CoppockCurve<M>,
 
 	roc1: RateOfChange,
 	roc2: RateOfChange,
-	ma1: RegularMethod,
-	ma2: RegularMethod,
+	ma1: DynMovingAverage,
+	ma2: DynMovingAverage,
 	cross_over1: Cross,
 	pivot: ReversalSignal,
 	cross_over2: Cross,
 }
 
-impl IndicatorInstance for CoppockCurveInstance {
-	type Config = CoppockCurve;
+impl<M: MovingAverageConstructor> IndicatorInstance for CoppockCurveInstance<M> {
+	type Config = CoppockCurve<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

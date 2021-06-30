@@ -1,4 +1,4 @@
-use crate::core::Method;
+use crate::core::{Method, MovingAverage};
 use crate::core::{Error, PeriodType, ValueType, Window};
 use std::{cmp::Ordering, slice::SliceIndex};
 
@@ -277,6 +277,8 @@ impl<'de> Deserialize<'de> for SMM {
 		Ok(smm)
 	}
 }
+
+impl MovingAverage for SMM {}
 
 #[cfg(test)]
 mod tests {

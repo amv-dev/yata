@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, ValueType, OHLCV};
+use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 use crate::methods::{Cross, SMA, SWMA};
 
 /// Relative Vigor Index
@@ -37,7 +37,7 @@ use crate::methods::{Cross, SMA, SWMA};
 /// Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct RelativeVigorIndex {
+pub struct RelativeVigorIndex<M: MovingAverageConstructor = MA> {
 	/// Summarize period. Default is `10`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
@@ -47,7 +47,7 @@ pub struct RelativeVigorIndex {
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period2: PeriodType,
-
+	/*
 	/// Signal line MA period. Default is `4`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
@@ -55,15 +55,16 @@ pub struct RelativeVigorIndex {
 
 	/// Signal line MA method. Default is [`SWMA`](crate::methods::SWMA).
 	pub method: RegularMethods,
-
+	*/
+	pub signal: M,
 	/// Signal zone filter. Default is `0.25`.
 	///
 	/// Range in \[`0.0`; `0.5`\)
 	pub zone: ValueType,
 }
 
-impl IndicatorConfig for RelativeVigorIndex {
-	type Instance = RelativeVigorIndexInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for RelativeVigorIndex<M> {
+	type Instance = RelativeVigorIndexInstance<M>;
 
 	const NAME: &'static str = "RelativeVigorIndex";
 
@@ -83,7 +84,7 @@ impl IndicatorConfig for RelativeVigorIndex {
 			sma1: SMA::new(cfg.period1, d_close)?,
 			swma2: SWMA::new(cfg.period2, d_hl)?,
 			sma2: SMA::new(cfg.period1, d_hl)?,
-			ma: method(cfg.method, cfg.period3, rvi)?,
+			ma: cfg.signal.init(rvi)?, // method(cfg.method, cfg.period3, rvi)?,
 			cross: Cross::default(),
 			cfg,
 		})
@@ -94,7 +95,7 @@ impl IndicatorConfig for RelativeVigorIndex {
 			&& self.zone >= 0.
 			&& self.zone < 0.5
 			&& self.period2 > 1
-			&& self.period3 > 1
+			&& self.signal.ma_period() > 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -107,13 +108,9 @@ impl IndicatorConfig for RelativeVigorIndex {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period2 = value,
 			},
-			"period3" => match value.parse() {
+			"signal" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period3 = value,
-			},
-			"method" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method = value,
+				Ok(value) => self.signal = value,
 			},
 			"zone" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -138,28 +135,29 @@ impl Default for RelativeVigorIndex {
 		Self {
 			period1: 10,
 			period2: 4,
-			period3: 4,
-			method: RegularMethods::SWMA,
+			signal: MA::SWMA(4),
+			// period3: 4,
+			// method: RegularMethods::SWMA,
 			zone: 0.25,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct RelativeVigorIndexInstance {
-	cfg: RelativeVigorIndex,
+pub struct RelativeVigorIndexInstance<M: MovingAverageConstructor = MA> {
+	cfg: RelativeVigorIndex<M>,
 
 	prev_close: ValueType,
 	swma1: SWMA,
 	sma1: SMA,
 	swma2: SWMA,
 	sma2: SMA,
-	ma: RegularMethod,
+	ma: DynMovingAverage,
 	cross: Cross,
 }
 
-impl IndicatorInstance for RelativeVigorIndexInstance {
-	type Config = RelativeVigorIndex;
+impl<M: MovingAverageConstructor> IndicatorInstance for RelativeVigorIndexInstance<M> {
+	type Config = RelativeVigorIndex<M>;
 
 	#[inline]
 	fn config(&self) -> &Self::Config {

@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, PeriodType, Source, ValueType, Window, OHLCV};
+use crate::core::{DynMovingAverage, Error, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType, Window};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{method, RegularMethod, RegularMethods};
+use crate::helpers::MA;
 
 // The Formula for the Detrended Price Oscillator (DPO) is
 // DPO=Price from X2+1 periods ago−X period SMA
@@ -27,7 +27,9 @@ use crate::helpers::{method, RegularMethod, RegularMethods};
 /// # Has no signals
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct DetrendedPriceOscillator {
+pub struct DetrendedPriceOscillator<M: MovingAverageConstructor = MA> {
+	pub ma: M,
+	/*
 	/// MA period size. Default is `21`.
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
@@ -35,13 +37,13 @@ pub struct DetrendedPriceOscillator {
 
 	/// MA method type. Default is [`SMA`](crate::methods::SMA)
 	pub method: RegularMethods,
-
+	*/
 	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
 
-impl IndicatorConfig for DetrendedPriceOscillator {
-	type Instance = DetrendedPriceOscillatorInstance;
+impl<M: MovingAverageConstructor> IndicatorConfig for DetrendedPriceOscillator<M> {
+	type Instance = DetrendedPriceOscillatorInstance<M>;
 
 	const NAME: &'static str = "DetrendedPriceOscillator";
 
@@ -52,26 +54,23 @@ impl IndicatorConfig for DetrendedPriceOscillator {
 
 		let cfg = self;
 		let src = candle.source(cfg.source);
+
 		Ok(Self::Instance {
-			sma: method(cfg.method, cfg.period, src)?,
-			window: Window::new(cfg.period / 2 + 1, src),
+			sma: cfg.ma.init(src)?, // method(cfg.method, cfg.period, src)?,
+			window: Window::new(cfg.ma.ma_period() / 2 + 1, src),
 			cfg,
 		})
 	}
 
 	fn validate(&self) -> bool {
-		self.period > 1 && self.period < PeriodType::MAX
+		self.ma.ma_period() > 1 && self.ma.ma_period() < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
 		match name {
-			"period" => match value.parse() {
+			"ma" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.period = value,
-			},
-			"method" => match value.parse() {
-				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-				Ok(value) => self.method = value,
+				Ok(value) => self.ma = value,
 			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
@@ -91,26 +90,27 @@ impl IndicatorConfig for DetrendedPriceOscillator {
 	}
 }
 
-impl Default for DetrendedPriceOscillator {
+impl Default for DetrendedPriceOscillator<MA> {
 	fn default() -> Self {
 		Self {
-			period: 21,
-			method: RegularMethods::SMA,
+			// period: 21,
+			// method: RegularMethods::SMA,
+			ma: MA::SMA(21),
 			source: Source::Close,
 		}
 	}
 }
 
 #[derive(Debug)]
-pub struct DetrendedPriceOscillatorInstance {
-	cfg: DetrendedPriceOscillator,
+pub struct DetrendedPriceOscillatorInstance<M: MovingAverageConstructor = MA> {
+	cfg: DetrendedPriceOscillator<M>,
 
-	sma: RegularMethod,
+	sma: DynMovingAverage,
 	window: Window<ValueType>,
 }
 
-impl IndicatorInstance for DetrendedPriceOscillatorInstance {
-	type Config = DetrendedPriceOscillator;
+impl<M: MovingAverageConstructor> IndicatorInstance for DetrendedPriceOscillatorInstance<M> {
+	type Config = DetrendedPriceOscillator<M>;
 
 	fn config(&self) -> &Self::Config {
 		&self.cfg

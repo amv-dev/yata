@@ -1,4 +1,4 @@
-use crate::core::Method;
+use crate::core::{Method, MovingAverage};
 use crate::core::{Error, PeriodType, ValueType, Window};
 
 #[cfg(feature = "serde")]
@@ -105,6 +105,8 @@ impl Method for LinReg {
 		self.b()
 	}
 }
+
+impl MovingAverage for LinReg {}
 
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]

@@ -1,276 +1,144 @@
+use std::str::FromStr;
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, PeriodType, ValueType};
-use crate::methods::{
-	Derivative, Highest, HighestLowestDelta, Integral, LinReg, Lowest, MeanAbsDev, MedianAbsDev,
-	Momentum, Past, RateOfChange, StDev, Vidya, CCI, DEMA, DMA, EMA, HMA, RMA, SMA, SMM, SWMA,
-	TEMA, TMA, TRIMA, WMA, WSMA,
-};
+use crate::core::{Error, Method, DynMovingAverage, MovingAverageConstructor, PeriodType, ValueType};
+use crate::methods::{LinReg, Vidya, DEMA, DMA, EMA, HMA, RMA, SMA, SMM, SWMA, TEMA, TMA, TRIMA, WMA, WSMA};
 
-use std::convert::TryFrom;
-use std::str::FromStr;
-/// A shortcut for dynamically (runtime) generated regular methods
-///
-/// Regular method is a method which has parameters of single [`PeriodType`], input is single [`ValueType`] and output is single [`ValueType`].
-///
-/// # See also
-///
-/// [Default regular methods list](RegularMethods)
-///
-/// [`ValueType`]: crate::core::ValueType
-/// [`PeriodType`]: crate::core::PeriodType
-pub type RegularMethod =
-	Box<dyn Method<Params = PeriodType, Input = ValueType, Output = ValueType>>;
-
-/// Regular methods dictionary
-#[derive(Debug, Clone, Copy, PartialEq)]
+/// Default moving average constructor
+#[allow(clippy::pub_enum_variant_names)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "lowercase"))]
 #[non_exhaustive]
-pub enum RegularMethods {
+pub enum MA {
 	/// [Simple Moving Average](crate::methods::SMA)
-	SMA,
+	SMA(PeriodType),
 
 	/// [Weighed Moving Average](crate::methods::WMA)
-	WMA,
+	WMA(PeriodType),
 
 	/// [Hull Moving Average](crate::methods::HMA)
-	HMA,
+	HMA(PeriodType),
 
 	/// [Running Moving Average](crate::methods::RMA)
-	RMA,
+	RMA(PeriodType),
 
 	/// [Exponential Moving Average](crate::methods::EMA)
-	EMA,
+	EMA(PeriodType),
 
 	/// [Double Exponential Moving Average](crate::methods::DMA)
-	DMA,
+	DMA(PeriodType),
 
 	/// Another type of [Double Exponential Moving Average](crate::methods::DEMA)
-	DEMA,
+	DEMA(PeriodType),
 
 	/// [Triple Exponential Moving Average](crate::methods::TMA)
-	TMA,
+	TMA(PeriodType),
 
 	/// Another type of [Triple Exponential Moving Average](crate::methods::DEMA)
-	TEMA,
+	TEMA(PeriodType),
 
 	/// [Wilder's smoothing average](crate::methods::WSMA)
-	WSMA,
+	WSMA(PeriodType),
 
 	/// [Simple Moving Median](crate::methods::SMM)
-	SMM,
+	SMM(PeriodType),
 
 	/// [Symmetrically Weighted Moving Average](crate::methods::SWMA)
-	SWMA,
+	SWMA(PeriodType),
 
 	/// [Triangular Moving Average](crate::methods::TRIMA)
-	TRIMA,
+	TRIMA(PeriodType),
 
 	/// [Linear regression](crate::methods::LinReg)
 	#[cfg_attr(feature = "serde", serde(rename = "lin_reg"))]
-	LinReg,
+	LinReg(PeriodType),
 
 	/// [Variable Index Dynamic Average](crate::methods::Vidya)
-	Vidya,
-
-	/// [Past](crate::methods::Past) moves timeseries forward
-	Past,
-
-	/// Just an alias for `Past`
-	Move,
-
-	/// [Derivative](crate::methods::Derivative)
-	Derivative,
-
-	/// [Integral](crate::methods::Integral)
-	Integral,
-
-	/// [Mean Absolute Deviation](crate::methods::MeanAbsDev)
-	#[cfg_attr(feature = "serde", serde(rename = "mean_abs_dev"))]
-	MeanAbsDev,
-
-	/// [Median Absolute Deviation](crate::methods::MedianAbsDev)
-	#[cfg_attr(feature = "serde", serde(rename = "median_abs_dev"))]
-	MedianAbsDev,
-
-	/// [Standard Deviation](crate::methods::StDev)
-	#[cfg_attr(feature = "serde", serde(rename = "st_dev"))]
-	StDev,
-
-	/// [Commodity channel index](crate::methods::CCI)
-	CCI,
-
-	/// [Momentum](crate::methods::Momentum)
-	Momentum,
-
-	/// [Change](crate::methods::Change)
-	#[cfg_attr(feature = "serde", serde(rename = "momentum"))]
-	Change,
-
-	/// [Rate Of Change](crate::methods::RateOfChange)
-	#[cfg_attr(feature = "serde", serde(rename = "rate_of_change"))]
-	RateOfChange,
-
-	/// Just an alias for [Rate Of Change](crate::methods::RateOfChange)
-	#[cfg_attr(feature = "serde", serde(rename = "rate_of_change"))]
-	ROC,
-
-	/// [Highest](crate::methods::Highest)
-	Highest,
-
-	/// [Lowest](crate::methods::Lowest)
-	Lowest,
-
-	/// [HighestLowestDelta](crate::methods::HighestLowestDelta)
-	#[cfg_attr(feature = "serde", serde(rename = "highest_lowest_delta"))]
-	HighestLowestDelta,
+	Vidya(PeriodType),
 }
 
-impl FromStr for RegularMethods {
-	type Err = String;
+impl MovingAverageConstructor for MA {
+	type Type = u8;
+
+	fn init(&self, value: ValueType) -> Result<DynMovingAverage, Error> {
+		match *self {
+			Self::SMA(length) => Ok(Box::new(SMA::new(length, &value)?)),
+			Self::WMA(length) => Ok(Box::new(WMA::new(length, &value)?)),
+			Self::HMA(length) => Ok(Box::new(HMA::new(length, &value)?)),
+			Self::RMA(length) => Ok(Box::new(RMA::new(length, &value)?)),
+			Self::EMA(length) => Ok(Box::new(EMA::new(length, &value)?)),
+			Self::DMA(length) => Ok(Box::new(DMA::new(length, &value)?)),
+			Self::TMA(length) => Ok(Box::new(TMA::new(length, &value)?)),
+			Self::DEMA(length) => Ok(Box::new(DEMA::new(length, &value)?)),
+			Self::TEMA(length) => Ok(Box::new(TEMA::new(length, &value)?)),
+			Self::WSMA(length) => Ok(Box::new(WSMA::new(length, &value)?)),
+			Self::SMM(length) => Ok(Box::new(SMM::new(length, &value)?)),
+			Self::SWMA(length) => Ok(Box::new(SWMA::new(length, &value)?)),
+			Self::TRIMA(length) => Ok(Box::new(TRIMA::new(length, &value)?)),
+			Self::LinReg(length) => Ok(Box::new(LinReg::new(length, &value)?)),
+			Self::Vidya(length) => Ok(Box::new(Vidya::new(length, &value)?)),
+		}
+	}
+
+	#[allow(clippy::unnested_or_patterns)]
+	fn ma_period(&self) -> PeriodType {
+		match self {
+			Self::SMA(length)|Self::WMA(length)|Self::HMA(length)|Self::RMA(length)|
+			Self::EMA(length)|Self::DMA(length)|Self::TMA(length)|Self::DEMA(length)|
+			Self::TEMA(length)|Self::WSMA(length)|Self::SMM(length)|Self::SWMA(length)|
+			Self::TRIMA(length)|Self::LinReg(length)|Self::Vidya(length) => *length,
+		}
+	}
+
+	fn ma_type(&self) -> Self::Type {
+		match *self {
+			Self::SMA(_) => 0,
+			Self::WMA(_) => 1,
+			Self::HMA(_) => 2,
+			Self::RMA(_) => 3,
+			Self::EMA(_) => 4,
+			Self::DMA(_) => 5,
+			Self::TMA(_) => 6,
+			Self::DEMA(_) => 7,
+			Self::TEMA(_) => 8,
+			Self::WSMA(_) => 9,
+			Self::SMM(_) => 10,
+			Self::SWMA(_) => 11,
+			Self::TRIMA(_) => 12,
+			Self::LinReg(_) => 13,
+			Self::Vidya(_) => 14,
+		}
+	}
+}
+
+impl FromStr for MA {
+	type Err = Error;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s.to_ascii_lowercase().trim() {
-			"sma" => Ok(Self::SMA),
-			"wma" => Ok(Self::WMA),
-			"hma" => Ok(Self::HMA),
-			"rma" => Ok(Self::RMA),
-			"ema" => Ok(Self::EMA),
-			"dma" => Ok(Self::DMA),
-			"dema" => Ok(Self::DEMA),
-			"tma" => Ok(Self::TMA),
-			"tema" => Ok(Self::TEMA),
-			"wsma" => Ok(Self::WSMA),
-			"smm" => Ok(Self::SMM),
-			"swma" => Ok(Self::SWMA),
-			"trima" => Ok(Self::TRIMA),
-			"lin_reg" | "linreg" => Ok(Self::LinReg),
-			"vidya" => Ok(Self::Vidya),
+		let parts = s.split_once('-').ok_or(Error::MovingAverageParse)?;
 
-			"past" | "move" => Ok(Self::Past),
-			"derivative" => Ok(Self::Derivative),
-			"integral" => Ok(Self::Integral),
-			"mean_abs_dev" => Ok(Self::MeanAbsDev),
-			"median_abs_dev" => Ok(Self::MedianAbsDev),
-			"st_dev" | "stdev" => Ok(Self::StDev),
-			"cci" => Ok(Self::CCI),
-			"momentum" | "change" => Ok(Self::Momentum),
-			"rate_of_change" | "rateofchange" | "roc" => Ok(Self::RateOfChange),
-			"highest" => Ok(Self::Highest),
-			"lowest" => Ok(Self::Lowest),
-			"highest_lowest_delta" => Ok(Self::HighestLowestDelta),
+		let length: PeriodType = parts.1.parse().or(Err(Error::MovingAverageParse))?;
 
-			_ => Err(format!("Unknown regular method name {}", s)),
-		}
-	}
-}
-
-impl TryFrom<&str> for RegularMethods {
-	type Error = String;
-
-	fn try_from(s: &str) -> Result<Self, Self::Error> {
-		Self::from_str(s)
-	}
-}
-
-impl TryFrom<String> for RegularMethods {
-	type Error = String;
-
-	fn try_from(s: String) -> Result<Self, Self::Error> {
-		Self::from_str(s.as_str())
-	}
-}
-
-/// Returns a heap-allocated [`RegularMethod`] for timeseries by given `name` and window `length`.
-/// These methods are always gets an input value of type f64 and the same output value type
-///
-/// Available methods:
-/// * `sma` - [simple moving average](SMA)
-/// * `wma` - [weighed moving average](WMA)
-/// * `hma` - [hull moving average](HMA)
-/// * `ema` - [exponential moving average](EMA)
-/// * `rma` - [running moving average](RMA)
-/// * `dma` - [double exponential moving average](DMA)
-/// * `dema` - [another double exponential moving average](DEMA)
-/// * `tma` - [triple exponential moving average](TMA)
-/// * `tema` - [another triple exponential moving average](TEMA)
-/// * `wsma` - [Wilder's smoothing average](WSMA)
-/// * `smm` - [simple moving median](SMM)
-/// * `swma` - [symmetrically weighted moving average](SWMA)
-/// * `lin_reg` - [linear regression moving average](LinReg)
-/// * `vidya` - [variable index dynamic average](Vidya)
-/// * `trima` - [triangular moving average](TRIMA)
-/// * `past`, `move` - [moves timeseries forward](Past)
-/// * `derivative` - [derivative](Derivative)
-/// * `mean_abs_dev` - [mead absolute deviation](MeanAbsDev)
-/// * `median_abs_dev` - [median absolute deviation](MedianAbsDev)
-/// * `st_dev` - [standard deviation](StDev)
-/// * `cci` - [Commodity channel index](CCI)
-/// * `momentum`, `change` - [absolute change of values](Momentum)
-/// * `rate_of_change` - [relative change of values](RateOfChange)
-/// * [`highest`](Highest), [`lowest`](Lowest), [`highest_lowest_delta`](HighestLowestDelta)
-///
-/// # Examples
-///
-/// ```
-/// use yata::helpers::{method, RegularMethods};
-///
-/// let mut m = method(RegularMethods::SMA, 3, 1.0).unwrap();
-///
-/// m.next(1.0);
-/// m.next(2.0);
-///
-/// assert_eq!(m.next(3.0), 2.0);
-/// assert_eq!(m.next(4.0), 3.0);
-/// ```
-///
-/// # See also
-///
-/// [Default regular methods list](RegularMethods)
-
-pub fn method(
-	method: RegularMethods,
-	length: PeriodType,
-	initial_value: ValueType,
-) -> Result<RegularMethod, Error> {
-	match method {
-		RegularMethods::SMA => Ok(Box::new(SMA::new(length, &initial_value)?)),
-		RegularMethods::WMA => Ok(Box::new(WMA::new(length, &initial_value)?)),
-		RegularMethods::HMA => Ok(Box::new(HMA::new(length, &initial_value)?)),
-		RegularMethods::RMA => Ok(Box::new(RMA::new(length, &initial_value)?)),
-		RegularMethods::EMA => Ok(Box::new(EMA::new(length, &initial_value)?)),
-		RegularMethods::DMA => Ok(Box::new(DMA::new(length, &initial_value)?)),
-		RegularMethods::DEMA => Ok(Box::new(DEMA::new(length, &initial_value)?)),
-		RegularMethods::TMA => Ok(Box::new(TMA::new(length, &initial_value)?)),
-		RegularMethods::TEMA => Ok(Box::new(TEMA::new(length, &initial_value)?)),
-		RegularMethods::WSMA => Ok(Box::new(WSMA::new(length, &initial_value)?)),
-		RegularMethods::SMM => Ok(Box::new(SMM::new(length, &initial_value)?)),
-		RegularMethods::SWMA => Ok(Box::new(SWMA::new(length, &initial_value)?)),
-		RegularMethods::LinReg => Ok(Box::new(LinReg::new(length, &initial_value)?)),
-		RegularMethods::TRIMA => Ok(Box::new(TRIMA::new(length, &initial_value)?)),
-		RegularMethods::Vidya => Ok(Box::new(Vidya::new(length, &initial_value)?)),
-
-		RegularMethods::Past | RegularMethods::Move => {
-			Ok(Box::new(Past::new(length, &initial_value)?))
-		}
-		RegularMethods::Derivative => Ok(Box::new(Derivative::new(length, &initial_value)?)),
-		RegularMethods::Integral => Ok(Box::new(Integral::new(length, &initial_value)?)),
-		RegularMethods::MeanAbsDev => Ok(Box::new(MeanAbsDev::new(length, &initial_value)?)),
-		RegularMethods::MedianAbsDev => Ok(Box::new(MedianAbsDev::new(length, &initial_value)?)),
-		RegularMethods::StDev => Ok(Box::new(StDev::new(length, &initial_value)?)),
-		RegularMethods::CCI => Ok(Box::new(CCI::new(length, &initial_value)?)),
-		RegularMethods::Momentum | RegularMethods::Change => {
-			Ok(Box::new(Momentum::new(length, &initial_value)?))
-		}
-		RegularMethods::RateOfChange | RegularMethods::ROC => {
-			Ok(Box::new(RateOfChange::new(length, &initial_value)?))
-		}
-		RegularMethods::Highest => Ok(Box::new(Highest::new(length, &initial_value)?)),
-		RegularMethods::Lowest => Ok(Box::new(Lowest::new(length, &initial_value)?)),
-		RegularMethods::HighestLowestDelta => {
-			Ok(Box::new(HighestLowestDelta::new(length, &initial_value)?))
+		match parts.0 {
+			"sma" => Ok(Self::SMA(length)),
+			"wma" => Ok(Self::WMA(length)),
+			"hma" => Ok(Self::HMA(length)),
+			"rma" => Ok(Self::RMA(length)),
+			"ema" => Ok(Self::EMA(length)),
+			"dma" => Ok(Self::DMA(length)),
+			"tma" => Ok(Self::TMA(length)),
+			"dema" => Ok(Self::DEMA(length)),
+			"tema" => Ok(Self::TEMA(length)),
+			"wsma" => Ok(Self::WSMA(length)),
+			"smm" => Ok(Self::SMM(length)),
+			"swma" => Ok(Self::SWMA(length)),
+			"trima" => Ok(Self::TRIMA(length)),
+			"linreg" => Ok(Self::LinReg(length)),
+			"vidya" => Ok(Self::Vidya(length)),
+			_ => Err(Error::MovingAverageParse),
 		}
 	}
 }

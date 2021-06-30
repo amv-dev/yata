@@ -8,20 +8,24 @@ pub trait Sequence<T>: AsRef<[T]> {
 	fn validate(&self) -> bool;
 
 	/// Calls [`Method`](crate::core::Method) over the slice and returns `Vec` of result values.
-	fn call<M>(&self, method: M) -> Vec<M::Output>
+	#[inline]
+	fn call<M>(&self, method: &mut M) -> Vec<M::Output>
 	where
-		M: Method<Input = T>;
+		M: Method<Input = T>
+	{
+		self.as_ref().iter().map(|x| method.next(x)).collect()
+	}
 
 	/// Applies [`Method`](crate::core::Method) on the slice in-place.
 	#[inline]
-	fn apply<M>(&mut self, mut method: M)
+	fn apply<M>(&mut self, method: &mut M)
 	where
 		M: Method<Input = T, Output = T>,
 		Self: AsMut<[T]>,
 	{
 		self.as_mut()
 			.iter_mut()
-			.for_each(|x| *x = method.next(&*x));
+			.for_each(|x| *x = method.next(x));
 	}
 
 	/// Returns a reference to the first value in the sequence or `None` if it's empty.
@@ -82,30 +86,11 @@ impl<Q: AsRef<[ValueType]>> Sequence<ValueType> for Q {
 	fn validate(&self) -> bool {
 		self.as_ref().iter().copied().all(ValueType::is_finite)
 	}
-
-	#[inline]
-	fn call<M>(&self, mut method: M) -> Vec<M::Output>
-	where
-		M: Method<Input = ValueType>,
-	{
-		self.as_ref().iter().map(|x| method.next(x)).collect()
-	}
 }
 
 impl<T: OHLCV, Q: AsRef<[T]>> Sequence<T> for Q {
 	#[inline]
 	fn validate(&self) -> bool {
 		self.as_ref().iter().all(OHLCV::validate)
-	}
-
-	#[inline]
-	fn call<M>(&self, mut method: M) -> Vec<M::Output>
-	where
-		M: Method<Input = T>,
-	{
-		self.as_ref()
-			.iter()
-			.map(|x| method.next(x))
-			.collect()
 	}
 }
