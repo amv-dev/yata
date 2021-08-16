@@ -59,6 +59,8 @@ pub enum MA {
 	Vidya(PeriodType),
 }
 
+
+/// Default moving average instance for constructor
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "lowercase"))]

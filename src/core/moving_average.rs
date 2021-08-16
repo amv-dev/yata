@@ -25,6 +25,8 @@ pub trait MovingAverage: Method<Params = PeriodType, Input = ValueType, Output =
 pub trait MovingAverageConstructor: Clone + FromStr {
     /// Used for comparing MA types
     type Type: Eq;
+
+    /// `MovingAverage` Instance type
     type Instance: MovingAverage;
 
     /// Creates moving average instance with the `initial_value`
@@ -41,33 +43,3 @@ pub trait MovingAverageConstructor: Clone + FromStr {
         self.ma_type() == other.ma_type()
     }
 }
-
-// impl<T: MovingAverageConstructor> MovingAverageConstructor for Rc<T> {
-//     fn init(&self, value: ValueType) -> Result<DynMovingAverage, Error> {
-//         MovingAverageConstructor::init(&**self, value)
-//     }
-
-//     fn len(&self) -> PeriodType {
-//         MovingAverageConstructor::len(&**self)
-//     }
-// }
-
-// impl<T: MovingAverageConstructor> MovingAverageConstructor for Arc<T> {
-//     fn init(&self, value: ValueType) -> Result<DynMovingAverage, Error> {
-//         MovingAverageConstructor::init(&**self, value)
-//     }
-
-//     fn len(&self) -> PeriodType {
-//         MovingAverageConstructor::len(&**self)
-//     }
-// }
-
-// impl<T: MovingAverageConstructor> MovingAverageConstructor for Box<T> {
-//     fn init(&self, value: ValueType) -> Result<DynMovingAverage, Error> {
-//         MovingAverageConstructor::init(&**self, value)
-//     }
-
-//     fn len(&self) -> PeriodType {
-//         MovingAverageConstructor::len(&**self)
-//     }
-// }
