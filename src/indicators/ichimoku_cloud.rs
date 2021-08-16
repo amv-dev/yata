@@ -137,6 +137,7 @@ impl Default for IchimokuCloud {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct IchimokuCloudInstance {
 	cfg: IchimokuCloud,
 

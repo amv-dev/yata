@@ -124,6 +124,7 @@ impl Default for Aroon {
 
 /// Aroon state structure
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AroonInstance {
 	cfg: Aroon,
 	lowest_index: LowestIndex,

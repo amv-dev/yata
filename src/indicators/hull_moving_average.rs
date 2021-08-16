@@ -115,6 +115,7 @@ impl Default for HullMovingAverage {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HullMovingAverageInstance {
 	cfg: HullMovingAverage,
 

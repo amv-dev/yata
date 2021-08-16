@@ -81,6 +81,7 @@ impl Default for ChaikinMoneyFlow {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChaikinMoneyFlowInstance {
 	cfg: ChaikinMoneyFlow,
 

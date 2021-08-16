@@ -99,6 +99,7 @@ impl Default for PriceChannelStrategy {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PriceChannelStrategyInstance {
 	cfg: PriceChannelStrategy,
 

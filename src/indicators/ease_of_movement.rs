@@ -105,6 +105,7 @@ impl Default for EaseOfMovement<MA> {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EaseOfMovementInstance<M: MovingAverageConstructor = MA> {
 	cfg: EaseOfMovement<M>,
 

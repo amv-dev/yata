@@ -110,6 +110,7 @@ impl Default for ChaikinOscillator<MA> {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChaikinOscillatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: ChaikinOscillator<M>,
 

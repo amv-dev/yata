@@ -181,6 +181,7 @@ impl Default for KnowSureThing {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KnowSureThingInstance<M: MovingAverageConstructor = MA> {
 	cfg: KnowSureThing<M>,
 

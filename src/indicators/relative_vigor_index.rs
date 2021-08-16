@@ -144,6 +144,7 @@ impl Default for RelativeVigorIndex {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RelativeVigorIndexInstance<M: MovingAverageConstructor = MA> {
 	cfg: RelativeVigorIndex<M>,
 

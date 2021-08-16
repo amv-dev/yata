@@ -103,6 +103,7 @@ impl Default for ChandeMomentumOscillator {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChandeMomentumOscillatorInstance {
 	cfg: ChandeMomentumOscillator,
 

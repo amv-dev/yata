@@ -124,6 +124,7 @@ impl Default for Trix {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TRIXInstance<M: MovingAverageConstructor = MA> {
 	cfg: Trix<M>,
 

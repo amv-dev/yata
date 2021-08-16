@@ -95,6 +95,7 @@ impl Default for PivotReversalStrategy {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PivotReversalStrategyInstance {
 	cfg: PivotReversalStrategy,
 

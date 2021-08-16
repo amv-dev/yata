@@ -104,6 +104,7 @@ impl Default for BollingerBands {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BollingerBandsInstance {
 	cfg: BollingerBands,
 

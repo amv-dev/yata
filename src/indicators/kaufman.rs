@@ -155,6 +155,7 @@ impl Default for Kaufman {
 	}
 }
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KaufmanInstance {
 	cfg: Kaufman,
 

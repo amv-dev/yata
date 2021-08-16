@@ -123,6 +123,7 @@ impl Default for Envelopes<MA> {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EnvelopesInstance<M: MovingAverageConstructor = MA> {
 	cfg: Envelopes<M>,
 

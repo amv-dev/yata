@@ -111,6 +111,7 @@ impl Default for MoneyFlowIndex {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MoneyFlowIndexInstance {
 	cfg: MoneyFlowIndex,
 

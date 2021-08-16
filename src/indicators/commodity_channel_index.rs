@@ -105,6 +105,7 @@ impl Default for CommodityChannelIndex {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CommodityChannelIndexInstance {
 	cfg: CommodityChannelIndex,
 

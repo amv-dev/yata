@@ -95,6 +95,7 @@ impl Default for ParabolicSAR {
 }
 
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ParabolicSARInstance {
 	cfg: ParabolicSAR,
 

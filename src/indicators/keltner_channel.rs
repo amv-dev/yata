@@ -117,6 +117,7 @@ impl Default for KeltnerChannel<MA> {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KeltnerChannelInstance<M: MovingAverageConstructor = MA> {
 	cfg: KeltnerChannel<M>,
 

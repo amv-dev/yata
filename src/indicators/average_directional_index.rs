@@ -153,6 +153,7 @@ impl Default for AverageDirectionalIndex<MA> {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AverageDirectionalIndexInstance<M: MovingAverageConstructor = MA> {
 	cfg: AverageDirectionalIndex<M>,
 

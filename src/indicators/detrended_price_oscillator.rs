@@ -102,6 +102,7 @@ impl Default for DetrendedPriceOscillator<MA> {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct DetrendedPriceOscillatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: DetrendedPriceOscillator<M>,
 

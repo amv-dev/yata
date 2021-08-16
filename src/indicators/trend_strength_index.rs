@@ -139,6 +139,7 @@ impl Default for TrendStrengthIndex {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TrendStrengthIndexInstance {
 	cfg: TrendStrengthIndex,
 	period: ValueType,

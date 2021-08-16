@@ -143,6 +143,7 @@ impl Default for AwesomeOscillator<MA> {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AwesomeOscillatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: AwesomeOscillator<M>,
 

@@ -133,6 +133,7 @@ impl Default for FisherTransform<MA> {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FisherTransformInstance<M: MovingAverageConstructor = MA> {
 	cfg: FisherTransform<M>,
 

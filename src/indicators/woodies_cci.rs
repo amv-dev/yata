@@ -118,6 +118,7 @@ impl Default for WoodiesCCI {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WoodiesCCIInstance {
 	cfg: WoodiesCCI,
 

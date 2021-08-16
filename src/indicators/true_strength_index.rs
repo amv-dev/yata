@@ -148,6 +148,7 @@ impl Default for TrueStrengthIndex {
 }
 
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TrueStrengthIndexInstance {
 	cfg: TrueStrengthIndex,
 

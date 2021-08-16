@@ -1,10 +1,13 @@
 #![allow(missing_docs)]
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 use crate::core::{ValueType, OHLCV};
 
 pub mod example;
 
 #[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 struct HLC {
 	high: ValueType,
 	low: ValueType,
