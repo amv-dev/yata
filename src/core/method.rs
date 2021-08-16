@@ -84,6 +84,7 @@ pub trait Method: fmt::Debug {
 	}
 
 	/// Returns memory size of the method `(size, align)`
+	#[deprecated]
 	fn memsize(&self) -> (usize, usize)
 	where
 		Self: Sized,
