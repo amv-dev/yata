@@ -3,11 +3,10 @@ use std::str::FromStr;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, DynMovingAverage, MovingAverageConstructor, PeriodType, ValueType};
+use crate::core::{Error, Method, MovingAverage, MovingAverageConstructor, PeriodType, ValueType};
 use crate::methods::{LinReg, Vidya, DEMA, DMA, EMA, HMA, RMA, SMA, SMM, SWMA, TEMA, TMA, TRIMA, WMA, WSMA};
 
 /// Default moving average constructor
-#[allow(clippy::pub_enum_variant_names)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "lowercase"))]
@@ -60,26 +59,160 @@ pub enum MA {
 	Vidya(PeriodType),
 }
 
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "lowercase"))]
+#[non_exhaustive]
+pub enum MAInstance {
+	/// [Simple Moving Average](crate::methods::SMA)
+	SMA(SMA),
+
+	/// [Weighed Moving Average](crate::methods::WMA)
+	WMA(WMA),
+
+	/// [Hull Moving Average](crate::methods::HMA)
+	HMA(HMA),
+
+	/// [Running Moving Average](crate::methods::RMA)
+	RMA(RMA),
+
+	/// [Exponential Moving Average](crate::methods::EMA)
+	EMA(EMA),
+
+	/// [Double Exponential Moving Average](crate::methods::DMA)
+	DMA(DMA),
+
+	/// Another type of [Double Exponential Moving Average](crate::methods::DEMA)
+	DEMA(DEMA),
+
+	/// [Triple Exponential Moving Average](crate::methods::TMA)
+	TMA(TMA),
+
+	/// Another type of [Triple Exponential Moving Average](crate::methods::DEMA)
+	TEMA(TEMA),
+
+	/// [Wilder's smoothing average](crate::methods::WSMA)
+	WSMA(WSMA),
+
+	/// [Simple Moving Median](crate::methods::SMM)
+	SMM(SMM),
+
+	/// [Symmetrically Weighted Moving Average](crate::methods::SWMA)
+	SWMA(SWMA),
+
+	/// [Triangular Moving Average](crate::methods::TRIMA)
+	TRIMA(TRIMA),
+
+	/// [Linear regression](crate::methods::LinReg)
+	#[cfg_attr(feature = "serde", serde(rename = "lin_reg"))]
+	LinReg(LinReg),
+
+	/// [Variable Index Dynamic Average](crate::methods::Vidya)
+	Vidya(Vidya),
+}
+
+impl Method for MAInstance {
+	type Input = ValueType;
+	type Output = ValueType;
+	type Params = PeriodType;
+
+	fn new(_: Self::Params, _: &Self::Input) -> Result<Self, Error>
+	where
+		Self: Sized
+	{
+		Err(Error::Other("`MAInstance` cannot be constructed directly. You should use `MA::init` to instanciate it.".into()))
+	}
+
+	#[inline]
+	fn next(&mut self, value: &Self::Input) -> Self::Output {
+		match self {
+			Self::SMA(i) => i.next(value),
+			Self::WMA(i) => i.next(value),
+			Self::HMA(i) => i.next(value),
+			Self::RMA(i) => i.next(value),
+			Self::EMA(i) => i.next(value),
+			Self::DMA(i) => i.next(value),
+			Self::DEMA(i) => i.next(value),
+			Self::TMA(i) => i.next(value),
+			Self::TEMA(i) => i.next(value),
+			Self::WSMA(i) => i.next(value),
+			Self::SMM(i) => i.next(value),
+			Self::SWMA(i) => i.next(value),
+			Self::TRIMA(i) => i.next(value),
+			Self::LinReg(i) => i.next(value),
+			Self::Vidya(i) => i.next(value),
+		}
+	}
+}
+
+impl MovingAverage for MAInstance {}
+
 impl MovingAverageConstructor for MA {
 	type Type = u8;
+	type Instance = MAInstance;
 
-	fn init(&self, value: ValueType) -> Result<DynMovingAverage, Error> {
+	fn init(&self, value: ValueType) -> Result<Self::Instance, Error> {
 		match *self {
-			Self::SMA(length) => Ok(Box::new(SMA::new(length, &value)?)),
-			Self::WMA(length) => Ok(Box::new(WMA::new(length, &value)?)),
-			Self::HMA(length) => Ok(Box::new(HMA::new(length, &value)?)),
-			Self::RMA(length) => Ok(Box::new(RMA::new(length, &value)?)),
-			Self::EMA(length) => Ok(Box::new(EMA::new(length, &value)?)),
-			Self::DMA(length) => Ok(Box::new(DMA::new(length, &value)?)),
-			Self::TMA(length) => Ok(Box::new(TMA::new(length, &value)?)),
-			Self::DEMA(length) => Ok(Box::new(DEMA::new(length, &value)?)),
-			Self::TEMA(length) => Ok(Box::new(TEMA::new(length, &value)?)),
-			Self::WSMA(length) => Ok(Box::new(WSMA::new(length, &value)?)),
-			Self::SMM(length) => Ok(Box::new(SMM::new(length, &value)?)),
-			Self::SWMA(length) => Ok(Box::new(SWMA::new(length, &value)?)),
-			Self::TRIMA(length) => Ok(Box::new(TRIMA::new(length, &value)?)),
-			Self::LinReg(length) => Ok(Box::new(LinReg::new(length, &value)?)),
-			Self::Vidya(length) => Ok(Box::new(Vidya::new(length, &value)?)),
+			Self::SMA(length) => {
+				let instance = SMA::new(length, &value)?;
+				Ok(Self::Instance::SMA(instance))
+			},
+			Self::WMA(length) => {
+				let instance = WMA::new(length, &value)?;
+				Ok(Self::Instance::WMA(instance))
+			},
+			Self::HMA(length) => {
+				let instance = HMA::new(length, &value)?;
+				Ok(Self::Instance::HMA(instance))
+			},
+			Self::RMA(length) => {
+				let instance = RMA::new(length, &value)?;
+				Ok(Self::Instance::RMA(instance))
+			},
+			Self::EMA(length) => {
+				let instance = EMA::new(length, &value)?;
+				Ok(Self::Instance::EMA(instance))
+			},
+			Self::DMA(length) => {
+				let instance = DMA::new(length, &value)?;
+				Ok(Self::Instance::DMA(instance))
+			},
+			Self::DEMA(length) => {
+				let instance = DEMA::new(length, &value)?;
+				Ok(Self::Instance::DEMA(instance))
+			},
+			Self::TMA(length) => {
+				let instance = TMA::new(length, &value)?;
+				Ok(Self::Instance::TMA(instance))
+			},
+			Self::TEMA(length) => {
+				let instance = TEMA::new(length, &value)?;
+				Ok(Self::Instance::TEMA(instance))
+			},
+			Self::WSMA(length) => {
+				let instance = WSMA::new(length, &value)?;
+				Ok(Self::Instance::WSMA(instance))
+			},
+			Self::SMM(length) => {
+				let instance = SMM::new(length, &value)?;
+				Ok(Self::Instance::SMM(instance))
+			},
+			Self::SWMA(length) => {
+				let instance = SWMA::new(length, &value)?;
+				Ok(Self::Instance::SWMA(instance))
+			},
+			Self::TRIMA(length) => {
+				let instance = TRIMA::new(length, &value)?;
+				Ok(Self::Instance::TRIMA(instance))
+			},
+			Self::LinReg(length) => {
+				let instance = LinReg::new(length, &value)?;
+				Ok(Self::Instance::LinReg(instance))
+			},
+			Self::Vidya(length) => {
+				let instance = Vidya::new(length, &value)?;
+				Ok(Self::Instance::Vidya(instance))
+			},
 		}
 	}
 

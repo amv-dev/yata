@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, DynMovingAverage, Error, MovingAverageConstructor, OHLCV, Source, ValueType};
+use crate::core::{Action, Error, MovingAverageConstructor, Method, OHLCV, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 
@@ -126,7 +126,7 @@ impl Default for Envelopes<MA> {
 pub struct EnvelopesInstance<M: MovingAverageConstructor = MA> {
 	cfg: Envelopes<M>,
 
-	ma: DynMovingAverage,
+	ma: M::Instance,
 	k_high: ValueType,
 	k_low: ValueType,
 }

@@ -13,7 +13,6 @@ use super::{Error, Method, PeriodType, ValueType};
 /// [`Method`]: crate::core::Method
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
-pub type DynMovingAverage = Box<dyn MovingAverage>;
 
 /// Marker trait for any moving average
 pub trait MovingAverage: Method<Params = PeriodType, Input = ValueType, Output = ValueType> {}
@@ -26,9 +25,10 @@ pub trait MovingAverage: Method<Params = PeriodType, Input = ValueType, Output =
 pub trait MovingAverageConstructor: Clone + FromStr {
     /// Used for comparing MA types
     type Type: Eq;
+    type Instance: MovingAverage;
 
     /// Creates moving average instance with the `initial_value`
-    fn init(&self, initial_value: ValueType) -> Result<DynMovingAverage, Error>;
+    fn init(&self, initial_value: ValueType) -> Result<Self::Instance, Error>;
 
     /// Returns period length of 
     fn ma_period(&self) -> PeriodType;

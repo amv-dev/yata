@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, ADI};
@@ -114,8 +114,8 @@ pub struct ChaikinOscillatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: ChaikinOscillator<M>,
 
 	adi: ADI,
-	ma1: DynMovingAverage,
-	ma2: DynMovingAverage,
+	ma1: M::Instance,
+	ma2: M::Instance,
 	cross_over: Cross,
 }
 

@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, TSI};
@@ -147,7 +147,7 @@ pub struct SMIErgodicIndicatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: SMIErgodicIndicator<M>,
 
 	tsi: TSI,
-	ma: DynMovingAverage,
+	ma: M::Instance,
 	cross: Cross,
 }
 

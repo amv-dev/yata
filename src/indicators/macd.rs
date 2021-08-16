@@ -3,7 +3,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Candle, DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
+use crate::core::{Candle, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::Cross;
@@ -147,9 +147,9 @@ impl Default for MACD {
 pub struct MACDInstance<M: MovingAverageConstructor> {
 	cfg: MACD<M>,
 
-	ma1: DynMovingAverage,
-	ma2: DynMovingAverage,
-	ma3: DynMovingAverage,
+	ma1: M::Instance,
+	ma2: M::Instance,
+	ma3: M::Instance,
 	cross1: Cross,
 	cross2: Cross,
 }

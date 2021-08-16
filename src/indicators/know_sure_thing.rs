@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, RateOfChange};
@@ -188,11 +188,11 @@ pub struct KnowSureThingInstance<M: MovingAverageConstructor = MA> {
 	roc2v: RateOfChange,
 	roc3v: RateOfChange,
 	roc4v: RateOfChange,
-	ma1: DynMovingAverage,
-	ma2: DynMovingAverage,
-	ma3: DynMovingAverage,
-	ma4: DynMovingAverage,
-	ma5: DynMovingAverage,
+	ma1: M::Instance,
+	ma2: M::Instance,
+	ma3: M::Instance,
+	ma4: M::Instance,
+	ma5: M::Instance,
 	cross: Cross,
 }
 

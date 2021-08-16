@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Candle, DynMovingAverage, MovingAverageConstructor};
+use crate::core::{Candle, MovingAverageConstructor};
 use crate::core::{Error, Method, PeriodType, Source, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
@@ -115,7 +115,7 @@ impl Default for EldersForceIndex<MA> {
 pub struct EldersForceIndexInstance<M: MovingAverageConstructor = MA> {
 	cfg: EldersForceIndex<M>,
 
-	ma: DynMovingAverage,
+	ma: M::Instance,
 	window: Window<Candle>,
 	vol_sum: ValueType,
 	cross_over: Cross,

@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType, Window};
+use crate::core::{Error, MovingAverageConstructor, Method, OHLCV, PeriodType, Source, ValueType, Window};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 
@@ -105,7 +105,7 @@ impl Default for DetrendedPriceOscillator<MA> {
 pub struct DetrendedPriceOscillatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: DetrendedPriceOscillator<M>,
 
-	sma: DynMovingAverage,
+	sma: M::Instance,
 	window: Window<ValueType>,
 }
 

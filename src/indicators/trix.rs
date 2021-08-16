@@ -1,4 +1,4 @@
-use crate::core::{DynMovingAverage, Error, IndicatorConfig, IndicatorInstance, IndicatorResult, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
+use crate::core::{Error, IndicatorConfig, IndicatorInstance, IndicatorResult, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
 use crate::helpers::MA;
 use crate::methods::{Change, Cross, ReversalSignal, TMA};
 
@@ -128,7 +128,7 @@ pub struct TRIXInstance<M: MovingAverageConstructor = MA> {
 	cfg: Trix<M>,
 
 	tma: TMA,
-	sig: DynMovingAverage,
+	sig: M::Instance,
 	change: Change,
 	cross1: Cross,
 	cross2: Cross,

@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::HLC;
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Window};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Window};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::Cross;
@@ -108,7 +108,7 @@ impl Default for EaseOfMovement<MA> {
 pub struct EaseOfMovementInstance<M: MovingAverageConstructor = MA> {
 	cfg: EaseOfMovement<M>,
 
-	m1: DynMovingAverage,
+	m1: M::Instance,
 	w: Window<HLC>,
 	cross: Cross,
 }

@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, ReversalSignal};
@@ -146,8 +146,8 @@ impl Default for AwesomeOscillator<MA> {
 pub struct AwesomeOscillatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: AwesomeOscillator<M>,
 
-	ma1: DynMovingAverage,
-	ma2: DynMovingAverage,
+	ma1: M::Instance,
+	ma2: M::Instance,
 	cross_over: Cross,
 	reverse: ReversalSignal,
 	low_peaks: u8,

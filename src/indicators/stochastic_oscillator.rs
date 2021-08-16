@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, CrossAbove, CrossUnder, Highest, Lowest};
@@ -166,8 +166,8 @@ pub struct StochasticOscillatorInstance<M: MovingAverageConstructor = MA> {
 	upper_zone: ValueType,
 	highest: Highest,
 	lowest: Lowest,
-	ma1: DynMovingAverage,
-	ma2: DynMovingAverage,
+	ma1: M::Instance,
+	ma2: M::Instance,
 	cross_over: Cross,
 	cross_above1: CrossAbove,
 	cross_under1: CrossUnder,

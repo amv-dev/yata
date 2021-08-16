@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{MA, sign};
 use crate::methods::Cross;
@@ -129,9 +129,9 @@ impl Default for KlingerVolumeOscillator {
 pub struct KlingerVolumeOscillatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: KlingerVolumeOscillator<M>,
 
-	ma1: DynMovingAverage,
-	ma2: DynMovingAverage,
-	ma3: DynMovingAverage,
+	ma1: M::Instance,
+	ma2: M::Instance,
+	ma3: M::Instance,
 	cross1: Cross,
 	cross2: Cross,
 	last_tp: ValueType,

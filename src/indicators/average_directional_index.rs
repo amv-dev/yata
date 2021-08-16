@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::HLC;
-use crate::core::{DynMovingAverage, Error, MovingAverageConstructor, OHLCV, PeriodType, ValueType, Window};
+use crate::core::{Error, MovingAverageConstructor, Method, OHLCV, PeriodType, ValueType, Window};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 
@@ -158,10 +158,10 @@ pub struct AverageDirectionalIndexInstance<M: MovingAverageConstructor = MA> {
 
 	window: Window<HLC>,
 	prev_close: ValueType,
-	tr_ma: DynMovingAverage,
-	plus_di: DynMovingAverage,
-	minus_di: DynMovingAverage,
-	ma2: DynMovingAverage,
+	tr_ma: M::Instance,
+	plus_di: M::Instance,
+	minus_di: M::Instance,
+	ma2: M::Instance,
 }
 
 impl<M: MovingAverageConstructor> AverageDirectionalIndexInstance<M> {

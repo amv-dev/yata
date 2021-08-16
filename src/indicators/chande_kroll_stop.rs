@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 // use std::str::FromStr;
 
-use crate::core::{Action, DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
+use crate::core::{Action, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::{MA, signi};
 use crate::methods::{CrossAbove, Highest, Lowest};
@@ -145,7 +145,7 @@ impl Default for ChandeKrollStop<MA> {
 pub struct ChandeKrollStopInstance<M: MovingAverageConstructor = MA> {
 	cfg: ChandeKrollStop<M>,
 
-	ma: DynMovingAverage,
+	ma: M::Instance,
 	highest1: Highest,
 	lowest1: Lowest,
 	highest2: Highest,

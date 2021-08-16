@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, RateOfChange, ReversalSignal};
@@ -179,8 +179,8 @@ pub struct CoppockCurveInstance<M: MovingAverageConstructor = MA> {
 
 	roc1: RateOfChange,
 	roc2: RateOfChange,
-	ma1: DynMovingAverage,
-	ma2: DynMovingAverage,
+	ma1: M::Instance,
+	ma2: M::Instance,
 	cross_over1: Cross,
 	pivot: ReversalSignal,
 	cross_over2: Cross,

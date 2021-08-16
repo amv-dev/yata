@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, Source, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{CrossAbove, CrossUnder, SMA};
@@ -121,7 +121,7 @@ pub struct KeltnerChannelInstance<M: MovingAverageConstructor = MA> {
 	cfg: KeltnerChannel<M>,
 
 	prev_close: ValueType,
-	ma: DynMovingAverage,
+	ma: M::Instance,
 	sma: SMA,
 	cross_above: CrossAbove,
 	cross_under: CrossUnder,

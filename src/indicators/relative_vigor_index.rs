@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, SMA, SWMA};
@@ -152,7 +152,7 @@ pub struct RelativeVigorIndexInstance<M: MovingAverageConstructor = MA> {
 	sma1: SMA,
 	swma2: SWMA,
 	sma2: SMA,
-	ma: DynMovingAverage,
+	ma: M::Instance,
 	cross: Cross,
 }
 

@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{DynMovingAverage, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, Highest, Lowest};
@@ -136,7 +136,7 @@ impl Default for FisherTransform<MA> {
 pub struct FisherTransformInstance<M: MovingAverageConstructor = MA> {
 	cfg: FisherTransform<M>,
 
-	ma1: DynMovingAverage,
+	ma1: M::Instance,
 	highest: Highest,
 	lowest: Lowest,
 	cross: Cross,
