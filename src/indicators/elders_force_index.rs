@@ -111,7 +111,7 @@ impl Default for EldersForceIndex<MA> {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EldersForceIndexInstance<M: MovingAverageConstructor = MA> {
 	cfg: EldersForceIndex<M>,

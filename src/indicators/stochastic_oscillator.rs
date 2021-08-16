@@ -159,7 +159,7 @@ impl Default for StochasticOscillator {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct StochasticOscillatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: StochasticOscillator<M>,

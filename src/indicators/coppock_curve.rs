@@ -173,7 +173,7 @@ impl Default for CoppockCurve<MA> {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CoppockCurveInstance<M: MovingAverageConstructor = MA> {
 	cfg: CoppockCurve<M>,

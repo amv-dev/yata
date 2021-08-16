@@ -143,7 +143,7 @@ impl Default for MACD {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MACDInstance<M: MovingAverageConstructor> {
 	cfg: MACD<M>,

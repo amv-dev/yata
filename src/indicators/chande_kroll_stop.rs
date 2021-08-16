@@ -141,7 +141,7 @@ impl Default for ChandeKrollStop<MA> {
 }
 
 /// Chande Kroll Stop state structure
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChandeKrollStopInstance<M: MovingAverageConstructor = MA> {
 	cfg: ChandeKrollStop<M>,

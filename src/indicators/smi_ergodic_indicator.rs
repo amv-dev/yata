@@ -142,7 +142,7 @@ impl Default for SMIErgodicIndicator {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SMIErgodicIndicatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: SMIErgodicIndicator<M>,

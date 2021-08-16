@@ -95,7 +95,7 @@ impl Default for DonchianChannel {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct DonchianChannelInstance {
 	cfg: DonchianChannel,

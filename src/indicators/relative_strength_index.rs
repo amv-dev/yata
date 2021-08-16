@@ -122,7 +122,7 @@ impl Default for RelativeStrengthIndex {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RelativeStrengthIndexInstance<M: MovingAverageConstructor = MA> {
 	cfg: RelativeStrengthIndex<M>,

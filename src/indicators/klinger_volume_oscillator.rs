@@ -125,7 +125,7 @@ impl Default for KlingerVolumeOscillator {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KlingerVolumeOscillatorInstance<M: MovingAverageConstructor = MA> {
 	cfg: KlingerVolumeOscillator<M>,
