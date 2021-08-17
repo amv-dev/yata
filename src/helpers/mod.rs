@@ -4,7 +4,7 @@
 
 mod methods;
 use crate::core::{Candle, ValueType};
-pub use methods::*;
+pub use methods::{MA, MAInstance};
 
 /// sign is like [`f64::signum`]
 /// except when value == 0.0, then sign returns 0.0

@@ -113,16 +113,22 @@ pub enum MAInstance {
 	Vidya(Vidya),
 }
 
+mod ma_instance_protection {
+	#[doc(hidden)]
+	#[allow(missing_copy_implementations, missing_debug_implementations)]
+	pub struct MAInstanceCreationProtection;
+}
+
 impl Method for MAInstance {
 	type Input = ValueType;
 	type Output = ValueType;
-	type Params = PeriodType;
+	type Params = ma_instance_protection::MAInstanceCreationProtection;
 
 	fn new(_: Self::Params, _: &Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized
 	{
-		Err(Error::Other("`MAInstance` cannot be constructed directly. You should use `MA::init` to instanciate it.".into()))
+		Err(Error::Other("`MAInstance` cannot be constructed directly. You should use `MA::init` to instantiate it.".into()))
 	}
 
 	#[inline]
