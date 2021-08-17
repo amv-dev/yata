@@ -15,7 +15,7 @@ use super::{Error, Method, PeriodType, ValueType};
 /// [`PeriodType`]: crate::core::PeriodType
 
 /// Marker trait for any moving average
-pub trait MovingAverage: Method<Params = PeriodType, Input = ValueType, Output = ValueType> {}
+pub trait MovingAverage: Method<Input = ValueType, Output = ValueType> {}
 
 /// Trait for dynamically creation of moving average instances based on it's type and period
 ///
