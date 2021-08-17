@@ -92,7 +92,7 @@ impl<M: MovingAverageConstructor> IndicatorConfig for CoppockCurve<M> {
 			ma1: cfg.ma1.init(0.)?,// method(cfg.method1, cfg.period1, 0.)?,
 			ma2: cfg.s3_ma.init(0.)?, //method(cfg.method2, cfg.s3_period, 0.)?,
 			cross_over1: Cross::default(),
-			pivot: ReversalSignal::new(cfg.s2_left, cfg.s2_right, 0.)?,
+			pivot: ReversalSignal::new(cfg.s2_left, cfg.s2_right, &0.)?,
 			cross_over2: Cross::default(),
 
 			cfg,

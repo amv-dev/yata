@@ -70,7 +70,7 @@ impl<M: MovingAverageConstructor> IndicatorConfig for Trix<M> {
 				change: Change::new(1, &src)?,
 				cross1: Cross::new((), &(src, src))?,
 				cross2: Cross::new((), &(src, src))?,
-				reverse: ReversalSignal::new(1, 1, 0.0)?,
+				reverse: ReversalSignal::new(1, 1, &0.0)?,
 
 				cfg: self,
 				// phantom: PhantomData::default(),

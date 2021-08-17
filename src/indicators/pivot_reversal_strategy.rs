@@ -51,8 +51,8 @@ impl IndicatorConfig for PivotReversalStrategy {
 
 		let cfg = self;
 		Ok(Self::Instance {
-			ph: UpperReversalSignal::new(cfg.left, cfg.right, candle.high())?,
-			pl: LowerReversalSignal::new(cfg.left, cfg.right, candle.low())?,
+			ph: UpperReversalSignal::new(cfg.left, cfg.right, &candle.high())?,
+			pl: LowerReversalSignal::new(cfg.left, cfg.right, &candle.low())?,
 			window: Window::new(cfg.right, HLC::from(candle)),
 			hprice: 0.,
 			lprice: 0.,

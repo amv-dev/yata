@@ -59,8 +59,8 @@ pub struct ReversalSignal {
 impl ReversalSignal {
 	/// Constructs new instanceof `ReversalSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
-	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
-		Method::new((left, right), &value)
+	pub fn new(left: PeriodType, right: PeriodType, value: &ValueType) -> Result<Self, Error> {
+		Method::new((left, right), value)
 	}
 }
 
@@ -146,8 +146,8 @@ pub struct UpperReversalSignal {
 impl UpperReversalSignal {
 	/// Constructs new instanceof `UpperReversalSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
-	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
-		Method::new((left, right), &value)
+	pub fn new(left: PeriodType, right: PeriodType, value: &ValueType) -> Result<Self, Error> {
+		Method::new((left, right), value)
 	}
 }
 
@@ -280,8 +280,8 @@ pub struct LowerReversalSignal {
 impl LowerReversalSignal {
 	/// Constructs new instanceof `LowerReversalSignal`
 	/// It's just an alias for `Method::new((left, right), value)` but without parentheses of `Input` tuple
-	pub fn new(left: PeriodType, right: PeriodType, value: ValueType) -> Result<Self, Error> {
-		Method::new((left, right), &value)
+	pub fn new(left: PeriodType, right: PeriodType, value: &ValueType) -> Result<Self, Error> {
+		Method::new((left, right), value)
 	}
 }
 
@@ -360,7 +360,7 @@ mod tests {
 		for i in 1..254 {
 			for j in 1..(254 - i) {
 				let input = (i as ValueType + 56.0) / 16.3251;
-				let mut method = LowerReversalSignal::new(i, j, input).unwrap();
+				let mut method = LowerReversalSignal::new(i, j, &input).unwrap();
 
 				let output = method.next(&input);
 				test_const(&mut method, &input, &output);
@@ -374,7 +374,7 @@ mod tests {
 		let v: Vec<ValueType> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
 		let r: Vec<i8> =  vec![ 0,   0,   0,   1,   0,   0,   0,   0,   1,   0,   0,   1,   0,   0,   0,   0,   1 ];
 
-		let mut pivot = LowerReversalSignal::new(2, 2, v[0]).unwrap();
+		let mut pivot = LowerReversalSignal::new(2, 2, &v[0]).unwrap();
 
 		let r2: Vec<i8> = v.iter().map(|x| pivot.next(x).analog()).collect();
 		assert_eq!(r, r2);
@@ -385,7 +385,7 @@ mod tests {
 		for i in 1..254 {
 			for j in 1..(254 - i) {
 				let input = (i as ValueType + 56.0) / 16.3251;
-				let mut method = UpperReversalSignal::new(i, j, input).unwrap();
+				let mut method = UpperReversalSignal::new(i, j, &input).unwrap();
 
 				let output = method.next(&input);
 				test_const(&mut method, &input, &output);
@@ -399,7 +399,7 @@ mod tests {
 		let v: Vec<ValueType> = vec![2.0, 1.0, 2.0, 2.0, 3.0, 2.0, 1.0, 2.0, 3.0, 2.0, 3.0, 4.0, 1.0, 2.0, 1.0, 2.0, 3.0];
 		let r: Vec<i8> =  vec![ 0,   0,   0,   0,   0,   0,   1,   0,   0,   0,   0,   0,   0,   1,   0,   0,   0 ];
 
-		let mut pivot = UpperReversalSignal::new(2, 2, v[0]).unwrap();
+		let mut pivot = UpperReversalSignal::new(2, 2, &v[0]).unwrap();
 
 		let r2: Vec<i8> = v.iter().map(|x| pivot.next(x).analog()).collect();
 		assert_eq!(r, r2);

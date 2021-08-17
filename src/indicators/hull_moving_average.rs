@@ -59,7 +59,7 @@ impl IndicatorConfig for HullMovingAverage {
 
 		Ok(Self::Instance {
 			hma: HMA::new(cfg.period, &src)?,
-			pivot: ReversalSignal::new(cfg.left, cfg.right, src)?,
+			pivot: ReversalSignal::new(cfg.left, cfg.right, &src)?,
 			cfg,
 		})
 	}
