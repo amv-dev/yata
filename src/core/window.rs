@@ -84,6 +84,8 @@ impl<T> Window<T> {
 
 	/// Creates new `Window` object from raw slice and index of the oldest inserted element in that slice.
 	///
+	/// `index` must be an index of the most oldest value in the slice. In most cases it should be zero.
+	/// 
 	/// # Panics
 	///
 	/// This method will panic if length of the slice is greater or equal to [`PeriodType::MAX`].
@@ -290,6 +292,20 @@ impl<T> std::ops::Index<PeriodType> for Window<T> {
 		} else {
 			&self.buf[buf_index]
 		}
+	}
+}
+
+impl<T> From<Box<[T]>> for Window<T> {
+	#[inline]
+	fn from(slice: Box<[T]>) -> Self {
+		Self::from_parts(slice, 0)
+	}
+}
+
+impl<T> From<Vec<T>> for Window<T> {
+	#[inline]
+	fn from(v: Vec<T>) -> Self {
+		Self::from_parts(v.into_boxed_slice(), 0)
 	}
 }
 
