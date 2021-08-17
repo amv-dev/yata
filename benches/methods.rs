@@ -439,7 +439,7 @@ fn bench_rate_of_change_w100(b: &mut test::Bencher) {
 fn bench_reverse_signal_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle();
-	let mut method = ReversalSignal::new(5, 5, candles[0]).unwrap();
+	let mut method = ReversalSignal::new(5, 5, &candles[0]).unwrap();
 	for _ in 0..10 {
 		method.next(iter.next().unwrap());
 	}
@@ -450,7 +450,7 @@ fn bench_reverse_signal_w10(b: &mut test::Bencher) {
 fn bench_reverse_signal_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle();
-	let mut method = ReversalSignal::new(50, 50, candles[0]).unwrap();
+	let mut method = ReversalSignal::new(50, 50, &candles[0]).unwrap();
 	for _ in 0..100 {
 		method.next(iter.next().unwrap());
 	}
@@ -462,7 +462,7 @@ fn bench_reverse_signal_w100(b: &mut test::Bencher) {
 fn bench_reverse_low_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle();
-	let mut method = LowerReversalSignal::new(5, 5, candles[0]).unwrap();
+	let mut method = LowerReversalSignal::new(5, 5, &candles[0]).unwrap();
 	for _ in 0..10 {
 		method.next(iter.next().unwrap());
 	}
@@ -473,7 +473,7 @@ fn bench_reverse_low_w10(b: &mut test::Bencher) {
 fn bench_reverse_low_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle();
-	let mut method = LowerReversalSignal::new(50, 50, candles[0]).unwrap();
+	let mut method = LowerReversalSignal::new(50, 50, &candles[0]).unwrap();
 	for _ in 0..100 {
 		method.next(iter.next().unwrap());
 	}
@@ -485,7 +485,7 @@ fn bench_reverse_low_w100(b: &mut test::Bencher) {
 fn bench_reverse_high_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle();
-	let mut method = LowerReversalSignal::new(5, 5, candles[0]).unwrap();
+	let mut method = LowerReversalSignal::new(5, 5, &candles[0]).unwrap();
 	for _ in 0..10 {
 		method.next(iter.next().unwrap());
 	}
@@ -496,7 +496,7 @@ fn bench_reverse_high_w10(b: &mut test::Bencher) {
 fn bench_reverse_high_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle();
-	let mut method = UpperReversalSignal::new(50, 50, candles[0]).unwrap();
+	let mut method = UpperReversalSignal::new(50, 50, &candles[0]).unwrap();
 	for _ in 0..100 {
 		method.next(iter.next().unwrap());
 	}
@@ -838,7 +838,7 @@ fn bench_cci_w100(b: &mut test::Bencher) {
 fn bench_tsi_w10(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle();
-	let mut method = TSI::new(10, 10, candles[0]).unwrap();
+	let mut method = TSI::new(10, 10, &candles[0]).unwrap();
 	for _ in 0..10 {
 		method.next(iter.next().unwrap());
 	}
@@ -849,7 +849,7 @@ fn bench_tsi_w10(b: &mut test::Bencher) {
 fn bench_tsi_w100(b: &mut test::Bencher) {
 	let candles: Vec<_> = RandomCandles::new().take(1000).map(|c| c.close).collect();
 	let mut iter = candles.iter().cycle();
-	let mut method = TSI::new(100, 100, candles[0]).unwrap();
+	let mut method = TSI::new(100, 100, &candles[0]).unwrap();
 	for _ in 0..100 {
 		method.next(iter.next().unwrap());
 	}
