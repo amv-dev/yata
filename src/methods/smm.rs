@@ -96,13 +96,13 @@ fn find_insert_index(value: ValueType, slice: &[ValueType], padding: usize) -> u
 /// use yata::methods::SMM;
 ///
 /// // SMM of length=3
-/// let mut smm = SMM::new(3, 1.0).unwrap();
+/// let mut smm = SMM::new(3, &1.0).unwrap();
 ///
-/// smm.next(1.0);
-/// smm.next(2.0);
+/// smm.next(&1.0);
+/// smm.next(&2.0);
 ///
-/// assert_eq!(smm.next(3.0), 2.0);
-/// assert_eq!(smm.next(100.0), 3.0);
+/// assert_eq!(smm.next(&3.0), 2.0);
+/// assert_eq!(smm.next(&100.0), 3.0);
 /// ```
 ///
 /// # Performance

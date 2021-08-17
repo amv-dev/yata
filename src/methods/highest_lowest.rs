@@ -31,10 +31,10 @@ use serde::{Deserialize, Serialize};
 ///
 /// let values = [1.0, 2.0, 3.0, 2.0, 1.0, 0.5, 2.0, 3.0];
 /// let r      = [0.0, 1.0, 2.0, 1.0, 2.0, 1.5, 1.5, 2.5];
-/// let mut hld = HighestLowestDelta::new(3, values[0]).unwrap();
+/// let mut hld = HighestLowestDelta::new(3, &values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-///     let v = hld.next(values[i]);
+///     let v = hld.next(&values[i]);
 ///     assert_eq!(v, r[i]);
 /// });
 /// ```
@@ -143,10 +143,10 @@ impl Method for HighestLowestDelta {
 /// let values = [1.0, 2.0, 3.0, 2.0, 1.0, 0.5, 2.0, 3.0];
 /// let r      = [1.0, 2.0, 3.0, 3.0, 3.0, 2.0, 2.0, 3.0];
 ///
-/// let mut highest = Highest::new(3, values[0]).unwrap();
+/// let mut highest = Highest::new(3, &values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-///     let v = highest.next(values[i]);
+///     let v = highest.next(&values[i]);
 ///     assert_eq!(v, r[i]);
 /// });
 /// ```
@@ -236,10 +236,10 @@ impl Method for Highest {
 /// let values = [1.0, 2.0, 3.0, 2.0, 1.0, 0.5, 2.0, 3.0];
 /// let r      = [1.0, 1.0, 1.0, 2.0, 1.0, 0.5, 0.5, 0.5];
 ///
-/// let mut lowest = Lowest::new(3, values[0]).unwrap();
+/// let mut lowest = Lowest::new(3, &values[0]).unwrap();
 ///
 /// (0..values.len()).for_each(|i| {
-///     let v = lowest.next(values[i]);
+///     let v = lowest.next(&values[i]);
 ///     assert_eq!(v, r[i]);
 /// });
 /// ```

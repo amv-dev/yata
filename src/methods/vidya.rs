@@ -26,13 +26,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::Vidya;
 ///
 /// // Vidya with period length=3
-/// let mut vidya = Vidya::new(3, 1.0).unwrap();
+/// let mut vidya = Vidya::new(3, &1.0).unwrap();
 ///
-/// vidya.next(3.0);
-/// vidya.next(6.0);
+/// vidya.next(&3.0);
+/// vidya.next(&6.0);
 ///
-/// println!("{}", vidya.next(9.0));
-/// println!("{}", vidya.next(12.0));
+/// println!("{}", vidya.next(&9.0));
+/// println!("{}", vidya.next(&12.0));
 /// ```
 ///
 /// # Performance

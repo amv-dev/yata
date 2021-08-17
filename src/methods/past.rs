@@ -30,15 +30,15 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::Past;
 ///
 /// // Move of length=3
-/// let mut past = Past::new(3, 1.0).unwrap();
+/// let mut past = Past::new(3, &1.0).unwrap();
 ///
-/// past.next(1.0);
-/// past.next(2.0);
-/// past.next(3.0);
+/// past.next(&1.0);
+/// past.next(&2.0);
+/// past.next(&3.0);
 ///
-/// assert_eq!(past.next(4.0), 1.0);
-/// assert_eq!(past.next(5.0), 2.0);
-/// assert_eq!(past.next(6.0), 3.0);
+/// assert_eq!(past.next(&4.0), 1.0);
+/// assert_eq!(past.next(&5.0), 2.0);
+/// assert_eq!(past.next(&6.0), 3.0);
 /// ```
 ///
 /// # Performance

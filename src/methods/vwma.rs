@@ -28,14 +28,14 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::VWMA;
 ///
 /// // VWMA of length=3
-/// let mut vwma = VWMA::new(3, (3.0, 1.0)).unwrap();
+/// let mut vwma = VWMA::new(3, &(3.0, 1.0)).unwrap();
 ///
 /// // input value is a pair of f64 (value, weight)
-/// vwma.next((3.0, 1.0));
-/// vwma.next((6.0, 1.0));
+/// vwma.next(&(3.0, 1.0));
+/// vwma.next(&(6.0, 1.0));
 ///
-/// assert_eq!(vwma.next((9.0, 2.0)), 6.75);
-/// assert!((vwma.next((12.0, 0.5))- 8.571428571428571).abs() < 1e-10);
+/// assert_eq!(vwma.next(&(9.0, 2.0)), 6.75);
+/// assert!((vwma.next(&(12.0, 0.5))- 8.571428571428571).abs() < 1e-10);
 /// ```
 ///
 /// # Performance

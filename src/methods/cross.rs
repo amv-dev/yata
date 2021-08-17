@@ -39,7 +39,7 @@ use serde::{Deserialize, Serialize};
 /// (0..t1.len()).for_each(|i| {
 ///     let value = t1[i];
 ///     let base = t2[i];
-///     let cross_value = cross.next((value, base)).analog();
+///     let cross_value = cross.next(&(value, base)).analog();
 ///     assert_eq!(cross_value, r[i]);
 /// });
 /// ```
@@ -110,7 +110,7 @@ impl Method for Cross {
 /// use yata::core::Method;
 /// use yata::methods::CrossAbove;
 ///
-/// let mut cross_above = CrossAbove::new((), (0.0, 5.0)).unwrap();
+/// let mut cross_above = CrossAbove::new((), &(0.0, 5.0)).unwrap();
 ///
 /// let t1 = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
 /// let t2 = vec![5.0, 3.0, 1.8, 2.9, 4.1, 5.6];
@@ -119,7 +119,7 @@ impl Method for Cross {
 /// (0..t1.len()).for_each(|i| {
 ///     let value = t1[i];
 ///     let base = t2[i];
-///     let cross_value = cross_above.next((value, base)).analog();
+///     let cross_value = cross_above.next(&(value, base)).analog();
 ///     assert_eq!(cross_value, r[i]);
 /// });
 /// ```
@@ -199,7 +199,7 @@ impl Method for CrossAbove {
 /// use yata::core::Method;
 /// use yata::methods::CrossUnder;
 ///
-/// let mut cross_under = CrossUnder::new((), (0.0, 5.0)).unwrap();
+/// let mut cross_under = CrossUnder::new((), &(0.0, 5.0)).unwrap();
 ///
 /// let t1 = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
 /// let t2 = vec![5.0, 3.0, 1.8, 2.9, 4.1, 5.6];
@@ -208,7 +208,7 @@ impl Method for CrossAbove {
 /// (0..t1.len()).for_each(|i| {
 ///     let value = t1[i];
 ///     let base = t2[i];
-///     let cross_value = cross_under.next((value, base)).analog();
+///     let cross_value = cross_under.next(&(value, base)).analog();
 ///     assert_eq!(cross_value, r[i]);
 /// });
 /// ```

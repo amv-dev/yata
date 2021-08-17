@@ -32,8 +32,8 @@ use serde::{Deserialize, Serialize};
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
 /// let r = [ 0,   0,   1,   0,   -1,  0,   0 ];
 ///
-/// let mut pivot = ReversalSignal::new(2, 2, s[0]).unwrap();
-/// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
+/// let mut pivot = ReversalSignal::new(2, 2, &s[0]).unwrap();
+/// let r2: Vec<i8> = s.iter().map(|v| pivot.next(v).analog()).collect();
 ///
 /// assert_eq!(r2, r);
 /// ```
@@ -113,8 +113,8 @@ impl Method for ReversalSignal {
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
 /// let r = [ 0,   0,   0,   0,   1,   0,   0 ];
 ///
-/// let mut pivot = UpperReversalSignal::new(2, 2, s[0]).unwrap();
-/// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
+/// let mut pivot = UpperReversalSignal::new(2, 2, &s[0]).unwrap();
+/// let r2: Vec<i8> = s.iter().map(|v| pivot.next(v).analog()).collect();
 ///
 /// assert_eq!(r2, r);
 /// ```
@@ -244,8 +244,8 @@ impl Method for UpperReversalSignal {
 /// let s = [1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0];
 /// let r = [ 0,   0,   0,   0,   1,   0,   0 ];
 ///
-/// let mut pivot = UpperReversalSignal::new(2, 2, s[0]).unwrap();
-/// let r2: Vec<i8> = s.iter().map(|&v| pivot.next(v).analog()).collect();
+/// let mut pivot = UpperReversalSignal::new(2, 2, &s[0]).unwrap();
+/// let r2: Vec<i8> = s.iter().map(|v| pivot.next(v).analog()).collect();
 ///
 /// assert_eq!(r2, r);
 /// ```

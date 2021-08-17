@@ -11,9 +11,9 @@
 //! use yata::prelude::*;
 //! use yata::methods::WMA;
 //!
-//! let mut wma = WMA::new(5, 20.0).unwrap();
+//! let mut wma = WMA::new(5, &20.0).unwrap();
 //!
-//! let input_value = 34.51;
+//! let input_value = &34.51;
 //! let output_value = wma.next(input_value);
 //! ```
 //!
@@ -23,12 +23,12 @@
 //! use yata::prelude::*;
 //! use yata::methods::SMA;
 //!
-//! let mut sma = SMA::new(3, 5.0).unwrap();
-//! sma.next(5.0);
-//! sma.next(4.0);
-//! assert_eq!(sma.next(6.0), 5.0);
-//! assert_eq!(sma.next(2.0), 4.0);
-//! assert_eq!(sma.next(-2.0), 2.0);
+//! let mut sma = SMA::new(3, &5.0).unwrap();
+//! sma.next(&5.0);
+//! sma.next(&4.0);
+//! assert_eq!(sma.next(&6.0), 5.0);
+//! assert_eq!(sma.next(&2.0), 4.0);
+//! assert_eq!(sma.next(&-2.0), 2.0);
 //! ```
 
 mod sma;

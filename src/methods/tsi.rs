@@ -32,13 +32,13 @@ use serde::{Deserialize, Serialize};
 /// use yata::methods::TSI;
 ///
 /// // TSI with short length=3, long length=10
-/// let mut tsi = TSI::new(3, 10, 3.0).unwrap();
+/// let mut tsi = TSI::new(3, 10, &3.0).unwrap();
 ///
-/// tsi.next(3.0);
-/// tsi.next(6.0);
+/// tsi.next(&3.0);
+/// tsi.next(&6.0);
 ///
-/// println!("{}", tsi.next(9.0));
-/// println!("{}", tsi.next(12.0));
+/// println!("{}", tsi.next(&9.0));
+/// println!("{}", tsi.next(&12.0));
 /// ```
 ///
 /// # Performance

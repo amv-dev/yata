@@ -31,10 +31,10 @@ use serde::{Deserialize, Serialize};
 ///
 /// let mut candles = RandomCandles::default();
 ///
-/// let mut hma = HMA::new(5, candles.first().close).unwrap();
+/// let mut hma = HMA::new(5, &candles.first().close).unwrap();
 ///
 /// candles.take(5).enumerate().for_each(|(index, candle)| {
-///     println!("HMA at #{} is {}", index, hma.next(candle.close));
+///     println!("HMA at #{} is {}", index, hma.next(&candle.close));
 /// });
 ///
 /// ```
