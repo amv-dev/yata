@@ -79,7 +79,7 @@ impl IndicatorConfig for TrueStrengthIndex {
 		let src = candle.source(cfg.source);
 
 		Ok(Self::Instance {
-			tsi: TSI::new(cfg.period2, cfg.period1, src)?,
+			tsi: TSI::new(cfg.period2, cfg.period1, &src)?,
 			ema: EMA::new(cfg.period3, &0.)?,
 			cross_under: CrossUnder::default(),
 			cross_above: CrossAbove::default(),

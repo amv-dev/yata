@@ -66,9 +66,9 @@ impl TSI {
 	pub fn new(
 		short_period: PeriodType,
 		long_period: PeriodType,
-		value: ValueType,
+		value: &ValueType,
 	) -> Result<Self, Error> {
-		Method::new((short_period, long_period), &value)
+		Method::new((short_period, long_period), value)
 	}
 }
 

@@ -79,7 +79,7 @@ impl<M: MovingAverageConstructor> IndicatorConfig for SMIErgodicIndicator<M> {
 		let src = candle.source(cfg.source);
 
 		Ok(Self::Instance {
-			tsi: TSI::new(cfg.period2, cfg.period1, src)?,
+			tsi: TSI::new(cfg.period2, cfg.period1, &src)?,
 			ma: cfg.signal.init(0.)?, // method(cfg.method, cfg.period3, 0.)?,
 			cross: Cross::default(),
 			cfg,
