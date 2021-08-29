@@ -167,6 +167,11 @@ impl AverageDirectionalIndexInstance {
 	fn dir_mov(&mut self, candle: HLC) -> (ValueType, ValueType) {
 		let prev_candle = self.window.push(candle);
 		let true_range = self.tr_ma.next(candle.tr_close(self.prev_close));
+
+		if true_range == 0.0 {
+			return (0.0, 0.0);
+		}
+
 		self.prev_close = candle.close();
 
 		let (du, dd) = (
