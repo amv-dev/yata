@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 
 /// Converts timeseries to [Renko](https://en.wikipedia.org/wiki/Renko_chart) timeseries
 ///
-/// Renko is very different from the simple timeseries. On each step it may generate any amount of blocks or not genereate it at all.
-/// That's why it needs to be implement throw three different structures:
+/// Renko is very different from a simple timeseries. On each step it may generate any amount of blocks or not generate it at all.
+/// That's why it needs to be implemented throw three different structures:
 ///
 /// * [`Renko`] method itself.
 ///
@@ -60,7 +60,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::core::Source;
 /// use yata::methods::Renko;
 ///
-/// // Here we just creating `Vec` of `OHLCV`s with only `close` value inside  
+/// // Here we just creating a `Vec` of `OHLCV`s with only `close` value inside  
 /// let inputs = (&[100.0, 100.5, 101.506, 105.0, 102.0, 101.4, 100.0])
 ///     .iter()
 ///     .map(|&v| Candle {
@@ -121,19 +121,19 @@ pub struct RenkoBlock {
 }
 
 impl RenkoBlock {
-	/// Returns upper bound of the Renko's block
+	/// Returns upper bound of the block
 	#[must_use]
 	pub fn upper_bound(&self) -> ValueType {
 		self.open.max(self.close)
 	}
 
-	/// Returns lower bound of the Renko's block
+	/// Returns lower bound of the block
 	#[must_use]
 	pub fn lower_bound(&self) -> ValueType {
 		self.open.min(self.close)
 	}
 
-	/// Returns sign of the Renko's block
+	/// Returns sign of the block
 	#[must_use]
 	pub fn sign(&self) -> i8 {
 		1 - (self.close < self.open) as i8 * 2
