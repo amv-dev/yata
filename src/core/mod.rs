@@ -7,20 +7,20 @@ mod candles;
 mod errors;
 mod indicator;
 mod method;
+mod moving_average;
 mod ohlcv;
 mod sequence;
 mod window;
-mod moving_average;
 
 pub use action::Action;
 pub use candles::*;
 pub use errors::Error;
 pub use indicator::*;
 pub use method::Method;
+pub use moving_average::*;
 pub use ohlcv::OHLCV;
 pub use sequence::*;
 pub use window::Window;
-pub use moving_average::*;
 
 /// Main value type for calculations
 ///

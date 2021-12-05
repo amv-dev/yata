@@ -70,8 +70,9 @@ impl<T> Window<T> {
 	///
 	/// [`PeriodType::MAX`]: crate::core::PeriodType
 	#[must_use]
-	pub fn new(size: PeriodType, value: T) -> Self 
-	where T: Clone
+	pub fn new(size: PeriodType, value: T) -> Self
+	where
+		T: Clone,
 	{
 		debug_assert!(size <= (PeriodType::MAX - 1), "PeriodType overflow");
 		Self {
@@ -85,7 +86,7 @@ impl<T> Window<T> {
 	/// Creates new `Window` object from raw slice and index of the oldest inserted element in that slice.
 	///
 	/// `index` must be an index of the most oldest value in the slice. In most cases it should be zero.
-	/// 
+	///
 	/// # Panics
 	///
 	/// This method will panic if length of the slice is greater or equal to [`PeriodType::MAX`].
@@ -96,8 +97,14 @@ impl<T> Window<T> {
 	pub fn from_parts(slice: Box<[T]>, index: PeriodType) -> Self {
 		let size = slice.len() as PeriodType;
 
-		assert!(slice.len() < PeriodType::MAX as usize, "The length of the slice is too large");
-		assert!(slice.len() > index as usize, "Index is out of slice's range");
+		assert!(
+			slice.len() < PeriodType::MAX as usize,
+			"The length of the slice is too large"
+		);
+		assert!(
+			slice.len() > index as usize,
+			"Index is out of slice's range"
+		);
 
 		Self {
 			buf: slice,

@@ -1,5 +1,5 @@
-use crate::core::{Method, MovingAverage};
 use crate::core::{Error, PeriodType, ValueType, Window};
+use crate::core::{Method, MovingAverage};
 use std::{cmp::Ordering, slice::SliceIndex};
 
 #[cfg(feature = "serde")]
@@ -9,7 +9,7 @@ use serde::{ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializ
 // !!!!!! USE WITH CAUTION !!!!!!
 //
 // When `unsafe_performance` feature is enabled, this function may produce UB,
-// when tying to get slice item outside it's bounds.
+// when trying to get slice item outside of it's bounds.
 //
 // !!!!!! USE WITH CAUTION !!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

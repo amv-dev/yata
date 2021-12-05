@@ -1,5 +1,5 @@
-use crate::core::{Method, MovingAverage};
 use crate::core::{Error, PeriodType, ValueType};
+use crate::core::{Method, MovingAverage};
 use crate::methods::SMA;
 
 #[cfg(feature = "serde")]

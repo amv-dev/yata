@@ -4,7 +4,9 @@ use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 
 use crate::core::{Error, Method, MovingAverage, MovingAverageConstructor, PeriodType, ValueType};
-use crate::methods::{LinReg, Vidya, DEMA, DMA, EMA, HMA, RMA, SMA, SMM, SWMA, TEMA, TMA, TRIMA, WMA, WSMA};
+use crate::methods::{
+	LinReg, Vidya, DEMA, DMA, EMA, HMA, RMA, SMA, SMM, SWMA, TEMA, TMA, TRIMA, WMA, WSMA,
+};
 
 /// Default moving average constructor
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -58,7 +60,6 @@ pub enum MA {
 	/// [Variable Index Dynamic Average](crate::methods::Vidya)
 	Vidya(PeriodType),
 }
-
 
 /// Default moving average instance for constructor
 #[derive(Debug, Clone)]
@@ -126,7 +127,7 @@ impl Method for MAInstance {
 
 	fn new(_: Self::Params, _: &Self::Input) -> Result<Self, Error>
 	where
-		Self: Sized
+		Self: Sized,
 	{
 		Err(Error::Other("`MAInstance` cannot be constructed directly. You should use `MA::init` to instantiate it.".into()))
 	}
@@ -164,73 +165,84 @@ impl MovingAverageConstructor for MA {
 			Self::SMA(length) => {
 				let instance = SMA::new(length, &value)?;
 				Ok(Self::Instance::SMA(instance))
-			},
+			}
 			Self::WMA(length) => {
 				let instance = WMA::new(length, &value)?;
 				Ok(Self::Instance::WMA(instance))
-			},
+			}
 			Self::HMA(length) => {
 				let instance = HMA::new(length, &value)?;
 				Ok(Self::Instance::HMA(instance))
-			},
+			}
 			Self::RMA(length) => {
 				let instance = RMA::new(length, &value)?;
 				Ok(Self::Instance::RMA(instance))
-			},
+			}
 			Self::EMA(length) => {
 				let instance = EMA::new(length, &value)?;
 				Ok(Self::Instance::EMA(instance))
-			},
+			}
 			Self::DMA(length) => {
 				let instance = DMA::new(length, &value)?;
 				Ok(Self::Instance::DMA(instance))
-			},
+			}
 			Self::DEMA(length) => {
 				let instance = DEMA::new(length, &value)?;
 				Ok(Self::Instance::DEMA(instance))
-			},
+			}
 			Self::TMA(length) => {
 				let instance = TMA::new(length, &value)?;
 				Ok(Self::Instance::TMA(instance))
-			},
+			}
 			Self::TEMA(length) => {
 				let instance = TEMA::new(length, &value)?;
 				Ok(Self::Instance::TEMA(instance))
-			},
+			}
 			Self::WSMA(length) => {
 				let instance = WSMA::new(length, &value)?;
 				Ok(Self::Instance::WSMA(instance))
-			},
+			}
 			Self::SMM(length) => {
 				let instance = SMM::new(length, &value)?;
 				Ok(Self::Instance::SMM(instance))
-			},
+			}
 			Self::SWMA(length) => {
 				let instance = SWMA::new(length, &value)?;
 				Ok(Self::Instance::SWMA(instance))
-			},
+			}
 			Self::TRIMA(length) => {
 				let instance = TRIMA::new(length, &value)?;
 				Ok(Self::Instance::TRIMA(instance))
-			},
+			}
 			Self::LinReg(length) => {
 				let instance = LinReg::new(length, &value)?;
 				Ok(Self::Instance::LinReg(instance))
-			},
+			}
 			Self::Vidya(length) => {
 				let instance = Vidya::new(length, &value)?;
 				Ok(Self::Instance::Vidya(instance))
-			},
+			}
 		}
 	}
 
 	#[allow(clippy::unnested_or_patterns)]
 	fn ma_period(&self) -> PeriodType {
 		match self {
-			Self::SMA(length)|Self::WMA(length)|Self::HMA(length)|Self::RMA(length)|
-			Self::EMA(length)|Self::DMA(length)|Self::TMA(length)|Self::DEMA(length)|
-			Self::TEMA(length)|Self::WSMA(length)|Self::SMM(length)|Self::SWMA(length)|
-			Self::TRIMA(length)|Self::LinReg(length)|Self::Vidya(length) => *length,
+			Self::SMA(length)
+			| Self::WMA(length)
+			| Self::HMA(length)
+			| Self::RMA(length)
+			| Self::EMA(length)
+			| Self::DMA(length)
+			| Self::TMA(length)
+			| Self::DEMA(length)
+			| Self::TEMA(length)
+			| Self::WSMA(length)
+			| Self::SMM(length)
+			| Self::SWMA(length)
+			| Self::TRIMA(length)
+			| Self::LinReg(length)
+			| Self::Vidya(length) => *length,
 		}
 	}
 
@@ -259,11 +271,11 @@ impl FromStr for MA {
 	type Err = Error;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let parts = s.split_once('-').ok_or(Error::MovingAverageParse)?;
+		let (method, period) = s.split_once('-').ok_or(Error::MovingAverageParse)?;
 
-		let length: PeriodType = parts.1.parse().or(Err(Error::MovingAverageParse))?;
+		let length: PeriodType = period.parse().or(Err(Error::MovingAverageParse))?;
 
-		match parts.0 {
+		match method {
 			"sma" => Ok(Self::SMA(length)),
 			"wma" => Ok(Self::WMA(length)),
 			"hma" => Ok(Self::HMA(length)),

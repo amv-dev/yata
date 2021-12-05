@@ -23,23 +23,23 @@ pub trait MovingAverage: Method<Input = ValueType, Output = ValueType> {}
 ///
 /// [`IndicatorConfig`]: crate::core::indicator::IndicatorConfig
 pub trait MovingAverageConstructor: Clone + FromStr {
-    /// Used for comparing MA types
-    type Type: Eq;
+	/// Used for comparing MA types
+	type Type: Eq;
 
-    /// `MovingAverage` Instance type
-    type Instance: MovingAverage;
+	/// `MovingAverage` Instance type
+	type Instance: MovingAverage;
 
-    /// Creates moving average instance with the `initial_value`
-    fn init(&self, initial_value: ValueType) -> Result<Self::Instance, Error>;
+	/// Creates moving average instance with the `initial_value`
+	fn init(&self, initial_value: ValueType) -> Result<Self::Instance, Error>;
 
-    /// Returns period length of 
-    fn ma_period(&self) -> PeriodType;
+	/// Returns period length of
+	fn ma_period(&self) -> PeriodType;
 
-    /// Returns moving average type
-    fn ma_type(&self) -> Self::Type;
+	/// Returns moving average type
+	fn ma_type(&self) -> Self::Type;
 
-    /// Checks two moving average constructors for the same moving averagee type
-    fn is_similar_to(&self, other: &Self) -> bool {
-        self.ma_type() == other.ma_type()
-    }
+	/// Checks two moving average constructors for the same moving averagee type
+	fn is_similar_to(&self, other: &Self) -> bool {
+		self.ma_type() == other.ma_type()
+	}
 }
