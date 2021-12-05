@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// `left` should be > `0` and `right` should be > `0`
 ///
-/// There is an additional restriction on parameters: `left`+`right`+1 should be <= [`PeriodType`]::MAX.
+/// There is an additional restriction on parameters: `left`+`right`+1 should be <= [`PeriodType`]`::MAX`.
 /// So if your [`PeriodType`] is default `u8`, then `left`+`right`+1 should be <= `255`
 ///
 /// [Read more about `PeriodType`][`PeriodType`]
@@ -93,7 +93,7 @@ impl Method for ReversalSignal {
 ///
 /// `left` should be > 0 and `right` should be > 0
 ///
-/// There is an additional restriction on parameters: `left`+`right`+1 should be <= [`PeriodType`]::MAX.
+/// There is an additional restriction on parameters: `left`+`right`+1 should be <= [`PeriodType`]`::MAX`.
 /// So if your [`PeriodType`] is default `u8`, then `left`+`right`+1 should be <= 255
 ///
 /// [Read more about `PeriodType`][`PeriodType`]
@@ -224,7 +224,7 @@ impl Method for UpperReversalSignal {
 ///
 /// `left` should be > 0 and `right` should be > 0
 ///
-/// There is an additional restriction on parameters: `left`+`right`+1 should be <= [`PeriodType`]::MAX.
+/// There is an additional restriction on parameters: `left`+`right`+1 should be <= [`PeriodType`]`::MAX`.
 /// So if your [`PeriodType`] is default `u8`, then `left`+`right`+1 should be <= 255
 ///
 /// [Read more about `PeriodType`][`PeriodType`]

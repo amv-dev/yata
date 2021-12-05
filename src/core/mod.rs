@@ -32,7 +32,7 @@ pub use window::Window;
 ///
 /// ```toml
 /// [dependencies]
-/// yata = { value_type_f32 = true }
+/// yata = { features = [ "value_type_f32" ] }
 /// ```
 ///
 /// Read more at [Features section](https://doc.rust-lang.org/cargo/reference/features.html#the-features-section)
@@ -59,7 +59,7 @@ pub type ValueType = f32;
 ///
 /// ```toml
 /// [dependencies]
-/// yata = { period_type_u16 = true }
+/// yata = { features = ["period_type_u16"] }
 /// ```
 ///
 /// Read more at [Features section](https://doc.rust-lang.org/cargo/reference/features.html#the-features-section)

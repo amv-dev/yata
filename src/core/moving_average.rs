@@ -2,26 +2,24 @@ use std::str::FromStr;
 
 use super::{Error, Method, PeriodType, ValueType};
 
-/// A shortcut for dynamically generated moving averages
+/// Marker trait for any moving average
 ///
 /// Moving average is a [`Method`] which has parameters of single [`PeriodType`], input is single [`ValueType`] and output is single [`ValueType`].
 ///
 /// # See also
 ///
-/// [Default regular methods list](RegularMethods)
+/// [Default moving averages methods list](crate::helpers::MA)
 ///
 /// [`Method`]: crate::core::Method
 /// [`ValueType`]: crate::core::ValueType
 /// [`PeriodType`]: crate::core::PeriodType
-
-/// Marker trait for any moving average
 pub trait MovingAverage: Method<Input = ValueType, Output = ValueType> {}
 
 /// Trait for dynamically creation of moving average instances based on it's type and period
 ///
 /// This trait plays the same role for moving averages as [`IndicatorConfig`] plays for indicators.
 ///
-/// [`IndicatorConfig`]: crate::core::indicator::IndicatorConfig
+/// [`IndicatorConfig`]: crate::core::IndicatorConfig
 pub trait MovingAverageConstructor: Clone + FromStr {
 	/// Used for comparing MA types
 	type Type: Eq;

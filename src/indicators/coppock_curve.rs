@@ -37,7 +37,7 @@ pub struct CoppockCurve<M: MovingAverageConstructor = MA> {
 	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub ma1: M,
 
-	///	Signal line MA type .
+	/// Signal line MA type .
 	///
 	/// Default is [`EMA(5)`](crate::methods::EMA)
 	///

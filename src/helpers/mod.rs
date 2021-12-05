@@ -125,7 +125,7 @@ pub fn assert_neq_float(value1: ValueType, value2: ValueType) {
 }
 
 /// Random Candles iterator for testing purposes
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 #[allow(missing_copy_implementations)]
 pub struct RandomCandles(u16);
 
@@ -148,12 +148,6 @@ impl RandomCandles {
 		self.0 = position;
 
 		candle
-	}
-}
-
-impl Default for RandomCandles {
-	fn default() -> Self {
-		Self(0)
 	}
 }
 

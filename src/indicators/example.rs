@@ -115,23 +115,19 @@ impl IndicatorInstance for ExampleInstance {
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
 		let new_signal = self.cross.next(&(candle.close(), self.cfg.price));
 
-		let signal = match new_signal {
-			Action::None => {
-				self.last_signal = new_signal;
-				self.last_signal_position = 0;
-				new_signal
-			}
-			_ => {
-				if let Action::None = self.last_signal {
-					self.last_signal
-				} else {
-					self.last_signal_position += 1;
-					if self.last_signal_position > self.cfg.period {
-						self.last_signal = Action::None;
-					}
-					self.last_signal
+		let signal = if new_signal == Action::None {
+			self.last_signal = new_signal;
+			self.last_signal_position = 0;
+			new_signal
+		} else {
+			if Action::None != self.last_signal {
+				self.last_signal_position += 1;
+				if self.last_signal_position > self.cfg.period {
+					self.last_signal = Action::None;
 				}
 			}
+
+			self.last_signal
 		};
 
 		let some_other_signal = Action::from(0.5);
