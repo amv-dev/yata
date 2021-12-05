@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, Source, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::Cross;
@@ -35,13 +35,13 @@ use std::mem::replace;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RelativeStrengthIndex<M: MovingAverageConstructor = MA> {
-	pub ma: M,
-	/*
-	/// Main period type. Default is `14`.
+	/// Main MA type.
 	///
-	/// Range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub period: PeriodType,
-	*/
+	/// Default is [`EMA(14)`](crate::methods::EMA)
+	///
+	/// Period range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\).
+	pub ma: M,
+
 	/// Overbought/oversell relative zone. Default is `0.3`.
 	///
 	/// Range in \(`0.0`; `0.5`\]
@@ -49,10 +49,6 @@ pub struct RelativeStrengthIndex<M: MovingAverageConstructor = MA> {
 
 	/// Source type of values. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
-	/*
-	/// Moving average method. Default is [`EMA`](crate::methods::EMA).
-	pub method: RegularMethods,
-	*/
 }
 
 impl<M: MovingAverageConstructor> IndicatorConfig for RelativeStrengthIndex<M> {
@@ -70,8 +66,8 @@ impl<M: MovingAverageConstructor> IndicatorConfig for RelativeStrengthIndex<M> {
 
 		Ok(Self::Instance {
 			previous_input: src,
-			posma: cfg.ma.init(0.)?, // method(cfg.method, cfg.period, 0.)?,
-			negma: cfg.ma.init(0.)?, // method(cfg.method, cfg.period, 0.)?,
+			posma: cfg.ma.init(0.)?,
+			negma: cfg.ma.init(0.)?,
 			cross_upper: Cross::new((), &(0.5, 1.0 - cfg.zone))?,
 			cross_lower: Cross::new((), &(0.5, cfg.zone))?,
 			cfg,
@@ -114,9 +110,7 @@ impl Default for RelativeStrengthIndex {
 	fn default() -> Self {
 		Self {
 			ma: MA::EMA(14),
-			// period: 14,
 			zone: 0.3,
-			// method: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}

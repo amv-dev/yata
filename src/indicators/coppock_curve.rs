@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
+use crate::core::{Error, Method, MovingAverageConstructor, PeriodType, Source, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, RateOfChange, ReversalSignal};
@@ -30,14 +30,20 @@ use crate::methods::{Cross, RateOfChange, ReversalSignal};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CoppockCurve<M: MovingAverageConstructor = MA> {
-	pub ma1: M,
-	pub s3_ma: M,
-	/*
-	/// MA period \(using `method1`\). Default is `10`.
+	/// Main MA type.
 	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
-	pub period1: PeriodType,
-	*/
+	/// Default is [`WMA(10)`](crate::methods::WMA)
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
+	pub ma1: M,
+
+	///	Signal line MA type .
+	///
+	/// Default is [`EMA(5)`](crate::methods::EMA)
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
+	pub s3_ma: M,
+
 	/// Long rate of change period. Default is `14`.
 	///
 	/// Range in \(`period3`; [`PeriodType::MAX`](crate::core::PeriodType)\).
@@ -57,21 +63,9 @@ pub struct CoppockCurve<M: MovingAverageConstructor = MA> {
 	///
 	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)-`s2_left`\).
 	pub s2_right: PeriodType,
-	/*
-	/// Signal line period (using `method2`). Default is `5`.
-	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
-	pub s3_period: PeriodType,
-	*/
+
 	/// Source type. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
-	/*
-	/// Main MA type \(using `period1`\). Default is [`WMA`](crate::methods::WMA)
-	pub method1: RegularMethods,
-
-	/// Signal line MA type \(using `s3_period`\). Default is [`EMA`](crate::methods::EMA)
-	pub method2: RegularMethods,
-	*/
 }
 
 impl<M: MovingAverageConstructor> IndicatorConfig for CoppockCurve<M> {
@@ -89,7 +83,7 @@ impl<M: MovingAverageConstructor> IndicatorConfig for CoppockCurve<M> {
 		Ok(Self::Instance {
 			roc1: RateOfChange::new(cfg.period2, src)?,
 			roc2: RateOfChange::new(cfg.period3, src)?,
-			ma1: cfg.ma1.init(0.)?,// method(cfg.method1, cfg.period1, 0.)?,
+			ma1: cfg.ma1.init(0.)?,   // method(cfg.method1, cfg.period1, 0.)?,
 			ma2: cfg.s3_ma.init(0.)?, //method(cfg.method2, cfg.s3_period, 0.)?,
 			cross_over1: Cross::default(),
 			pivot: ReversalSignal::new(cfg.s2_left, cfg.s2_right, &0.)?,
@@ -160,14 +154,10 @@ impl Default for CoppockCurve<MA> {
 		Self {
 			ma1: MA::WMA(10),
 			s3_ma: MA::EMA(5),
-			// period1: 10,
 			period2: 14,
 			period3: 11,
 			s2_left: 4,
 			s2_right: 2,
-			// s3_period: 5,
-			// method1: RegularMethods::WMA,
-			// method2: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}

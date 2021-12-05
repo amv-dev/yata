@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, PeriodType, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, CrossAbove, CrossUnder, Highest, Lowest};
@@ -48,27 +48,23 @@ pub struct StochasticOscillator<M: MovingAverageConstructor = MA> {
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period: PeriodType,
-	pub ma: M,
-	pub signal: M,
-	/*
-	/// Period for smoothing `main` value. Default is `14`.
+
+	/// Moving average for smoothing `main` value.
+	///
+	/// Default is [`SMA(14)`](crate::methods::SMA).
 	///
 	/// Usually it is equal to `period`.
 	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub smooth_k: PeriodType,
+	/// Period range is in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	pub ma: M,
 
-	/// MA method for smoothing `main` value. Default is [`SMA`](crate::methods::SMA).
-	pub method_k: RegularMethods,
-	
-	/// Period for smoothing `signal line` value. Default is `3`.
+	/// Moving average type for smoothing `signal line` value.
 	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub smooth_d: PeriodType,
+	/// Default is [`SMA(3)`](crate::methods::SMA).
+	///
+	/// Period range is in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	pub signal: M,
 
-	/// MA method for smoothing `signal line` value. Default is [`SMA`](crate::methods::SMA).
-	pub method_d: RegularMethods,
-	*/
 	/// Zone size for #1 and #2 signals.
 	///
 	/// Range in \[`0.0`; `0.5`\].
@@ -150,10 +146,6 @@ impl Default for StochasticOscillator {
 			period: 14,
 			ma: MA::SMA(14),
 			signal: MA::SMA(3),
-			// smooth_k: 14,
-			// smooth_d: 3,
-			// method_k: RegularMethods::SMA,
-			// method_d: RegularMethods::SMA,
 			zone: 0.2,
 		}
 	}

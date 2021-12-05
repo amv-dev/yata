@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, PeriodType, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, TSI};
@@ -46,16 +46,14 @@ pub struct SMIErgodicIndicator<M: MovingAverageConstructor = MA> {
 	///
 	/// Range in \(`2`, `period1`\].
 	pub period2: PeriodType,
-	/*
-	/// Signal line MA period. Default is `5`.
-	///
-	/// Range in \[`2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
-	pub period3: PeriodType,
 
-	/// Signal line MA method. Default is [`EMA`](crate::methods::EMA).
-	pub method: RegularMethods,
-	*/
+	/// Signal line moving average type.
+	///
+	/// Default is [`EMA(5)`](crate::methods::EMA).
+	///
+	/// Period range is in \[`2`, [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub signal: M,
+
 	/// Signal zone size. Default is `0.2`.
 	///
 	/// Range in \[`0.0`; `1.0`]

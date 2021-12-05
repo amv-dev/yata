@@ -2,9 +2,11 @@
 use serde::{Deserialize, Serialize};
 // use std::str::FromStr;
 
-use crate::core::{Action, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
+use crate::core::{
+	Action, Error, Method, MovingAverageConstructor, PeriodType, Source, ValueType, OHLCV,
+};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{MA, signi};
+use crate::helpers::{signi, MA};
 use crate::methods::{CrossAbove, Highest, Lowest};
 
 /// Chande Kroll Stop
@@ -39,15 +41,12 @@ use crate::methods::{CrossAbove, Highest, Lowest};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChandeKrollStop<M: MovingAverageConstructor = MA> {
-	pub ma: M,
-	/*
-	/// ATR period length. Default is `10`.
+	/// ATR moving average.
+	///
+	/// Default is [`SMA(10)`](crate::methods::SMA).
 	///
 	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\]
-	pub p: PeriodType,
-	/// ATR method. Default is [`SMA`](crate::methods::SMA).
-	pub method: RegularMethods,
-	*/
+	pub ma: M,
 	/// ATR multiplier. Default is `1.0`.
 	///
 	/// Range in \[`0`; `+inf`\)
@@ -74,7 +73,7 @@ impl<M: MovingAverageConstructor> IndicatorConfig for ChandeKrollStop<M> {
 
 		let cfg = self;
 		Ok(Self::Instance {
-			ma: cfg.ma.init(candle.tr(candle))?,// method(cfg.method, cfg.p, candle.tr(candle))?,
+			ma: cfg.ma.init(candle.tr(candle))?,
 
 			highest1: Highest::new(cfg.ma.ma_period(), &candle.high())?,
 			lowest1: Lowest::new(cfg.ma.ma_period(), &candle.low())?,

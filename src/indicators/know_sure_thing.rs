@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, PeriodType, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, RateOfChange};
@@ -41,34 +41,17 @@ pub struct KnowSureThing<M: MovingAverageConstructor = MA> {
 
 	/// ROC4 period. Default is `30`.
 	pub period4: PeriodType,
-	/*
-	/// ROC1 moving average period. Default is `10`.
-	pub sma1: PeriodType,
 
-	/// ROC2 moving average period. Default is `10`.
-	pub sma2: PeriodType,
-
-	/// ROC3 moving average period. Default is `10`.
-	pub sma3: PeriodType,
-
-	/// ROC4 moving average period. Default is `15`.
-	pub sma4: PeriodType,
-	
-	/// ROCs lines moving average type. Defual is [`SMA`](crate::methods::SMA).
-	pub method1: RegularMethods,
-	*/
+	/// ROC1 moving average type. Default is [`SMA(10)`](crate::methods::SMA).
 	pub ma1: M,
+	/// ROC2 moving average type. Default is [`SMA(10)`](crate::methods::SMA).
 	pub ma2: M,
+	/// ROC3 moving average type. Default is [`SMA(10)`](crate::methods::SMA).
 	pub ma3: M,
+	/// ROC4 moving average type. Default is [`SMA(15)`](crate::methods::SMA).
 	pub ma4: M,
 
-	/*
-	/// Signal line moving average period. Default is `9`.
-	pub sma5: PeriodType,
-
-	/// Signal line moving average type. Defual is [`SMA`](crate::methods::SMA).
-	pub method2: RegularMethods,
-	*/
+	/// Signal line moving average type. Default is [`SMA(9)`](crate::methods::SMA).
 	pub signal: M,
 }
 
@@ -90,19 +73,23 @@ impl<M: MovingAverageConstructor> IndicatorConfig for KnowSureThing<M> {
 			roc2v: RateOfChange::new(cfg.period2, close)?,
 			roc3v: RateOfChange::new(cfg.period3, close)?,
 			roc4v: RateOfChange::new(cfg.period4, close)?,
-			ma1: cfg.ma1.init(0.)?, // method(cfg.method1, cfg.sma1, 0.)?,
-			ma2: cfg.ma2.init(0.)?, // method(cfg.method1, cfg.sma2, 0.)?,
-			ma3: cfg.ma3.init(0.)?, // method(cfg.method1, cfg.sma3, 0.)?,
-			ma4: cfg.ma4.init(0.)?, // method(cfg.method1, cfg.sma4, 0.)?,
-			ma5: cfg.signal.init(0.)?, // method(cfg.method2, cfg.sma5, 0.)?,
+			ma1: cfg.ma1.init(0.)?,
+			ma2: cfg.ma2.init(0.)?,
+			ma3: cfg.ma3.init(0.)?,
+			ma4: cfg.ma4.init(0.)?,
+			ma5: cfg.signal.init(0.)?,
 			cross: Cross::default(),
 			cfg,
 		})
 	}
 
 	fn validate(&self) -> bool {
-		self.ma1.is_similar_to(&self.ma2) && self.ma1.is_similar_to(&self.ma3) && self.ma1.is_similar_to(&self.ma4)
-		&& self.period1 < self.period2 && self.period2 < self.period3 && self.period3 < self.period4
+		self.ma1.is_similar_to(&self.ma2)
+			&& self.ma1.is_similar_to(&self.ma3)
+			&& self.ma1.is_similar_to(&self.ma4)
+			&& self.period1 < self.period2
+			&& self.period2 < self.period3
+			&& self.period3 < self.period4
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -169,13 +156,6 @@ impl Default for KnowSureThing {
 			ma3: MA::SMA(10),
 			ma4: MA::SMA(15),
 			signal: MA::SMA(9),
-			// sma1: 10,
-			// sma2: 10,
-			// sma3: 10,
-			// sma4: 15,
-			// sma5: 9,
-			// method1: RegularMethods::SMA,
-			// method2: RegularMethods::SMA,
 		}
 	}
 }

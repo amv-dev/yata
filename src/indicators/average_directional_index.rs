@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::HLC;
-use crate::core::{Error, MovingAverageConstructor, Method, OHLCV, PeriodType, ValueType, Window};
+use crate::core::{Error, Method, MovingAverageConstructor, PeriodType, ValueType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 
@@ -36,23 +36,14 @@ use crate::helpers::MA;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AverageDirectionalIndex<M: MovingAverageConstructor = MA> {
+	/// Default is [`RMA(14)`](crate::methods::RMA)
+	///
+	/// Period range is in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub method1: M,
+	/// Default is [`RMA(14)`](crate::methods::RMA)
+	///
+	/// Period range is in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub method2: M,
-	/*
-	/// Default is [`RMA`](crate::methods::RMA)
-	pub method1: RegularMethods,
-	/// Default is `14`.
-	///
-	/// Range in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub di_length: PeriodType,
-	
-	/// Default is [`RMA`](crate::methods::RMA)
-	pub method2: RegularMethods,
-	/// Default is `14`
-	///
-	/// Range in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub adx_smoothing: PeriodType,
-	*/
 	/// Default is `1`
 	///
 	/// Range in \[`1`; `min(di_length, adx_smoothing)`\)
@@ -105,20 +96,10 @@ impl<M: MovingAverageConstructor> IndicatorConfig for AverageDirectionalIndex<M>
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.method1 = value,
 			},
-			// "di_length" => match value.parse() {
-			// 	Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-			// 	Ok(value) => self.di_length = value,
-			// },
-
 			"method2" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.method2 = value,
 			},
-			// "adx_smoothing" => match value.parse() {
-			// 	Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
-			// 	Ok(value) => self.adx_smoothing = value,
-			// },
-
 			"period1" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.period1 = value,
@@ -141,7 +122,7 @@ impl<M: MovingAverageConstructor> IndicatorConfig for AverageDirectionalIndex<M>
 	}
 }
 
-impl Default for AverageDirectionalIndex<MA> {
+impl Default for AverageDirectionalIndex {
 	fn default() -> Self {
 		Self {
 			method1: MA::RMA(14),

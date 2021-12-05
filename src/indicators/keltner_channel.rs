@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, Source, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{CrossAbove, CrossUnder, SMA};
@@ -31,16 +31,13 @@ use crate::methods::{CrossAbove, CrossUnder, SMA};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KeltnerChannel<M: MovingAverageConstructor = MA> {
-	pub ma: M,
-	/*
-	/// Period for the middle moving average. Default is `20`.
+	/// Middle moving average type.
 	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub period: PeriodType,
+	/// Default is [`EMA(20)`](crate::methods::EMA).
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
+	pub ma: M,
 
-	/// Middle moving average type. Default is [`EMA`](crate::methods::EMA).
-	pub method: RegularMethods,
-	*/
 	/// True range multiplier. Default is `1.0`.
 	///
 	/// Range in \(`0.0`; `+inf`\)
@@ -108,10 +105,8 @@ impl Default for KeltnerChannel<MA> {
 	fn default() -> Self {
 		Self {
 			ma: MA::EMA(20),
-			// period: 20,
 			sigma: 1.0,
 			source: Source::Close,
-			// method: RegularMethods::EMA,
 		}
 	}
 }

@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
+use crate::core::{Error, Method, MovingAverageConstructor, PeriodType, Source, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, ReversalSignal};
@@ -27,20 +27,14 @@ use crate::methods::{Cross, ReversalSignal};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AwesomeOscillator<M: MovingAverageConstructor = MA> {
+	/// Default is [`SMA(34)`](crate::methods::SMA)
+	///
+	/// Period range in \(ma2's period; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub ma1: M,
+	/// Default is [`SMA(5)`](crate::methods::SMA)
+	///
+	/// Period range in \[`3`; ma1's period\).
 	pub ma2: M,
-	/*
-	/// Default is `34`.
-	///
-	/// Range in \(`period2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
-	pub period1: PeriodType,
-	/// Default is `5`.
-	///
-	/// Range in \[`3`; `period1`\).
-	pub period2: PeriodType,
-	/// Default is [`SMA`](crate::methods::SMA).
-	pub method: RegularMethods,
-	*/
 	/// Default is [`HL2`](crate::core::Source::HL2).
 	pub source: Source,
 	/// Default is `1`.

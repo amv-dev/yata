@@ -3,7 +3,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Candle, Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
+use crate::core::{Candle, Error, Method, MovingAverageConstructor, PeriodType, Source, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::Cross;
@@ -37,34 +37,27 @@ use crate::methods::Cross;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MACD<M: MovingAverageConstructor = MA> {
+	/// Fast MA type.
+	///
+	/// Default is [`EMA(12)`](crate::methods::EMA).
+	///
+	/// Period range in \[`2`; ma2's period\)
 	pub ma1: M,
+
+	/// Slow MA type.
+	///
+	/// Default is [`EMA(26)`](crate::methods::EMA).
+	///
+	/// Period range in \(ma1's period; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub ma2: M,
-	pub signal: M,
-	/*
-	/// Fast MA period. Default is `12`.
+
+	/// Signal line MA type.
 	///
-	/// Range in \[`2`; `period2`\)
-	pub period1: PeriodType,
-
-	/// Fast MA type. Default is [`EMA`](crate::methods::EMA).
-	pub method1: RegularMethods,
-
-	/// Slow MA period. Default is `26`.
-	///
-	/// Range in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub period2: PeriodType,
-
-	/// Slow MA type. Default is [`EMA`](crate::methods::EMA).
-	pub method2: RegularMethods,
-
-	/// Signal line MA period. Default is `9`.
+	/// Default is [`EMA(9)`](crate::methods::EMA).
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub period3: PeriodType,
+	pub signal: M,
 
-	/// Signal line MA type. Default is [`EMA`](crate::methods::EMA).
-	pub method3: RegularMethods,
-	*/
 	/// Source value type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
@@ -79,9 +72,9 @@ impl<M: MovingAverageConstructor> IndicatorConfig for MACD<M> {
 			let cfg = self;
 			let src = candle.source(cfg.source);
 			Ok(Self::Instance {
-				ma1: cfg.ma1.init(src)?, // method(cfg.method1, cfg.period1, src)?,
-				ma2: cfg.ma2.init(src)?, // method(cfg.method2, cfg.period2, src)?,
-				ma3: cfg.signal.init(src)?, // method(cfg.method3, cfg.period3, src)?,
+				ma1: cfg.ma1.init(src)?,
+				ma2: cfg.ma2.init(src)?,
+				ma3: cfg.signal.init(src)?,
 				cross1: Cross::default(),
 				cross2: Cross::default(),
 				cfg,
@@ -92,7 +85,9 @@ impl<M: MovingAverageConstructor> IndicatorConfig for MACD<M> {
 	}
 
 	fn validate(&self) -> bool {
-		self.ma1.ma_period() < self.ma2.ma_period() && self.ma1.ma_period() > 1 && self.signal.ma_period() > 1
+		self.ma1.ma_period() < self.ma2.ma_period()
+			&& self.ma1.ma_period() > 1
+			&& self.signal.ma_period() > 1
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -132,12 +127,6 @@ impl Default for MACD {
 			ma1: MA::EMA(12),
 			ma2: MA::EMA(26),
 			signal: MA::EMA(9),
-			// period1: 12,
-			// period2: 26,
-			// period3: 9,
-			// method1: RegularMethods::EMA,
-			// method2: RegularMethods::EMA,
-			// method3: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}

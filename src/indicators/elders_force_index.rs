@@ -28,21 +28,16 @@ use crate::methods::Cross;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EldersForceIndex<M: MovingAverageConstructor = MA> {
-	pub ma: M,
-	/*
-	/// MA period. Default is `13`.
+	/// Main moving average type.
 	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
-	pub period1: PeriodType,
-	*/
+	/// Default is [`EMA(13)`](crate::methods::EMA).
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
+	pub ma: M,
 	/// Price change period. Default is `1`.
 	///
 	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period2: PeriodType,
-	/*
-	/// MA method. Default is [`EMA`](crate::methods::EMA).
-	pub method: RegularMethods,
-	*/
 	/// Price source type of values. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
 }
@@ -59,7 +54,7 @@ impl<M: MovingAverageConstructor> IndicatorConfig for EldersForceIndex<M> {
 
 		let cfg = self;
 		Ok(Self::Instance {
-			ma: cfg.ma.init(0.)?,// method(cfg.method, cfg.period1, 0.)?,
+			ma: cfg.ma.init(0.)?, // method(cfg.method, cfg.period1, 0.)?,
 			window: Window::new(cfg.period2, Candle::from(candle)),
 			vol_sum: candle.volume() * cfg.period2 as ValueType,
 			cross_over: Cross::default(),
@@ -103,9 +98,7 @@ impl Default for EldersForceIndex<MA> {
 	fn default() -> Self {
 		Self {
 			ma: MA::EMA(13),
-			// period1: 13,
 			period2: 1,
-			// method: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}

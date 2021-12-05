@@ -1,7 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, MovingAverageConstructor, Method, OHLCV, PeriodType, Source, ValueType, Window};
+use crate::core::{
+	Error, Method, MovingAverageConstructor, PeriodType, Source, ValueType, Window, OHLCV,
+};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 
@@ -28,16 +30,12 @@ use crate::helpers::MA;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct DetrendedPriceOscillator<M: MovingAverageConstructor = MA> {
-	pub ma: M,
-	/*
-	/// MA period size. Default is `21`.
+	/// Main moving average type.
 	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub period: PeriodType,
-
-	/// MA method type. Default is [`SMA`](crate::methods::SMA)
-	pub method: RegularMethods,
-	*/
+	/// Default is [`SMA(21)`](crate::methods::SMA)
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	pub ma: M,
 	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
@@ -93,8 +91,6 @@ impl<M: MovingAverageConstructor> IndicatorConfig for DetrendedPriceOscillator<M
 impl Default for DetrendedPriceOscillator<MA> {
 	fn default() -> Self {
 		Self {
-			// period: 21,
-			// method: RegularMethods::SMA,
 			ma: MA::SMA(21),
 			source: Source::Close,
 		}

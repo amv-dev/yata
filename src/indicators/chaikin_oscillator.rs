@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType};
+use crate::core::{Error, Method, MovingAverageConstructor, PeriodType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, ADI};
@@ -26,20 +26,18 @@ use crate::methods::{Cross, ADI};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ChaikinOscillator<M: MovingAverageConstructor = MA> {
-	pub ma1: M,
-	pub ma2: M,
-	/*
-	/// Short period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 3.
+	/// Short smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index).
 	///
-	/// Range in \[`1`; `period2`\)
-	pub period1: PeriodType,
-	/// Long period for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is 10.
+	/// Default is [`EMA(3)`](crate::methods::EMA).
+	///
+	/// Range in \[`1`; ma2's period\)
+	pub ma1: M,
+	/// Long smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index).
+	///
+	/// Default is [`EMA(10)`](crate::methods::EMA).
 	///
 	/// Range in \(`period1`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub period2: PeriodType,
-	/// Method for smoothing [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index). Default is [`EMA`](crate::methods::EMA).
-	pub method: RegularMethods,
-	*/
+	pub ma2: M,
 	/// [AD index](https://en.wikipedia.org/wiki/Accumulation/distribution_index) size. Default is 0 (windowless)
 	///
 	/// Range in \[`0`; [`PeriodType::MAX`](crate::core::PeriodType)\]
@@ -69,7 +67,10 @@ impl<M: MovingAverageConstructor> IndicatorConfig for ChaikinOscillator<M> {
 	}
 
 	fn validate(&self) -> bool {
-		self.ma1.is_similar_to(&self.ma2) && self.ma1.ma_period() > 0 && self.ma1.ma_period() < self.ma2.ma_period() && self.ma2.ma_period() < PeriodType::MAX
+		self.ma1.is_similar_to(&self.ma2)
+			&& self.ma1.ma_period() > 0
+			&& self.ma1.ma_period() < self.ma2.ma_period()
+			&& self.ma2.ma_period() < PeriodType::MAX
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -99,11 +100,8 @@ impl<M: MovingAverageConstructor> IndicatorConfig for ChaikinOscillator<M> {
 impl Default for ChaikinOscillator<MA> {
 	fn default() -> Self {
 		Self {
-			// period1: 3,
-			// period2: 10,
 			ma1: MA::EMA(3),
 			ma2: MA::EMA(10),
-			// method: RegularMethods::EMA,
 			window: 0,
 		}
 	}

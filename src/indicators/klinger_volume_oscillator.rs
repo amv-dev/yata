@@ -1,9 +1,9 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::helpers::{MA, sign};
+use crate::helpers::{sign, MA};
 use crate::methods::Cross;
 
 /// Klinger Volume Oscillator
@@ -35,25 +35,24 @@ use crate::methods::Cross;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KlingerVolumeOscillator<M: MovingAverageConstructor = MA> {
+	/// Fast moving average type.
+	///
+	/// Default is [`EMA(34)`](crate::methods::EMA).
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub ma1: M,
+	/// Slow moving average type.
+	///
+	/// Default is [`EMA(55)`](crate::methods::EMA).
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub ma2: M,
+	/// Signal line moving average type.
+	///
+	/// Default is [`EMA(13)`](crate::methods::EMA).
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub signal: M,
-	/*
-	/// Fast moving average period. Default is `34`.
-	pub period1: PeriodType,
-
-	/// Slow moving average period. Default is `55`.
-	pub period2: PeriodType,
-
-	/// Signal line moving average period. Default is `13`.
-	pub period3: PeriodType,
-
-	/// Fast and slow moving averages method. Default is [`EMA`](crate::methods::EMA).
-	pub method1: RegularMethods,
-
-	/// Signal line moving average method. Default is [`EMA`](crate::methods::EMA).
-	pub method2: RegularMethods,
-	*/
 }
 
 impl<M: MovingAverageConstructor> IndicatorConfig for KlingerVolumeOscillator<M> {
@@ -68,9 +67,9 @@ impl<M: MovingAverageConstructor> IndicatorConfig for KlingerVolumeOscillator<M>
 
 		let cfg = self;
 		Ok(Self::Instance {
-			ma1: cfg.ma1.init(0.)?, // method(cfg.method1, cfg.period1, 0.)?,
-			ma2: cfg.ma2.init(0.)?, // method(cfg.method1, cfg.period2, 0.)?,
-			ma3: cfg.signal.init(0.)?, // method(cfg.method2, cfg.period3, 0.)?,
+			ma1: cfg.ma1.init(0.)?,
+			ma2: cfg.ma2.init(0.)?,
+			ma3: cfg.signal.init(0.)?,
 			cross1: Cross::default(),
 			cross2: Cross::default(),
 			last_tp: candle.tp(),
@@ -79,7 +78,10 @@ impl<M: MovingAverageConstructor> IndicatorConfig for KlingerVolumeOscillator<M>
 	}
 
 	fn validate(&self) -> bool {
-		self.ma1.is_similar_to(&self.ma2) && self.ma1.ma_period() > 1 && self.signal.ma_period() > 1 && self.ma1.ma_period() < self.ma2.ma_period()
+		self.ma1.is_similar_to(&self.ma2)
+			&& self.ma1.ma_period() > 1
+			&& self.signal.ma_period() > 1
+			&& self.ma1.ma_period() < self.ma2.ma_period()
 	}
 
 	fn set(&mut self, name: &str, value: String) -> Result<(), Error> {
@@ -116,11 +118,6 @@ impl Default for KlingerVolumeOscillator {
 			ma1: MA::EMA(34),
 			ma2: MA::EMA(55),
 			signal: MA::EMA(13),
-			// period1: 34,
-			// period2: 55,
-			// period3: 13,
-			// method1: RegularMethods::EMA,
-			// method2: RegularMethods::EMA,
 		}
 	}
 }

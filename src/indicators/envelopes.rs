@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Action, Error, MovingAverageConstructor, Method, OHLCV, Source, ValueType};
+use crate::core::{Action, Error, Method, MovingAverageConstructor, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 
@@ -31,21 +31,16 @@ use crate::helpers::MA;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Envelopes<M: MovingAverageConstructor = MA> {
-	pub ma: M,
-	/*
-	/// MA period length. Default is `20`.
+	/// Main moving average type.
 	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
-	pub period: PeriodType,
-	*/
+	/// Default is [`SMA(20)`](crate::methods::SMA).
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
+	pub ma: M,
 	/// Bound relative size. Default is `0.1`.
 	///
 	/// Range in (`0.0`; `+inf`).
 	pub k: ValueType,
-	/*
-	/// MA method. Default is [`SMA`](crate::methods::SMA).
-	pub method: RegularMethods,
-	*/
 	/// Source value type for bounds. Default is [`Close`](crate::core::Source::Close).
 	pub source: Source,
 	/// Source2 value type for actual price. Default is [`Close`](crate::core::Source::Close).
@@ -113,9 +108,7 @@ impl Default for Envelopes<MA> {
 	fn default() -> Self {
 		Self {
 			ma: MA::SMA(20),
-			// period: 20,
 			k: 0.1,
-			// method: RegularMethods::SMA,
 			source: Source::Close,
 			source2: Source::Close,
 		}

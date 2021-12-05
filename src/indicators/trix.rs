@@ -1,4 +1,7 @@
-use crate::core::{Error, IndicatorConfig, IndicatorInstance, IndicatorResult, Method, MovingAverageConstructor, OHLCV, PeriodType, Source};
+use crate::core::{
+	Error, IndicatorConfig, IndicatorInstance, IndicatorResult, Method, MovingAverageConstructor,
+	PeriodType, Source, OHLCV,
+};
 use crate::helpers::MA;
 use crate::methods::{Change, Cross, ReversalSignal, TMA};
 
@@ -41,16 +44,14 @@ pub struct Trix<M: MovingAverageConstructor = MA> {
 	///
 	/// Range in \[`3`; [`PeriodType::MAX`](crate::core::PeriodType)\)
 	pub period1: PeriodType,
-	pub signal: M,
-	/*
-	/// Signal line period. Default is `6`.
-	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
-	pub period2: PeriodType,
 
-	/// Signal line moving average method. Default is [`EMA`](crate::methods::EMA).
-	pub method2: RegularMethods,
-	*/
+	/// Signal line moving average type.
+	///
+	/// Default is [`EMA(6)`](crate::methods::EMA).
+	///
+	/// Period range is in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\)
+	pub signal: M,
+
 	/// Source type. Default is [`Close`](crate::core::Source::Close)
 	pub source: Source,
 }
@@ -66,14 +67,13 @@ impl<M: MovingAverageConstructor> IndicatorConfig for Trix<M> {
 
 			Ok(Self::Instance {
 				tma: TMA::new(self.period1, &src)?,
-				sig: self.signal.init(src)?, // method(self.method2, self.period2, src)?,
+				sig: self.signal.init(src)?,
 				change: Change::new(1, &src)?,
 				cross1: Cross::new((), &(src, src))?,
 				cross2: Cross::new((), &(src, src))?,
 				reverse: ReversalSignal::new(1, 1, &0.0)?,
 
 				cfg: self,
-				// phantom: PhantomData::default(),
 			})
 		} else {
 			Err(Error::WrongConfig)
@@ -116,8 +116,6 @@ impl Default for Trix {
 		Self {
 			period1: 18,
 			signal: MA::EMA(6),
-			// period2: 6, // TODO: find recommended value here
-			// method2: RegularMethods::EMA,
 			source: Source::Close,
 		}
 	}

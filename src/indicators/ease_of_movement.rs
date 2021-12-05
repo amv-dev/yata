@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::HLC;
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Window};
+use crate::core::{Error, Method, MovingAverageConstructor, PeriodType, Window, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::Cross;
@@ -28,21 +28,16 @@ use crate::methods::Cross;
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EaseOfMovement<M: MovingAverageConstructor = MA> {
-	pub ma: M,
-	/*
-	/// MA period length \(using `method`\). Default is `13`.
+	/// Main moving average type.
 	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
-	pub period1: PeriodType,
-	*/
+	/// Default is [`SMA(13)`](crate::methods::SMA)
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
+	pub ma: M,
 	/// Differencial period size. Default is `1`.
 	///
 	/// Range in \[`1`; [`PeriodType::MAX`](crate::core::PeriodType)\].
 	pub period2: PeriodType,
-	/*
-	/// MA type \(using `period1`\). Default is [`SMA`](crate::methods::SMA).
-	pub method: RegularMethods,
-	*/
 }
 
 impl<M: MovingAverageConstructor> IndicatorConfig for EaseOfMovement<M> {
@@ -97,9 +92,7 @@ impl Default for EaseOfMovement<MA> {
 	fn default() -> Self {
 		Self {
 			ma: MA::SMA(13),
-			// period1: 13,
 			period2: 1,
-			// method: RegularMethods::SMA,
 		}
 	}
 }

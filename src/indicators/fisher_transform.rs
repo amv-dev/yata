@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Error, Method, MovingAverageConstructor, OHLCV, PeriodType, Source, ValueType};
+use crate::core::{Error, Method, MovingAverageConstructor, PeriodType, Source, ValueType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, Highest, Lowest};
@@ -38,22 +38,16 @@ pub struct FisherTransform<M: MovingAverageConstructor = MA> {
 	///
 	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub period1: PeriodType,
-	/*
-	/// Signal value MA period. Default is `2`.
-	///
-	/// Range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
-	pub period2: PeriodType,
-	*/
 	/// Zone size for signals. Default is `1.5`.
 	///
 	/// Range in \(`0.0`; `+inf`\)
 	pub zone: ValueType,
-
+	/// Signal line moving average type.
+	///
+	/// Default is [`SMA(2)`](crate::methods::SMA).
+	///
+	/// Period range in \[`2`; [`PeriodType::MAX`](crate::core::PeriodType)\).
 	pub signal: M,
-	/*
-	/// Signal value MA type. Default is [`SMA`](crate::methods::SMA).
-	pub method: RegularMethods,
-	*/
 	/// Source type of values. Default is [`TP`](crate::core::Source::TP)
 	pub source: Source,
 }
@@ -124,9 +118,7 @@ impl Default for FisherTransform<MA> {
 		Self {
 			period1: 9,
 			signal: MA::SMA(2),
-			// period2: 2,
 			zone: 1.5,
-			// method: RegularMethods::SMA,
 			source: Source::TP,
 		}
 	}
