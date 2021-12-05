@@ -16,7 +16,7 @@ It also provides you an interface to create your own indicators.
 
 ```toml
 [dependencies]
-yata = "0.4"
+yata = "0.5"
 ```
 
 ## Available **moving averages**:
