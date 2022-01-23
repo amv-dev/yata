@@ -78,8 +78,8 @@ where
 		let last_value = instance.next(initial_value);
 
 		Ok(Self {
-			instance,
 			last_value,
+			instance,
 		})
 	}
 
