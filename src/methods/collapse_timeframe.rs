@@ -100,6 +100,7 @@ impl Method for CollapseTimeframe {
 #[cfg(test)]
 mod tests {
 	use super::{Candle, CollapseTimeframe as TestingMethod, Method, OHLCV};
+	use crate::core::ValueType;
 	use crate::helpers::{assert_eq_float, RandomCandles};
 
 	#[test]
@@ -122,11 +123,11 @@ mod tests {
 						high: window
 							.iter()
 							.map(OHLCV::high)
-							.fold(first.high(), |a, b| a.max(b)),
+							.fold(first.high(), ValueType::max),
 						low: window
 							.iter()
 							.map(OHLCV::low)
-							.fold(first.low(), |a, b| a.min(b)),
+							.fold(first.low(), ValueType::min),
 						close: window.last().map(OHLCV::close).unwrap(),
 						volume: window.iter().map(OHLCV::volume).sum(),
 					}
