@@ -32,7 +32,7 @@ pub fn sign(value: ValueType) -> ValueType {
 	// } else {
 	// 	0.
 	// }
-	((value > 0.) as i8 - (value < 0.) as i8) as ValueType
+	signi(value) as ValueType
 }
 
 /// signi is like [`f64::signum`], except 2 things

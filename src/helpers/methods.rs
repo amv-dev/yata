@@ -114,16 +114,10 @@ pub enum MAInstance {
 	Vidya(Vidya),
 }
 
-mod ma_instance_protection {
-	#[doc(hidden)]
-	#[allow(missing_copy_implementations, missing_debug_implementations)]
-	pub struct MAInstanceCreationProtection;
-}
-
 impl Method for MAInstance {
 	type Input = ValueType;
 	type Output = ValueType;
-	type Params = ma_instance_protection::MAInstanceCreationProtection;
+	type Params = std::convert::Infallible;
 
 	fn new(_: Self::Params, _: &Self::Input) -> Result<Self, Error>
 	where
