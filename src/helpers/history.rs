@@ -59,9 +59,9 @@ where
 
 /// Wrapper for keeping last produced value
 #[derive(Debug, Clone)]
-pub struct WithLastValue<T, V> {
-	instance: T,
+pub struct WithLastValue<T: ?Sized, V> {
 	last_value: V,
+	instance: T,
 }
 
 impl<T> Method for WithLastValue<T, T::Output>
