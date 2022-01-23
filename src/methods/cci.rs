@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
+use crate::helpers::Peekable;
 use crate::methods::MeanAbsDev;
 
 #[cfg(feature = "serde")]
@@ -50,7 +51,7 @@ impl Method for CCI {
 	#[inline]
 	fn next(&mut self, value: &Self::Input) -> Self::Output {
 		let mean = self.0.next(value);
-		let ma = self.0.get_sma().get_last_value();
+		let ma = self.0.get_sma().peek();
 
 		if mean > 0.0 {
 			(value - ma) / mean

@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -67,6 +68,12 @@ impl Method for Conv {
 	#[inline]
 	fn next(&mut self, value: &Self::Input) -> Self::Output {
 		self.window.push(*value);
+		self.peek()
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for Conv {
+	fn peek(&self) -> <Self as Method>::Output {
 		self.window
 			.iter()
 			.zip(self.weights.iter().rev())

@@ -1,5 +1,6 @@
 use crate::core::{Error, PeriodType, ValueType, Window};
 use crate::core::{Method, MovingAverage};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -107,6 +108,12 @@ impl Method for LinReg {
 }
 
 impl MovingAverage for LinReg {}
+
+impl Peekable<<Self as Method>::Output> for LinReg {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.b()
+	}
+}
 
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]

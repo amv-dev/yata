@@ -1,4 +1,5 @@
 use super::{Error, Sequence};
+use crate::helpers::{WithHistory, WithLastValue};
 use std::fmt;
 
 type BoxedFnMethod<'a, M> = Box<dyn FnMut(&'a <M as Method>::Input) -> <M as Method>::Output>;
@@ -76,6 +77,30 @@ pub trait Method: fmt::Debug {
 
 	/// Generates next output value based on the given input `value`
 	fn next(&mut self, value: &Self::Input) -> Self::Output;
+
+	/// Creates an instance of the method with given `parameters` and initial `value`, wrapped by historical data holder
+	fn with_history(
+		parameters: Self::Params,
+		initial_value: &Self::Input,
+	) -> Result<WithHistory<Self, Self::Output>, Error>
+	where
+		Self: Sized,
+		Self::Output: fmt::Debug + Clone,
+	{
+		WithHistory::new(parameters, initial_value)
+	}
+
+	/// Creates an instance of the method with given `parameters` and initial `value`, wrapped by last produced value holder
+	fn with_last_value(
+		parameters: Self::Params,
+		initial_value: &Self::Input,
+	) -> Result<WithLastValue<Self, Self::Output>, Error>
+	where
+		Self: Sized,
+		Self::Output: fmt::Debug + Clone,
+	{
+		WithLastValue::new(parameters, initial_value)
+	}
 
 	/// Returns a name of the method
 	fn name(&self) -> &str {

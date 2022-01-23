@@ -1,5 +1,6 @@
 use crate::core::{Error, PeriodType, ValueType, Window};
 use crate::core::{Method, MovingAverage};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -91,6 +92,12 @@ impl Method for WMA {
 }
 
 impl MovingAverage for WMA {}
+
+impl Peekable<<Self as Method>::Output> for WMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.numerator * self.invert_sum
+	}
+}
 
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]

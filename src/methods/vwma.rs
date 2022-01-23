@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -75,6 +76,12 @@ impl Method for VWMA {
 		self.vol_sum += value.1 - past_value.1;
 		self.sum += value.0.mul_add(value.1, -past_value.0 * past_value.1);
 
+		self.sum / self.vol_sum
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for VWMA {
+	fn peek(&self) -> <Self as Method>::Output {
 		self.sum / self.vol_sum
 	}
 }

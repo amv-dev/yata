@@ -2,8 +2,11 @@
 //! Additional helping primitives
 //!
 
+mod history;
 mod methods;
+
 use crate::core::{Candle, ValueType};
+pub use history::{Buffered, Peekable, WithHistory, WithLastValue};
 pub use methods::{MAInstance, MA};
 
 /// sign is like [`f64::signum`]

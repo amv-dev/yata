@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -91,6 +92,12 @@ impl Method for StDev {
 		self.val_sum += diff;
 		self.mean += diff * self.divider;
 
+		self.peek()
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for StDev {
+	fn peek(&self) -> <Self as Method>::Output {
 		// self.sq_val_sum - self.val_sum * self.mean;
 		let sum = self.val_sum.mul_add(self.mean, self.sq_val_sum);
 

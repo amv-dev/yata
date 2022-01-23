@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -78,6 +79,12 @@ impl Method for LinearVolatility {
 
 		self.volatility += derivative - past_derivative;
 
+		self.volatility
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for LinearVolatility {
+	fn peek(&self) -> <Self as Method>::Output {
 		self.volatility
 	}
 }

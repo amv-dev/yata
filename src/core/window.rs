@@ -268,6 +268,24 @@ impl<T> Window<T> {
 	pub const fn len(&self) -> PeriodType {
 		self.size
 	}
+
+	/// Returns an element at `index` starting from the newest
+	#[must_use]
+	#[inline]
+	pub fn get(&self, index: PeriodType) -> Option<&T> {
+		let buf_index = self.slice_index(index)?;
+		self.buf.get(buf_index as usize)
+	}
+
+	#[must_use]
+	#[inline]
+	fn slice_index(&self, index: PeriodType) -> Option<PeriodType> {
+		let index = self.s_1.checked_sub(index)?;
+		let saturated = self.index.saturating_add(index);
+		let overflow = (saturated >= self.size) as PeriodType;
+		let s = self.size - self.index;
+		Some(overflow * index.saturating_sub(s) + (1 - overflow) * saturated)
+	}
 }
 
 impl<T> AsRef<[T]> for Window<T> {
@@ -286,13 +304,9 @@ impl<T> std::ops::Index<PeriodType> for Window<T> {
 	type Output = T;
 
 	fn index(&self, index: PeriodType) -> &Self::Output {
-		debug_assert!(index < self.size, "Window index {:} is out of range", index);
-
-		let index = self.s_1 - index;
-		let saturated = self.index.saturating_add(index);
-		let overflow = (saturated >= self.size) as PeriodType;
-		let s = self.size - self.index;
-		let buf_index = (overflow * index.saturating_sub(s) + (1 - overflow) * saturated) as usize;
+		let buf_index =
+			self.slice_index(index)
+				.unwrap_or_else(|| panic!("Window index {:} is out of range", index)) as usize;
 
 		if cfg!(feature = "unsafe_performance") {
 			unsafe { self.buf.get_unchecked(buf_index) }
