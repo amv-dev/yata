@@ -95,3 +95,15 @@ impl<T, V: Clone> Peekable<V> for WithLastValue<T, V> {
 		self.last_value.clone()
 	}
 }
+
+impl<V: Clone, T: Peekable<V>> Peekable<V> for &T {
+	fn peek(&self) -> V {
+		(*self).peek()
+	}
+}
+
+impl<V: Clone, T: Buffered<V>> Buffered<V> for &T {
+	fn get(&self, index: usize) -> Option<V> {
+		(*self).get(index)
+	}
+}
