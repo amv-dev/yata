@@ -5,6 +5,7 @@ use std::convert::TryFrom;
 use std::str::FromStr;
 
 use crate::core::{Error, ValueType, OHLCV};
+use crate::helpers::Merge;
 
 /// Source enum represents common parts of a *Candle*
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
@@ -174,6 +175,18 @@ impl OHLCV for Candle {
 	#[inline]
 	fn volume(&self) -> ValueType {
 		self.volume
+	}
+}
+
+impl Merge<Candle> for Candle {
+	fn merge(&self, other: &Candle) -> Candle {
+		Candle {
+			high: self.high.max(other.high()),
+			low: self.low.min(other.low()),
+			close: other.close(),
+			volume: self.volume + other.volume(),
+			..*self
+		}
 	}
 }
 

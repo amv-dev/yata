@@ -372,3 +372,4 @@ impl OHLCV for [ValueType; 5] {
 // 		(**self).volume()
 // 	}
 // }
+

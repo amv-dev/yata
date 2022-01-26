@@ -1,6 +1,6 @@
 use crate::core::Method;
 use crate::core::{ValueType, OHLCV};
-use crate::prelude::Candle;
+use crate::helpers::Merge;
 
 /// Implements some methods for sequence manipulations.
 pub trait Sequence<T>: AsRef<[T]> {
@@ -44,31 +44,17 @@ pub trait Sequence<T>: AsRef<[T]> {
 	/// Converts timeframe of the series
 	///
 	/// See also [`CollapseTimeframe`](crate::methods::CollapseTimeframe) method.
-	fn collapse_timeframe(&self, size: usize, continuous: bool) -> Vec<Candle>
+	fn collapse_timeframe(&self, size: usize, continuous: bool) -> Vec<T>
 	where
-		T: OHLCV,
+		T: OHLCV + Merge<T> + Copy,
 	{
-		fn fold<T: OHLCV>(folded: Candle, next: &T) -> Candle {
-			Candle {
-				high: folded.high.max(next.high()),
-				low: folded.low.min(next.low()),
-				close: next.close(),
-				volume: folded.volume + next.volume(),
-				..folded
-			}
+		fn fold<T: OHLCV + Merge<T>>(folded: T, next: &T) -> T {
+			folded.merge(next)
 		}
 
-		fn window<T: OHLCV>(window: &[T]) -> Candle {
-			let first = window.first().unwrap();
-			let initial = Candle {
-				open: first.open(),
-				high: first.high(),
-				low: first.low(),
-				close: first.close(),
-				volume: first.volume(),
-			};
-
-			window.iter().skip(1).fold(initial, fold)
+		fn window<T: OHLCV + Merge<T> + Copy>(window: &[T]) -> T {
+			let first = window[0];
+			window.iter().skip(1).fold(first, fold)
 		}
 
 		self.as_ref()
