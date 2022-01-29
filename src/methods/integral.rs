@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -115,6 +116,12 @@ impl Method for Integral {
 impl Default for Integral {
 	fn default() -> Self {
 		Self::new(0, &0.0).unwrap()
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for Integral {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.value
 	}
 }
 

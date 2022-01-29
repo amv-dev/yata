@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType};
+use crate::helpers::Peekable;
 use crate::methods::EMA;
 
 #[cfg(feature = "serde")]
@@ -96,8 +97,17 @@ impl Method for TSI {
 		let momentum = value - self.last_value;
 		self.last_value = value;
 
-		let numerator = self.ema12.next(&self.ema11.next(&momentum));
-		let denominator = self.ema22.next(&self.ema21.next(&momentum.abs()));
+		self.ema12.next(&self.ema11.next(&momentum));
+		self.ema22.next(&self.ema21.next(&momentum.abs()));
+
+		self.peek()
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for TSI {
+	fn peek(&self) -> <Self as Method>::Output {
+		let numerator = self.ema12.peek();
+		let denominator = self.ema22.peek();
 
 		if denominator > 0.0 {
 			numerator / denominator

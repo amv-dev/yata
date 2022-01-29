@@ -1,5 +1,8 @@
+use std::convert::TryInto;
+
 use crate::core::{Error, PeriodType, ValueType, Window};
 use crate::core::{Method, MovingAverage};
+use crate::helpers::{Buffered, Peekable};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -69,6 +72,7 @@ impl SMA {
 	/// Returns last result value. Useful for implementing in other methods and indicators.
 	#[inline]
 	#[must_use]
+	#[deprecated(since = "0.5.1", note = "Use `Peekable::peek` instead")]
 	pub const fn get_last_value(&self) -> ValueType {
 		self.value
 	}
@@ -100,6 +104,19 @@ impl Method for SMA {
 }
 
 impl MovingAverage for SMA {}
+
+impl Buffered<ValueType> for SMA {
+	fn get(&self, index: usize) -> Option<ValueType> {
+		let index = index.try_into().ok()?;
+		self.window.get(index).copied()
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for SMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.value
+	}
+}
 
 #[cfg(test)]
 mod tests {

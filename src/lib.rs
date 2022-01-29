@@ -179,6 +179,8 @@ pub mod prelude {
 		Candle, Error, IndicatorConfig, IndicatorInstance, Method, Sequence, OHLCV,
 	};
 
+	pub use super::helpers::{Buffered, Peekable};
+
 	/// Dynamically dispatchable traits for indicators creation
 	pub mod dd {
 		pub use crate::core::{IndicatorConfigDyn, IndicatorInstanceDyn};

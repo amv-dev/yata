@@ -1,4 +1,7 @@
-use crate::core::{Error, Method, MovingAverage, PeriodType, ValueType, Window};
+use crate::{
+	core::{Error, Method, MovingAverage, PeriodType, ValueType, Window},
+	helpers::Peekable,
+};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -110,6 +113,12 @@ impl Method for Vidya {
 }
 
 impl MovingAverage for Vidya {}
+
+impl Peekable<<Self as Method>::Output> for Vidya {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.last_output
+	}
+}
 
 #[cfg(test)]
 mod tests {

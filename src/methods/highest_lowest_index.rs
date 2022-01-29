@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -112,6 +113,12 @@ impl Method for HighestIndex {
 	}
 }
 
+impl Peekable<<Self as Method>::Output> for HighestIndex {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.index
+	}
+}
+
 /// Returns lowest value index over the last `length` values for timeseries of type [`ValueType`]
 ///
 /// If period has more than one minimum values, then returns the index of the newest value (e.g. the smallest index)
@@ -216,6 +223,12 @@ impl Method for LowestIndex {
 			self.value = value;
 		}
 
+		self.index
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for LowestIndex {
+	fn peek(&self) -> <Self as Method>::Output {
 		self.index
 	}
 }

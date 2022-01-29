@@ -1,5 +1,6 @@
 use crate::core::{Error, PeriodType, ValueType};
 use crate::core::{Method, MovingAverage};
+use crate::helpers::Peekable;
 use crate::methods::EMA;
 
 #[cfg(feature = "serde")]
@@ -70,6 +71,12 @@ impl Method for WSMA {
 }
 
 impl MovingAverage for WSMA {}
+
+impl Peekable<<Self as Method>::Output> for WSMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.0.peek()
+	}
+}
 
 #[cfg(test)]
 mod tests {

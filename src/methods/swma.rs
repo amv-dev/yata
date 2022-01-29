@@ -1,4 +1,7 @@
-use crate::core::{Error, Method, MovingAverage, PeriodType, ValueType, Window};
+use crate::{
+	core::{Error, Method, MovingAverage, PeriodType, ValueType, Window},
+	helpers::Peekable,
+};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -102,11 +105,17 @@ impl Method for SWMA {
 		self.numerator += right_value.mul_add(self.left_float_length, self.left_total);
 		self.left_total += left_prev_value - right_value;
 
-		self.numerator * self.invert_sum
+		self.peek()
 	}
 }
 
 impl MovingAverage for SWMA {}
+
+impl Peekable<<Self as Method>::Output> for SWMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.numerator * self.invert_sum
+	}
+}
 
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]

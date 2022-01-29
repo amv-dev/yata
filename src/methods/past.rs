@@ -1,5 +1,7 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, Window};
+use crate::helpers::{Buffered, Peekable};
+use std::convert::TryInto;
 use std::fmt;
 
 #[cfg(feature = "serde")]
@@ -77,6 +79,22 @@ where
 	#[inline]
 	fn next(&mut self, value: &Self::Input) -> T {
 		self.0.push(value.clone())
+	}
+}
+
+impl<T> Peekable<<Self as Method>::Output> for Past<T>
+where
+	T: Clone + fmt::Debug,
+{
+	fn peek(&self) -> <Self as Method>::Output {
+		self.0.newest().clone()
+	}
+}
+
+impl<T: Clone + std::fmt::Debug> Buffered<<Self as Method>::Output> for Past<T> {
+	fn get(&self, index: usize) -> Option<<Self as Method>::Output> {
+		let index = index.try_into().ok()?;
+		self.0.get(index).cloned()
 	}
 }
 

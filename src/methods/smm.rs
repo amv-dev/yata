@@ -1,5 +1,6 @@
 use crate::core::{Error, PeriodType, ValueType, Window};
 use crate::core::{Method, MovingAverage};
+use crate::helpers::Peekable;
 use std::{cmp::Ordering, slice::SliceIndex};
 
 #[cfg(feature = "serde")]
@@ -132,8 +133,9 @@ impl SMM {
 	/// Returns last result value. Useful for implementing in other methods and indicators.
 	#[inline]
 	#[must_use]
+	#[deprecated(since = "0.5.1", note = "Use `Peekable::peek` instead")]
 	pub fn get_last_value(&self) -> ValueType {
-		(get(&self.slice, self.half as usize) + get(&self.slice, self.half_m1 as usize)) * 0.5
+		self.peek()
 	}
 }
 
@@ -214,7 +216,7 @@ impl Method for SMM {
 			self.slice[index] = value;
 		}
 
-		self.get_last_value()
+		self.peek()
 	}
 }
 
@@ -279,6 +281,12 @@ impl<'de> Deserialize<'de> for SMM {
 }
 
 impl MovingAverage for SMM {}
+
+impl Peekable<<Self as Method>::Output> for SMM {
+	fn peek(&self) -> <Self as Method>::Output {
+		(get(&self.slice, self.half as usize) + get(&self.slice, self.half_m1 as usize)) * 0.5
+	}
+}
 
 #[cfg(test)]
 mod tests {

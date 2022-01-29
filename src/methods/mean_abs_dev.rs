@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType};
+use crate::helpers::Peekable;
 use crate::methods::SMA;
 
 #[cfg(feature = "serde")]
@@ -53,8 +54,15 @@ impl Method for MeanAbsDev {
 
 	#[inline]
 	fn next(&mut self, value: &Self::Input) -> Self::Output {
-		let mean = self.0.next(value);
+		self.0.next(value);
 
+		self.peek()
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for MeanAbsDev {
+	fn peek(&self) -> <Self as Method>::Output {
+		let mean = self.0.peek();
 		self.0
 			.get_window()
 			.as_slice()

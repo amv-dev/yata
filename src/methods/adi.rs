@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window, OHLCV};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -113,6 +114,12 @@ impl Method for ADI {
 			self.cmf_sum -= self.window.push(clvv);
 		}
 
+		self.peek()
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for ADI {
+	fn peek(&self) -> <Self as Method>::Output {
 		self.cmf_sum
 	}
 }

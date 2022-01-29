@@ -1,5 +1,6 @@
 use crate::core::{Error, PeriodType, ValueType};
 use crate::core::{Method, MovingAverage};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -77,6 +78,12 @@ impl Method for EMA {
 
 impl MovingAverage for EMA {}
 
+impl Peekable<<Self as Method>::Output> for EMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.value
+	}
+}
+
 /// Simple shortcut for [EMA] over [EMA]
 ///
 /// # See also
@@ -112,6 +119,12 @@ impl Method for DMA {
 
 impl MovingAverage for DMA {}
 
+impl Peekable<<Self as Method>::Output> for DMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.dma.value
+	}
+}
+
 /// Simple shortcut for [EMA] over [EMA] over [EMA] (or [EMA] over [DMA], or [DMA] over [EMA])
 ///
 /// # See also
@@ -146,6 +159,12 @@ impl Method for TMA {
 }
 
 impl MovingAverage for TMA {}
+
+impl Peekable<<Self as Method>::Output> for TMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.tma.value
+	}
+}
 
 /// [Double Exponential Moving Average](https://en.wikipedia.org/wiki/Double_exponential_moving_average) of specified `length` for timeseries of type [`ValueType`]
 ///
@@ -214,14 +233,23 @@ impl Method for DEMA {
 	#[inline]
 	fn next(&mut self, value: &Self::Input) -> Self::Output {
 		let e_ma = self.ema.next(value);
-		let d_ma = self.dma.next(&e_ma);
+		self.dma.next(&e_ma);
+
+		self.peek()
+	}
+}
+
+impl MovingAverage for DEMA {}
+
+impl Peekable<<Self as Method>::Output> for DEMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		let e_ma = self.ema.value;
+		let d_ma = self.dma.value;
 
 		// 2. * ema - dma
 		e_ma.mul_add(2., -d_ma)
 	}
 }
-
-impl MovingAverage for DEMA {}
 
 /// [Triple Exponential Moving Average](https://en.wikipedia.org/wiki/Triple_exponential_moving_average) of specified `length` for timeseries of type [`ValueType`]
 ///
@@ -293,14 +321,24 @@ impl Method for TEMA {
 	fn next(&mut self, value: &Self::Input) -> Self::Output {
 		let e_ma = self.ema.next(value);
 		let d_ma = self.dma.next(&e_ma);
-		let t_ma = self.tma.next(&d_ma);
+		self.tma.next(&d_ma);
+
+		self.peek()
+	}
+}
+
+impl MovingAverage for TEMA {}
+
+impl Peekable<<Self as Method>::Output> for TEMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		let e_ma = self.ema.value;
+		let d_ma = self.dma.value;
+		let t_ma = self.tma.value;
 
 		// 3. * (ema - dma) + tma
 		(e_ma - d_ma).mul_add(3., t_ma)
 	}
 }
-
-impl MovingAverage for TEMA {}
 
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]

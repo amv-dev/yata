@@ -1,5 +1,6 @@
 use crate::core::Method;
 use crate::core::{Error, PeriodType, ValueType, Window};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -118,6 +119,12 @@ impl Method for HighestLowestDelta {
 	}
 }
 
+impl Peekable<<Self as Method>::Output> for HighestLowestDelta {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.highest - self.lowest
+	}
+}
+
 /// Returns highest value over the last `length` values for timeseries of type [`ValueType`]
 ///
 /// # Parameters
@@ -211,6 +218,12 @@ impl Method for Highest {
 	}
 }
 
+impl Peekable<<Self as Method>::Output> for Highest {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.value
+	}
+}
+
 /// Returns lowest value over the last `length` values for timeseries of type [`ValueType`]
 ///
 /// # Parameters
@@ -300,6 +313,12 @@ impl Method for Lowest {
 			self.value = self.window.iter().fold(value, |a, &b| a.min(b));
 		}
 
+		self.value
+	}
+}
+
+impl Peekable<<Self as Method>::Output> for Lowest {
+	fn peek(&self) -> <Self as Method>::Output {
 		self.value
 	}
 }

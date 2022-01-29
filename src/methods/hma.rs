@@ -1,5 +1,8 @@
 use super::WMA;
-use crate::core::{Error, Method, MovingAverage, PeriodType, ValueType};
+use crate::{
+	core::{Error, Method, MovingAverage, PeriodType, ValueType},
+	helpers::Peekable,
+};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -86,6 +89,12 @@ impl Method for HMA {
 }
 
 impl MovingAverage for HMA {}
+
+impl Peekable<<Self as Method>::Output> for HMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.wma3.peek()
+	}
+}
 
 #[cfg(test)]
 mod tests {

@@ -1,5 +1,6 @@
 use crate::core::{Error, PeriodType, ValueType};
 use crate::core::{Method, MovingAverage};
+use crate::helpers::Peekable;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -90,6 +91,12 @@ impl Method for RMA {
 }
 
 impl MovingAverage for RMA {}
+
+impl Peekable<<Self as Method>::Output> for RMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.prev_value
+	}
+}
 
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]

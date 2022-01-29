@@ -1,5 +1,6 @@
 use crate::core::{Error, PeriodType, ValueType};
 use crate::core::{Method, MovingAverage};
+use crate::helpers::{Buffered, Peekable};
 use crate::methods::SMA;
 
 #[cfg(feature = "serde")]
@@ -70,6 +71,18 @@ impl Method for TRIMA {
 }
 
 impl MovingAverage for TRIMA {}
+
+impl Peekable<<Self as Method>::Output> for TRIMA {
+	fn peek(&self) -> <Self as Method>::Output {
+		self.sma2.peek()
+	}
+}
+
+impl Buffered<<Self as Method>::Output> for TRIMA {
+	fn get(&self, index: usize) -> Option<<Self as Method>::Output> {
+		self.sma2.get(index)
+	}
+}
 
 #[cfg(test)]
 mod tests {
