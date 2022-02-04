@@ -1,6 +1,6 @@
 use crate::core::Method;
 use crate::core::{ValueType, OHLCV};
-use crate::prelude::Candle;
+use std::ops::Add;
 
 /// Implements some methods for sequence manipulations.
 pub trait Sequence<T>: AsRef<[T]> {
@@ -44,37 +44,19 @@ pub trait Sequence<T>: AsRef<[T]> {
 	/// Converts timeframe of the series
 	///
 	/// See also [`CollapseTimeframe`](crate::methods::CollapseTimeframe) method.
-	fn collapse_timeframe(&self, size: usize, continuous: bool) -> Vec<Candle>
+	fn collapse_timeframe(&self, size: usize, continuous: bool) -> Vec<T>
 	where
-		T: OHLCV,
+		T: OHLCV + Clone + Add<Output = T>,
 	{
-		fn fold<T: OHLCV>(folded: Candle, next: &T) -> Candle {
-			Candle {
-				high: folded.high.max(next.high()),
-				low: folded.low.min(next.low()),
-				close: next.close(),
-				volume: folded.volume + next.volume(),
-				..folded
-			}
-		}
-
-		fn window<T: OHLCV>(window: &[T]) -> Candle {
-			let first = window.first().unwrap();
-			let initial = Candle {
-				open: first.open(),
-				high: first.high(),
-				low: first.low(),
-				close: first.close(),
-				volume: first.volume(),
-			};
-
-			window.iter().skip(1).fold(initial, fold)
+		#[inline]
+		fn reduce<T: OHLCV + Clone + Add<Output = T>>(window: &[T]) -> T {
+			window.iter().cloned().reduce(Add::add).unwrap()
 		}
 
 		self.as_ref()
 			.windows(size)
 			.step_by(if continuous { 1 } else { size })
-			.map(window)
+			.map(reduce)
 			.collect()
 	}
 }

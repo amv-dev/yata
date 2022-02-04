@@ -219,6 +219,20 @@ impl PartialEq for Candle {
 
 impl Eq for Candle {}
 
+impl<T: OHLCV> std::ops::Add<T> for Candle {
+	type Output = Self;
+
+	fn add(self, rhs: T) -> Self::Output {
+		Self {
+			high: self.high.max(rhs.high()),
+			low: self.low.min(rhs.low()),
+			close: rhs.close(),
+			volume: self.volume + rhs.volume(),
+			..self
+		}
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::Source;
