@@ -343,7 +343,6 @@ impl Peekable<<Self as Method>::Output> for TEMA {
 #[cfg(test)]
 #[allow(clippy::suboptimal_flops)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{DEMA, DMA, EMA, TEMA, TMA};
 	use crate::core::{Method, ValueType};
 	use crate::helpers::{assert_eq_float, RandomCandles};

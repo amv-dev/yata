@@ -83,9 +83,8 @@ impl Method for Derivative {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
 	use super::{Derivative as TestingMethod, Method};
-	use crate::core::{Candle, ValueType};
+	use crate::core::ValueType;
 	use crate::helpers::{assert_eq_float, RandomCandles};
 	use crate::methods::tests::test_const;
 

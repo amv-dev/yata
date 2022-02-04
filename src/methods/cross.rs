@@ -266,8 +266,7 @@ impl Method for CrossUnder {
 
 #[cfg(test)]
 mod tests {
-	#![allow(unused_imports)]
-	use crate::core::{Candle, Method, ValueType};
+	use crate::core::{Method, ValueType};
 	use crate::helpers::RandomCandles;
 	use crate::methods::tests::test_const;
 

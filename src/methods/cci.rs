@@ -1,6 +1,5 @@
-#![allow(unused_imports)]
 use crate::core::Method;
-use crate::core::{Error, PeriodType, ValueType, Window};
+use crate::core::{Error, PeriodType, ValueType};
 use crate::helpers::Peekable;
 use crate::methods::MeanAbsDev;
 

@@ -1,9 +1,7 @@
-#![allow(unused_imports)]
-
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Candle, Error, Method, MovingAverageConstructor, PeriodType, Source, OHLCV};
+use crate::core::{Error, Method, MovingAverageConstructor, Source, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::Cross;

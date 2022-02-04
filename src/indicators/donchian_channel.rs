@@ -1,11 +1,9 @@
-#![allow(unused_imports)]
-
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Candle, Error, Method, PeriodType, Source, OHLCV};
+use crate::core::{Error, Method, PeriodType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
-use crate::methods::{Cross, Highest, Lowest};
+use crate::methods::{Highest, Lowest};
 
 /// Donchian Channel
 ///
