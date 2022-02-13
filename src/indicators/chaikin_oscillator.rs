@@ -128,8 +128,7 @@ impl<M: MovingAverageConstructor> IndicatorInstance for ChaikinOscillatorInstanc
 	}
 
 	fn next<T: OHLCV>(&mut self, candle: &T) -> IndicatorResult {
-		let dyn_candle: &dyn OHLCV = candle;
-		let adi = self.adi.next(dyn_candle);
+		let adi = self.adi.next(candle);
 
 		let data1 = self.ma1.next(&adi);
 		let data2 = self.ma2.next(&adi);

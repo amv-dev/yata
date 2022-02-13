@@ -1,3 +1,5 @@
+use std::ops::Add;
+
 use crate::core::{Candle, Error, Method, OHLCV};
 
 #[cfg(feature = "serde")]
@@ -23,10 +25,10 @@ use serde::{Deserialize, Serialize};
 /// use yata::prelude::*;
 /// use yata::methods::CollapseTimeframe;
 ///
-/// let timeframe = [
+/// let timeframe: [Candle; 2] = [
 /// //   open  high  low  close volume
-///     (10.0, 15.0, 5.0, 12.0, 1000.0),
-///     (12.1, 17.0, 6.0, 13.0, 2000.0),
+///     (10.0, 15.0, 5.0, 12.0, 1000.0).into(),
+///     (12.1, 17.0, 6.0, 13.0, 2000.0).into(),
 /// ];
 ///
 /// let mut collapser = CollapseTimeframe::new(2, &timeframe[0]).unwrap();
@@ -51,18 +53,24 @@ use serde::{Deserialize, Serialize};
 ///
 /// [`ValueType`]: crate::core::ValueType
 /// [`Candle`]: crate::core::Candle
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct CollapseTimeframe {
-	current: Option<Candle>,
+pub struct CollapseTimeframe<T = Candle>
+where
+	T: OHLCV + Clone + Add<Output = T>,
+{
+	current: Option<T>,
 	index: usize,
 	period: usize,
 }
 
-impl Method for CollapseTimeframe {
+impl<T> Method for CollapseTimeframe<T>
+where
+	T: OHLCV + Clone + Add<Output = T>,
+{
 	type Params = usize;
-	type Input = dyn OHLCV;
-	type Output = Option<Candle>;
+	type Input = T;
+	type Output = Option<T>;
 
 	fn new(period: Self::Params, _candle: &Self::Input) -> Result<Self, Error> {
 		if period == 0 {
@@ -70,21 +78,18 @@ impl Method for CollapseTimeframe {
 		}
 
 		Ok(Self {
+			current: None,
+			index: 0,
 			period,
-			..Self::default()
 		})
 	}
 
 	fn next(&mut self, candle: &Self::Input) -> Self::Output {
-		let current = self.current.map_or(candle.into(), |c2| Candle {
-			high: c2.high.max(candle.high()),
-			low: c2.low.min(candle.low()),
-			close: candle.close(),
-			volume: c2.volume + candle.volume(),
-			..c2
-		});
-
-		self.current = Some(current);
+		self.current = self
+			.current
+			.take()
+			.map(|current| current + candle.clone())
+			.or_else(|| Some(candle.clone()));
 
 		self.index += 1;
 

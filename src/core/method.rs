@@ -62,7 +62,7 @@ type BoxedFnMethod<'a, M> = Box<dyn FnMut(&'a <M as Method>::Input) -> <M as Met
 ///
 /// # Be advised
 /// There is no `reset` method on the trait. If you need reset a state of the `Method` instance, you should just create a new one.
-pub trait Method: fmt::Debug {
+pub trait Method {
 	/// Method parameters
 	type Params;
 	/// Input value type
