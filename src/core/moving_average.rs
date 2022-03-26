@@ -20,7 +20,7 @@ pub trait MovingAverage: Method<Input = ValueType, Output = ValueType> {}
 /// This trait plays the same role for moving averages as [`IndicatorConfig`] plays for indicators.
 ///
 /// [`IndicatorConfig`]: crate::core::IndicatorConfig
-pub trait MovingAverageConstructor: Clone + FromStr {
+pub trait MovingAverageConstructor: Send + Clone + FromStr {
 	/// Used for comparing MA types
 	type Type: Eq;
 

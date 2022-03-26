@@ -2,7 +2,7 @@ use super::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::core::{Error, OHLCV};
 
 /// Dynamically dispatchable [`IndicatorConfig`](crate::core::IndicatorConfig)
-pub trait IndicatorConfigDyn<T: OHLCV> {
+pub trait IndicatorConfigDyn<T: OHLCV> : Send {
 	/// Dynamically initializes the **State** based on the current **Configuration**
 	fn init(&self, initial_value: &T) -> Result<Box<dyn IndicatorInstanceDyn<T>>, Error>;
 
@@ -37,7 +37,7 @@ impl<T, I, C> IndicatorConfigDyn<T> for C
 where
 	T: OHLCV,
 	I: IndicatorInstanceDyn<T> + IndicatorInstance<Config = Self> + 'static,
-	C: IndicatorConfig<Instance = I> + Clone + 'static,
+	C: IndicatorConfig<Instance = I> + Clone + Send + 'static,
 {
 	fn init(&self, initial_value: &T) -> Result<Box<dyn IndicatorInstanceDyn<T>>, Error> {
 		let instance = IndicatorConfig::init(self.clone(), initial_value)?;
@@ -66,7 +66,7 @@ where
 }
 
 /// Dynamically dispatchable [`IndicatorInstance`](crate::core::IndicatorInstance)
-pub trait IndicatorInstanceDyn<T: OHLCV> {
+pub trait IndicatorInstanceDyn<T: OHLCV> : Send {
 	/// Evaluates given candle and returns [`IndicatorResult`](crate::core::IndicatorResult)
 	fn next(&mut self, candle: &T) -> IndicatorResult;
 
@@ -101,7 +101,7 @@ pub trait IndicatorInstanceDyn<T: OHLCV> {
 impl<T, I> IndicatorInstanceDyn<T> for I
 where
 	T: OHLCV,
-	I: IndicatorInstance + 'static,
+	I: IndicatorInstance + Send + 'static,
 {
 	fn next(&mut self, candle: &T) -> IndicatorResult {
 		IndicatorInstance::next(self, candle)

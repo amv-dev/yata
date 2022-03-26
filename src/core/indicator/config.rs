@@ -7,7 +7,7 @@ use crate::core::{Error, OHLCV};
 ///
 /// See example with [`Example Indicator`](crate::indicators::example)
 // Config cannot be Copy because it might consist ov Vec-s. F.e. if indicator using Conv method with custom weights.
-pub trait IndicatorConfig: Clone {
+pub trait IndicatorConfig: Clone + Send {
 	/// Type of **State**
 	type Instance: IndicatorInstance<Config = Self>;
 
