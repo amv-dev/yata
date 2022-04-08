@@ -82,6 +82,7 @@ pub struct ADI {
 impl ADI {
 	/// Returns last calculated value
 	#[must_use]
+	#[deprecated(since = "0.6.0", note = "Use `Peekable::peek` instead")]
 	pub const fn get_value(&self) -> ValueType {
 		self.cmf_sum
 	}

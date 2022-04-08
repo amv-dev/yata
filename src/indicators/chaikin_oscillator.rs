@@ -5,6 +5,7 @@ use crate::core::{Error, Method, MovingAverageConstructor, PeriodType, OHLCV};
 use crate::core::{IndicatorConfig, IndicatorInstance, IndicatorResult};
 use crate::helpers::MA;
 use crate::methods::{Cross, ADI};
+use crate::prelude::Peekable;
 
 /// Chaikin Oscillator
 ///
@@ -58,8 +59,8 @@ impl<M: MovingAverageConstructor> IndicatorConfig for ChaikinOscillator<M> {
 		let adi = ADI::new(cfg.window, candle)?;
 
 		Ok(Self::Instance {
-			ma1: cfg.ma1.init(adi.get_value())?, //method(cfg.method, cfg.period1, adi.get_value())?,
-			ma2: cfg.ma2.init(adi.get_value())?, // method(cfg.method, cfg.period2, adi.get_value())?,
+			ma1: cfg.ma1.init(adi.peek())?,
+			ma2: cfg.ma2.init(adi.peek())?,
 			adi,
 			cross_over: Cross::default(),
 			cfg,
