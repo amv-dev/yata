@@ -72,7 +72,7 @@ impl<M: MovingAverageConstructor> IndicatorConfig for MACD<M> {
 			Ok(Self::Instance {
 				ma1: cfg.ma1.init(src)?,
 				ma2: cfg.ma2.init(src)?,
-				ma3: cfg.signal.init(src)?,
+				ma3: cfg.signal.init(0.)?,
 				cross1: Cross::default(),
 				cross2: Cross::default(),
 				cfg,
