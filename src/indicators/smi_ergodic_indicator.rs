@@ -108,6 +108,10 @@ impl<M: MovingAverageConstructor> IndicatorConfig for SMIErgodicIndicator<M> {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.signal = value,
 			},
+			"zone" => match value.parse() {
+				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
+				Ok(value) => self.zone = value,
+			},
 			"source" => match value.parse() {
 				Err(_) => return Err(Error::ParameterParse(name.to_string(), value.to_string())),
 				Ok(value) => self.source = value,
