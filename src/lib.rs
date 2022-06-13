@@ -37,6 +37,7 @@ limitations under the License.
 #![allow(unknown_lints)] // workaround clippy unknown lints when rust stable 1.50. May be removed in the future
 #![allow(clippy::upper_case_acronyms)]
 #![deny(clippy::nursery)]
+#![allow(clippy::use_self)]
 
 //! Yet Another Technical Analysis library
 //!
