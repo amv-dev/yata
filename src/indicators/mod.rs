@@ -146,7 +146,7 @@ mod stochastic_oscillator;
 pub use stochastic_oscillator::{StochasticOscillator, StochasticOscillatorInstance};
 
 mod trix;
-pub use trix::{Trix, TrixInstance};
+pub use trix::{Trix, TRIXInstance};
 
 mod trend_strength_index;
 pub use trend_strength_index::{TrendStrengthIndex, TrendStrengthIndexInstance};
