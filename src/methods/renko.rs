@@ -60,7 +60,7 @@ use serde::{Deserialize, Serialize};
 /// use yata::core::Source;
 /// use yata::methods::Renko;
 ///
-/// // Here we just creating a `Vec` of `OHLCV`s with only `close` value inside  
+/// // Here we just creating a `Vec` of `OHLCV`s with only `close` value inside
 /// let inputs = (&[100.0, 100.5, 101.506, 105.0, 102.0, 101.4, 100.0])
 ///     .iter()
 ///     .map(|&v| Candle {
@@ -402,7 +402,7 @@ mod tests {
 	#[allow(clippy::clone_on_copy)]
 	fn test_renko() {
 		//						0	   1	   2	   3	  4	     5	    6
-		let inputs = (&[100.0, 100.5, 101.506, 105.0, 102.0, 101.4, 100.0])
+		let inputs = [100.0, 100.5, 101.506, 105.0, 102.0, 101.4, 100.0]
 			.iter()
 			.map(|&v| Candle {
 				close: v,
@@ -416,14 +416,14 @@ mod tests {
 			.map(|x| (renko.clone(), renko.next(x), renko.clone()))
 			.enumerate()
 			.for_each(|(i, (r1, x, r2))| match i {
-				0 => assert!(x.is_empty(), "{:?} => {:?} ::: {:?}", r1, r2, x),
-				1 => assert!(x.is_empty(), "{:?} => {:?} ::: {:?}", r1, r2, x),
-				2 => assert_eq!(x.len(), 1, "{:?} => {:?} ::: {:?}", r1, r2, x),
-				3 => assert_eq!(x.len(), 3, "{:?} => {:?} ::: {:?}", r1, r2, x),
-				4 => assert_eq!(x.len(), 1, "{:?} => {:?} ::: {:?}", r1, r2, x),
-				5 => assert_eq!(x.len(), 1, "{:?} => {:?} ::: {:?}", r1, r2, x),
-				6 => assert_eq!(x.len(), 1, "{:?} => {:?} ::: {:?}", r1, r2, x),
-				_ => panic!("Expected match arm for index {}", i),
+				0 => assert!(x.is_empty(), "{r1:?} => {r2:?} ::: {x:?}"),
+				1 => assert!(x.is_empty(), "{r1:?} => {r2:?} ::: {x:?}"),
+				2 => assert_eq!(x.len(), 1, "{r1:?} => {r2:?} ::: {x:?}"),
+				3 => assert_eq!(x.len(), 3, "{r1:?} => {r2:?} ::: {x:?}"),
+				4 => assert_eq!(x.len(), 1, "{r1:?} => {r2:?} ::: {x:?}"),
+				5 => assert_eq!(x.len(), 1, "{r1:?} => {r2:?} ::: {x:?}"),
+				6 => assert_eq!(x.len(), 1, "{r1:?} => {r2:?} ::: {x:?}"),
+				_ => panic!("Expected match arm for index {i}"),
 			});
 	}
 }

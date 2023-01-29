@@ -27,14 +27,14 @@ pub enum Error {
 impl std::fmt::Display for Error {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::SourceParse(value) => write!(f, "Unable to parse value as Source: {:?}", value),
+			Self::SourceParse(value) => write!(f, "Unable to parse value as Source: {value:?}"),
 			Self::ParameterParse(name, value) => {
-				write!(f, "Unable to parse into {}: {:?}", name, value)
+				write!(f, "Unable to parse into {name}: {value:?}")
 			}
 			Self::WrongMethodParameters => write!(f, "Wrong method parameters"),
 			Self::WrongConfig => write!(f, "Wrong config"),
 			Self::InvalidCandles => write!(f, "Invalid candles"),
-			Self::Other(reason) => write!(f, "{}", reason),
+			Self::Other(reason) => f.write_str(reason),
 			Self::MovingAverageParse => write!(f, "Error parsing moving average type and length"),
 		}
 	}

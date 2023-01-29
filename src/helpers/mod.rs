@@ -85,8 +85,7 @@ pub fn assert_eq_float(original: ValueType, calculated: ValueType) {
 
 	assert!(
 		calculated.is_finite(),
-		"Calculated value is not a regular number: {}",
-		calculated
+		"Calculated value is not a regular number: {calculated}",
 	);
 
 	let diff = original - calculated;
@@ -121,9 +120,7 @@ pub fn assert_neq_float(value1: ValueType, value2: ValueType) {
 
 	assert!(
 		(diff / mid).abs() > SIGMA,
-		"value#1={}, value#2={}",
-		value1,
-		value2
+		"value#1={value1}, value#2={value2}",
 	);
 }
 

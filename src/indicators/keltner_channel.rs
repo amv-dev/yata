@@ -139,7 +139,7 @@ impl<M: MovingAverageConstructor> IndicatorInstance for KeltnerChannelInstance<M
 		let atr = self.sma.next(&tr);
 
 		let upper = atr.mul_add(self.cfg.sigma, ma);
-		let lower = ma - atr * self.cfg.sigma;
+		let lower = atr.mul_add(-self.cfg.sigma, ma);
 
 		let signal =
 			self.cross_under.next(&(source, lower)) - self.cross_above.next(&(source, upper));

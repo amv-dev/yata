@@ -123,7 +123,7 @@ impl IndicatorInstance for PriceChannelStrategyInstance {
 		let delta = highest - middle;
 
 		let upper = delta.mul_add(self.cfg.sigma, middle);
-		let lower = middle - delta * self.cfg.sigma;
+		let lower = delta.mul_add(-self.cfg.sigma, middle);
 
 		let signal_up = (candle.high() >= upper) as i8;
 		let signal_down = (candle.low() <= lower) as i8;

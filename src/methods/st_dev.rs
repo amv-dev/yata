@@ -154,10 +154,7 @@ mod tests {
 				let value = ma.next(x);
 				let value2 = diff_sq_sum.sqrt();
 
-				println!(
-					"{} <=> {} at {} with length {}",
-					value2, value, i, ma_length
-				);
+				println!("{value2} <=> {value} at {i} with length {ma_length}");
 				assert_eq_float(value2, value);
 			});
 		});

@@ -304,9 +304,9 @@ impl<T> std::ops::Index<PeriodType> for Window<T> {
 	type Output = T;
 
 	fn index(&self, index: PeriodType) -> &Self::Output {
-		let buf_index =
-			self.slice_index(index)
-				.unwrap_or_else(|| panic!("Window index {:} is out of range", index)) as usize;
+		let buf_index = self
+			.slice_index(index)
+			.unwrap_or_else(|| panic!("Window index {index} is out of range")) as usize;
 
 		if cfg!(feature = "unsafe_performance") {
 			unsafe { self.buf.get_unchecked(buf_index) }
@@ -506,15 +506,14 @@ where
 		if buf.len() > PeriodType::MAX as usize - 1 {
 			let max_length = PeriodType::MAX as usize - 1;
 			let error = SerdeError::custom(format!(
-				"Length of window's buffer cannot be more than {}.",
-				max_length
+				"Length of window's buffer cannot be more than {max_length}.",
 			));
 			return Err(error);
 		}
 
 		if (buf.len() as PeriodType) <= index {
 			let error =
-				SerdeError::custom(format!("Index {} is out of window's buffer bounds.", index));
+				SerdeError::custom(format!("Index {index} is out of window's buffer bounds."));
 			return Err(error);
 		}
 

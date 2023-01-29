@@ -304,7 +304,7 @@ mod tests {
 				value2 = 0;
 			}
 
-			assert_eq!(value1, value2, "{}, {} at index {}", value2, value1, i);
+			assert_eq!(value1, value2, "{value2}, {value1} at index {i}");
 		});
 	}
 	#[test]
@@ -332,13 +332,9 @@ mod tests {
 		src.iter().enumerate().for_each(|(i, &x)| {
 			let value1 = ma.next(&(x, avg)).analog();
 
-			let value2 = if x > avg && src[i.saturating_sub(1)] < avg {
-				1
-			} else {
-				0
-			};
+			let value2 = i8::from(x > avg && src[i.saturating_sub(1)] < avg);
 
-			assert_eq!(value1, value2, "{}, {} at index {}", value2, value1, i);
+			assert_eq!(value1, value2, "{value2}, {value1} at index {i}");
 		});
 	}
 
@@ -367,13 +363,9 @@ mod tests {
 		src.iter().enumerate().for_each(|(i, &x)| {
 			let value1 = ma.next(&(x, avg)).analog();
 
-			let value2 = if x < avg && src[i.saturating_sub(1)] > avg {
-				1
-			} else {
-				0
-			};
+			let value2 = i8::from(x < avg && src[i.saturating_sub(1)] > avg);
 
-			assert_eq!(value1, value2, "{}, {} at index {}", value2, value1, i);
+			assert_eq!(value1, value2, "{value2}, {value1} at index {i}");
 		});
 	}
 }

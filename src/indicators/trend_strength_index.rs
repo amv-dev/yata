@@ -169,13 +169,13 @@ impl IndicatorInstance for TrendStrengthIndexInstance {
 
 		self.sy += src - past_src;
 
-		self.sy2 += src * src - past_src * past_src;
+		self.sy2 += src.mul_add(src, -past_src * past_src);
 
 		let sma = self.inverted_period * self.sy;
 		let p = (self.wma.next(&src) - sma) * self.sx;
 
 		// sy2 is always greater than sma * sy, so q is always positive
-		let q = self.k * (self.sy2 - sma * self.sy);
+		let q = self.k * sma.mul_add(-self.sy, self.sy2);
 
 		let value = p / q.sqrt();
 

@@ -107,7 +107,7 @@ impl fmt::Debug for IndicatorResult {
 			.values
 			.iter()
 			.take(self.length.0 as usize)
-			.map(|&x| format!("{:>7.4}", x))
+			.map(|&x| format!("{x:>7.4}"))
 			.collect();
 		let signals: Vec<String> = self
 			.signals

@@ -151,10 +151,7 @@ impl From<Action> for i8 {
 
 impl From<Option<i8>> for Action {
 	fn from(value: Option<i8>) -> Self {
-		match value {
-			None => Self::None,
-			Some(v) => v.into(),
-		}
+		value.map_or(Self::None, Self::from)
 	}
 }
 
@@ -182,7 +179,7 @@ impl From<f64> for Action {
 			return Self::None;
 		}
 
-		let normalized = v.max(-1.0).min(1.0);
+		let normalized = v.clamp(-1., 1.);
 
 		let value = from_normalized_f64_to_bounded(normalized.abs());
 
@@ -202,10 +199,7 @@ impl From<f64> for Action {
 
 impl From<Option<f64>> for Action {
 	fn from(value: Option<f64>) -> Self {
-		match value {
-			None => Self::None,
-			Some(value) => value.into(),
-		}
+		value.map_or(Self::None, Self::from)
 	}
 }
 
@@ -218,10 +212,7 @@ impl From<f32> for Action {
 
 impl From<Option<f32>> for Action {
 	fn from(value: Option<f32>) -> Self {
-		match value {
-			None => Self::None,
-			Some(value) => value.into(),
-		}
+		value.map_or(Self::None, Self::from)
 	}
 }
 
@@ -290,8 +281,8 @@ impl fmt::Debug for Action {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
 			Self::None => write!(f, "N"),
-			Self::Buy(value) => write!(f, "+{}", value),
-			Self::Sell(value) => write!(f, "-{}", value),
+			Self::Buy(value) => write!(f, "+{value}"),
+			Self::Sell(value) => write!(f, "-{value}"),
 		}
 	}
 }
@@ -364,11 +355,7 @@ mod tests {
 			assert_eq!(
 				action,
 				ratio.into(),
-				"at index {} with action {:?} ratio {}, action#2 {:?}",
-				x,
-				action,
-				ratio,
-				action2,
+				"at index {x} with action {action:?} ratio {ratio}, action#2 {action2:?}",
 			);
 
 			let action = if x < BOUND {
@@ -383,11 +370,7 @@ mod tests {
 			assert_eq!(
 				action,
 				ratio.into(),
-				"at index {} with action {:?} ratio {}, action#2 {:?}",
-				x,
-				action,
-				ratio,
-				action2,
+				"at index {x} with action {action:?} ratio {ratio}, action#2 {action2:?}",
 			);
 		});
 	}
@@ -401,12 +384,13 @@ mod tests {
 			1e-15
 		};
 
-		println!("{}", delta);
+		println!("{delta}");
 		(0..=BOUND).for_each(|x| {
 			let xx = x as ValueType;
 			assert_eq!(Action::Buy(x), (half_value * 2. * xx).into());
 			assert_eq!(Action::Sell(x), (-half_value * 2. * xx).into());
 
+			#[allow(clippy::suboptimal_flops)]
 			if x > 0 {
 				let y = x - 1;
 				assert_eq!(
@@ -420,7 +404,7 @@ mod tests {
 			}
 		});
 
-		assert_eq!(Action::Buy(1), (half_value * 3. - delta).into());
+		assert_eq!(Action::Buy(1), half_value.mul_add(3., -delta).into());
 		assert_eq!(Action::Buy(2), (half_value * 3.).into());
 	}
 

@@ -132,6 +132,7 @@ mod tests {
 
 			for x in &src {
 				let value1 = ma.next(x);
+				#[allow(clippy::suboptimal_flops)]
 				let value2 = wma3.next(&(2. * wma2.next(x) - wma1.next(x)));
 				assert_eq_float(value2, value1);
 			}

@@ -126,7 +126,7 @@ impl IndicatorInstance for BollingerBandsInstance {
 		let sq_error = self.st_dev.next(&source);
 
 		let upper = sq_error.mul_add(self.cfg.sigma, middle);
-		let lower = middle - sq_error * self.cfg.sigma;
+		let lower = sq_error.mul_add(-self.cfg.sigma, middle);
 
 		let values = [upper, middle, lower];
 
@@ -137,7 +137,7 @@ impl IndicatorInstance for BollingerBandsInstance {
 			(source - lower) / range
 		};
 
-		let signals = [Action::from(relative * 2.0 - 1.0)];
+		let signals = [Action::from(relative.mul_add(2.0, -1.0))];
 		IndicatorResult::new(&values, &signals)
 	}
 }

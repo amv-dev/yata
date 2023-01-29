@@ -142,7 +142,7 @@ const BOUND: ValueType = 0.999;
 
 #[inline]
 fn bound_value(value: ValueType) -> ValueType {
-	value.min(BOUND).max(-BOUND)
+	value.clamp(-BOUND, BOUND)
 }
 
 impl<M: MovingAverageConstructor> IndicatorInstance for FisherTransformInstance<M> {
@@ -164,7 +164,7 @@ impl<M: MovingAverageConstructor> IndicatorInstance for FisherTransformInstance<
 			0.
 		} else {
 			// converting `SRC` into a value in range [-1; 1]
-			let x = bound_value((src - lowest) / (highest - lowest) * 2. - 1.);
+			let x = bound_value(((src - lowest) / (highest - lowest)).mul_add(2., -1.));
 			// calculating fisher transform value
 			x.atanh()
 		};

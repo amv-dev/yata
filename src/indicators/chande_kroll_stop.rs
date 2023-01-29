@@ -78,15 +78,18 @@ impl<M: MovingAverageConstructor> IndicatorConfig for ChandeKrollStop<M> {
 			highest1: Highest::new(cfg.ma.ma_period(), &candle.high())?,
 			lowest1: Lowest::new(cfg.ma.ma_period(), &candle.low())?,
 
-			highest2: Highest::new(cfg.q, &(candle.high() - cfg.x * tr))?,
+			highest2: Highest::new(cfg.q, &cfg.x.mul_add(-tr, candle.high()))?,
 			lowest2: Lowest::new(cfg.q, &cfg.x.mul_add(tr, candle.low()))?,
 
 			prev_close: candle.close(),
-			prev_stop_short: candle.high() - cfg.x * tr,
+			prev_stop_short: cfg.x.mul_add(-tr, candle.high()),
 			prev_stop_long: cfg.x.mul_add(tr, candle.low()),
 			cross_above: CrossAbove::new(
 				(),
-				&(cfg.x.mul_add(tr, candle.low()), candle.high() - cfg.x * tr),
+				&(
+					cfg.x.mul_add(tr, candle.low()),
+					cfg.x.mul_add(-tr, candle.high()),
+				),
 			)?,
 			cfg,
 		})
@@ -170,7 +173,7 @@ impl<M: MovingAverageConstructor> IndicatorInstance for ChandeKrollStopInstance<
 
 		let atr = self.ma.next(&tr);
 
-		let phs = self.highest1.next(&candle.high()) - atr * self.cfg.x;
+		let phs = atr.mul_add(-self.cfg.x, self.highest1.next(&candle.high()));
 		let pls = atr.mul_add(self.cfg.x, self.lowest1.next(&candle.low()));
 
 		let stop_short = self.highest2.next(&phs);

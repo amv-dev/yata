@@ -2,7 +2,7 @@
 authors = ["AMvDev <amv-dev@protonmail.com>"]
 categories = ["mathematics", "science"]
 description = "Yet another Technical Analysis library. For rust now."
-edition = "2018"
+edition = "2021"
 keywords = ["technical", "analysis", "trading", "indicators"]
 license = "Apache-2.0"
 name = "yata"
@@ -20,7 +20,7 @@ include = [
     "/LICENSE",
     "/rustfmt.toml",
     "/.gitignore",
-    "/.editorconfig"
+    "/.editorconfig",
 ]
 
 [dependencies]
