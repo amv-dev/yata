@@ -154,7 +154,7 @@ mod tests {
 	}
 
 	#[test]
-	#[should_panic]
+	#[should_panic(expected = "assertion")]
 	fn test_adi_windowless_const() {
 		let candle = Candle {
 			open: 121.0,

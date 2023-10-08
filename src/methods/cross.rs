@@ -67,7 +67,7 @@ impl Method for Cross {
 	type Input = (ValueType, ValueType);
 	type Output = Action;
 
-	fn new(_: Self::Params, value: &Self::Input) -> Result<Self, Error>
+	fn new((): Self::Params, value: &Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
@@ -160,7 +160,7 @@ impl Method for CrossAbove {
 	type Input = (ValueType, ValueType);
 	type Output = Action;
 
-	fn new(_: Self::Params, value: &Self::Input) -> Result<Self, Error>
+	fn new((): Self::Params, value: &Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{
@@ -249,7 +249,7 @@ impl Method for CrossUnder {
 	type Input = (ValueType, ValueType);
 	type Output = Action;
 
-	fn new(_: Self::Params, value: &Self::Input) -> Result<Self, Error>
+	fn new((): Self::Params, value: &Self::Input) -> Result<Self, Error>
 	where
 		Self: Sized,
 	{

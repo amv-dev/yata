@@ -15,7 +15,7 @@ impl Method for HeikinAshi {
 	type Input = dyn OHLCV;
 	type Output = Candle;
 
-	fn new(_: Self::Params, value: &Self::Input) -> Result<Self, Error> {
+	fn new((): Self::Params, value: &Self::Input) -> Result<Self, Error> {
 		Ok(Self {
 			prev: Candle::from(value),
 		})

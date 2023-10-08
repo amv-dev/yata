@@ -100,7 +100,7 @@ mod tests {
 	}
 
 	#[test]
-	#[should_panic]
+	#[should_panic(expected = "WrongMethodParameters")]
 	fn test_median_abs_dev1() {
 		let mut candles = RandomCandles::default();
 

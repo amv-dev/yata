@@ -51,7 +51,7 @@ impl Method for TR {
 	type Input = dyn OHLCV;
 	type Output = ValueType;
 
-	fn new(_: Self::Params, value: &Self::Input) -> Result<Self, Error> {
+	fn new((): Self::Params, value: &Self::Input) -> Result<Self, Error> {
 		Ok(Self {
 			prev_close: value.close(),
 		})

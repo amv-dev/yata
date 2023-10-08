@@ -166,7 +166,7 @@ mod tests {
 	}
 
 	#[test]
-	#[should_panic]
+	#[should_panic(expected = "WrongMethodParameters")]
 	fn test_timeframe_collapse_fail() {
 		let candles = RandomCandles::new().take(1).collect::<Vec<_>>();
 		TestingMethod::new(0, &candles[0]).unwrap();

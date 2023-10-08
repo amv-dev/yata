@@ -144,7 +144,7 @@ mod tests {
 	}
 
 	#[test]
-	#[should_panic]
+	#[should_panic(expected = "assertion")]
 	fn test_integral0_const() {
 		use crate::core::Method;
 		use crate::methods::tests::test_const;
@@ -164,12 +164,10 @@ mod tests {
 			.collect();
 
 		let mut ma = TestingMethod::new(0, &src[0]).unwrap();
-		let mut q = Vec::new();
 
 		src.iter().enumerate().for_each(|(i, x)| {
 			let value1 = ma.next(x);
 			let value2 = src.iter().take(i + 1).fold(0.0, |s, &c| s + c);
-			q.push(x);
 
 			// assert_eq!(value1, value2, "at index {} with value {}: {:?}", i, x, q);
 			assert_eq_float(value2, value1);
