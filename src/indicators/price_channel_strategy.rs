@@ -7,7 +7,7 @@ use crate::methods::{Highest, Lowest};
 
 /// Price Channel Strategy
 ///
-/// Calculates price channel by highes high and lowest low for last `period` candles.
+/// Calculates price channel by highest high and lowest low for last `period` candles.
 ///
 /// ## Links
 ///

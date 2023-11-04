@@ -36,7 +36,7 @@ pub trait MovingAverageConstructor: Clone + FromStr {
 	/// Returns moving average type
 	fn ma_type(&self) -> Self::Type;
 
-	/// Checks two moving average constructors for the same moving averagee type
+	/// Checks two moving average constructors for the same moving average type
 	fn is_similar_to(&self, other: &Self) -> bool {
 		self.ma_type() == other.ma_type()
 	}
