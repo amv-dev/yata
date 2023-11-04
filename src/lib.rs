@@ -41,7 +41,7 @@ limitations under the License.
 
 //! Yet Another Technical Analysis library
 //!
-//! `YaTa` implements most common technical analysis [methods](crate::methods) and [indicators](crate::indicators)
+//! `YaTa` implements most common technical analysis [methods] and [indicators]
 //!
 //! It also provides you an interface to create your own indicators.
 //!
