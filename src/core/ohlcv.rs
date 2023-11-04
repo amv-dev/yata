@@ -97,6 +97,36 @@ pub trait OHLCV: 'static {
 		(self.high() + self.low() + self.close() + self.open()) * 0.25
 	}
 
+	#[cfg(feature = "value_type_f32")]
+	/// CLV = \[\(close - low\) - \(high - close\)\] / \(high - low\)
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use yata::prelude::*;
+	/// use yata::core::Candle;
+	/// let candle = Candle {
+	///     high: 5.0,
+	///     low: 2.0,
+	///     close: 4.0,
+	///     ..Candle::default()
+	/// };
+	///
+	/// assert_eq!(candle.clv(), ((candle.close()-candle.low()) - (candle.high() - candle.close()))/(candle.high() - candle.low()));
+	/// assert_eq!(candle.clv(), ((4. - 2.) - (5. - 4.))/(5. - 2.));
+	/// ```
+	#[inline]
+	fn clv(&self) -> ValueType {
+		// we need to check division by zero, so we can really just check if `high` is equal to `low` without using any kind of round error checks
+		#[allow(clippy::float_cmp)]
+		if self.high() == self.low() {
+			0.
+		} else {
+			(2.0f32.mul_add(self.close(), -self.low()) - self.high()) / (self.high() - self.low())
+		}
+	}
+
+	#[cfg(not(feature = "value_type_f32"))]
 	/// CLV = \[\(close - low\) - \(high - close\)\] / \(high - low\)
 	///
 	/// # Examples

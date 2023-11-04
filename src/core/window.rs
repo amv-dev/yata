@@ -1,3 +1,4 @@
+#![allow(clippy::cast_possible_truncation)]
 #![allow(unsafe_code)]
 use super::PeriodType;
 use std::mem;

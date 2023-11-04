@@ -1,4 +1,6 @@
 #![allow(missing_docs)]
+#![allow(clippy::cast_possible_truncation)]
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -116,7 +118,7 @@ mod know_sure_thing;
 pub use know_sure_thing::{KnowSureThing, KnowSureThingInstance};
 
 mod macd;
-pub use macd::{MovingAverageConvergenceDivergence, MACD, MACDInstance};
+pub use macd::{MACDInstance, MovingAverageConvergenceDivergence, MACD};
 
 mod momentum_index;
 pub use momentum_index::{MomentumIndex, MomentumIndexInstance};
@@ -146,7 +148,7 @@ mod stochastic_oscillator;
 pub use stochastic_oscillator::{StochasticOscillator, StochasticOscillatorInstance};
 
 mod trix;
-pub use trix::{Trix, TRIXInstance};
+pub use trix::{TRIXInstance, Trix};
 
 mod trend_strength_index;
 pub use trend_strength_index::{TrendStrengthIndex, TrendStrengthIndexInstance};

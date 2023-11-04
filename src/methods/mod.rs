@@ -1,3 +1,4 @@
+#![allow(clippy::cast_possible_truncation)]
 #![warn(missing_docs, missing_debug_implementations)]
 
 //! Commonly used methods for manipulating timeseries.
