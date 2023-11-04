@@ -78,6 +78,8 @@ mod median_abs_dev;
 pub use median_abs_dev::*;
 mod vidya;
 pub use vidya::*;
+mod pivot_point_standard;
+pub use pivot_point_standard::*;
 
 mod cross;
 pub use cross::*;
