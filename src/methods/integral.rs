@@ -51,7 +51,7 @@ use serde::{Deserialize, Serialize};
 /// assert_eq!(integral.next(&5.0), 15.0); // 1 + 2 + 3 + 4 + 5
 /// ```
 ///
-/// ### Intergal is opposite method for Derivative
+/// ### Integral is opposite method for Derivative
 /// ```
 /// use yata::prelude::*;
 /// use yata::methods::{Integral, Derivative};

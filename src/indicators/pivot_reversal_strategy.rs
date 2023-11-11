@@ -9,7 +9,7 @@ use super::HLC;
 
 /// Pivot Reversal Strategy
 ///
-/// Simply seaches for pivot points and returns signal.
+/// Simply searches for pivot points and returns signal.
 ///
 /// ## Links
 ///

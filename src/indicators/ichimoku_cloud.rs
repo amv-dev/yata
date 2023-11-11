@@ -22,12 +22,12 @@ use crate::methods::{Cross, Highest, Lowest};
 ///
 /// # 2 signals
 ///
-/// * When `Tenkan Sen` crosses `Kijun Sen` upwards and `source` value is greter than both `Senkou Span A and B` and when `Senkou Span A` is greter than `Senkou Span B`,
+/// * When `Tenkan Sen` crosses `Kijun Sen` upwards and `source` value is greater than both `Senkou Span A and B` and when `Senkou Span A` is greater than `Senkou Span B`,
 /// returns full buy signal.
 /// When `Tenkan Sen` crosses `Kijun Sen` downwards and `source` value is lower than both `Senkou Span A and B` and when `Senkou Span A` is lower than `Senkou Span B`,
 /// returns full sell signal.
 ///
-/// * When `source` value crosses `Kijun Sen` upwards and `source` value is greter than both `Senkou Span A and B` and when `Senkou Span A` is greter than `Senkou Span B`,
+/// * When `source` value crosses `Kijun Sen` upwards and `source` value is greater than both `Senkou Span A and B` and when `Senkou Span A` is greater than `Senkou Span B`,
 /// returns full buy signal.
 /// When `source` value crosses `Kijun Sen` downwards and `source` value is lower than both `Senkou Span A and B` and when `Senkou Span A` is lower than `Senkou Span B`,
 /// returns full sell signal.

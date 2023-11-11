@@ -18,7 +18,7 @@ use crate::methods::{Cross, RateOfChange};
 ///
 /// Range in \(`-inf`; `+inf`\)
 ///
-/// * `Sinal line` value
+/// * `Signal line` value
 ///
 /// Range in \(`-inf`; `+inf`\)
 ///
