@@ -175,6 +175,15 @@ pub mod helpers;
 pub mod indicators;
 pub mod methods;
 
+#[cfg(all(feature = "period_type_u64", target_pointer_width = "32"))]
+compile_error!("Feature `period_type_u64` can't be used on 32-bit machines");
+
+#[cfg(all(
+	any(feature = "period_type_u32", feature = "period_type_u64"),
+	target_pointer_width = "16"
+))]
+compile_error!("Features `period_type_u64` and `period_type_u32` can't be used on 16-bit machines");
+
 /// Contains main traits you need to start using this library
 pub mod prelude {
 	pub use super::core::{
