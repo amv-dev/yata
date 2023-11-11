@@ -97,7 +97,7 @@ mod tr;
 pub use tr::TR;
 /// Renko implementation entities
 ///
-/// For more information see [`Renko`](crate::methods::Renko)
+/// For more information see [`Renko`]
 pub mod renko;
 #[doc(inline)]
 pub use renko::Renko;

@@ -14,12 +14,12 @@ use serde::{Deserialize, Serialize};
 ///
 /// * [`RenkoOutput`] which is `Renko`'s method output type.
 ///
-/// It implements an [`Iterator`](std::iter::Iterator) trait for generating [`RenkoBlock`]s after each step of calling [`Method::next`] on [`Renko`].
+/// It implements an [`Iterator`] trait for generating [`RenkoBlock`]s after each step of calling [`Method::next`] on [`Renko`].
 /// `RenkoOutput` may produce any amount of `RenkoBlock`s or may not produce it at all.
 ///
 /// * [`RenkoBlock`] is final entity of Renko chart.
 ///
-/// It has `open` and `close` values which are similar to corresponding [`OHLCV`](crate::core::OHLCV)'s values.
+/// It has `open` and `close` values which are similar to corresponding [`OHLCV`]'s values.
 ///
 /// So the final workflow is like that:
 ///
@@ -168,7 +168,7 @@ impl OHLCV for RenkoBlock {
 }
 /// [`Renko`]'s method [output type](crate::core::Method::Output)
 ///
-/// Implements [`Iterator`](std::iter::Iterator) trait for generating [`RenkoBlock`]s.
+/// Implements [`Iterator`] trait for generating [`RenkoBlock`]s.
 #[derive(Debug, Clone)]
 #[allow(missing_copy_implementations)]
 pub struct RenkoOutput {

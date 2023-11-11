@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 
 /// # Example config for the indicator **Configuration**
 ///
-/// Must implement `Debug`, `Clone`, `Default`, [`IndicatorConfig`](crate::core::IndicatorConfig) trait.
+/// Must implement `Debug`, `Clone`, `Default`, [`IndicatorConfig`] trait.
 ///
 /// Also it may implements `serde::{Serialize, Deserialize}` - it's up to you.
 ///
@@ -89,9 +89,9 @@ impl Default for Example {
 	}
 }
 
-/// # Example [`IndicatorInstance`](crate::core::IndicatorInstance) implementation
+/// # Example [`IndicatorInstance`] implementation
 ///
-/// Must implement `Debug` and [`IndicatorInstance`](crate::core::IndicatorInstance) traits
+/// Must implement `Debug` and [`IndicatorInstance`] traits
 ///
 /// See source code for the full example
 #[derive(Debug, Clone, Copy)]
