@@ -121,7 +121,8 @@ pub trait OHLCV: 'static {
 		if self.high() == self.low() {
 			0.
 		} else {
-			(2.0f64.mul_add(self.close(), -self.low()) - self.high()) / (self.high() - self.low())
+			let twice: ValueType = 2.;
+			(twice.mul_add(self.close(), -self.low()) - self.high()) / (self.high() - self.low())
 		}
 	}
 

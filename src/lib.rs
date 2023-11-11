@@ -38,6 +38,7 @@ limitations under the License.
 #![allow(clippy::upper_case_acronyms)]
 #![deny(clippy::nursery)]
 #![allow(clippy::use_self)]
+#![cfg_attr(feature = "period_type_u64", allow(clippy::cast_possible_truncation))]
 
 //! Yet Another Technical Analysis library
 //!

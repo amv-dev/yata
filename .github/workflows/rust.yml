@@ -16,9 +16,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Run clippy
+      run: cargo clippy --tests --verbose
+    - name: Run clippy with features
+      run: cargo clippy --tests --verbose --features="value_type_f32,period_type_u64,unsafe_performance"
     - name: Build
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
-    - name: Run clippy
-      run: cargo clippy --tests --verbose
