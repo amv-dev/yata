@@ -122,7 +122,12 @@ impl<M: MovingAverageConstructor> IndicatorInstance for EaseOfMovementInstance<M
 
 		let d = (d_high + d_low) * 0.5;
 
-		let v = d * (candle.high() - candle.low()) / candle.volume();
+		let v = if candle.volume() == 0.0 {
+			0.0
+		} else {
+			d * (candle.high() - candle.low()) / candle.volume()
+		};
+
 		debug_assert!(v.is_finite() && !v.is_nan());
 
 		let value = self.m1.next(&v);
