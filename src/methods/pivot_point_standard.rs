@@ -12,38 +12,38 @@ use crate::core::{Method, ValueType, OHLCV};
 /// The Pivot Point indicator is calculated based on the high, low, and close prices of the previous trading
 /// period (such as a day, week, or month) and provides several support and resistance levels.
 ///
-/// ## Links
+/// # Parameters
+///
+/// Has no parameters
+///
+/// # Input type
+///
+/// Input type is [`OHLCV`]
+///
+/// # Output type
+///
+/// Output type is [`PivotPointTraditionalOutput`]
+///
+/// # Links
 ///
 /// * <https://en.wikipedia.org/wiki/Pivot_point_(technical_analysis)>
 ///
-pub struct PivotPointStandard {
-	close: ValueType,
-	high: ValueType,
-	low: ValueType,
-}
+pub struct PivotPointStandard {}
 
 impl Method for PivotPointStandard {
 	type Params = ();
 	type Input = dyn OHLCV;
 	type Output = PivotPointTraditionalOutput;
 
-	fn new((): Self::Params, initial_value: &Self::Input) -> Result<Self, crate::core::Error>
+	fn new(_params: Self::Params, _initial_value: &Self::Input) -> Result<Self, crate::core::Error>
 	where
 		Self: Sized,
 	{
-		Ok(Self {
-			close: initial_value.close(),
-			high: initial_value.high(),
-			low: initial_value.low(),
-		})
+		Ok(Self {})
 	}
 
 	fn next(&mut self, value: &Self::Input) -> Self::Output {
-		let result = PivotPointTraditionalOutput::new(self.high, self.low, self.close);
-		self.close = value.close();
-		self.high = value.high();
-		self.low = value.low();
-		result
+		PivotPointTraditionalOutput::new(value.high(), value.low(), value.close())
 	}
 }
 
@@ -80,27 +80,16 @@ impl PivotPointTraditionalOutput {
 	#[rustfmt::skip]
 	#[allow(clippy::suboptimal_flops)]
 	fn new(high: ValueType, low: ValueType, close: ValueType) -> Self {
-		// PP = (HIGHprev + LOWprev + CLOSEprev) / 3
 		let pp: ValueType = (high + low + close) / 3.0;
-		// R1 = PP * 2 - LOWprev
 		let r1: ValueType = pp.mul_add(2.0, -low);
-		// S1 = PP * 2 - HIGHprev
 		let s1: ValueType = pp.mul_add(2.0, -high);
-		// R2 = PP + (HIGHprev - LOWprev)
 		let r2: ValueType = pp + (high - low);
-		// S2 = PP - (HIGHprev - LOWprev)
 		let s2: ValueType = pp - (high - low);
-		// R3 = PP * 2 + (HIGHprev - 2 * LOWprev)
 		let r3: ValueType = pp.mul_add(2.0, high - 2.0 * low);
-		// S3 = PP * 2 - (2 * HIGHprev - LOWprev)
 		let s3: ValueType = pp * 2.0 - (2.0 * high - low);
-		// R4 = PP * 3 + (HIGHprev - 3 * LOWprev)
 		let r4: ValueType = pp * 3.0 + (high - 3.0 * low);
-		// S4 = PP * 3 - (3 * HIGHprev - LOWprev)
 		let s4: ValueType = pp * 3.0 - (3.0 * high - low);
-		// R5 = PP * 4 + (HIGHprev - 4 * LOWprev)
 		let r5: ValueType = pp.mul_add(4.0, high - 4.0 * low);
-		// S5 = PP * 4 - (4 * HIGHprev - LOWprev)
 		let s5: ValueType = pp * 4.0 - (4.0 * high - low);
 
 		Self { pp, r1, s1, r2, s2, r3, s3, r4, s4, r5, s5 }
@@ -117,7 +106,7 @@ mod test {
 	fn test_pivot_point_standard() {
 		// OHLCV: (open, high, low, close, volume)
 		let candle = (2.0, 200.29, 195.21, 198.45, 10.0);
-		let mut instance = PivotPointStandard::new((), &candle).unwrap();
+		let mut instance = PivotPointStandard {};
 		let next = instance.next(&candle);
 		assert_eq_float(197.983, next.pp);
 		assert_eq_float(200.756, next.r1);
