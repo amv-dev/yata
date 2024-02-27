@@ -24,6 +24,11 @@ impl<T: ?Sized, V: Clone> WithHistory<T, V> {
 	pub fn get(&self, index: usize) -> Option<V> {
 		Buffered::get(self, index)
 	}
+
+	/// Iterate over historical values, starting from the oldest value
+	pub fn iter(&self) -> impl Iterator<Item = &V> {
+		self.history.iter()
+	}
 }
 
 impl<T: ?Sized, V: Clone> Buffered<V> for WithHistory<T, V> {
@@ -54,6 +59,24 @@ where
 		self.history.push(next_value.clone());
 
 		next_value
+	}
+}
+
+impl<'a, T, V> IntoIterator for &'a WithHistory<T, V> {
+	type Item = &'a V;
+	type IntoIter = std::slice::Iter<'a, V>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		self.history.iter()
+	}
+}
+
+impl<T, V> IntoIterator for WithHistory<T, V> {
+	type Item = V;
+	type IntoIter = std::vec::IntoIter<Self::Item>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		self.history.into_iter()
 	}
 }
 
