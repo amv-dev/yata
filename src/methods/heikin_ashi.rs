@@ -25,14 +25,15 @@ impl Method for HeikinAshi {
 	fn next(&mut self, value: &Self::Input) -> Self::Output {
 		let open = (self.prev.open() + self.prev.close()) * 0.5;
 		let close = value.ohlc4();
-
+		self.prev = 
 		Candle {
 			open,
 			high: value.high().max(open),
 			low: value.low().min(open),
 			close,
 			volume: value.volume(),
-		}
+		};
+		self.prev.clone()
 	}
 }
 
