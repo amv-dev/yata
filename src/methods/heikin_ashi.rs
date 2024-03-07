@@ -1,4 +1,4 @@
-use crate::core::{Candle, Error, Method, OHLCV};
+use crate::core::{Candle, Error, Method, ValueType, OHLCV};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct HeikinAshi {
-	prev: Candle,
+	next_open: ValueType,
 }
 
 impl Method for HeikinAshi {
@@ -16,15 +16,20 @@ impl Method for HeikinAshi {
 	type Output = Candle;
 
 	fn new((): Self::Params, value: &Self::Input) -> Result<Self, Error> {
+		// It is not so obvious how we should correctly initialize first candle
+		// The reason why `ohlc4` is used is because it's the only way we can achieve stable results
+		// when constant input value is provided, which is one of requiremets for all the methods
 		Ok(Self {
-			prev: Candle::from(value),
+			next_open: value.ohlc4(),
 		})
 	}
 
 	#[inline]
 	fn next(&mut self, value: &Self::Input) -> Self::Output {
-		let open = (self.prev.open() + self.prev.close()) * 0.5;
+		let open = self.next_open;
 		let close = value.ohlc4();
+
+		self.next_open = (open + close) * 0.5;
 
 		Candle {
 			open,
@@ -39,7 +44,7 @@ impl Method for HeikinAshi {
 #[cfg(test)]
 mod tests {
 	use super::{HeikinAshi, OHLCV};
-	use crate::core::{Candle, Method};
+	use crate::core::{Candle, Method, ValueType};
 	use crate::helpers::{assert_eq_float, RandomCandles};
 
 	#[test]
@@ -50,7 +55,13 @@ mod tests {
 		let first = candles.first();
 		let mut heikin_ashi = HeikinAshi::new((), &first).unwrap();
 
-		let prev = candles.first();
+		let mut prev = Candle {
+			open: first.ohlc4(),
+			high: ValueType::NAN,
+			low: ValueType::NAN,
+			close: first.ohlc4(),
+			volume: ValueType::NAN,
+		};
 
 		candles
 			.take(100)
@@ -65,6 +76,8 @@ mod tests {
 					close,
 					..candle
 				};
+
+				prev = tested;
 
 				(tested, heikin_ashi.next(&candle))
 			})
