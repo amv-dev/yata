@@ -24,10 +24,12 @@ include = [
 ]
 
 [dependencies]
+rkyv = { version = "0.7.44", features = ["validation"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 
 [features]
 default = ["serde"]
+rkyv = ["dep:rkyv"]
 period_type_u16 = []
 period_type_u32 = []
 period_type_u64 = []

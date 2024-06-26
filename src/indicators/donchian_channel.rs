@@ -15,7 +15,7 @@ use crate::methods::{Highest, Lowest};
 ///
 /// * Lower bound
 ///
-/// Range is the same as [`high`] values.
+/// Range is the same as [`low`] values.
 ///
 /// * Middle value
 ///
@@ -25,7 +25,7 @@ use crate::methods::{Highest, Lowest};
 ///
 /// * Upper bound
 ///
-/// Range is the same as [`low`] values.
+/// Range is the same as [`high`] values.
 ///
 /// # 1 signal
 ///
