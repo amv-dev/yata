@@ -264,6 +264,7 @@ By default, there is no `unsafe` code in the crate. But you can optionally enabl
 # Features
 
 - `serde` - enables [`serde`](https://crates.io/crates/serde) crate support;
+- `rkyv` - enables [`rkyv`](https://crates.io/crates/rkyv) derive on Candle;
 - `period_type_u16` - sets `PeriodType` to `u16`;
 - `period_type_u32` - sets `PeriodType` to `u32`;
 - `period_type_u64` - sets `PeriodType` to `u64`;
