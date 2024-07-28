@@ -91,7 +91,7 @@ where
 	}
 }
 
-impl<T: Clone + std::fmt::Debug> Buffered<<Self as Method>::Output> for Past<T> {
+impl<T: Clone + fmt::Debug> Buffered<<Self as Method>::Output> for Past<T> {
 	fn get(&self, index: usize) -> Option<<Self as Method>::Output> {
 		let index = index.try_into().ok()?;
 		self.0.get(index).cloned()
