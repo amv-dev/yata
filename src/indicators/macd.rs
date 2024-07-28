@@ -25,12 +25,12 @@ use crate::methods::Cross;
 /// # 2 signal
 ///
 /// * When `MACD` crosses `Signal line` upwards, returns full buy signal.
-/// When `MACD` crosses `Signal line` downwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `MACD` crosses `Signal line` downwards, returns full sell signal.
+///   Otherwise returns no signal.
 ///
 /// * When `MACD` crosses zero line upwards, returns full buy signal.
-/// When `MACD` crosses zero line downwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `MACD` crosses zero line downwards, returns full sell signal.
+///   Otherwise returns no signal.
 ///
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

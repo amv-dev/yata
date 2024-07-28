@@ -51,7 +51,7 @@ limitations under the License.
 //! - [Simple moving average (SMA)](crate::methods::SMA);
 //! - [Weighted moving average (WMA)](crate::methods::WMA);
 //! - Exponential moving average family: [EMA](crate::methods::EMA), [DMA](crate::methods::DMA), [TMA](crate::methods::TMA),
-//! [DEMA](crate::methods::DEMA), [TEMA](crate::methods::TEMA);
+//!   [DEMA](crate::methods::DEMA), [TEMA](crate::methods::TEMA);
 //! - [Simple moving median (SMM)](crate::methods::SMM);
 //! - [Linear regression moving average (LSMA)](crate::methods::LinReg);
 //! - [Volume weighted moving average (VWMA)](crate::methods::VWMA);

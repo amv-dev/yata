@@ -18,7 +18,7 @@ use crate::methods::{CrossAbove, Highest, Lowest};
 /// # 3 values
 ///
 /// * `stop long`
-/// Range of values is the same as the range of the `source` values.
+///   Range of values is the same as the range of the `source` values.
 ///
 /// * `source` value
 ///

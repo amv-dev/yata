@@ -25,8 +25,8 @@ use crate::methods::{Cross, RateOfChange};
 /// # 1 signal
 ///
 /// * When `KST` crosses `Signal line` upwards, returns full buy signal.
-/// When `KST` crosses `Signal line` downwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `KST` crosses `Signal line` downwards, returns full sell signal.
+///   Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KnowSureThing<M: MovingAverageConstructor = MA> {

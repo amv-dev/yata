@@ -26,8 +26,8 @@ use crate::helpers::MA;
 /// # 1 signal
 ///
 /// * Signal 1 appears when `Source2` value crosses bounds.
-/// When `Source2` value crosses `upper bound` upwards, returns full sell signal.
-/// When `Source2` value crosses `lower bound` downwards, returns full buy signal.
+///   When `Source2` value crosses `upper bound` upwards, returns full sell signal.
+///   When `Source2` value crosses `lower bound` downwards, returns full buy signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Envelopes<M: MovingAverageConstructor = MA> {

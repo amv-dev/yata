@@ -23,8 +23,8 @@ use crate::methods::Cross;
 /// # 1 signal
 ///
 /// * Signal 1 appears when `main value` crosses zero line.
-/// When `main value` crosses zero line upwards, returns full buy signal.
-/// When `main value` crosses zero line downwards, returns full sell signal.
+///   When `main value` crosses zero line upwards, returns full buy signal.
+///   When `main value` crosses zero line downwards, returns full sell signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct EldersForceIndex<M: MovingAverageConstructor = MA> {

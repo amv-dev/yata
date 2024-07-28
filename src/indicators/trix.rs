@@ -27,16 +27,16 @@ use serde::{Deserialize, Serialize};
 /// # 3 signals
 ///
 /// * When `main` value changes direction upwards, returns full buy signal.
-/// When `main` value changes direction downwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `main` value changes direction downwards, returns full sell signal.
+///   Otherwise returns no signal.
 ///
 /// * When `main` value crosses `signal line` value upwards, returns full buy signal.
-/// When `main` value crosses `signal line` value downwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `main` value crosses `signal line` value downwards, returns full sell signal.
+///   Otherwise returns no signal.
 ///
 /// * When `main` value crosses zero line upwards, returns full buy signal.
-/// When `main` value crosses zero line downwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `main` value crosses zero line downwards, returns full sell signal.
+///   Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Trix<M: MovingAverageConstructor = MA> {

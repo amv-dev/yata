@@ -21,9 +21,9 @@ use crate::methods::{Change, Cross, LinearVolatility, StDev};
 /// # 1 signal
 ///
 /// * if `filter_period` is less or equal than `0`, then returns signal when `KAMA` crosses `source` value.
-/// When `source` crosses `KAMA` upwards, returns full buy signal.
-/// When `source` crosses `KAMA` downwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `source` crosses `KAMA` upwards, returns full buy signal.
+///   When `source` crosses `KAMA` downwards, returns full sell signal.
+///   Otherwise returns no signal.
 ///
 /// * if `filter_period` is greater than `1`, it uses same cross between `source` and `KAMA`, but with additional filtering using standard deviation.
 #[derive(Debug, Clone, Copy)]

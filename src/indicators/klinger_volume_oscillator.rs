@@ -26,12 +26,12 @@ use crate::methods::Cross;
 /// # 2 signals
 ///
 /// * When `main` value crosses `0.0` upwards, then returns full buy signal.
-/// When `main` value crosses `0.0` downwards, then returns full sell signal.
-/// Otherwise returns no signal.
+///   When `main` value crosses `0.0` downwards, then returns full sell signal.
+///   Otherwise returns no signal.
 ///
 /// * When `main` value crosses `signal line` value  upwards, then returns full buy signal.
-/// When `main` value crosses `signal line` downwards, then returns full sell signal.
-/// Otherwise returns no signal.
+///   When `main` value crosses `signal line` downwards, then returns full sell signal.
+///   Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct KlingerVolumeOscillator<M: MovingAverageConstructor = MA> {

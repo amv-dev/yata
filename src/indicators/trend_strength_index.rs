@@ -21,10 +21,10 @@ use crate::methods::{CrossAbove, CrossUnder, ReversalSignal, WMA};
 /// # 2 signals
 ///
 /// * When `main value` crosses upper `zone` downwards, gives full negative #1 signal.
-/// When `main value` crosses lower `zone` upwards, gives full positive #1 signal.
+///   When `main value` crosses lower `zone` upwards, gives full positive #1 signal.
 ///
 /// * When `main value` is below lower `zone` and changes direction upwards, gives full positive #2 signal
-/// When `main value` is above upper `zone` and changes direction downwards, gives full negative #2 signal
+///   When `main value` is above upper `zone` and changes direction downwards, gives full negative #2 signal
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TrendStrengthIndex {

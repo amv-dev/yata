@@ -29,12 +29,12 @@ use crate::methods::Cross;
 /// # 2 signals
 ///
 /// * When `MFI` value crosses `lower bound` downwards, returns full buy signal.
-/// When `MFI` value crosses `upper bound` upwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `MFI` value crosses `upper bound` upwards, returns full sell signal.
+///   Otherwise returns no signal.
 ///
 /// * When `MFI` value crosses `lower bound` upwards, returns full buy signal.
-/// When `MFI` value crosses `upper bound` downwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `MFI` value crosses `upper bound` downwards, returns full sell signal.
+///   Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MoneyFlowIndex {

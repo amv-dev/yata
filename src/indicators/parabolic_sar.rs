@@ -25,8 +25,8 @@ use super::HLC;
 ///
 /// # 1 signal
 /// * When `trend` changes it's value to positive, then returns full buy signal.
-/// When `trend` changes it's value to negative, then returns full sell signal.
-/// Otherwise returns no signal.
+///   When `trend` changes it's value to negative, then returns full sell signal.
+///   Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ParabolicSAR {

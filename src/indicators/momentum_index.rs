@@ -20,8 +20,8 @@ use crate::methods::Momentum;
 /// # 1 signal
 ///
 /// * When both momentums are positive, returns full buy signal.
-/// When both momentums are negative, returns full sell signal.
-/// Otherwise returns no signal.
+///   When both momentums are negative, returns full sell signal.
+///   Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct MomentumIndex {

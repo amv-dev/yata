@@ -29,7 +29,7 @@ use crate::methods::{Cross, Highest, Lowest};
 /// # 2 signals
 ///
 /// * Signal 1 appears when `main value` crosses zero line.
-/// When `main value` changes direction, returns signal corresponds to relative position of `main value` in `zone`
+///   When `main value` changes direction, returns signal corresponds to relative position of `main value` in `zone`
 /// * Signal 2 appears when `main value` crosses `signal line` and after signal 1 appears
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

@@ -30,9 +30,9 @@ use crate::methods::{Highest, Lowest};
 /// # 1 signal
 ///
 /// * When [`high`] value hits `upper bound`, returns full buy signal.
-/// When [`low`] value hits `lower bound`, returns full sell signal.
-/// Otherwise returns no signal.
-/// If both values hit both bounds, returns no signal.
+///   When [`low`] value hits `lower bound`, returns full sell signal.
+///   Otherwise returns no signal.
+///   If both values hit both bounds, returns no signal.
 ///
 /// [`high`]: crate::core::OHLCV::high
 /// [`low`]: crate::core::OHLCV::low

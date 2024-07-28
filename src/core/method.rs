@@ -114,7 +114,7 @@ pub trait Method {
 	where
 		Self: Sized,
 	{
-		(std::mem::size_of::<Self>(), std::mem::align_of::<Self>())
+		(size_of::<Self>(), align_of::<Self>())
 	}
 
 	/// Iterates the `Method` over the given `inputs` slice and returns `Vec` of output values.

@@ -30,14 +30,14 @@ use crate::methods::{Cross, CrossAbove, CrossUnder, EMA, TSI};
 /// Otherwise returns no signal.
 ///
 /// * Signal #2.
-/// When `main` value crosses zero line upwards, returns full buy signal.
-/// When `main` value crosses zero line downwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `main` value crosses zero line upwards, returns full buy signal.
+///   When `main` value crosses zero line downwards, returns full sell signal.
+///   Otherwise returns no signal.
 ///
 /// * Signal #3.
-/// When `main` value crosses `signal line` upwards, returns full buy signal.
-/// When `main` value crosses `signal line` downwards, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `main` value crosses `signal line` upwards, returns full buy signal.
+///   When `main` value crosses `signal line` downwards, returns full sell signal.
+///   Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TrueStrengthIndex {

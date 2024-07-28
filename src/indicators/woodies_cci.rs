@@ -28,8 +28,8 @@ const SCALE: ValueType = 1.0 / 1.5;
 /// # 1 signals
 ///
 /// * When `Trend CCI` stays above zero line for `s1_lag` bars, returns full buy signal.
-/// When `Trend CCI` stays below zero line for `s1_lag` bars, returns full sell signal.
-/// Otherwise returns no signal.
+///   When `Trend CCI` stays below zero line for `s1_lag` bars, returns full sell signal.
+///   Otherwise returns no signal.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WoodiesCCI {

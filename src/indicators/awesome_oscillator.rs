@@ -21,8 +21,8 @@ use crate::methods::{Cross, ReversalSignal};
 /// # 2 signals
 ///
 /// * "Twin Peaks". When `value` is below zero line and we got `conseq_peaks` lower peaks, then returns full positive signal
-/// When `value` is above zero line and we got `conseq_peaks` higher peaks, then returns full negative signal.
-/// Otherwise gives no signal.
+///   When `value` is above zero line and we got `conseq_peaks` higher peaks, then returns full negative signal.
+///   Otherwise gives no signal.
 /// * Gives signal when `values` crosses zero line
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
