@@ -1,6 +1,7 @@
 use super::{Error, Sequence};
 use crate::helpers::{WithHistory, WithLastValue};
 use std::fmt;
+use std::mem::{align_of, size_of};
 
 type BoxedFnMethod<'a, M> = Box<dyn FnMut(&'a <M as Method>::Input) -> <M as Method>::Output>;
 
