@@ -6,7 +6,8 @@ use crate::helpers::Peekable;
 use serde::{Deserialize, Serialize};
 
 /// [Volume Weighed Moving Average](https://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average) of specified `length`
-/// for timeseries of type ([`ValueType`], [`ValueType`]) which represents pair of values (`value`, `volume`)
+///
+/// Used for timeseries of type ([`ValueType`], [`ValueType`]) which represents pair of values (`value`, `volume`)
 ///
 /// # Parameters
 ///
